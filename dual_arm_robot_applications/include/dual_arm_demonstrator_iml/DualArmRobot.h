@@ -63,6 +63,7 @@ namespace dual_arm_demonstrator_iml {
         double ee_dist_;    // distance to object because of endeffector size
         KDL::Frame arms_offset_;    // offset between arms
         bool try_again_question();
+        // PlanningSceneMonitorPtr is aka std::shared_ptr<planning_scene_monitor::PlanningSceneMonitor>
         planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
 
     public:
