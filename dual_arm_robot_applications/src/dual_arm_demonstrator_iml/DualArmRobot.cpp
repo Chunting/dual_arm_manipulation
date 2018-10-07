@@ -25,8 +25,7 @@ DualArmRobot::DualArmRobot(ros::NodeHandle& nh) :
     ur10_.setPlannerId("RRTConnectkConfigDefault");
 
     // planning scene monitor
-    // "robot_description" The name of the ROS parameter that contains the URDF (in string format) 
-    planning_scene_monitor_ = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>("robot_description");
+    planning_scene_monitor_ = boost::make_shared<planning_scene_monitor::PlanningSceneMonitor>("robot_description");
 
     // initialize ur5 specific variables
     ur5_last_goal_pose_ = ur5_.getCurrentPose(ur5_.getEndEffectorLink());
