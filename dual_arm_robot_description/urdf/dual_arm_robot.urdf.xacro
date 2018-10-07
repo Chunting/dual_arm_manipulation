@@ -4,7 +4,7 @@
 
   <xacro:property name="pi" value="3.1415926535897931"/>
   <xacro:arg name="prefix_ur5" default="ur5_"/>
-  <xacro:arg name="prefix_ur10" default="ur10_"/>
+  <xacro:arg name="prefix_ur10" default="right_"/>
   <xacro:arg name="limited_ur5" default="true"/>
   <xacro:arg name="limited_ur10" default="true"/>
 
@@ -15,7 +15,7 @@
   <xacro:include filename="$(find dual_arm_robot_description)/urdf/ur5.urdf.xacro"/> <!-- file has been edited because of same variable names in ur5 and ur10 -->
 
   <!-- ur10 -->
-  <xacro:include filename="$(find dual_arm_robot_description)/urdf/ur10.urdf.xacro"/> <!-- original file has been edited because of same variable names in ur5 and ur10 -->
+  <xacro:include filename="$(find dual_arm_robot_description)/urdf/ur5.urdf.xacro"/> <!-- original file has been edited because of same variable names in ur5 and ur10 -->
 
   <!-- endeffector -->
   <xacro:include filename="$(find dual_arm_robot_description)/urdf/endeffector.urdf.xacro"/>
@@ -27,14 +27,14 @@
   <xacro:table/>
 
   <!-- place world reference -->
-<!--
+
   <link name="world"/>
   <joint name="world_joint" type="fixed">
     <parent link="world"/>
     <child link ="table_ground"/>
     <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
   </joint>
--->
+
   <!-- place ur5 arm -->
   <xacro:ur5_robot prefix="$(arg prefix_ur5)" joint_limited="$(arg limited_ur5)"/>
   <joint name="$(arg prefix_ur5)platform_mount" type="fixed">
