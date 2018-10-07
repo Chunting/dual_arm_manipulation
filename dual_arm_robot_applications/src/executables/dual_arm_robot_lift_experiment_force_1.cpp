@@ -66,19 +66,19 @@ int main(int argc, char **argv) {
     jcm.tolerance_below = 1.0;
     jcm.weight = 1.0;
     ur5_constraints.joint_constraints.push_back(jcm);
-    dualArmRobot.ur5_.setPathConstraints(ur5_constraints);
+    dualArmRobot.left_.setPathConstraints(ur5_constraints);
 
 
     /*
-    geometry_msgs::PoseStamped place_pose_ur5 = dualArmRobot.ur5_.getCurrentPose(dualArmRobot.ur5_.getEndEffectorLink());
+    geometry_msgs::PoseStamped place_pose_ur5 = dualArmRobot.left_.getCurrentPose(dualArmRobot.left_.getEndEffectorLink());
     place_pose_ur5.pose.position.z = place_pose_ur5.pose.position.z - direction.vector.z;*/
 
     // clear path constraints
-//    dualArmRobot.ur5_.clearPathConstraints();
+//    dualArmRobot.left_.clearPathConstraints();
 //    dualArmRobot.right_.clearPathConstraints();
 
     // plan move and execute
-    //geometry_msgs::PoseStamped start_pose = dualArmRobot.ur5_.getCurrentPose(dualArmRobot.ur5_.getEndEffectorLink());
+    //geometry_msgs::PoseStamped start_pose = dualArmRobot.left_.getCurrentPose(dualArmRobot.left_.getEndEffectorLink());
     //geometry_msgs::PoseStamped lift_pose = start_pose;
     //lift_pose.pose.position.z = lift_pose.pose.position.z +1;
     geometry_msgs::Vector3Stamped linear_move_direction;

@@ -57,9 +57,9 @@ namespace dual_arm_demonstrator_iml {
     class DualArmRobot {
     protected:
         ros::NodeHandle nh_;
-        std::string ur5_controller_;
+        std::string left_controller_;
         std::string right_controller_;
-        moveit_msgs::RobotState ur5_last_goal_state_;
+        moveit_msgs::RobotState left_last_goal_state_;
         double ee_dist_;    // distance to object because of endeffector size
         KDL::Frame arms_offset_;    // offset between arms
         bool try_again_question();
@@ -72,7 +72,7 @@ namespace dual_arm_demonstrator_iml {
         geometry_msgs::PoseStamped ur5_last_goal_pose_;
         geometry_msgs::PoseStamped ur5_last_goal_pose_temp_;
 
-        moveit::planning_interface::MoveGroup ur5_;
+        moveit::planning_interface::MoveGroup left_;
         moveit::planning_interface::MoveGroup right_;
         moveit::planning_interface::MoveGroup arms_;
 

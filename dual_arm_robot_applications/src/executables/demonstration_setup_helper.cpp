@@ -54,9 +54,9 @@ int main(int argc, char **argv) {
         ur5_rot.DoRotY(3.14 / 2);
         ur5_rot.GetQuaternion(ur5_pose.pose.orientation.x, ur5_pose.pose.orientation.y, ur5_pose.pose.orientation.z,
                               ur5_pose.pose.orientation.w);
-        dualArmRobot.ur5_.setPoseTarget(ur5_pose, dualArmRobot.ur5_.getEndEffectorLink());
+        dualArmRobot.left_.setPoseTarget(ur5_pose, dualArmRobot.left_.getEndEffectorLink());
 
-        error = dualArmRobot.ur5_.plan(ur5_plan);
+        error = dualArmRobot.left_.plan(ur5_plan);
 
     }
     dualArmRobot.execute(ur5_plan);

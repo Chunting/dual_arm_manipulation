@@ -1,40 +1,40 @@
 <?xml version="1.0"?>
 
 <launch>
-  <arg name="ip_ur5" default="192.168.1.101"/>
+  <arg name="ip_left" default="192.168.1.101"/>
   <arg name="ip_right" default="192.168.1.102"/>
-  <arg name="limited_ur5" default="false"/>
-  <arg name="limited_right" default="false"/>
-  <arg name="min_payload_ur5"  default="0.0"/>
-  <arg name="max_payload_ur5"  default="5.0"/>
-  <arg name="min_payload_right"  default="0.0"/>
-  <arg name="max_payload_right"  default="10.0"/>
-  <arg name="prefix_ur5" default="ur5_" />
+  <arg name="limited" default="false"/>
+  <arg name="limited" default="false"/>
+  <arg name="min_payload"  default="0.0"/>
+  <arg name="max_payload"  default="5.0"/>
+  <arg name="min_payload"  default="0.0"/>
+  <arg name="max_payload"  default="10.0"/>
+  <arg name="prefix_left" default="left_" />
   <arg name="prefix_right" default="right_" />
-  <arg name="controller_name_ur5" default="ur5"/>
+  <arg name="controller_name_left" default="ur5"/>
   <arg name="controller_name_right" default="ur10"/>
   <arg name="max_velocity_ur5" default="10.0"/> <!-- [rad/s] -->
   <arg name="max_velocity_right" default="10.0"/> <!-- [rad/s] -->
 
   <!-- dual_arm_robot model -->
   <include file="$(find dual_arm_robot_description)/launch/dual_arm_robot_upload.launch">
-    <arg name="limited_ur5" value="$(arg limited_ur5)"/>
-    <arg name="prefix_ur5" value="$(arg prefix_ur5)"/>
-    <arg name="limited_right" value="$(arg limited_right)"/>
+    <arg name="limited" value="$(arg limited)"/>
+    <arg name="prefix_left" value="$(arg prefix_left)"/>
+    <arg name="limited" value="$(arg limited)"/>
     <arg name="prefix_right" value="$(arg prefix_right)"/>
   </include>
 
   <!-- ::: ur5 driver ::: -->
-  <group ns="$(arg controller_name_ur5)">
+  <group ns="$(arg controller_name_left)">
     <remap from="joint_states" to="/joint_states"/>
     <!-- ur5 hardware interface -->
     <node name="ur_hardware_interface" pkg="ur_modern_driver" type="ur_driver" output="screen" launch-prefix="">
-      <param name="robot_ip_address" type="str" value="$(arg ip_ur5)"/>
-      <param name="min_payload" type="double" value="$(arg min_payload_ur5)"/>
-      <param name="max_payload" type="double" value="$(arg max_payload_ur5)"/>
+      <param name="robot_ip_address" type="str" value="$(arg ip_left)"/>
+      <param name="min_payload" type="double" value="$(arg min_payload)"/>
+      <param name="max_payload" type="double" value="$(arg max_payload)"/>
       <param name="max_velocity" type="double" value="$(arg max_velocity_ur5)"/>
       <param name="use_ros_control" type="bool" value="True"/>
-      <param name="prefix" value="$(arg prefix_ur5)" />
+      <param name="prefix" value="$(arg prefix_left)" />
     </node>
     
     <!-- ur5 controller settings -->
@@ -60,8 +60,8 @@
     <node name="ur_hardware_interface" pkg="ur_modern_driver" type="ur_driver" output="screen" launch-prefix="">
       <param name="reverse_port" type="int" value="5002"/>
       <param name="robot_ip_address" type="str" value="$(arg ip_right)"/>
-      <param name="min_payload" type="double" value="$(arg min_payload_right)"/>
-      <param name="max_payload" type="double" value="$(arg max_payload_right)"/>
+      <param name="min_payload" type="double" value="$(arg min_payload)"/>
+      <param name="max_payload" type="double" value="$(arg max_payload)"/>
       <param name="max_velocity" type="double" value="$(arg max_velocity_right)"/>
       <param name="use_ros_control" type="bool" value="True"/>
       <param name="prefix" value="$(arg prefix_right)" />

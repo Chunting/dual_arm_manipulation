@@ -132,7 +132,7 @@
     <origin xyz="0.84 0.019 0.04"/>
   </joint>
 
-  <link name="$(arg prefix_ur5)table_platform">
+  <link name="$(arg prefix_left)table_platform">
     <visual>
       <geometry>
         <mesh filename="package://dual_arm_robot_description/meshes/table/table_platform_ur5.stl"/>
@@ -149,9 +149,9 @@
     </collision>
   </link>
 
-  <joint name="$(arg prefix_ur5)table_ground_to_platform" type="fixed">
+  <joint name="$(arg prefix_left)table_ground_to_platform" type="fixed">
     <parent link="table_ground"/>
-    <child link="$(arg prefix_ur5)table_platform"/>
+    <child link="$(arg prefix_left)table_platform"/>
     <origin xyz="0 0 0"/>
   </joint>
 

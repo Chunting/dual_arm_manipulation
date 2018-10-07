@@ -58,7 +58,7 @@ int main(int argc, char **argv) {
     jcm.weight = 1.0;
     ur5_constraints.joint_constraints.push_back(jcm);
     both_constraints.joint_constraints.push_back(jcm);
-    dualArmRobot.ur5_.setPathConstraints(ur5_constraints);
+    dualArmRobot.left_.setPathConstraints(ur5_constraints);
 
     // ur5 can get blocked while placing without this constraint
     jcm.joint_name="ur5_elbow_joint";
@@ -68,7 +68,7 @@ int main(int argc, char **argv) {
     jcm.weight = 1.0;
     ur5_constraints.joint_constraints.push_back(jcm);
     both_constraints.joint_constraints.push_back(jcm);
-    dualArmRobot.ur5_.setPathConstraints(ur5_constraints);
+    dualArmRobot.left_.setPathConstraints(ur5_constraints);
 
     // ur5 sometimes blocks itself when picking the box on bottom, on top ur10 can get problems adapting its trajectory, this solve the issue.
     jcm.joint_name="ur5_shoulder_pan_joint";
@@ -78,7 +78,7 @@ int main(int argc, char **argv) {
     jcm.weight = 1.0;
     ur5_constraints.joint_constraints.push_back(jcm);
     both_constraints.joint_constraints.push_back(jcm);
-    dualArmRobot.ur5_.setPathConstraints(ur5_constraints);
+    dualArmRobot.left_.setPathConstraints(ur5_constraints);
 
     // ur10 sometimes blocks itself when picking the box on top, this should solve the issue
     jcm.joint_name="right_wrist_2_joint";
@@ -97,7 +97,7 @@ int main(int argc, char **argv) {
     jcm.weight = 1.0;
     ur5_constraints.joint_constraints.push_back(jcm);
     both_constraints.joint_constraints.push_back(jcm);
-    dualArmRobot.ur5_.setPathConstraints(ur5_constraints);
+    dualArmRobot.left_.setPathConstraints(ur5_constraints);
 
     dualArmRobot.arms_.setPathConstraints(both_constraints);
 
@@ -130,7 +130,7 @@ int main(int argc, char **argv) {
 
 
     // clear constraints of ur5
-    dualArmRobot.ur5_.clearPathConstraints();
+    dualArmRobot.left_.clearPathConstraints();
 
     // Place box7
     geometry_msgs::Vector3 go_down;
@@ -164,7 +164,7 @@ int main(int argc, char **argv) {
     jcm.tolerance_below = 0.6;
     jcm.weight = 1.0;
     ur5_constraints.joint_constraints.push_back(jcm);
-    dualArmRobot.ur5_.setPathConstraints(ur5_constraints);
+    dualArmRobot.left_.setPathConstraints(ur5_constraints);
     both_constraints.joint_constraints.push_back(jcm);
 
     // ur10 sometimes blocks itself for path adaption when picking the box on bottom, this should solve the issue
@@ -184,7 +184,7 @@ int main(int argc, char **argv) {
     jcm.tolerance_below = 3.0;
     jcm.weight = 1.0;
     ur5_constraints.joint_constraints.push_back(jcm);
-    dualArmRobot.ur5_.setPathConstraints(ur5_constraints);
+    dualArmRobot.left_.setPathConstraints(ur5_constraints);
     both_constraints.joint_constraints.push_back(jcm);
 
     // ur5 sometimes blocks itself when picking the box on bottom, on top ur10 can get problems adapting its trajectory, this solve the issue.
@@ -194,7 +194,7 @@ int main(int argc, char **argv) {
     jcm.tolerance_below = 0.7;
     jcm.weight = 1.0;
     ur5_constraints.joint_constraints.push_back(jcm);
-    dualArmRobot.ur5_.setPathConstraints(ur5_constraints);
+    dualArmRobot.left_.setPathConstraints(ur5_constraints);
     both_constraints.joint_constraints.push_back(jcm);
 
     // ur10 sometimes blocks itself when picking the box on top, this should solve the issue
@@ -249,7 +249,7 @@ int main(int argc, char **argv) {
     direction_push.z = 0.0;
 
     // setup constraints
-    dualArmRobot.ur5_.clearPathConstraints();
+    dualArmRobot.left_.clearPathConstraints();
 
     // pre-goal position
     ROS_INFO("moving closer to target position");
@@ -276,7 +276,7 @@ int main(int argc, char **argv) {
     
     // move robot back into home pose
     dualArmRobot.right_.clearPathConstraints();
-    dualArmRobot.ur5_.clearPathConstraints();
+    dualArmRobot.left_.clearPathConstraints();
     dualArmRobot.moveHome();
 
     // END

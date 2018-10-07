@@ -2,7 +2,7 @@
 
 <launch>
   <arg name="limited" default="true"/>
-  <arg name="prefix_ur5" default="ur5_"/>
+  <arg name="prefix_left" default="left_"/>
   <arg name="prefix_right" default="right_"/>
   <arg name="config" default="true"/>
   <arg name="sim" default="true"/>
@@ -10,9 +10,9 @@
 
   <!-- dual_arm_robot model -->
   <include file="$(find dual_arm_robot_description)/launch/dual_arm_robot_upload.launch">
-    <arg name="limited_ur5" value="$(arg limited)"/>
-    <arg name="prefix_ur5" value="$(arg prefix_ur5)"/>
-    <arg name="limited_right" value="$(arg limited)"/>
+    <arg name="limited" value="$(arg limited)"/>
+    <arg name="prefix_left" value="$(arg prefix_left)"/>
+    <arg name="limited" value="$(arg limited)"/>
     <arg name="prefix_right" value="$(arg prefix_right)"/>
   </include>
 
