@@ -58,7 +58,7 @@ namespace dual_arm_demonstrator_iml {
     protected:
         ros::NodeHandle nh_;
         std::string ur5_controller_;
-        std::string ur10_controller_;
+        std::string right_controller_;
         moveit_msgs::RobotState ur5_last_goal_state_;
         double ee_dist_;    // distance to object because of endeffector size
         KDL::Frame arms_offset_;    // offset between arms
@@ -73,7 +73,7 @@ namespace dual_arm_demonstrator_iml {
         geometry_msgs::PoseStamped ur5_last_goal_pose_temp_;
 
         moveit::planning_interface::MoveGroup ur5_;
-        moveit::planning_interface::MoveGroup ur10_;
+        moveit::planning_interface::MoveGroup right_;
         moveit::planning_interface::MoveGroup arms_;
 
         // workaround for moveGroup method does not return attached objects correctly (issue)
@@ -106,9 +106,9 @@ namespace dual_arm_demonstrator_iml {
 
         bool switch_controller(std::string stop_name, std::string start_name, std::string ur_namespace);
 
-        bool graspMove(double distance, bool avoid_collisions = true, bool use_ur5=true, bool use_ur10=true); //both arms will be moved closer together
+        bool graspMove(double distance, bool avoid_collisions = true, bool use_ur5=true, bool use_right=true); //both arms will be moved closer together
 
-        bool linearMove(geometry_msgs::Vector3Stamped direction, bool avoid_collisions = true, bool use_ur5=true, bool use_ur10=true);
+        bool linearMove(geometry_msgs::Vector3Stamped direction, bool avoid_collisions = true, bool use_ur5=true, bool use_right=true);
 
         bool linearMoveParallel(geometry_msgs::Vector3Stamped direction, std::string object_id, double traj_scale=1, bool avoid_collisions = true);
 

@@ -3,7 +3,7 @@
 <launch>
   <arg name="limited" default="true"/>
   <arg name="prefix_ur5" default="ur5_"/>
-  <arg name="prefix_ur10" default="ur10_"/>
+  <arg name="prefix_right" default="right_"/>
   <arg name="config" default="true"/>
   <arg name="sim" default="true"/>
   <arg name="debug" default="false" />
@@ -12,8 +12,8 @@
   <include file="$(find dual_arm_robot_description)/launch/dual_arm_robot_upload.launch">
     <arg name="limited_ur5" value="$(arg limited)"/>
     <arg name="prefix_ur5" value="$(arg prefix_ur5)"/>
-    <arg name="limited_ur10" value="$(arg limited)"/>
-    <arg name="prefix_ur10" value="$(arg prefix_ur10)"/>
+    <arg name="limited_right" value="$(arg limited)"/>
+    <arg name="prefix_right" value="$(arg prefix_right)"/>
   </include>
 
   <!-- We do not have a robot connected, so publish fake joint states -->

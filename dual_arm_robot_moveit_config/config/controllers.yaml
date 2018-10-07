@@ -20,26 +20,26 @@ controller_list:
 #      - ur5_wrist_1_joint
 #      - ur5_wrist_2_joint
 #      - ur5_wrist_3_joint
-  - name: ur10/ur10_vel_based_pos_traj_controller #or pos_based_pos_traj_controller
+  - name: ur10/right_vel_based_pos_traj_controller #or pos_based_pos_traj_controller
     action_ns: follow_joint_trajectory
     type: FollowJointTrajectory
     joints:
-      - ur10_shoulder_pan_joint
-      - ur10_shoulder_lift_joint
-      - ur10_elbow_joint
-      - ur10_wrist_1_joint
-      - ur10_wrist_2_joint
-      - ur10_wrist_3_joint
-#  - name: ur10/ur10_vel_based_admittance_traj_controller #or pos_based_pos_traj_controller
+      - right_shoulder_pan_joint
+      - right_shoulder_lift_joint
+      - right_elbow_joint
+      - right_wrist_1_joint
+      - right_wrist_2_joint
+      - right_wrist_3_joint
+#  - name: ur10/right_vel_based_admittance_traj_controller #or pos_based_pos_traj_controller
 #    action_ns: follow_joint_trajectory
 #    type: FollowJointTrajectory
 #    joints:
-#      - ur10_shoulder_pan_joint
-#      - ur10_shoulder_lift_joint
-#      - ur10_elbow_joint
-#      - ur10_wrist_1_joint
-#      - ur10_wrist_2_joint
-#      - ur10_wrist_3_joint
+#      - right_shoulder_pan_joint
+#      - right_shoulder_lift_joint
+#      - right_elbow_joint
+#      - right_wrist_1_joint
+#      - right_wrist_2_joint
+#      - right_wrist_3_joint
 
 ### without ros-control:
 #controller_list:
@@ -57,9 +57,9 @@ controller_list:
 #    action_ns: follow_joint_trajectory
 #    type: FollowJointTrajectory
 #    joints:
-#      - ur10_shoulder_pan_joint
-#      - ur10_shoulder_lift_joint
-#      - ur10_elbow_joint
-#      - ur10_wrist_1_joint
-#      - ur10_wrist_2_joint
-#      - ur10_wrist_3_joint
+#      - right_shoulder_pan_joint
+#      - right_shoulder_lift_joint
+#      - right_elbow_joint
+#      - right_wrist_1_joint
+#      - right_wrist_2_joint
+#      - right_wrist_3_joint

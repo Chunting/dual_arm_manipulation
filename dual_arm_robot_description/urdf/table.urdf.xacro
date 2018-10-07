@@ -155,24 +155,24 @@
     <origin xyz="0 0 0"/>
   </joint>
 
-  <link name="$(arg prefix_ur10)table_platform">
+  <link name="$(arg prefix_right)table_platform">
     <visual>
       <geometry>
-        <mesh filename="package://dual_arm_robot_description/meshes/table/table_platform_ur10.stl"/>
+        <mesh filename="package://dual_arm_robot_description/meshes/table/table_platform_right.stl"/>
       </geometry>
     <material name="steel"/>
     </visual>
     <origin rpy="0 0 0" xyz="0 0 0"/>
     <collision>
       <geometry>
-        <mesh filename="package://dual_arm_robot_description/meshes/table/table_platform_ur10.stl"/>
+        <mesh filename="package://dual_arm_robot_description/meshes/table/table_platform_right.stl"/>
       </geometry>
     </collision>
   </link>
 
-  <joint name="$(arg prefix_ur10)table_ground_to_platform" type="fixed">
+  <joint name="$(arg prefix_right)table_ground_to_platform" type="fixed">
     <parent link="table_ground"/>
-    <child link="$(arg prefix_ur10)table_platform"/>
+    <child link="$(arg prefix_right)table_platform"/>
     <origin xyz="1.076 0 0"/>
   </joint>
 

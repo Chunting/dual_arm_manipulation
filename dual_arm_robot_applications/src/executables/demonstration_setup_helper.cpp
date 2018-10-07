@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
 
     // variables
     moveit::planning_interface::MoveGroup::Plan ur5_plan;
-    moveit::planning_interface::MoveGroup::Plan ur10_plan;
+    moveit::planning_interface::MoveGroup::Plan right_plan;
     moveit::planning_interface::MoveItErrorCode error;
     error.val = -1;
 
@@ -64,21 +64,21 @@ int main(int argc, char **argv) {
     error.val = -1;
     while (error.val != 1){
         // move ur10 to shelf
-        geometry_msgs::PoseStamped ur10_pose;
-        ur10_pose.header.frame_id = "shelf";
-        ur10_pose.pose.position.x = 0.125;
-        ur10_pose.pose.position.y = 0.25 + 0.07;
-        ur10_pose.pose.position.z = 0.53;
-        KDL::Rotation ur10_rot;  // generated to easily assign quaternion of pose
-        ur10_rot.DoRotX(3.14 / 2);
-        ur10_rot.GetQuaternion(ur10_pose.pose.orientation.x, ur10_pose.pose.orientation.y, ur10_pose.pose.orientation.z,
-                               ur10_pose.pose.orientation.w);
-        dualArmRobot.ur10_.setPoseTarget(ur10_pose, dualArmRobot.ur10_.getEndEffectorLink());
+        geometry_msgs::PoseStamped right_pose;
+        right_pose.header.frame_id = "shelf";
+        right_pose.pose.position.x = 0.125;
+        right_pose.pose.position.y = 0.25 + 0.07;
+        right_pose.pose.position.z = 0.53;
+        KDL::Rotation right_rot;  // generated to easily assign quaternion of pose
+        right_rot.DoRotX(3.14 / 2);
+        right_rot.GetQuaternion(right_pose.pose.orientation.x, right_pose.pose.orientation.y, right_pose.pose.orientation.z,
+                               right_pose.pose.orientation.w);
+        dualArmRobot.right_.setPoseTarget(right_pose, dualArmRobot.right_.getEndEffectorLink());
 
-        error = dualArmRobot.ur10_.plan(ur10_plan);
+        error = dualArmRobot.right_.plan(right_plan);
 
     }
-    dualArmRobot.execute(ur10_plan);
+    dualArmRobot.execute(right_plan);
 
     // move closer
     dualArmRobot.graspMove(0.07);

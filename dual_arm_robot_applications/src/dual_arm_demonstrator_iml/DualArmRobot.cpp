@@ -9,20 +9,20 @@ using namespace dual_arm_demonstrator_iml;
 
 DualArmRobot::DualArmRobot(ros::NodeHandle& nh) :
         ur5_("ur5_manipulator"),
-        ur10_("ur10_manipulator"),
+        right_("right_manipulator"),
         arms_("arms"),
         nh_(nh) {
     // MoveIt! Setup
     //ur5_.setPlanningTime(40);
     ur5_.setPlanningTime(5);
     ur5_.setNumPlanningAttempts(25);
-    //ur10_.setPlanningTime(40);
-    ur10_.setPlanningTime(5);
-    ur10_.setNumPlanningAttempts(25);
+    //right_.setPlanningTime(40);
+    right_.setPlanningTime(5);
+    right_.setNumPlanningAttempts(25);
 
     // setup planner
     ur5_.setPlannerId("RRTConnectkConfigDefault");
-    ur10_.setPlannerId("RRTConnectkConfigDefault");
+    right_.setPlannerId("RRTConnectkConfigDefault");
 
     // planning scene monitor
     planning_scene_monitor_ = boost::make_shared<planning_scene_monitor::PlanningSceneMonitor>("robot_description");
@@ -35,11 +35,11 @@ DualArmRobot::DualArmRobot(ros::NodeHandle& nh) :
     /*
 #ifdef SIMULATION
     ur5_controller_ = "fake_ur5_manipulator_controller";
-    ur10_controller_ = "fake_ur10_manipulator_controller";
+    right_controller_ = "fake_right_manipulator_controller";
 #endif
 #ifndef SIMULATION*/
     ur5_controller_ = "ur5/ur5_vel_based_pos_traj_controller";
-    ur10_controller_ = "ur10/ur10_vel_based_pos_traj_controller";
+    right_controller_ = "ur10/right_vel_based_pos_traj_controller";
 //#endif
 }
 
@@ -59,13 +59,13 @@ moveit_msgs::RobotState DualArmRobot::getCurrentRobotStateMsg() {
 
 KDL::Frame DualArmRobot::getCurrentOffset(){
     geometry_msgs::PoseStamped ur5_pose = ur5_.getCurrentPose(ur5_.getEndEffectorLink());
-    geometry_msgs::PoseStamped ur10_pose = ur10_.getCurrentPose(ur10_.getEndEffectorLink());
+    geometry_msgs::PoseStamped right_pose = right_.getCurrentPose(right_.getEndEffectorLink());
     KDL::Frame ur5_frame;
-    KDL::Frame ur10_frame;
+    KDL::Frame right_frame;
     dual_arm_toolbox::Transform::transformPoseToKDL(ur5_pose.pose, ur5_frame);
-    dual_arm_toolbox::Transform::transformPoseToKDL(ur10_pose.pose, ur10_frame);
+    dual_arm_toolbox::Transform::transformPoseToKDL(right_pose.pose, right_frame);
     KDL::Frame offset;
-    offset = ur5_frame.Inverse() * ur10_frame;
+    offset = ur5_frame.Inverse() * right_frame;
     return offset;
 }
 
@@ -80,12 +80,12 @@ bool DualArmRobot::adaptTrajectory(moveit_msgs::RobotTrajectory ur5_trajectory, 
     robot_state::RobotStatePtr kinematic_state(new robot_state::RobotState(kinematic_model));
     kinematic_state->setToDefaultValues();
     const robot_state::JointModelGroup* ur5_joint_model_group = kinematic_model->getJointModelGroup("ur5_manipulator");
-    const robot_state::JointModelGroup* ur10_joint_model_group = kinematic_model->getJointModelGroup("ur10_manipulator");
+    const robot_state::JointModelGroup* right_joint_model_group = kinematic_model->getJointModelGroup("right_manipulator");
 
     // setup both_arms_trajectory
     both_arms_trajectory = ur5_trajectory;
-    for (unsigned int j=0; j < ur10_joint_model_group->getActiveJointModelNames().size(); j++){
-        both_arms_trajectory.joint_trajectory.joint_names.push_back(ur10_joint_model_group->getActiveJointModelNames()[j]);
+    for (unsigned int j=0; j < right_joint_model_group->getActiveJointModelNames().size(); j++){
+        both_arms_trajectory.joint_trajectory.joint_names.push_back(right_joint_model_group->getActiveJointModelNames()[j]);
     }
 
     // ik service client setup
@@ -99,7 +99,7 @@ bool DualArmRobot::adaptTrajectory(moveit_msgs::RobotTrajectory ur5_trajectory, 
     ik_msg.request.ik_request.robot_state = getCurrentRobotStateMsg();
     ik_msg.request.ik_request.attempts = 5;
     ik_msg.request.ik_request.avoid_collisions = true;
-    ik_msg.request.ik_request.group_name = ur10_.getName();
+    ik_msg.request.ik_request.group_name = right_.getName();
     ik_msg.request.ik_request.timeout = ros::Duration(15);
 
     // computing values for trajectory
@@ -116,14 +116,14 @@ bool DualArmRobot::adaptTrajectory(moveit_msgs::RobotTrajectory ur5_trajectory, 
         tf::transformEigenToKDL(end_effector_pose_ur5, frame_pose_ur5);
 
         // compute pos ur10
-        KDL::Frame frame_pose_ur10 = frame_pose_ur5*offset;
+        KDL::Frame frame_pose_right = frame_pose_ur5*offset;
 
         // ik msg for request for ur10
         ik_msg.request.ik_request.pose_stamped.header.frame_id = "table_ground";
-        ik_msg.request.ik_request.pose_stamped.pose.position.x = frame_pose_ur10.p.x();
-        ik_msg.request.ik_request.pose_stamped.pose.position.y = frame_pose_ur10.p.y();
-        ik_msg.request.ik_request.pose_stamped.pose.position.z = frame_pose_ur10.p.z();
-        frame_pose_ur10.M.GetQuaternion(
+        ik_msg.request.ik_request.pose_stamped.pose.position.x = frame_pose_right.p.x();
+        ik_msg.request.ik_request.pose_stamped.pose.position.y = frame_pose_right.p.y();
+        ik_msg.request.ik_request.pose_stamped.pose.position.z = frame_pose_right.p.z();
+        frame_pose_right.M.GetQuaternion(
                 ik_msg.request.ik_request.pose_stamped.pose.orientation.x,
                 ik_msg.request.ik_request.pose_stamped.pose.orientation.y,
                 ik_msg.request.ik_request.pose_stamped.pose.orientation.z,
@@ -200,8 +200,8 @@ bool DualArmRobot::switch_controller(std::string stop_name, std::string start_na
         if (ur5_controller_.compare(0,ur_namespace.size(),ur_namespace)==0){
             ur5_controller_ = ur_namespace+"/"+start_name;
         }
-        if (ur10_controller_.compare(0,ur_namespace.size(),ur_namespace)==0){
-            ur10_controller_ = ur_namespace+"/"+start_name;
+        if (right_controller_.compare(0,ur_namespace.size(),ur_namespace)==0){
+            right_controller_ = ur_namespace+"/"+start_name;
         }
     }
 
@@ -212,7 +212,7 @@ bool DualArmRobot::switch_controller(std::string stop_name, std::string start_na
 #endif
 }
 
-bool DualArmRobot::graspMove(double distance, bool avoid_collisions, bool use_ur5, bool use_ur10) {
+bool DualArmRobot::graspMove(double distance, bool avoid_collisions, bool use_ur5, bool use_right) {
     bool try_step;
     double fraction;
 
@@ -260,39 +260,39 @@ bool DualArmRobot::graspMove(double distance, bool avoid_collisions, bool use_ur
     }
 
     // ur10
-    if (use_ur10) try_step = true;
+    if (use_right) try_step = true;
     while (try_step && ros::ok()) {
-        ur10_.setStartStateToCurrentState();
-        std::vector<geometry_msgs::Pose> ur10_waypoints;
-        geometry_msgs::Pose ur10_waypoint = ur10_.getCurrentPose(ur10_.getEndEffectorLink()).pose;
-        ur10_waypoints.push_back(ur10_waypoint);
+        right_.setStartStateToCurrentState();
+        std::vector<geometry_msgs::Pose> right_waypoints;
+        geometry_msgs::Pose right_waypoint = right_.getCurrentPose(right_.getEndEffectorLink()).pose;
+        right_waypoints.push_back(right_waypoint);
 
         // transform distance vector
-        KDL::Vector ur10_vec_d;  // distance vector
-        KDL::Frame ur10_p_eef;   // endeffector frame
-        dual_arm_toolbox::Transform::transformPoseToKDL(ur10_waypoint, ur10_p_eef);
-        ur10_vec_d.x(0);
-        ur10_vec_d.y(0);
-        ur10_vec_d.z(distance);
-        ur10_vec_d = ur10_p_eef.M * ur10_vec_d;     // Rotate distance vector
+        KDL::Vector right_vec_d;  // distance vector
+        KDL::Frame right_p_eef;   // endeffector frame
+        dual_arm_toolbox::Transform::transformPoseToKDL(right_waypoint, right_p_eef);
+        right_vec_d.x(0);
+        right_vec_d.y(0);
+        right_vec_d.z(distance);
+        right_vec_d = right_p_eef.M * right_vec_d;     // Rotate distance vector
 
         // calculate waypoint
-        ur10_waypoint.position.x = ur10_waypoint.position.x + ur10_vec_d.x();
-        ur10_waypoint.position.y = ur10_waypoint.position.y + ur10_vec_d.y();
-        ur10_waypoint.position.z = ur10_waypoint.position.z + ur10_vec_d.z();
+        right_waypoint.position.x = right_waypoint.position.x + right_vec_d.x();
+        right_waypoint.position.y = right_waypoint.position.y + right_vec_d.y();
+        right_waypoint.position.z = right_waypoint.position.z + right_vec_d.z();
 
-        ur10_waypoints.push_back(ur10_waypoint);
-        moveit_msgs::RobotTrajectory ur10_trajectory;
-        fraction = ur10_.computeCartesianPath(ur10_waypoints, 0.001, 0.0, ur10_trajectory, avoid_collisions);
+        right_waypoints.push_back(right_waypoint);
+        moveit_msgs::RobotTrajectory right_trajectory;
+        fraction = right_.computeCartesianPath(right_waypoints, 0.001, 0.0, right_trajectory, avoid_collisions);
         if (fraction < 0.9) {
             ROS_WARN("UR10 cartesian path. (%.2f%% achieved)", fraction * 100.0);
             try_step = try_again_question();
             if (!try_step) return false;
         } else {
-            moveit::planning_interface::MoveGroup::Plan ur10_plan;
-            dual_arm_toolbox::TrajectoryProcessor::clean(ur10_trajectory);
-            ur10_plan.trajectory_ = ur10_trajectory;
-            execute(ur10_plan);
+            moveit::planning_interface::MoveGroup::Plan right_plan;
+            dual_arm_toolbox::TrajectoryProcessor::clean(right_trajectory);
+            right_plan.trajectory_ = right_trajectory;
+            execute(right_plan);
             try_step = false;
         }
     }
@@ -357,29 +357,29 @@ bool DualArmRobot::pickBox(std::string object_id , geometry_msgs::Vector3Stamped
     /*
     try_step = true;
     while (try_step && ros::ok()) {
-        geometry_msgs::PoseStamped ur10_pose;
-        ur10_pose.header.frame_id = object_id;
-        ur10_pose.pose.position.x = 0.18;
-        ur10_pose.pose.position.y = 0;
-        ur10_pose.pose.position.z = 0;
-        KDL::Rotation ur10_rot;  // generated to easily assign quaternion of pose
-        ur10_rot.DoRotY(3.14 / 2);
-        ur10_rot.DoRotX(3.14);
-        ur10_rot.GetQuaternion(ur10_pose.pose.orientation.x, ur10_pose.pose.orientation.y, ur10_pose.pose.orientation.z,
-                               ur10_pose.pose.orientation.w);
-        ur10_.setPoseTarget(ur10_pose);
+        geometry_msgs::PoseStamped right_pose;
+        right_pose.header.frame_id = object_id;
+        right_pose.pose.position.x = 0.18;
+        right_pose.pose.position.y = 0;
+        right_pose.pose.position.z = 0;
+        KDL::Rotation right_rot;  // generated to easily assign quaternion of pose
+        right_rot.DoRotY(3.14 / 2);
+        right_rot.DoRotX(3.14);
+        right_rot.GetQuaternion(right_pose.pose.orientation.x, right_pose.pose.orientation.y, right_pose.pose.orientation.z,
+                               right_pose.pose.orientation.w);
+        right_.setPoseTarget(right_pose);
 
-        moveit::planning_interface::MoveGroup::Plan ur10_plan;
-        error = ur10_.plan(ur10_plan);
+        moveit::planning_interface::MoveGroup::Plan right_plan;
+        error = right_.plan(right_plan);
         if (error.val != 1) {
             ROS_WARN("MoveIt!Error Code: %i", error.val);
             try_step = try_again_question();
             if (!try_step) return false;
         } else {
             ROS_INFO("Moving ur10 into grasp position");
-            dual_arm_toolbox::TrajectoryProcessor::clean(ur10_plan.trajectory_);
-            dual_arm_toolbox::TrajectoryProcessor::scaleTrajectorySpeed(ur10_plan.trajectory_, 0.4);
-            execute(ur10_plan);
+            dual_arm_toolbox::TrajectoryProcessor::clean(right_plan.trajectory_);
+            dual_arm_toolbox::TrajectoryProcessor::scaleTrajectorySpeed(right_plan.trajectory_, 0.4);
+            execute(right_plan);
             try_step = false;
         }
     }*/
@@ -397,20 +397,20 @@ bool DualArmRobot::pickBox(std::string object_id , geometry_msgs::Vector3Stamped
         ur5_rot.GetQuaternion(ur5_pose.pose.orientation.x, ur5_pose.pose.orientation.y, ur5_pose.pose.orientation.z,
                               ur5_pose.pose.orientation.w);
 
-        geometry_msgs::PoseStamped ur10_pose;
-        ur10_pose.header.frame_id = object_id;
-        ur10_pose.pose.position.x = 0.18;
-        ur10_pose.pose.position.y = 0;
-        ur10_pose.pose.position.z = 0;
-        KDL::Rotation ur10_rot;  // generated to easily assign quaternion of pose
-        ur10_rot.DoRotY(3.14 / 2);
-        ur10_rot.DoRotX(3.14);
-        ur10_rot.GetQuaternion(ur10_pose.pose.orientation.x, ur10_pose.pose.orientation.y, ur10_pose.pose.orientation.z,
-                               ur10_pose.pose.orientation.w);
+        geometry_msgs::PoseStamped right_pose;
+        right_pose.header.frame_id = object_id;
+        right_pose.pose.position.x = 0.18;
+        right_pose.pose.position.y = 0;
+        right_pose.pose.position.z = 0;
+        KDL::Rotation right_rot;  // generated to easily assign quaternion of pose
+        right_rot.DoRotY(3.14 / 2);
+        right_rot.DoRotX(3.14);
+        right_rot.GetQuaternion(right_pose.pose.orientation.x, right_pose.pose.orientation.y, right_pose.pose.orientation.z,
+                               right_pose.pose.orientation.w);
 
         arms_.setStartState(ur5_last_goal_state_);
         arms_.setPoseTarget(ur5_pose, ur5_.getEndEffectorLink());
-        arms_.setPoseTarget(ur10_pose, ur10_.getEndEffectorLink());
+        arms_.setPoseTarget(right_pose, right_.getEndEffectorLink());
 
         moveit::planning_interface::MoveGroup::Plan arms_plan;
         error = arms_.plan(arms_plan);
@@ -985,19 +985,19 @@ void DualArmRobot::allowedArmCollision(bool enable, std::string ur5_attachedObje
     ur5_links.push_back("ur5_ee_spring");
     ur5_links.push_back(ur5_attachedObject.c_str());
 
-    std::vector<std::string> ur10_links;
-    ur10_links.push_back("ur10_ee_link");
-    ur10_links.push_back("ur10_forearm_link");
-    ur10_links.push_back("ur10_tool0");
-    ur10_links.push_back("ur10_upper_arm_link");
-    ur10_links.push_back("ur10_wrist_1_link");
-    ur10_links.push_back("ur10_wrist_2_link");
-    ur10_links.push_back("ur10_wrist_3_link");
-    ur10_links.push_back("ur10_ee_0");
-    ur10_links.push_back("ur10_ee_frame");
-    ur10_links.push_back("ur10_ee_spring");
+    std::vector<std::string> right_links;
+    right_links.push_back("right_ee_link");
+    right_links.push_back("right_forearm_link");
+    right_links.push_back("right_tool0");
+    right_links.push_back("right_upper_arm_link");
+    right_links.push_back("right_wrist_1_link");
+    right_links.push_back("right_wrist_2_link");
+    right_links.push_back("right_wrist_3_link");
+    right_links.push_back("right_ee_0");
+    right_links.push_back("right_ee_frame");
+    right_links.push_back("right_ee_spring");
 
-    acm.setEntry(ur5_links, ur10_links, enable);  //Set an entry corresponding to all possible pairs between two sets of elements.
+    acm.setEntry(ur5_links, right_links, enable);  //Set an entry corresponding to all possible pairs between two sets of elements.
 
     // publish scene diff
     acm.getMessage(planningSceneMsg.allowed_collision_matrix);
@@ -1008,7 +1008,7 @@ void DualArmRobot::allowedArmCollision(bool enable, std::string ur5_attachedObje
 }
 
 bool DualArmRobot::linearMove(geometry_msgs::Vector3Stamped direction, bool avoid_collisions, bool use_ur5,
-                              bool use_ur10) {
+                              bool use_right) {
 
     bool try_step;
     double fraction;
@@ -1058,31 +1058,31 @@ bool DualArmRobot::linearMove(geometry_msgs::Vector3Stamped direction, bool avoi
     }
 
     // ur10
-    if (use_ur10) try_step = true;
+    if (use_right) try_step = true;
     while (try_step && ros::ok()) {
-        ur10_.setStartStateToCurrentState();
-        std::vector<geometry_msgs::Pose> ur10_waypoints;
-        ur10_.setPoseReferenceFrame(direction.header.frame_id);
-        geometry_msgs::Pose ur10_waypoint = ur10_.getCurrentPose(ur10_.getEndEffectorLink()).pose;
-        ur10_waypoints.push_back(ur10_waypoint);
+        right_.setStartStateToCurrentState();
+        std::vector<geometry_msgs::Pose> right_waypoints;
+        right_.setPoseReferenceFrame(direction.header.frame_id);
+        geometry_msgs::Pose right_waypoint = right_.getCurrentPose(right_.getEndEffectorLink()).pose;
+        right_waypoints.push_back(right_waypoint);
 
         // calculate waypoint
-        ur10_waypoint.position.x = ur10_waypoint.position.x + direction.vector.x;
-        ur10_waypoint.position.y = ur10_waypoint.position.y + direction.vector.y;
-        ur10_waypoint.position.z = ur10_waypoint.position.z + direction.vector.z;
+        right_waypoint.position.x = right_waypoint.position.x + direction.vector.x;
+        right_waypoint.position.y = right_waypoint.position.y + direction.vector.y;
+        right_waypoint.position.z = right_waypoint.position.z + direction.vector.z;
 
-        ur10_waypoints.push_back(ur10_waypoint);
-        moveit_msgs::RobotTrajectory ur10_trajectory;
-        fraction = ur10_.computeCartesianPath(ur10_waypoints, 0.001, 0.0, ur10_trajectory, avoid_collisions);
+        right_waypoints.push_back(right_waypoint);
+        moveit_msgs::RobotTrajectory right_trajectory;
+        fraction = right_.computeCartesianPath(right_waypoints, 0.001, 0.0, right_trajectory, avoid_collisions);
         if (fraction < 0.9) {
             ROS_WARN("UR10 cartesian path. (%.2f%% achieved)", fraction * 100.0);
             try_step = try_again_question();
             if (!try_step) return false;
         } else {
-            moveit::planning_interface::MoveGroup::Plan ur10_plan;
-            dual_arm_toolbox::TrajectoryProcessor::clean(ur10_trajectory);
-            ur10_plan.trajectory_ = ur10_trajectory;
-            execute(ur10_plan);
+            moveit::planning_interface::MoveGroup::Plan right_plan;
+            dual_arm_toolbox::TrajectoryProcessor::clean(right_trajectory);
+            right_plan.trajectory_ = right_trajectory;
+            execute(right_plan);
             try_step = false;
         }
     }
@@ -1092,22 +1092,22 @@ bool DualArmRobot::execute(moveit::planning_interface::MoveGroup::Plan plan) {
     ROS_INFO("executing trajectory");
 #ifndef OFFLINE
     moveit::planning_interface::MoveGroup::Plan plan_ur5;
-    moveit::planning_interface::MoveGroup::Plan plan_ur10;
+    moveit::planning_interface::MoveGroup::Plan plan_right;
 
-    dual_arm_toolbox::TrajectoryProcessor::split(plan.trajectory_, plan_ur5.trajectory_,plan_ur10.trajectory_,"ur5","ur10");
+    dual_arm_toolbox::TrajectoryProcessor::split(plan.trajectory_, plan_ur5.trajectory_,plan_right.trajectory_,"ur5","ur10");
     dual_arm_toolbox::TrajectoryProcessor::clean(plan_ur5.trajectory_);
-    dual_arm_toolbox::TrajectoryProcessor::clean(plan_ur10.trajectory_);
+    dual_arm_toolbox::TrajectoryProcessor::clean(plan_right.trajectory_);
 
-    bool success_ur10;
+    bool success_right;
     bool success_ur5;
 
     moveit_simple_controller_manager::FollowJointTrajectoryControllerHandle handle_ur5(ur5_controller_,"follow_joint_trajectory");
-    moveit_simple_controller_manager::FollowJointTrajectoryControllerHandle handle_ur10(ur10_controller_,"follow_joint_trajectory");
-    //moveit_simple_controller_manager::FollowJointTrajectoryControllerHandle handle_ur10("ur10/ur10_vel_based_traj_admittance_controller","follow_joint_trajectory");
+    moveit_simple_controller_manager::FollowJointTrajectoryControllerHandle handle_right(right_controller_,"follow_joint_trajectory");
+    //moveit_simple_controller_manager::FollowJointTrajectoryControllerHandle handle_right("ur10/right_vel_based_traj_admittance_controller","follow_joint_trajectory");
 
     // for both arms trajectories: because in planning each arm was not aware of the other there is a collision check before executing the trajectory
     /* TODO: put in again later
-    if ((plan_ur5.trajectory_.joint_trajectory.joint_names.size() > 0) && (plan_ur10.trajectory_.joint_trajectory.joint_names.size() > 0)){
+    if ((plan_ur5.trajectory_.joint_trajectory.joint_names.size() > 0) && (plan_right.trajectory_.joint_trajectory.joint_names.size() > 0)){
         // check trajectory for collisions
         robot_model_loader::RobotModelLoader robot_model_loader(
                 "robot_description");
@@ -1126,15 +1126,15 @@ bool DualArmRobot::execute(moveit::planning_interface::MoveGroup::Plan plan) {
         success_ur5 = handle_ur5.sendTrajectory(plan_ur5.trajectory_);
     }
 
-    if (plan_ur10.trajectory_.joint_trajectory.joint_names.size() > 0){
+    if (plan_right.trajectory_.joint_trajectory.joint_names.size() > 0){
         ROS_INFO("Trajectory sent to ur10");
-        success_ur10 = handle_ur10.sendTrajectory(plan_ur10.trajectory_);
+        success_right = handle_right.sendTrajectory(plan_right.trajectory_);
     }
 
     if (plan_ur5.trajectory_.joint_trajectory.joint_names.size() > 0) success_ur5 = handle_ur5.waitForExecution();
     else success_ur5 = true;
-    if (plan_ur10.trajectory_.joint_trajectory.joint_names.size() > 0) success_ur10 = handle_ur10.waitForExecution();
-    else success_ur10 = true;
+    if (plan_right.trajectory_.joint_trajectory.joint_names.size() > 0) success_right = handle_right.waitForExecution();
+    else success_right = true;
     sleep(0.5);  // to be sure robot is at goal position
 
     // update last goal ur5
@@ -1165,7 +1165,7 @@ bool DualArmRobot::execute(moveit::planning_interface::MoveGroup::Plan plan) {
     }
     ur5_last_goal_pose_ = fk_msg.response.pose_stamped[0];
 
-    return success_ur5&&success_ur10;
+    return success_ur5&&success_right;
 #endif
 #ifdef OFFLINE
 
@@ -1208,18 +1208,18 @@ bool DualArmRobot::moveHome() {
     // move ur10
     try_step = true;
     while (try_step && ros::ok()) {
-        ur10_.setNamedTarget("ur10_up");
-        moveit::planning_interface::MoveGroup::Plan ur10_plan;
-        error = ur10_.plan(ur10_plan);
+        right_.setNamedTarget("right_up");
+        moveit::planning_interface::MoveGroup::Plan right_plan;
+        error = right_.plan(right_plan);
         if (error.val != 1) {
             ROS_WARN("MoveIt!Error Code: %i", error.val);
             try_step = try_again_question();
             if (!try_step) return false;
         } else {
             ROS_INFO("Moving ur10 into grasp position");
-            dual_arm_toolbox::TrajectoryProcessor::clean(ur10_plan.trajectory_);
-            dual_arm_toolbox::TrajectoryProcessor::scaleTrajectorySpeed(ur10_plan.trajectory_, 0.4);
-            execute(ur10_plan);
+            dual_arm_toolbox::TrajectoryProcessor::clean(right_plan.trajectory_);
+            dual_arm_toolbox::TrajectoryProcessor::scaleTrajectorySpeed(right_plan.trajectory_, 0.4);
+            execute(right_plan);
             try_step = false;
         }
     }

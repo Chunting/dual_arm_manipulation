@@ -16,18 +16,18 @@
  */
 
 // m/s ; m
-void run_experiment(ros::NodeHandle &nh, ros::Publisher &ur10_speed_pub, moveit::planning_interface::MoveGroup &ur10, double velocity, double moving_distance){
+void run_experiment(ros::NodeHandle &nh, ros::Publisher &right_speed_pub, moveit::planning_interface::MoveGroup &ur10, double velocity, double moving_distance){
     // create ur_logger. Use this namespace
     std::vector<std::string> ur_namespaces;
     ur_namespaces.push_back("");
     UR_Logger ur_logger(nh, ur_namespaces);
 
     // stop controller
-    ros::ServiceClient ur10_srv_switch_controller = nh.serviceClient<controller_manager_msgs::SwitchController>("controller_manager/switch_controller");
+    ros::ServiceClient right_srv_switch_controller = nh.serviceClient<controller_manager_msgs::SwitchController>("controller_manager/switch_controller");
     controller_manager_msgs::SwitchController srv_req;
     srv_req.request.strictness = controller_manager_msgs::SwitchController::Request::BEST_EFFORT;
     srv_req.request.stop_controllers.push_back("vel_based_pos_traj_controller");
-    bool success = ur10_srv_switch_controller.call(srv_req);
+    bool success = right_srv_switch_controller.call(srv_req);
     ROS_INFO("Stopping controller %s",success?"SUCCEDED":"FAILED");
     srv_req.request.stop_controllers.clear();
 
@@ -58,7 +58,7 @@ void run_experiment(ros::NodeHandle &nh, ros::Publisher &ur10_speed_pub, moveit:
     while (ros::ok() && (stopwatch.elapsed().toSec()<moving_time))
     {
         joint_traj.header.stamp = ros::Time::now();
-        ur10_speed_pub.publish(joint_traj);
+        right_speed_pub.publish(joint_traj);
 
         ros::spinOnce();
         loop_rate.sleep();
@@ -74,7 +74,7 @@ void run_experiment(ros::NodeHandle &nh, ros::Publisher &ur10_speed_pub, moveit:
     while (ros::ok() && (stopwatch.elapsed().toSec()<1.5))
     {
         joint_traj.header.stamp = ros::Time::now();
-        ur10_speed_pub.publish(joint_traj);
+        right_speed_pub.publish(joint_traj);
 
         ros::spinOnce();
         loop_rate.sleep();
@@ -90,7 +90,7 @@ void run_experiment(ros::NodeHandle &nh, ros::Publisher &ur10_speed_pub, moveit:
     while (ros::ok() && (stopwatch.elapsed().toSec()<moving_time))
     {
         joint_traj.header.stamp = ros::Time::now();
-        ur10_speed_pub.publish(joint_traj);
+        right_speed_pub.publish(joint_traj);
 
         ros::spinOnce();
         loop_rate.sleep();
@@ -104,7 +104,7 @@ void run_experiment(ros::NodeHandle &nh, ros::Publisher &ur10_speed_pub, moveit:
     // restart controller
     srv_req.request.BEST_EFFORT;
     srv_req.request.start_controllers.push_back("vel_based_pos_traj_controller");
-    success = ur10_srv_switch_controller.call(srv_req);
+    success = right_srv_switch_controller.call(srv_req);
     ROS_INFO("Starting controller %s",success?"SUCCEDED":"FAILED");
     srv_req.request.start_controllers.clear();
 }
@@ -115,7 +115,7 @@ int main(int argc, char **argv)
     // ROS Setup
     ros::init(argc, argv, "ur_const_vel_publisher");
     ros::NodeHandle nh;
-    ros::Publisher ur10_speed_pub = nh.advertise<trajectory_msgs::JointTrajectory>("ur_driver/joint_speed", 1);
+    ros::Publisher right_speed_pub = nh.advertise<trajectory_msgs::JointTrajectory>("ur_driver/joint_speed", 1);
     ros::AsyncSpinner asyncSpinner(2);
     asyncSpinner.start();
 
@@ -155,28 +155,28 @@ int main(int argc, char **argv)
     // ::::::: Run Experiments :::::::
 /*
     ROS_INFO("::: Experiment 1 ::: vel = 0.02m/s; s = 0.03m");
-    run_experiment(nh, ur10_speed_pub, ur10, 0.02, 0.03);
+    run_experiment(nh, right_speed_pub, ur10, 0.02, 0.03);
 
     ROS_INFO("moveing to start");
     ur10.plan(plan);
     ur10.execute(plan);
 
     ROS_INFO("::: Experiment 2 ::: vel = 0.01m/s; s = 0.03m");
-    run_experiment(nh, ur10_speed_pub, ur10, 0.01, 0.03);
+    run_experiment(nh, right_speed_pub, ur10, 0.01, 0.03);
 
     ROS_INFO("moveing to start");
     ur10.plan(plan);
     ur10.execute(plan);
 
     ROS_INFO("::: Experiment 3 ::: vel = 0.005m/s; s = 0.03m");
-    run_experiment(nh, ur10_speed_pub, ur10, 0.005, 0.03);
+    run_experiment(nh, right_speed_pub, ur10, 0.005, 0.03);
 
     ROS_INFO("moveing to start");
     ur10.plan(plan);
     ur10.execute(plan);
 */
     ROS_INFO("::: Experiment 4 ::: vel = 0.001m/s; s = 0.03m");
-    run_experiment(nh, ur10_speed_pub, ur10, 0.001, 0.03);
+    run_experiment(nh, right_speed_pub, ur10, 0.001, 0.03);
 
     ROS_INFO("moveing to start");
     ur10.plan(plan);

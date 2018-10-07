@@ -67,7 +67,7 @@ ur5_manipulator:
     - PRMstarkConfigDefault
   projection_evaluator: joints(ur5_shoulder_pan_joint,ur5_shoulder_lift_joint)
   longest_valid_segment_fraction: 0.005 # in rad maximaler wert ergibt sich aus summe_der_joint_ranges*dieser_wert
-ur10_manipulator:
+right_manipulator:
   planner_configs:
     - SBLkConfigDefault
     - ESTkConfigDefault
@@ -80,7 +80,7 @@ ur10_manipulator:
     - TRRTkConfigDefault
     - PRMkConfigDefault
     - PRMstarkConfigDefault
-  projection_evaluator: joints(ur10_shoulder_pan_joint,ur10_shoulder_lift_joint)
+  projection_evaluator: joints(right_shoulder_pan_joint,right_shoulder_lift_joint)
   longest_valid_segment_fraction: 0.005
 ur5_endeffector:
   planner_configs:
@@ -95,7 +95,7 @@ ur5_endeffector:
     - TRRTkConfigDefault
     - PRMkConfigDefault
     - PRMstarkConfigDefault
-ur10_endeffector:
+right_endeffector:
   planner_configs:
     - SBLkConfigDefault
     - ESTkConfigDefault
@@ -121,5 +121,5 @@ arms:
     - TRRTkConfigDefault
     - PRMkConfigDefault
     - PRMstarkConfigDefault
-  projection_evaluator: joints(ur10_shoulder_pan_joint,ur10_shoulder_lift_joint)
+  projection_evaluator: joints(right_shoulder_pan_joint,right_shoulder_lift_joint)
   longest_valid_segment_fraction: 0.005

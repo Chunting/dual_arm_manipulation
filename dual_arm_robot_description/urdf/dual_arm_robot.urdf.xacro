@@ -4,9 +4,9 @@
 
   <xacro:property name="pi" value="3.1415926535897931"/>
   <xacro:arg name="prefix_ur5" default="ur5_"/>
-  <xacro:arg name="prefix_ur10" default="right_"/>
+  <xacro:arg name="prefix_right" default="right_"/>
   <xacro:arg name="limited_ur5" default="true"/>
-  <xacro:arg name="limited_ur10" default="true"/>
+  <xacro:arg name="limited_right" default="true"/>
 
   <!-- common stuff -->
   <xacro:include filename="$(find ur_description)/urdf/common.gazebo.xacro"/>
@@ -15,7 +15,7 @@
   <xacro:include filename="$(find dual_arm_robot_description)/urdf/ur5.urdf.xacro"/> <!-- file has been edited because of same variable names in ur5 and ur10 -->
 
   <!-- ur10 -->
-  <xacro:include filename="$(find dual_arm_robot_description)/urdf/ur5.urdf.xacro"/> <!-- original file has been edited because of same variable names in ur5 and ur10 -->
+  <xacro:include filename="$(find dual_arm_robot_description)/urdf/ur5_right.urdf.xacro"/> <!-- original file has been edited because of same variable names in ur5 and ur10 -->
 
   <!-- endeffector -->
   <xacro:include filename="$(find dual_arm_robot_description)/urdf/endeffector.urdf.xacro"/>
@@ -58,24 +58,24 @@
   </joint>
 -->
   <!-- place ur10 arm -->
-  <xacro:ur10_robot prefix="$(arg prefix_ur10)" joint_limited="$(arg limited_ur10)"/>
-  <joint name="$(arg prefix_ur10)platform_mount" type="fixed">
-    <parent link="$(arg prefix_ur10)table_platform"/>
-    <child link ="$(arg prefix_ur10)base_link"/>
+  <xacro:right_robot prefix="$(arg prefix_right)" joint_limited="$(arg limited_right)"/>
+  <joint name="$(arg prefix_right)platform_mount" type="fixed">
+    <parent link="$(arg prefix_right)table_platform"/>
+    <child link ="$(arg prefix_right)base_link"/>
     <origin xyz="0.1341 -0.3049 0.0155" rpy="0 0 ${pi/2}" />
   </joint>
 
   <!-- place ur10 endeffector -->
-  <xacro:endeffector prefix="$(arg prefix_ur10)"/>
-  <joint name="$(arg prefix_ur10)ee_mount" type="fixed">
-    <parent link="$(arg prefix_ur10)ee_link" />
-    <child link = "$(arg prefix_ur10)ee_frame" />
+  <xacro:endeffector prefix="$(arg prefix_right)"/>
+  <joint name="$(arg prefix_right)ee_mount" type="fixed">
+    <parent link="$(arg prefix_right)ee_link" />
+    <child link = "$(arg prefix_right)ee_frame" />
     <origin xyz="0.0 0.0 0.0" rpy="${pi/2.0} 0.0 ${pi/2.0}" />
   </joint>
 <!--
-  <joint name="$(arg prefix_ur10)ee_mount" type="fixed">
-    <parent link="$(arg prefix_ur10)tool0"/>
-    <child link ="$(arg prefix_ur10)ee_frame"/>
+  <joint name="$(arg prefix_right)ee_mount" type="fixed">
+    <parent link="$(arg prefix_right)tool0"/>
+    <child link ="$(arg prefix_right)ee_frame"/>
     <origin xyz="0 0 0" rpy="0 0 ${pi}" />
   </joint>
 -->

@@ -14,7 +14,7 @@
   <arg name="max_velocity" default="10.0"/> <!-- [rad/s] -->
 
   <!-- robot model -->
-  <include file="$(find ur_description)/launch/ur10_upload.launch">
+  <include file="$(find ur_description)/launch/right_upload.launch">
     <arg name="limited" value="$(arg limited)"/>
   </include>
 
@@ -29,7 +29,7 @@
   </node>
 
   <!-- Load controller settings -->
-  <rosparam file="$(find ur_modern_driver)/config/ur10_controllers.yaml" command="load"/>
+  <rosparam file="$(find ur_modern_driver)/config/right_controllers.yaml" command="load"/>
 
   <!-- spawn controller manager -->
   <node name="ros_control_controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
@@ -44,12 +44,12 @@
 
 
   <!-- ur planning execution - controllers.yaml of moveit config was altered to use ros control -->
-  <include file="$(find ur10_moveit_config)/launch/ur10_moveit_planning_execution.launch">
+  <include file="$(find right_moveit_config)/launch/right_moveit_planning_execution.launch">
     <arg name="limited" value="$(arg limited)"/>
   </include>
 
   <!-- ur10 moveit -->
-  <include file="$(find ur10_moveit_config)/launch/moveit_rviz.launch">
+  <include file="$(find right_moveit_config)/launch/moveit_rviz.launch">
     <arg name="config" value="true"/>
   </include>
 

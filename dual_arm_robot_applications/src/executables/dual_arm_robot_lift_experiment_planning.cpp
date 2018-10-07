@@ -49,34 +49,34 @@ int main(int argc, char **argv) {
     // setup constraints
     moveit_msgs::JointConstraint jcm;
     moveit_msgs::Constraints ur5_constraints;
-    moveit_msgs::Constraints ur10_constraints;
-    jcm.joint_name="ur10_shoulder_pan_joint";
+    moveit_msgs::Constraints right_constraints;
+    jcm.joint_name="right_shoulder_pan_joint";
     jcm.position = 2.4;
     jcm.tolerance_above = 0.7;
     jcm.tolerance_below = 2.5;
     jcm.weight = 1.0;
-    ur10_constraints.joint_constraints.push_back(jcm);
-    dualArmRobot.ur10_.setPathConstraints(ur10_constraints);
+    right_constraints.joint_constraints.push_back(jcm);
+    dualArmRobot.right_.setPathConstraints(right_constraints);
 
     /*
     moveit_msgs::JointConstraint jcm;
     moveit_msgs::Constraints ur5_constraints;
-    moveit_msgs::Constraints ur10_constraints;
-    jcm.joint_name="ur10_shoulder_pan_joint";
+    moveit_msgs::Constraints right_constraints;
+    jcm.joint_name="right_shoulder_pan_joint";
     jcm.position = -2.4;
     jcm.tolerance_above = 2.5;
     jcm.tolerance_below = 0.7;
     jcm.weight = 1.0;
-    ur10_constraints.joint_constraints.push_back(jcm);
-    dualArmRobot.ur10_.setPathConstraints(ur10_constraints);*/
+    right_constraints.joint_constraints.push_back(jcm);
+    dualArmRobot.right_.setPathConstraints(right_constraints);*/
     /*
-    jcm.joint_name="ur10_wrist_2_joint";
+    jcm.joint_name="right_wrist_2_joint";
     jcm.position = 3.0;
     jcm.tolerance_above = 1.0;
     jcm.tolerance_below = 4.0;
     jcm.weight = 1.0;
-    ur10_constraints.joint_constraints.push_back(jcm);
-    dualArmRobot.ur10_.setPathConstraints(ur10_constraints);*/
+    right_constraints.joint_constraints.push_back(jcm);
+    dualArmRobot.right_.setPathConstraints(right_constraints);*/
 /*
     jcm.joint_name="ur5_shoulder_pan_joint";
     jcm.position = 0.0;
@@ -108,7 +108,7 @@ int main(int argc, char **argv) {
 
     // clear path constraints
     dualArmRobot.ur5_.clearPathConstraints();
-    dualArmRobot.ur10_.clearPathConstraints();
+    dualArmRobot.right_.clearPathConstraints();
 
     // plan move up
     geometry_msgs::PoseStamped start_pose = dualArmRobot.ur5_.getCurrentPose(dualArmRobot.ur5_.getEndEffectorLink());

@@ -3,29 +3,29 @@
 <launch>
   <!-- robot_ip: IP-address of the robot's socket-messaging server -->
   <arg name="ip_ur5" default="192.168.1.101"/> <!-- IP des UR5 am IML eingetragen -->
-  <arg name="ip_ur10" default="192.168.1.102"/> <!-- IP des UR10 am IML eingetragen -->
+  <arg name="ip_right" default="192.168.1.102"/> <!-- IP des UR10 am IML eingetragen -->
   <!-- for limited setup: make sure that both robots are in vailid position, otherwise ompl throws an error -->
   <arg name="limited" default="true"/>
   <arg name="min_payload_ur5"  default="0.0"/>
   <arg name="max_payload_ur5"  default="5.0"/>
-  <arg name="min_payload_ur10"  default="0.0"/>
-  <arg name="max_payload_ur10"  default="10.0"/>
+  <arg name="min_payload_right"  default="0.0"/>
+  <arg name="max_payload_right"  default="10.0"/>
   <arg name="prefix_ur5" default="ur5_"/>
-  <arg name="prefix_ur10" default="ur10_"/>
+  <arg name="prefix_right" default="right_"/>
   <arg name="config" default="true"/>
   
   <!-- dual_arm_robot bringup. including ros controllers -->
   <include file="$(find dual_arm_robot_driver)/launch/dual_arm_robot_bringup_ros_control.launch">
     <arg name="ip_ur5" value="$(arg ip_ur5)"/>
-    <arg name="ip_ur10" value="$(arg ip_ur10)"/>
+    <arg name="ip_right" value="$(arg ip_right)"/>
     <arg name="limited_ur5" value="$(arg limited)"/>
-    <arg name="limited_ur10" value="$(arg limited)"/>
+    <arg name="limited_right" value="$(arg limited)"/>
     <arg name="min_payload_ur5"  value="$(arg min_payload_ur5)"/>
     <arg name="max_payload_ur5"  value="$(arg max_payload_ur5)"/>
-    <arg name="min_payload_ur10"  value="$(arg min_payload_ur10)"/>
-    <arg name="max_payload_ur10"  value="$(arg max_payload_ur10)"/>
+    <arg name="min_payload_right"  value="$(arg min_payload_right)"/>
+    <arg name="max_payload_right"  value="$(arg max_payload_right)"/>
     <arg name="prefix_ur5" value="$(arg prefix_ur5)"/>
-    <arg name="prefix_ur10" value="$(arg prefix_ur10)"/>
+    <arg name="prefix_right" value="$(arg prefix_right)"/>
   </include>
 
   <!-- MoveIt! Setup -->

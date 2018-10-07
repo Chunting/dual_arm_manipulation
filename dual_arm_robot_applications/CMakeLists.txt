@@ -206,8 +206,8 @@ install(DIRECTORY include/${PROJECT_NAME}/
 add_executable(dual_arm_robot_vel_force_experiment src/dual_arm_robot_vel_force_experiment.cpp src/ur_logging/UrLogger.cpp src/ur_logging/Stopwatch.cpp src/ur_logging/UrMessageListener.cpp)
 target_link_libraries(dual_arm_robot_vel_force_experiment ${catkin_LIBRARIES})
 
-add_executable(ur10_force_hold_exp src/ur10_force_hold_exp.cpp src/ur_logging/UrLogger.cpp src/ur_logging/Stopwatch.cpp src/ur_logging/UrMessageListener.cpp)
-target_link_libraries(ur10_force_hold_exp ${catkin_LIBRARIES})
+add_executable(right_force_hold_exp src/right_force_hold_exp.cpp src/ur_logging/UrLogger.cpp src/ur_logging/Stopwatch.cpp src/ur_logging/UrMessageListener.cpp)
+target_link_libraries(right_force_hold_exp ${catkin_LIBRARIES})
 
 #add_executable(tcp_wrench_publisher src/tcp_wrench_publisher.cpp)
 #target_link_libraries(tcp_wrench_publisher ${catkin_LIBRARIES})

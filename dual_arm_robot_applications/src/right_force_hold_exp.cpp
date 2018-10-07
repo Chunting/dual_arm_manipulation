@@ -46,7 +46,7 @@ int main(int argc, char **argv)
     // ROS Setup
     ros::init(argc, argv, "ur_const_vel_publisher");
     ros::NodeHandle nh;
-    ros::Publisher ur10_speed_pub = nh.advertise<trajectory_msgs::JointTrajectory>("ur_driver/joint_speed", 1);
+    ros::Publisher right_speed_pub = nh.advertise<trajectory_msgs::JointTrajectory>("ur_driver/joint_speed", 1);
     ros::AsyncSpinner asyncSpinner(2);
     asyncSpinner.start();
 
@@ -96,11 +96,11 @@ int main(int argc, char **argv)
     UR_Logger ur_logger(nh, ur_namespaces);
 
     // stop controller
-    ros::ServiceClient ur10_srv_switch_controller = nh.serviceClient<controller_manager_msgs::SwitchController>("controller_manager/switch_controller");
+    ros::ServiceClient right_srv_switch_controller = nh.serviceClient<controller_manager_msgs::SwitchController>("controller_manager/switch_controller");
     controller_manager_msgs::SwitchController srv_req;
     srv_req.request.strictness = controller_manager_msgs::SwitchController::Request::BEST_EFFORT;
     srv_req.request.stop_controllers.push_back("vel_based_pos_traj_controller");
-    bool success = ur10_srv_switch_controller.call(srv_req);
+    bool success = right_srv_switch_controller.call(srv_req);
     ROS_INFO("Stopping controller %s",success?"SUCCEDED":"FAILED");
     srv_req.request.stop_controllers.clear();
 
@@ -186,7 +186,7 @@ int main(int argc, char **argv)
         }
 
         joint_traj.header.stamp = ros::Time::now();
-        ur10_speed_pub.publish(joint_traj);
+        right_speed_pub.publish(joint_traj);
 
         ros::spinOnce();
         loop_rate.sleep();
@@ -198,7 +198,7 @@ int main(int argc, char **argv)
     while (ros::ok() && (stopwatch.elapsed().toSec()<10))
     {
         joint_traj.header.stamp = ros::Time::now();
-        ur10_speed_pub.publish(joint_traj);
+        right_speed_pub.publish(joint_traj);
 
         ros::spinOnce();
         loop_rate.sleep();
@@ -212,7 +212,7 @@ int main(int argc, char **argv)
     // restart controller
     srv_req.request.BEST_EFFORT;
     srv_req.request.start_controllers.push_back("vel_based_pos_traj_controller");
-    success = ur10_srv_switch_controller.call(srv_req);
+    success = right_srv_switch_controller.call(srv_req);
     ROS_INFO("Starting controller %s",success?"SUCCEDED":"FAILED");
     srv_req.request.start_controllers.clear();
 
