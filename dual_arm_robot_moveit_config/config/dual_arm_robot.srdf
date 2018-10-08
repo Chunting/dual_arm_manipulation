@@ -68,13 +68,13 @@
     <end_effector name="left_ee" parent_link="left_ee_link" group="left_endeffector" parent_group="left_manipulator" />
     <end_effector name="right_ee" parent_link="right_ee_link" group="right_endeffector" parent_group="right_manipulator" />
     <!--VIRTUAL JOINT: Purpose: this element defines a virtual joint between a robot link and an external frame of reference (considered fixed with respect to the robot)-->
-    <virtual_joint name="virtual_joint" type="fixed" parent_frame="robot_frame" child_link="table_ground" />
+    <virtual_joint name="virtual_joint" type="fixed" parent_frame="robot_frame" child_link="stand_ground" />
     <!--DISABLE COLLISIONS: By default it is assumed that any link of the robot could potentially come into collision with any other link in the robot. This tag disables collision checking between a specified pair of links. -->
     <disable_collisions link1="table_back" link2="table_camerahanger" reason="Never" />
     <disable_collisions link1="table_back" link2="table_front" reason="Never" />
-    <disable_collisions link1="table_back" link2="table_ground" reason="Adjacent" />
-    <disable_collisions link1="table_back" link2="table_side_left" reason="Default" />
-    <disable_collisions link1="table_back" link2="table_side_right" reason="Default" />
+    <disable_collisions link1="table_back" link2="stand_ground" reason="Adjacent" />
+    <disable_collisions link1="table_back" link2="stand2" reason="Default" />
+    <disable_collisions link1="table_back" link2="stand1" reason="Default" />
     <disable_collisions link1="table_back" link2="right_base_link" reason="Never" />
     <disable_collisions link1="table_back" link2="right_shoulder_link" reason="Never" />
     <disable_collisions link1="table_back" link2="right_table_platform" reason="Default" />
@@ -82,9 +82,9 @@
     <disable_collisions link1="table_back" link2="left_shoulder_link" reason="Never" />
     <disable_collisions link1="table_back" link2="left_table_platform" reason="Default" />
     <disable_collisions link1="table_camerahanger" link2="table_front" reason="Never" />
-    <disable_collisions link1="table_camerahanger" link2="table_ground" reason="Adjacent" />
-    <disable_collisions link1="table_camerahanger" link2="table_side_left" reason="Never" />
-    <disable_collisions link1="table_camerahanger" link2="table_side_right" reason="Never" />
+    <disable_collisions link1="table_camerahanger" link2="stand_ground" reason="Adjacent" />
+    <disable_collisions link1="table_camerahanger" link2="stand2" reason="Never" />
+    <disable_collisions link1="table_camerahanger" link2="stand1" reason="Never" />
     <disable_collisions link1="table_camerahanger" link2="right_base_link" reason="Never" />
     <disable_collisions link1="table_camerahanger" link2="right_shoulder_link" reason="Never" />
     <disable_collisions link1="table_camerahanger" link2="right_table_platform" reason="Never" />
@@ -92,9 +92,9 @@
     <disable_collisions link1="table_camerahanger" link2="left_shoulder_link" reason="Never" />
     <disable_collisions link1="table_camerahanger" link2="left_table_platform" reason="Never" />
     <disable_collisions link1="table_camerahanger" link2="left_upper_arm_link" reason="Never" />
-    <disable_collisions link1="table_front" link2="table_ground" reason="Adjacent" />
-    <disable_collisions link1="table_front" link2="table_side_left" reason="Default" />
-    <disable_collisions link1="table_front" link2="table_side_right" reason="Default" />
+    <disable_collisions link1="table_front" link2="stand_ground" reason="Adjacent" />
+    <disable_collisions link1="table_front" link2="stand2" reason="Default" />
+    <disable_collisions link1="table_front" link2="stand1" reason="Default" />
     <disable_collisions link1="table_front" link2="right_base_link" reason="Never" />
     <disable_collisions link1="table_front" link2="right_shoulder_link" reason="Never" />
     <disable_collisions link1="table_front" link2="right_table_platform" reason="Never" />
@@ -110,36 +110,36 @@
     <disable_collisions link1="table_front" link2="left_wrist_1_link" reason="Never" />
     <disable_collisions link1="table_front" link2="left_wrist_2_link" reason="Never" />
     <disable_collisions link1="table_front" link2="left_wrist_3_link" reason="Never" />
-    <disable_collisions link1="table_ground" link2="table_side_left" reason="Adjacent" />
-    <disable_collisions link1="table_ground" link2="table_side_right" reason="Adjacent" />
-    <disable_collisions link1="table_ground" link2="right_base_link" reason="Never" />
-    <disable_collisions link1="table_ground" link2="right_shoulder_link" reason="Never" />
-    <disable_collisions link1="table_ground" link2="right_table_platform" reason="Adjacent" />
-    <disable_collisions link1="table_ground" link2="left_base_link" reason="Never" />
-    <disable_collisions link1="table_ground" link2="left_shoulder_link" reason="Never" />
-    <disable_collisions link1="table_ground" link2="left_table_platform" reason="Adjacent" />
-    <disable_collisions link1="table_side_left" link2="table_side_right" reason="Never" />
-    <disable_collisions link1="table_side_left" link2="right_base_link" reason="Never" />
-    <disable_collisions link1="table_side_left" link2="right_shoulder_link" reason="Never" />
-    <disable_collisions link1="table_side_left" link2="right_table_platform" reason="Never" />
-    <disable_collisions link1="table_side_left" link2="right_upper_arm_link" reason="Never" />
-    <disable_collisions link1="table_side_left" link2="left_base_link" reason="Never" />
-    <disable_collisions link1="table_side_left" link2="left_shoulder_link" reason="Never" />
-    <disable_collisions link1="table_side_left" link2="left_table_platform" reason="Default" />
-    <disable_collisions link1="table_side_right" link2="right_base_link" reason="Never" />
-    <disable_collisions link1="table_side_right" link2="right_shoulder_link" reason="Never" />
-    <disable_collisions link1="table_side_right" link2="right_table_platform" reason="Default" />
-    <disable_collisions link1="table_side_right" link2="left_base_link" reason="Never" />
-    <disable_collisions link1="table_side_right" link2="left_ee_frame" reason="Never" />
-    <disable_collisions link1="table_side_right" link2="left_ee_link" reason="Never" />
-    <disable_collisions link1="table_side_right" link2="left_ee_spring" reason="Never" />
-    <disable_collisions link1="table_side_right" link2="left_forearm_link" reason="Never" />
-    <disable_collisions link1="table_side_right" link2="left_shoulder_link" reason="Never" />
-    <disable_collisions link1="table_side_right" link2="left_table_platform" reason="Never" />
-    <disable_collisions link1="table_side_right" link2="left_upper_arm_link" reason="Never" />
-    <disable_collisions link1="table_side_right" link2="left_wrist_1_link" reason="Never" />
-    <disable_collisions link1="table_side_right" link2="left_wrist_2_link" reason="Never" />
-    <disable_collisions link1="table_side_right" link2="left_wrist_3_link" reason="Never" />
+    <disable_collisions link1="stand_ground" link2="stand2" reason="Adjacent" />
+    <disable_collisions link1="stand_ground" link2="stand1" reason="Adjacent" />
+    <disable_collisions link1="stand_ground" link2="right_base_link" reason="Never" />
+    <disable_collisions link1="stand_ground" link2="right_shoulder_link" reason="Never" />
+    <disable_collisions link1="stand_ground" link2="right_table_platform" reason="Adjacent" />
+    <disable_collisions link1="stand_ground" link2="left_base_link" reason="Never" />
+    <disable_collisions link1="stand_ground" link2="left_shoulder_link" reason="Never" />
+    <disable_collisions link1="stand_ground" link2="left_table_platform" reason="Adjacent" />
+    <disable_collisions link1="stand2" link2="stand1" reason="Never" />
+    <disable_collisions link1="stand2" link2="right_base_link" reason="Never" />
+    <disable_collisions link1="stand2" link2="right_shoulder_link" reason="Never" />
+    <disable_collisions link1="stand2" link2="right_table_platform" reason="Never" />
+    <disable_collisions link1="stand2" link2="right_upper_arm_link" reason="Never" />
+    <disable_collisions link1="stand2" link2="left_base_link" reason="Never" />
+    <disable_collisions link1="stand2" link2="left_shoulder_link" reason="Never" />
+    <disable_collisions link1="stand2" link2="left_table_platform" reason="Default" />
+    <disable_collisions link1="stand1" link2="right_base_link" reason="Never" />
+    <disable_collisions link1="stand1" link2="right_shoulder_link" reason="Never" />
+    <disable_collisions link1="stand1" link2="right_table_platform" reason="Default" />
+    <disable_collisions link1="stand1" link2="left_base_link" reason="Never" />
+    <disable_collisions link1="stand1" link2="left_ee_frame" reason="Never" />
+    <disable_collisions link1="stand1" link2="left_ee_link" reason="Never" />
+    <disable_collisions link1="stand1" link2="left_ee_spring" reason="Never" />
+    <disable_collisions link1="stand1" link2="left_forearm_link" reason="Never" />
+    <disable_collisions link1="stand1" link2="left_shoulder_link" reason="Never" />
+    <disable_collisions link1="stand1" link2="left_table_platform" reason="Never" />
+    <disable_collisions link1="stand1" link2="left_upper_arm_link" reason="Never" />
+    <disable_collisions link1="stand1" link2="left_wrist_1_link" reason="Never" />
+    <disable_collisions link1="stand1" link2="left_wrist_2_link" reason="Never" />
+    <disable_collisions link1="stand1" link2="left_wrist_3_link" reason="Never" />
     <disable_collisions link1="right_base_link" link2="right_shoulder_link" reason="Adjacent" />
     <disable_collisions link1="right_base_link" link2="right_table_platform" reason="Adjacent" />
     <disable_collisions link1="right_base_link" link2="right_upper_arm_link" reason="Never" />

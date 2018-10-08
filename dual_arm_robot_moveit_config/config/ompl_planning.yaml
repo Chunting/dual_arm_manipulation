@@ -52,7 +52,7 @@ planner_configs:
     max_nearest_neighbors: 10  # use k nearest neighbors. default: 10
   PRMstarkConfigDefault:
     type: geometric::PRMstar
-ur5_manipulator:
+left_manipulator:
   planner_configs:
     - SBLkConfigDefault
     - ESTkConfigDefault
@@ -65,7 +65,7 @@ ur5_manipulator:
     - TRRTkConfigDefault
     - PRMkConfigDefault
     - PRMstarkConfigDefault
-  projection_evaluator: joints(ur5_shoulder_pan_joint,ur5_shoulder_lift_joint)
+  projection_evaluator: joints(left_shoulder_pan_joint,left_shoulder_lift_joint)
   longest_valid_segment_fraction: 0.005 # in rad maximaler wert ergibt sich aus summe_der_joint_ranges*dieser_wert
 right_manipulator:
   planner_configs:
@@ -82,7 +82,7 @@ right_manipulator:
     - PRMstarkConfigDefault
   projection_evaluator: joints(right_shoulder_pan_joint,right_shoulder_lift_joint)
   longest_valid_segment_fraction: 0.005
-ur5_endeffector:
+left_endeffector:
   planner_configs:
     - SBLkConfigDefault
     - ESTkConfigDefault

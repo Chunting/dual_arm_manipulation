@@ -59,7 +59,7 @@ namespace dual_arm_demonstrator_iml {
         ros::NodeHandle nh_;
         std::string left_controller_;
         std::string right_controller_;
-        moveit_msgs::RobotState left_last_goal_state_;
+        moveit_msgs::RobotState left_last_goal_state_; // mounted with force sensor
         double ee_dist_;    // distance to object because of endeffector size
         KDL::Frame arms_offset_;    // offset between arms
         bool try_again_question();
@@ -69,8 +69,8 @@ namespace dual_arm_demonstrator_iml {
     public:
         DualArmRobot(ros::NodeHandle &nh);
 
-        geometry_msgs::PoseStamped ur5_last_goal_pose_;
-        geometry_msgs::PoseStamped ur5_last_goal_pose_temp_;
+        geometry_msgs::PoseStamped left_last_goal_pose_;
+        geometry_msgs::PoseStamped left_last_goal_pose_temp_;
 
         moveit::planning_interface::MoveGroup left_;
         moveit::planning_interface::MoveGroup right_;
