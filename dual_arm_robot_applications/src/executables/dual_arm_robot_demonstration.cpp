@@ -109,7 +109,7 @@ int main(int argc, char **argv) {
     before_pick_7 = ros::Time::now();
     // Pick box7 on top
     geometry_msgs::Vector3Stamped direction;
-    direction.header.frame_id = "/table_ground";
+    direction.header.frame_id = "/stand_ground";
     direction.vector.x = 0;
     direction.vector.y = 0;
     direction.vector.z = 0.1;
@@ -219,7 +219,7 @@ int main(int argc, char **argv) {
 
     // Pick box3 on bottom
     geometry_msgs::Vector3Stamped direction2;
-    direction2.header.frame_id = "/table_ground";
+    direction2.header.frame_id = "/stand_ground";
     direction2.vector.x = 0.20;
     direction2.vector.y = 0.20;
     direction2.vector.z = 0.02;
@@ -253,7 +253,7 @@ int main(int argc, char **argv) {
 
     // pre-goal position
     ROS_INFO("moving closer to target position");
-    geometry_msgs::PoseStamped ur5_pre_pose = dualArmRobot.ur5_last_goal_pose_;
+    geometry_msgs::PoseStamped ur5_pre_pose = dualArmRobot.left_last_goal_pose_;
     ur5_pre_pose.pose.position.z += 0.2;
     if (!dualArmRobot.moveObject("box3", ur5_pre_pose, 0.5)){
         ROS_ERROR("Failed to move box3. Demonstration aborted.");

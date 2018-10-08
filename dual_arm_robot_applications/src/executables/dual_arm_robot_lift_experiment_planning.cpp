@@ -96,7 +96,7 @@ int main(int argc, char **argv) {
 
     // Pick box1
     geometry_msgs::Vector3Stamped direction;
-    direction.header.frame_id = "/table_ground";
+    direction.header.frame_id = "/stand_ground";
     direction.vector.x = 0;
     direction.vector.y = 0;
     direction.vector.z = 0.1;

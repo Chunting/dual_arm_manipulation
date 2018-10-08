@@ -70,7 +70,7 @@ int main(int argc, char **argv) {
 
     // Pick box1
     geometry_msgs::Vector3Stamped direction;
-    direction.header.frame_id = "/table_ground";
+    direction.header.frame_id = "/stand_ground";
     direction.vector.x = 0;
     direction.vector.y = 0;
     direction.vector.z = 0;//0.01;
@@ -93,7 +93,7 @@ int main(int argc, char **argv) {
     //lift_pose.pose.position.z = lift_pose.pose.position.z +1;
     geometry_msgs::Vector3Stamped linear_move_direction;
     linear_move_direction.vector.z = 0.00;
-    linear_move_direction.header.frame_id = "table_ground";
+    linear_move_direction.header.frame_id = "stand_ground";
 
 //#ifndef OFFLINE
     // experiment just hold

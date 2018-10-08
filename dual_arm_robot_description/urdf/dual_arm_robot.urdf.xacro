@@ -13,35 +13,108 @@
   <!-- ur5 -->
   <xacro:include filename="$(find dual_arm_robot_description)/urdf/ur5.urdf.xacro"/> <!-- file has been edited because of same variable names in ur5 and ur10 -->
 
-  <!-- ur10 -->
-  <xacro:include filename="$(find dual_arm_robot_description)/urdf/ur5_right.urdf.xacro"/> <!-- original file has been edited because of same variable names in ur5 and ur10 -->
-
   <!-- endeffector -->
   <xacro:include filename="$(find dual_arm_robot_description)/urdf/endeffector.urdf.xacro"/>
 
-  <!-- table -->
+  <!-- table 
   <xacro:include filename="$(find dual_arm_robot_description)/urdf/table.urdf.xacro"/>
-
+-->
   <!-- place table -->
   <xacro:table/>
 
-  <!-- place world reference -->
+  <xacro:property name="robot_horizontal_stand_width" value="0.5"/>
+	<xacro:property name="robot_vertical_stand_height" value="1.2"/>
+	
+	<!-- color macros -->
+	<xacro:macro name="material_orange_transparent">
+		<material name="orange_transparent">
+			<color rgba="1 0.5 0 0.4"/>
+		</material>
+	</xacro:macro>
+	<xacro:macro name="material_blue_transparent">
+		<material name="blue_transparent">
+			<color rgba="0 0.8 1 0.4"/>
+		</material>
+	</xacro:macro>
+	
+	<xacro:material_orange_transparent />
+	<xacro:material_blue_transparent />
+  	
+  <!-- end of color macros -->
+  <!-- Stand macros -->
+  <link name="stand1">
+		<visual>
+		<geometry>
+		<cylinder radius="0.0735" length="${robot_vertical_stand_height+0.2}"/>
+		</geometry>
+		<material name="orange_transparent"/>
+		</visual>
+		<collision>
+		<geometry>
+		<cylinder radius="0.0735" length="${robot_vertical_stand_height+0.2}"/>
+		</geometry>
+		<material name="blue_transparent"/>
+		</collision>
+	</link>
+	
+	<link name="stand2">
+		<visual>
+		<geometry>
+		<cylinder radius="0.0735" length="${robot_horizontal_stand_width}"/>
+		</geometry>
+		<material name="orange_transparent"/>
+		</visual>
+		<collision>
+		<geometry>
+		<cylinder radius="0.0735" length="${robot_horizontal_stand_width}"/>
+		</geometry>
+		<material name="blue_transparent"/>
+		</collision>
+	</link>
 
+  <!-- End of stand macros-->
+  <!-- Place the stand in the world -->
   <link name="world"/>
-  <joint name="world_joint" type="fixed">
-    <parent link="world"/>
-    <child link ="table_ground"/>
-    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+  <link name="stand_ground"/>
+    <!-- place world reference -->
+	<joint name="world_to_stand_ground" type="fixed">
+		<parent link="world"/>
+		<child link="stand_ground"/>
+		<origin xyz="0 0 0" rpy="0 0 0"/>
+	</joint>	
+
+	<joint name="base_link_to_stand" type="fixed">
+		<parent link="stand_ground"/>
+		<child link="stand1"/>
+		<origin xyz="0 0 ${robot_vertical_stand_height/2}" rpy="0 0 0"/>
+	</joint>
+
+	<joint name="stand1_to_stand2" type="fixed">
+		<parent link="stand1"/>
+		<child link="stand2"/>
+		<origin xyz="0 0 ${robot_vertical_stand_height/2}" rpy="1.57 1.57 0"/>
+	</joint>
+<!--
+	<joint name="stand2_to_stand3" type="fixed">
+		<parent link="stand2"/>
+		<child link="stand3"/>
+		<origin xyz="-0.05 0 ${(robot_horizontal_stand_width/4)+0.15}" rpy="0 1.57 0"/>
+	</joint>
+	
+	<joint name="stand2_to_stand4" type="fixed">
+		<parent link="stand2"/>
+		<child link="stand4"/>
+		<origin xyz="-0.05 0 -${(robot_horizontal_stand_width/4)+0.15}" rpy="0 1.57 0"/>
+	</joint>
+-->
+  <!-- place ur5 left arm    -->
+  <xacro:ur5_robot prefix="$(arg prefix_left)" joint_limited="$(arg limited)"/>
+  <joint name="stand2_to_left_arm" type="fixed">
+    <parent link="stand2"/>
+    <child link ="$(arg prefix_left)base_link"/>
+   <origin xyz="0 0 ${(robot_horizontal_stand_width/2)}" rpy="${pi/4.0} 0 0"/>
   </joint>
 
-  <!-- place ur5 arm -->
-  <xacro:ur5_robot prefix="$(arg prefix_left)" joint_limited="$(arg limited)"/>
-  <joint name="$(arg prefix_left)platform_mount" type="fixed">
-    <parent link="$(arg prefix_left)table_platform"/>
-    <child link ="$(arg prefix_left)base_link"/>
-    <origin xyz="0.2745 -0.2405 0.2535" rpy="0 0 -${pi/2}" />
-  </joint>
-  
   <!-- place ur5 endeffector -->
   <xacro:endeffector prefix="$(arg prefix_left)"/>
   <joint name="$(arg prefix_left)ee_mount" type="fixed">
@@ -49,6 +122,7 @@
     <child link = "$(arg prefix_left)ee_frame" />
     <origin xyz="0.0 0.0 0.0" rpy="${pi/2.0} 0.0 ${pi/2.0}" />
   </joint>
+  
 <!--
   <joint name="$(arg prefix_left)ee_mount" type="fixed">
     <parent link="$(arg prefix_left)tool0"/>
@@ -56,21 +130,22 @@
     <origin xyz="0 0 0" rpy="0 0 ${pi}" />
   </joint>
 -->
-  <!-- place ur10 arm -->
-  <xacro:right_robot prefix="$(arg prefix_right)" joint_limited="$(arg limited)"/>
-  <joint name="$(arg prefix_right)platform_mount" type="fixed">
-    <parent link="$(arg prefix_right)table_platform"/>
+  <!-- place ur5 right arm  -->
+  <xacro:ur5_robot prefix="$(arg prefix_right)" joint_limited="$(arg limited)"/>
+  <joint name="stand2_to_right_arm" type="fixed">
+    <parent link="stand2"/>
     <child link ="$(arg prefix_right)base_link"/>
-    <origin xyz="0.1341 -0.3049 0.0155" rpy="0 0 ${pi/2}" />
+    <origin xyz="0 0 -${(robot_horizontal_stand_width/2)}" rpy="${pi/4.0} ${pi} 0"/>
   </joint>
 
-  <!-- place ur10 endeffector -->
+  <!-- place ur5 right endeffector -->
   <xacro:endeffector prefix="$(arg prefix_right)"/>
   <joint name="$(arg prefix_right)ee_mount" type="fixed">
     <parent link="$(arg prefix_right)ee_link" />
     <child link = "$(arg prefix_right)ee_frame" />
     <origin xyz="0.0 0.0 0.0" rpy="${pi/2.0} 0.0 ${pi/2.0}" />
   </joint>
+  
 <!--
   <joint name="$(arg prefix_right)ee_mount" type="fixed">
     <parent link="$(arg prefix_right)tool0"/>
