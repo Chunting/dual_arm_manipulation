@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
 
     // setup constraints
     moveit_msgs::JointConstraint jcm;
-    moveit_msgs::Constraints ur5_constraints;
+    moveit_msgs::Constraints left_constraints;
     moveit_msgs::Constraints right_constraints;
 
     jcm.joint_name="right_shoulder_pan_joint";
@@ -60,18 +60,18 @@ int main(int argc, char **argv) {
     right_constraints.joint_constraints.push_back(jcm);
     dualArmRobot.right_.setPathConstraints(right_constraints);
 
-    jcm.joint_name="ur5_shoulder_pan_joint";
+    jcm.joint_name="left_shoulder_pan_joint";
     jcm.position = 0.0;
     jcm.tolerance_above = 1.0;
     jcm.tolerance_below = 1.0;
     jcm.weight = 1.0;
-    ur5_constraints.joint_constraints.push_back(jcm);
-    dualArmRobot.left_.setPathConstraints(ur5_constraints);
+    left_constraints.joint_constraints.push_back(jcm);
+    dualArmRobot.left_.setPathConstraints(left_constraints);
 
 
     /*
-    geometry_msgs::PoseStamped place_pose_ur5 = dualArmRobot.left_.getCurrentPose(dualArmRobot.left_.getEndEffectorLink());
-    place_pose_ur5.pose.position.z = place_pose_ur5.pose.position.z - direction.vector.z;*/
+    geometry_msgs::PoseStamped place_pose_left = dualArmRobot.left_.getCurrentPose(dualArmRobot.left_.getEndEffectorLink());
+    place_pose_left.pose.position.z = place_pose_left.pose.position.z - direction.vector.z;*/
 
     // clear path constraints
 //    dualArmRobot.left_.clearPathConstraints();
@@ -96,7 +96,7 @@ int main(int argc, char **argv) {
     ROS_INFO("Starting Log now");
     // start log
     std::vector<std::string> ur_namespaces;
-    ur_namespaces.push_back("ur5");
+    ur_namespaces.push_back("left");
     UR_Logger ur_logger(nh, ur_namespaces);
     ur_logger.start(100);
 
@@ -156,7 +156,7 @@ int main(int argc, char **argv) {
     /*
     geometry_msgs::Vector3Stamped close_direction;
     close_direction.vector.z = -direction.vector.z;
-    dualArmRobot.placeBox("box1", place_pose_ur5, close_direction.vector);*/
+    dualArmRobot.placeBox("box1", place_pose_left, close_direction.vector);*/
 
     // END
     ROS_INFO("Finished demonstration");

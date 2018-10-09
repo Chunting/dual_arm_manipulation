@@ -4,59 +4,55 @@
   <arg name="ip_left" default="192.168.1.101"/>
   <arg name="ip_right" default="192.168.1.102"/>
   <arg name="limited" default="false"/>
-  <arg name="limited" default="false"/>
   <arg name="min_payload"  default="0.0"/>
   <arg name="max_payload"  default="5.0"/>
-  <arg name="min_payload"  default="0.0"/>
-  <arg name="max_payload"  default="10.0"/>
   <arg name="prefix_left" default="left_" />
   <arg name="prefix_right" default="right_" />
-  <arg name="controller_name_left" default="ur5"/>
-  <arg name="controller_name_right" default="ur10"/>
-  <arg name="max_velocity_ur5" default="10.0"/> <!-- [rad/s] -->
+  <arg name="controller_name_left" default="left"/>
+  <arg name="controller_name_right" default="right"/>
+  <arg name="max_velocity_left" default="10.0"/> <!-- [rad/s] -->
   <arg name="max_velocity_right" default="10.0"/> <!-- [rad/s] -->
 
   <!-- dual_arm_robot model -->
   <include file="$(find dual_arm_robot_description)/launch/dual_arm_robot_upload.launch">
     <arg name="limited" value="$(arg limited)"/>
     <arg name="prefix_left" value="$(arg prefix_left)"/>
-    <arg name="limited" value="$(arg limited)"/>
     <arg name="prefix_right" value="$(arg prefix_right)"/>
   </include>
 
-  <!-- ::: ur5 driver ::: -->
+  <!-- ::: left driver ::: -->
   <group ns="$(arg controller_name_left)">
     <remap from="joint_states" to="/joint_states"/>
-    <!-- ur5 hardware interface -->
+    <!-- left hardware interface -->
     <node name="ur_hardware_interface" pkg="ur_modern_driver" type="ur_driver" output="screen" launch-prefix="">
       <param name="robot_ip_address" type="str" value="$(arg ip_left)"/>
       <param name="min_payload" type="double" value="$(arg min_payload)"/>
       <param name="max_payload" type="double" value="$(arg max_payload)"/>
-      <param name="max_velocity" type="double" value="$(arg max_velocity_ur5)"/>
+      <param name="max_velocity" type="double" value="$(arg max_velocity_left)"/>
       <param name="use_ros_control" type="bool" value="True"/>
       <param name="prefix" value="$(arg prefix_left)" />
     </node>
     
-    <!-- ur5 controller settings -->
-    <rosparam file="$(find dual_arm_robot_driver)/config/ur5_controllers.yaml" command="load"/>
+    <!-- left controller settings -->
+    <rosparam file="$(find dual_arm_robot_driver)/config/left_controllers.yaml" command="load"/>
 
-    <!-- ur5 spawn controller manager -->
+    <!-- left spawn controller manager -->
     <node name="ros_control_controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
-    output="screen" args="ur5_joint_state_controller ur5_force_torque_sensor_controller ur5_vel_based_pos_traj_controller --shutdown-timeout 1" />
+    output="screen" args="left_joint_state_controller left_force_torque_sensor_controller left_vel_based_pos_traj_controller --shutdown-timeout 1" />
 
-    <!-- ur5 load other controllers (admittance controller) -->
+    <!-- left load other controllers (admittance controller) -->
     <node name="ros_control_controller_manager" pkg="controller_manager" type="controller_manager" respawn="false"
-    output="screen" args="load ur5_vel_based_admittance_traj_controller" />
+    output="screen" args="load left_vel_based_admittance_traj_controller" />
 
-    <!-- ur5 Convert joint states to /tf tranforms -->
+    <!-- left Convert joint states to /tf tranforms -->
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
   </group>
 
 
-  <!-- ::: ur10 driver ::: -->
+  <!-- ::: right driver ::: -->
   <group ns="$(arg controller_name_right)">
     <remap from="joint_states" to="/joint_states"/>
-    <!-- ur10 hardware interface -->
+    <!-- right hardware interface -->
     <node name="ur_hardware_interface" pkg="ur_modern_driver" type="ur_driver" output="screen" launch-prefix="">
       <param name="reverse_port" type="int" value="5002"/>
       <param name="robot_ip_address" type="str" value="$(arg ip_right)"/>
@@ -67,18 +63,18 @@
       <param name="prefix" value="$(arg prefix_right)" />
     </node>
     
-    <!-- ur10 controller settings -->
+    <!-- right controller settings -->
     <rosparam file="$(find dual_arm_robot_driver)/config/right_controllers.yaml" command="load"/>
 
-    <!-- ur10 spawn controller manager -->
+    <!-- right spawn controller manager -->
     <node name="ros_control_controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
     output="screen" args="right_joint_state_controller right_force_torque_sensor_controller right_vel_based_pos_traj_controller --shutdown-timeout 1" />
 
-    <!-- ur10 load other controllers (admittance controller) -->
+    <!-- right load other controllers (admittance controller) -->
     <node name="ros_control_controller_manager" pkg="controller_manager" type="controller_manager" respawn="false"
     output="screen" args="load right_vel_based_admittance_traj_controller" />
 
-    <!-- ur10 Convert joint states to /tf tranforms -->
+    <!-- right Convert joint states to /tf tranforms -->
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
   </group>
 

@@ -212,13 +212,27 @@ target_link_libraries(right_force_hold_exp ${catkin_LIBRARIES})
 #add_executable(tcp_wrench_publisher src/tcp_wrench_publisher.cpp)
 #target_link_libraries(tcp_wrench_publisher ${catkin_LIBRARIES})
 
-add_executable(dual_arm_robot_logger src/executables/dual_arm_robot_logger.cpp src/ur_logging/UrLogger.cpp src/ur_logging/Stopwatch.cpp src/ur_logging/UrMessageListener.cpp)
+add_executable(dual_arm_robot_logger 
+              src/executables/dual_arm_robot_logger.cpp 
+              src/ur_logging/UrLogger.cpp 
+              src/ur_logging/Stopwatch.cpp 
+              src/ur_logging/UrMessageListener.cpp)
 target_link_libraries(dual_arm_robot_logger ${catkin_LIBRARIES})
 
-add_executable(dual_arm_robot_demonstration src/executables/dual_arm_robot_demonstration.cpp src/dual_arm_toolbox/TrajectoryProcessor.cpp src/dual_arm_toolbox/Transform.cpp src/dual_arm_demonstrator_iml/DualArmRobot.cpp src/dual_arm_demonstrator_iml/SceneManager.cpp)
+add_executable(dual_arm_robot_demonstration 
+              src/executables/dual_arm_robot_demonstration.cpp 
+              src/dual_arm_toolbox/TrajectoryProcessor.cpp 
+              src/dual_arm_toolbox/Transform.cpp 
+              src/dual_arm_demonstrator_iml/DualArmRobot.cpp 
+              src/dual_arm_demonstrator_iml/SceneManager.cpp)
 target_link_libraries(dual_arm_robot_demonstration ${catkin_LIBRARIES})
 
-add_executable(dual_arm_robot_lift_experiment_planning src/executables/dual_arm_robot_lift_experiment_planning.cpp src/dual_arm_toolbox/TrajectoryProcessor.cpp src/dual_arm_toolbox/Transform.cpp src/dual_arm_demonstrator_iml/DualArmRobot.cpp src/dual_arm_demonstrator_iml/SceneManager.cpp)
+add_executable(dual_arm_robot_lift_experiment_planning 
+              src/executables/dual_arm_robot_lift_experiment_planning.cpp 
+              src/dual_arm_toolbox/TrajectoryProcessor.cpp 
+              src/dual_arm_toolbox/Transform.cpp 
+              src/dual_arm_demonstrator_iml/DualArmRobot.cpp 
+              src/dual_arm_demonstrator_iml/SceneManager.cpp)
 target_link_libraries(dual_arm_robot_lift_experiment_planning ${catkin_LIBRARIES})
 
 add_executable(dual_arm_robot_lift_experiment_force src/executables/dual_arm_robot_lift_experiment_force.cpp src/dual_arm_toolbox/TrajectoryProcessor.cpp src/dual_arm_toolbox/Transform.cpp src/dual_arm_demonstrator_iml/DualArmRobot.cpp src/dual_arm_demonstrator_iml/SceneManager.cpp src/ur_logging/UrLogger.cpp src/ur_logging/Stopwatch.cpp src/ur_logging/UrMessageListener.cpp)

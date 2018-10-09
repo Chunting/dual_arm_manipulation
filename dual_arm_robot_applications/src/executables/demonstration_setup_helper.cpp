@@ -38,28 +38,28 @@ int main(int argc, char **argv) {
     sceneManager.setupScene();
 
     // variables
-    moveit::planning_interface::MoveGroup::Plan ur5_plan;
+    moveit::planning_interface::MoveGroup::Plan left_plan;
     moveit::planning_interface::MoveGroup::Plan right_plan;
     moveit::planning_interface::MoveItErrorCode error;
     error.val = -1;
 
-    // move ur5 to shelf
+    // move left to shelf
     while (error.val != 1){
-        geometry_msgs::PoseStamped ur5_pose;
-        ur5_pose.header.frame_id = "shelf";
-        ur5_pose.pose.position.x = -0.07;
-        ur5_pose.pose.position.y = 0.125;
-        ur5_pose.pose.position.z = 0.53;
-        KDL::Rotation ur5_rot;  // generated to easily assign quaternion of pose
-        ur5_rot.DoRotY(3.14 / 2);
-        ur5_rot.GetQuaternion(ur5_pose.pose.orientation.x, ur5_pose.pose.orientation.y, ur5_pose.pose.orientation.z,
-                              ur5_pose.pose.orientation.w);
-        dualArmRobot.left_.setPoseTarget(ur5_pose, dualArmRobot.left_.getEndEffectorLink());
+        geometry_msgs::PoseStamped left_pose;
+        left_pose.header.frame_id = "shelf";
+        left_pose.pose.position.x = -0.07;
+        left_pose.pose.position.y = 0.125;
+        left_pose.pose.position.z = 0.53;
+        KDL::Rotation left_rot;  // generated to easily assign quaternion of pose
+        left_rot.DoRotY(3.14 / 2);
+        left_rot.GetQuaternion(left_pose.pose.orientation.x, left_pose.pose.orientation.y, left_pose.pose.orientation.z,
+                              left_pose.pose.orientation.w);
+        dualArmRobot.left_.setPoseTarget(left_pose, dualArmRobot.left_.getEndEffectorLink());
 
-        error = dualArmRobot.left_.plan(ur5_plan);
+        error = dualArmRobot.left_.plan(left_plan);
 
     }
-    dualArmRobot.execute(ur5_plan);
+    dualArmRobot.execute(left_plan);
 
     error.val = -1;
     while (error.val != 1){

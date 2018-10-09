@@ -2,8 +2,8 @@
 
 <launch>
   <!-- robot_ip: IP-address of the robot's socket-messaging server -->
-  <arg name="ip_left" default="192.168.1.101"/> <!-- IP des UR5 am IML eingetragen -->
-  <arg name="ip_right" default="192.168.1.102"/> <!-- IP des UR10 am IML eingetragen -->
+  <arg name="ip_left" default="192.168.1.101"/> <!-- UR5 left arm IP address -->
+  <arg name="ip_right" default="192.168.1.102"/> <!-- UR5 right arm IP address -->
   <!-- for limited setup: make sure that both robots are in vailid position, otherwise ompl throws an error -->
   <arg name="limited" default="true"/>
   <arg name="min_payload"  default="0.0"/>

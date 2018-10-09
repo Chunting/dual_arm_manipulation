@@ -81,7 +81,7 @@ namespace dual_arm_demonstrator_iml {
         moveit_msgs::RobotState getCurrentRobotStateMsg();
 
         // calculates a trajectory for both arms based on the trajectory of one arm
-        bool adaptTrajectory(moveit_msgs::RobotTrajectory ur5_trajectory, KDL::Frame offset,
+        bool adaptTrajectory(moveit_msgs::RobotTrajectory left_trajectory, KDL::Frame offset,
                              moveit_msgs::RobotTrajectory &both_arms_trajectory, double jump_threshold = 0.4);
 
         // returns the Offset-Vector between both end effectors
@@ -91,24 +91,24 @@ namespace dual_arm_demonstrator_iml {
         bool pickBox(std::string object_id, geometry_msgs::Vector3Stamped lift_direction);
 
         // pace Methods
-        bool placeBox(std::string object_id, geometry_msgs::PoseStamped ur5_place_pose,
+        bool placeBox(std::string object_id, geometry_msgs::PoseStamped left_place_pose,
                       geometry_msgs::Vector3 close_direction);
 
         bool pushPlaceBox(std::string object_id, geometry_msgs::PoseStamped box_pose, geometry_msgs::Vector3 direction);
 
-        bool moveObject(std::string object_id, geometry_msgs::PoseStamped ur5_pose, double scale=0.2);
-        bool planMoveObject(std::string object_id, geometry_msgs::PoseStamped ur5_pose, double scale=0.2); // Only plan an visualize without executing. For use in validation.
+        bool moveObject(std::string object_id, geometry_msgs::PoseStamped left_pose, double scale=0.2);
+        bool planMoveObject(std::string object_id, geometry_msgs::PoseStamped left_pose, double scale=0.2); // Only plan an visualize without executing. For use in validation.
 
         // enable/disable collision check between robot arms
-        void allowedArmCollision(bool enable, std::string ur5_attachedObject);
+        void allowedArmCollision(bool enable, std::string left_attachedObject);
 
         bool place(geometry_msgs::Pose pose_object);
 
         bool switch_controller(std::string stop_name, std::string start_name, std::string ur_namespace);
 
-        bool graspMove(double distance, bool avoid_collisions = true, bool use_ur5=true, bool use_right=true); //both arms will be moved closer together
+        bool graspMove(double distance, bool avoid_collisions = true, bool use_left=true, bool use_right=true); //both arms will be moved closer together
 
-        bool linearMove(geometry_msgs::Vector3Stamped direction, bool avoid_collisions = true, bool use_ur5=true, bool use_right=true);
+        bool linearMove(geometry_msgs::Vector3Stamped direction, bool avoid_collisions = true, bool use_left=true, bool use_right=true);
 
         bool linearMoveParallel(geometry_msgs::Vector3Stamped direction, std::string object_id, double traj_scale=1, bool avoid_collisions = true);
 

@@ -48,7 +48,7 @@ int main(int argc, char **argv) {
 
     // setup constraints
     moveit_msgs::JointConstraint jcm;
-    moveit_msgs::Constraints ur5_constraints;
+    moveit_msgs::Constraints left_constraints;
     moveit_msgs::Constraints right_constraints;
     jcm.joint_name="right_shoulder_pan_joint";
     jcm.position = 2.4;
@@ -60,7 +60,7 @@ int main(int argc, char **argv) {
 
     /*
     moveit_msgs::JointConstraint jcm;
-    moveit_msgs::Constraints ur5_constraints;
+    moveit_msgs::Constraints left_constraints;
     moveit_msgs::Constraints right_constraints;
     jcm.joint_name="right_shoulder_pan_joint";
     jcm.position = -2.4;
@@ -78,21 +78,21 @@ int main(int argc, char **argv) {
     right_constraints.joint_constraints.push_back(jcm);
     dualArmRobot.right_.setPathConstraints(right_constraints);*/
 /*
-    jcm.joint_name="ur5_shoulder_pan_joint";
+    jcm.joint_name="left_shoulder_pan_joint";
     jcm.position = 0.0;
     jcm.tolerance_above = 1.0;
     jcm.tolerance_below = 1.0;
     jcm.weight = 1.0;
-    ur5_constraints.joint_constraints.push_back(jcm);
-    dualArmRobot.left_.setPathConstraints(ur5_constraints);*/
+    left_constraints.joint_constraints.push_back(jcm);
+    dualArmRobot.left_.setPathConstraints(left_constraints);*/
 
-    jcm.joint_name="ur5_shoulder_pan_joint";
+    jcm.joint_name="left_shoulder_pan_joint";
     jcm.position = 0.0;
     jcm.tolerance_above = 0.4;
     jcm.tolerance_below = 0.4;
     jcm.weight = 1.0;
-    ur5_constraints.joint_constraints.push_back(jcm);
-    dualArmRobot.left_.setPathConstraints(ur5_constraints);
+    left_constraints.joint_constraints.push_back(jcm);
+    dualArmRobot.left_.setPathConstraints(left_constraints);
 
     // Pick box1
     geometry_msgs::Vector3Stamped direction;
