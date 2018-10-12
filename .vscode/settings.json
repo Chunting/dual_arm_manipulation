@@ -2,5 +2,10 @@
     "python.autoComplete.extraPaths": [
         "/home/gnc428/catkin_ws/devel/lib/python2.7/dist-packages",
         "/opt/ros/indigo/lib/python2.7/dist-packages"
-    ]
+    ],
+    "files.associations": {
+        "array": "cpp",
+        "slist": "cpp",
+        "initializer_list": "cpp"
+    }
 }

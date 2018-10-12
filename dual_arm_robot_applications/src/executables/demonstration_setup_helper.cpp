@@ -46,11 +46,12 @@ int main(int argc, char **argv) {
     // move left to shelf
     while (error.val != 1){
         geometry_msgs::PoseStamped left_pose;
-        left_pose.header.frame_id = "shelf";
+        // left_pose.header.frame_id = "shelf";
+        left_pose.header.frame_id = "left_base_link";
         left_pose.pose.position.x = -0.07;
         left_pose.pose.position.y = 0.125;
         left_pose.pose.position.z = 0.53;
-        KDL::Rotation left_rot;  // generated to easily assign quaternion of pose
+        KDL::Rotation left_rot;.  // generated to easily assign quaternion of pose
         left_rot.DoRotY(3.14 / 2);
         left_rot.GetQuaternion(left_pose.pose.orientation.x, left_pose.pose.orientation.y, left_pose.pose.orientation.z,
                               left_pose.pose.orientation.w);
@@ -65,7 +66,8 @@ int main(int argc, char **argv) {
     while (error.val != 1){
         // move ur10 to shelf
         geometry_msgs::PoseStamped right_pose;
-        right_pose.header.frame_id = "shelf";
+        // right_pose.header.frame_id = "shelf";
+        right_pose.header.frame_id = "right_base_link";
         right_pose.pose.position.x = 0.125;
         right_pose.pose.position.y = 0.25 + 0.07;
         right_pose.pose.position.z = 0.53;

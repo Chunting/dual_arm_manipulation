@@ -19,9 +19,9 @@
   <!-- table 
   <xacro:include filename="$(find dual_arm_robot_description)/urdf/table.urdf.xacro"/>
 -->
-  <!-- place table -->
+  <!-- place table 
   <xacro:table/>
-
+-->
   <xacro:property name="robot_horizontal_stand_width" value="0.5"/>
 	<xacro:property name="robot_vertical_stand_height" value="1.2"/>
 	

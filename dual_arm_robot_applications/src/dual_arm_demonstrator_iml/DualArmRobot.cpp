@@ -14,20 +14,26 @@ DualArmRobot::DualArmRobot(ros::NodeHandle& nh) :
         nh_(nh) {
     // MoveIt! Setup
     //left_.setPlanningTime(40);
+    // Spceciy the maximum amount of time to use when planning
     left_.setPlanningTime(5);
+    // Set the number of times the motion plan is to be computed, the default value is 1
     left_.setNumPlanningAttempts(25);
     //right_.setPlanningTime(40);
     right_.setPlanningTime(5);
     right_.setNumPlanningAttempts(25);
 
     // setup planner
+    // Specify a planner to be used for further planning
     left_.setPlannerId("RRTConnectkConfigDefault");
     right_.setPlannerId("RRTConnectkConfigDefault");
 
     // planning scene monitor
+    // Subscribes to the topic planning_scene
     planning_scene_monitor_ = boost::make_shared<planning_scene_monitor::PlanningSceneMonitor>("robot_description");
 
     // initialize ur5 specific variables
+    // left_.getEndEffectorLink() get current end-effector link
+    // 
     left_last_goal_pose_ = left_.getCurrentPose(left_.getEndEffectorLink());
     left_last_goal_state_ = getCurrentRobotStateMsg();
 
@@ -53,10 +59,14 @@ robot_state::RobotState DualArmRobot::getCurrentRobotState(){
 
 moveit_msgs::RobotState DualArmRobot::getCurrentRobotStateMsg() {
     moveit_msgs::RobotState current_state_msg;
+    // Convert a MoveIt! robot state to a robot state message. 
     moveit::core::robotStateToRobotStateMsg(getCurrentRobotState(), current_state_msg);
     return current_state_msg;
 }
-
+// KDL::Frame
+// represents a frame transformation in 3D space (rotation + translation) 
+// if V2 = Frame*V1 (V2 expressed in frame A, V1 expressed in frame B) then V2 = Frame.M*V1+Frame.p
+// Frame.M contains columns that represent the axes of frame B wrt frame A Frame.p contains the origin of frame B expressed in frame A. 
 KDL::Frame DualArmRobot::getCurrentOffset(){
     geometry_msgs::PoseStamped left_pose = left_.getCurrentPose(left_.getEndEffectorLink());
     geometry_msgs::PoseStamped right_pose = right_.getCurrentPose(right_.getEndEffectorLink());
@@ -414,6 +424,7 @@ bool DualArmRobot::pickBox(std::string object_id , geometry_msgs::Vector3Stamped
         // The representation of a motion plan (as ROS messages), it's a structure.
         moveit::planning_interface::MoveGroup::Plan arms_plan; 
         // arms_ is a class of MoveGroup
+        ROS_INFO("Before run plan...");
         error = arms_.plan(arms_plan);
         if (error.val != 1) {
             ROS_WARN("MoveIt!Error Code: %i", error.val);
@@ -1014,7 +1025,7 @@ bool DualArmRobot::linearMove(geometry_msgs::Vector3Stamped direction, bool avoi
     bool try_step;
     double fraction;
 
-    // ur5
+    // left arm
     if (use_left) try_step = true;
     while (try_step && ros::ok()) {
         left_.setPoseReferenceFrame(direction.header.frame_id);
@@ -1053,12 +1064,14 @@ bool DualArmRobot::linearMove(geometry_msgs::Vector3Stamped direction, bool avoi
             dual_arm_toolbox::TrajectoryProcessor::clean(left_trajectory);
             moveit::planning_interface::MoveGroup::Plan left_plan;
             left_plan.trajectory_ = left_trajectory;
-            execute(left_plan);
+            bool success = execute(left_plan);
+            if(!success)
+                ROS_WARN("Left arm trajectory failed! ");
             try_step = false;
         }
     }
 
-    // right
+    // right arm
     if (use_right) try_step = true;
     while (try_step && ros::ok()) {
         right_.setStartStateToCurrentState();
@@ -1076,14 +1089,16 @@ bool DualArmRobot::linearMove(geometry_msgs::Vector3Stamped direction, bool avoi
         moveit_msgs::RobotTrajectory right_trajectory;
         fraction = right_.computeCartesianPath(right_waypoints, 0.001, 0.0, right_trajectory, avoid_collisions);
         if (fraction < 0.9) {
-            ROS_WARN("UR10 cartesian path. (%.2f%% achieved)", fraction * 100.0);
+            ROS_WARN("Right arm cartesian path. (%.2f%% achieved)", fraction * 100.0);
             try_step = try_again_question();
             if (!try_step) return false;
         } else {
             moveit::planning_interface::MoveGroup::Plan right_plan;
             dual_arm_toolbox::TrajectoryProcessor::clean(right_trajectory);
             right_plan.trajectory_ = right_trajectory;
-            execute(right_plan);
+            bool success = execute(right_plan);
+            if(!success)
+                ROS_WARN("Right arm trajectory failed! ");
             try_step = false;
         }
     }
@@ -1121,7 +1136,7 @@ bool DualArmRobot::execute(moveit::planning_interface::MoveGroup::Plan plan) {
         }
         else ROS_INFO("Checked path. Path is valid. Executing...");
     }*/
-
+    /// Print out the joint trajectory infomation
     if (plan_left.trajectory_.joint_trajectory.joint_names.size() > 0){
         ROS_INFO("Trajectory sent to left arm");
         success_left = handle_right.sendTrajectory(plan_left.trajectory_);
@@ -1191,7 +1206,10 @@ bool DualArmRobot::moveHome() {
     // move left arm
     try_step = true;
     while (try_step && ros::ok()) {
+        // Set the current joint values to be ones previously remembered by rememberJointValues() or, 
+        // if not found, that are specified in the SRDF under the name "left_up" as a group state. 
         left_.setNamedTarget("left_up");
+        geometry_msgs::PoseStamped targetPose = left_.getPoseTarget(); 	
         moveit::planning_interface::MoveGroup::Plan left_plan;
         left_.setStartState(left_last_goal_state_);
         error = left_.plan(left_plan);
@@ -1200,7 +1218,7 @@ bool DualArmRobot::moveHome() {
             try_step = try_again_question();
             if (!try_step) return false;
         } else {
-            ROS_INFO("Moving left arm into grasp position");
+            ROS_INFO("Moving left arm into home position");
             dual_arm_toolbox::TrajectoryProcessor::clean(left_plan.trajectory_);
             dual_arm_toolbox::TrajectoryProcessor::scaleTrajectorySpeed(left_plan.trajectory_, 0.4);
             execute(left_plan);
@@ -1219,7 +1237,7 @@ bool DualArmRobot::moveHome() {
             try_step = try_again_question();
             if (!try_step) return false;
         } else {
-            ROS_INFO("Moving right arm into grasp position");
+            ROS_INFO("Moving right arm into home position");
             dual_arm_toolbox::TrajectoryProcessor::clean(right_plan.trajectory_);
             dual_arm_toolbox::TrajectoryProcessor::scaleTrajectorySpeed(right_plan.trajectory_, 0.4);
             execute(right_plan);

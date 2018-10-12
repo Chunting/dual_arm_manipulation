@@ -81,14 +81,14 @@ void SceneManager::addShelf(std::string id, geometry_msgs::Pose pose, std::strin
 void SceneManager::setupScene() {
     // add shelf
     geometry_msgs::Pose shelf_pose;
-    shelf_pose.position.x = 0.400;
-    shelf_pose.position.y = -0.850;
-    shelf_pose.position.z = 0.009;
+    shelf_pose.position.x = -0.85;
+    shelf_pose.position.y = 0;
+    shelf_pose.position.z = 0.19;
     KDL::Rotation shelf_rot;
     shelf_rot.DoRotZ(-3.14/4);
     shelf_rot.GetQuaternion(shelf_pose.orientation.x, shelf_pose.orientation.y, shelf_pose.orientation.z, shelf_pose.orientation.w);
     addShelf("shelf", shelf_pose, "stand_ground", "stand_ground");
-
+    /*
     // add box1
     geometry_msgs::Pose box1_pose;
     box1_pose.position.x = 0.25 - box_.dimensions[1]/2 - box_.dimensions[1];
@@ -146,7 +146,7 @@ void SceneManager::setupScene() {
     KDL::Rotation box6_rot;
     box6_rot.GetQuaternion(box6_pose.orientation.x, box6_pose.orientation.y, box6_pose.orientation.z, box6_pose.orientation.w);
     dual_arm_demonstrator_iml::SceneManager::addBox("box6", box6_pose, "shelf", "shelf");
-
+    */
     // add box7
     geometry_msgs::Pose box7_pose;
     box7_pose.position.x = 0.02 + box_.dimensions[0]/2;

@@ -43,7 +43,7 @@ int main(int argc, char **argv) {
     ROS_INFO("In the dual_arm_robot_demonstration...");
     // move home
     dualArmRobot.moveHome();
-
+   
     // setup constraints
     moveit_msgs::JointConstraint jcm;
     moveit_msgs::Constraints left_constraints;
@@ -151,7 +151,7 @@ int main(int argc, char **argv) {
     sleep(5);
 
     dualArmRobot.moveHome();
-
+   
     // setup constraints
     // ur5 sometimes blocks itself when moving the box on bottom, this should solve the issue
     left_constraints.joint_constraints.clear();
@@ -167,7 +167,7 @@ int main(int argc, char **argv) {
     dualArmRobot.left_.setPathConstraints(left_constraints);
     both_constraints.joint_constraints.push_back(jcm);
 
-    // ur10 sometimes blocks itself for path adaption when picking the box on bottom, this should solve the issue
+    // ur5 sometimes blocks itself for path adaption when picking the box on bottom, this should solve the issue
     jcm.joint_name="right_wrist_1_joint";
     jcm.position = 0.7;
     jcm.tolerance_above = 1.0;
@@ -232,7 +232,7 @@ int main(int argc, char **argv) {
     // Place box3 by pushing it to its goal position
     // first, determine box3 goal pose
     geometry_msgs::Pose box3_goal_pose;
-    box3_goal_pose.position.x = 0.04 + sceneManager.box_.dimensions[1]/2 /*+ sceneManager.box_.dimensions[1]*/+0.001;
+    box3_goal_pose.position.x = 0.04 + sceneManager.box_.dimensions[1]/2 +0.001; //+ sceneManager.box_.dimensions[1]
     box3_goal_pose.position.y = 0.04 + sceneManager.box_.dimensions[2]/2 + sceneManager.box_.dimensions[2]+0.001;
     box3_goal_pose.position.z = 0.0155+0.52/2+0.0155/2+sceneManager.box_.dimensions[0]/2+0.005;
     KDL::Rotation box3_goal_rot;

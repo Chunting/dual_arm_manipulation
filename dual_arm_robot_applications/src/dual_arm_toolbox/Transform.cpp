@@ -5,7 +5,11 @@
 #include "dual_arm_toolbox/Transform.h"
 
 using namespace dual_arm_toolbox;
-
+/*
+geometry_msgs/Pose.msg:
+    geometry_msgs/Point position [x y z]
+    geometry_msgs/Quaternion orientation [x y z w]
+*/
 void Transform::transformPoseToKDL(geometry_msgs::Pose pose, KDL::Frame& kdl_frame){
     kdl_frame.M = kdl_frame.M.Quaternion(
             pose.orientation.x,
