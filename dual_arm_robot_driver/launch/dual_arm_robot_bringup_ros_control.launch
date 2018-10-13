@@ -10,8 +10,8 @@
   <arg name="prefix_right" default="right_" />
   <arg name="controller_name_left" default="left"/>
   <arg name="controller_name_right" default="right"/>
-  <arg name="max_velocity_left" default="10.0"/> <!-- [rad/s] -->
-  <arg name="max_velocity_right" default="10.0"/> <!-- [rad/s] -->
+  <arg name="max_velocity_left" default="5.0"/> <!-- [rad/s] -->
+  <arg name="max_velocity_right" default="5.0"/> <!-- [rad/s] -->
 
   <!-- dual_arm_robot model -->
   <include file="$(find dual_arm_robot_description)/launch/dual_arm_robot_upload.launch">

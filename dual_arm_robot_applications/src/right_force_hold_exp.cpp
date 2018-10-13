@@ -53,9 +53,9 @@ int main(int argc, char **argv)
     Subscriber subscriber(nh);
 
     // MoveGroup
-    moveit::planning_interface::MoveGroup ur10("manipulator");
+    moveit::planning_interface::MoveGroup right_("right_manipulator");
     moveit::planning_interface::MoveGroup::Plan plan;
-    ur10.setPlanningTime(30);
+    right_.setPlanningTime(30);
 
     ROS_WARN("robot is moving without collision checking. BE CAREFUL!");
     ROS_INFO("waiting 10 Seconds. Press Ctrl-C if Robot is in the wrong start position");
@@ -63,26 +63,26 @@ int main(int argc, char **argv)
 
     //long distance position
     /*
-    ur10.setJointValueTarget("elbow_joint", -1.366541959239651);
-    ur10.setJointValueTarget("shoulder_lift_joint", -2.573810648739345);
-    ur10.setJointValueTarget("shoulder_pan_joint", 0.5943102022167164);
-    ur10.setJointValueTarget("wrist_1_joint", -0.7533539281232803);
-    ur10.setJointValueTarget("wrist_2_joint", -0.0);
-    ur10.setJointValueTarget("wrist_3_joint", 0.00015758105264953662);*/
+    right_.setJointValueTarget("elbow_joint", -1.366541959239651);
+    right_.setJointValueTarget("shoulder_lift_joint", -2.573810648739345);
+    right_.setJointValueTarget("shoulder_pan_joint", 0.5943102022167164);
+    right_.setJointValueTarget("wrist_1_joint", -0.7533539281232803);
+    right_.setJointValueTarget("wrist_2_joint", -0.0);
+    right_.setJointValueTarget("wrist_3_joint", 0.00015758105264953662);*/
 
     // short distance postion
-    ur10.setJointValueTarget("elbow_joint", -1.9646600642315206);
-    ur10.setJointValueTarget("shoulder_lift_joint", -2.2494529549924893);
-    ur10.setJointValueTarget("shoulder_pan_joint", -1.1800545151007107);
-    ur10.setJointValueTarget("wrist_1_joint", -0.41466027950402257);
-    ur10.setJointValueTarget("wrist_2_joint", -0.0);
-    ur10.setJointValueTarget("wrist_3_joint", 0.00300112795031922);
+    right_.setJointValueTarget("elbow_joint", -1.9646600642315206);
+    right_.setJointValueTarget("shoulder_lift_joint", -2.2494529549924893);
+    right_.setJointValueTarget("shoulder_pan_joint", -1.1800545151007107);
+    right_.setJointValueTarget("wrist_1_joint", -0.41466027950402257);
+    right_.setJointValueTarget("wrist_2_joint", -0.0);
+    right_.setJointValueTarget("wrist_3_joint", 0.00300112795031922);
 
-    //ur10.setJointValueTarget(ur10JointTarget);
-    ur10.plan(plan);
+    //right_.setJointValueTarget(ur10JointTarget);
+    right_.plan(plan);
     ROS_WARN("visualizing plan. STRG+C to interrupt.");
     sleep(4);
-    ur10.execute(plan);
+    right_.execute(plan);
     sleep(3);
 
 
@@ -104,7 +104,7 @@ int main(int argc, char **argv)
     ROS_INFO("Stopping controller %s",success?"SUCCEDED":"FAILED");
     srv_req.request.stop_controllers.clear();
 
-    geometry_msgs::PoseStamped current_pose = ur10.getCurrentPose();
+    geometry_msgs::PoseStamped current_pose = right_.getCurrentPose();
     std::cout << "x: " << current_pose.pose.position.x << "\ty: " << current_pose.pose.position.y << "\tz:  " << current_pose.pose.position.z << std::endl;
     double radius = sqrt(current_pose.pose.position.x*current_pose.pose.position.x + current_pose.pose.position.y*current_pose.pose.position.y);
     std::cout << "RADIUS: " << radius << std::endl;
@@ -121,7 +121,7 @@ int main(int argc, char **argv)
     // start logging
     ur_logger.start(50);
 
-    ROS_INFO("Publishing velocity commands to ur10 at 125Hz");
+    ROS_INFO("Publishing velocity commands to right_ at 125Hz");
 
     // publish messages
     ros::Rate loop_rate(125);   // velocity-message publish rate
@@ -218,8 +218,8 @@ int main(int argc, char **argv)
 
 
     ROS_INFO("moveing to start");
-    ur10.plan(plan);
-    ur10.execute(plan);
+    right_.plan(plan);
+    right_.execute(plan);
 
 
     ROS_INFO("finished. shutting down.");

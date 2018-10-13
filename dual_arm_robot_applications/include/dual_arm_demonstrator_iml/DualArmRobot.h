@@ -68,9 +68,12 @@ namespace dual_arm_demonstrator_iml {
 
     public:
         DualArmRobot(ros::NodeHandle &nh);
-
+        // Get the current pose of end effector
         geometry_msgs::PoseStamped left_last_goal_pose_;
         geometry_msgs::PoseStamped left_last_goal_pose_temp_;
+
+        geometry_msgs::PoseStamped right_last_goal_pose_;
+        geometry_msgs::PoseStamped right_last_goal_pose_temp_;
 
         moveit::planning_interface::MoveGroup left_;
         moveit::planning_interface::MoveGroup right_;

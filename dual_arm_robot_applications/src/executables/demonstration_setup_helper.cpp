@@ -42,16 +42,23 @@ int main(int argc, char **argv) {
     moveit::planning_interface::MoveGroup::Plan right_plan;
     moveit::planning_interface::MoveItErrorCode error;
     error.val = -1;
-
+   
+    geometry_msgs::Vector3Stamped direction;
+    direction.header.frame_id = "/stand_ground";
+    direction.vector.x = 0;
+    direction.vector.y = 0;
+    direction.vector.z = 0.1;//0.01;
+    dualArmRobot.linearMove(direction, true, true,true);
+    /*
     // move left to shelf
     while (error.val != 1){
         geometry_msgs::PoseStamped left_pose;
         // left_pose.header.frame_id = "shelf";
-        left_pose.header.frame_id = "left_base_link";
-        left_pose.pose.position.x = -0.07;
-        left_pose.pose.position.y = 0.125;
-        left_pose.pose.position.z = 0.53;
-        KDL::Rotation left_rot;.  // generated to easily assign quaternion of pose
+        left_pose.header.frame_id = "world";
+        left_pose.pose.position.x = dualArmRobot.left_last_goal_pose_.pose.position.x+0.1;
+        left_pose.pose.position.y = dualArmRobot.left_last_goal_pose_.pose.position.y;
+        left_pose.pose.position.z = dualArmRobot.left_last_goal_pose_.pose.position.z;
+        KDL::Rotation left_rot;  // generated to easily assign quaternion of pose
         left_rot.DoRotY(3.14 / 2);
         left_rot.GetQuaternion(left_pose.pose.orientation.x, left_pose.pose.orientation.y, left_pose.pose.orientation.z,
                               left_pose.pose.orientation.w);
@@ -67,10 +74,10 @@ int main(int argc, char **argv) {
         // move ur10 to shelf
         geometry_msgs::PoseStamped right_pose;
         // right_pose.header.frame_id = "shelf";
-        right_pose.header.frame_id = "right_base_link";
-        right_pose.pose.position.x = 0.125;
-        right_pose.pose.position.y = 0.25 + 0.07;
-        right_pose.pose.position.z = 0.53;
+        right_pose.header.frame_id = "world";
+        right_pose.pose.position.x = dualArmRobot.right_last_goal_pose_.pose.position.x+0.1;
+        right_pose.pose.position.y = dualArmRobot.right_last_goal_pose_.pose.position.y;
+        right_pose.pose.position.z = dualArmRobot.right_last_goal_pose_.pose.position.z;
         KDL::Rotation right_rot;  // generated to easily assign quaternion of pose
         right_rot.DoRotX(3.14 / 2);
         right_rot.GetQuaternion(right_pose.pose.orientation.x, right_pose.pose.orientation.y, right_pose.pose.orientation.z,
@@ -84,7 +91,7 @@ int main(int argc, char **argv) {
 
     // move closer
     dualArmRobot.graspMove(0.07);
-
+*/
     // END
     ROS_INFO("Place the shelf between the robot arms as displayed in rviz!");
     ros::shutdown();
