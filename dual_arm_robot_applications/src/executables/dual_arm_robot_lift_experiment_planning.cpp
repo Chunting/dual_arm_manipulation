@@ -50,11 +50,15 @@ int main(int argc, char **argv) {
     moveit_msgs::JointConstraint jcm;
     moveit_msgs::Constraints left_constraints;
     moveit_msgs::Constraints right_constraints;
+    // Constrain the position of a joint to be within a certain bound
+    // the bound to be achieved is [position-tolerance_below, position+tolerance_above]
     jcm.joint_name="right_shoulder_pan_joint";
     jcm.position = 2.4;
     jcm.tolerance_above = 0.7;
     jcm.tolerance_below = 2.5;
-    jcm.weight = 1.0;
+    // A weighting facor for this constraint
+    // (denotes relative importance to other constraints. Closer to zero means less important)
+    jcm.weight = 1.0;   
     right_constraints.joint_constraints.push_back(jcm);
     dualArmRobot.right_.setPathConstraints(right_constraints);
 
@@ -96,7 +100,7 @@ int main(int argc, char **argv) {
 
     // Pick box1
     geometry_msgs::Vector3Stamped direction;
-    direction.header.frame_id = "/stand_ground";
+    direction.header.frame_id = "/world";
     direction.vector.x = 0;
     direction.vector.y = 0;
     direction.vector.z = 0.1;

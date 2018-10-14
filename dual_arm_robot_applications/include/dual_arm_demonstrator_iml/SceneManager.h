@@ -62,6 +62,7 @@ namespace dual_arm_demonstrator_iml {
         SceneManager(ros::NodeHandle& nh);
 
         // constants
+        // Define shapes of box, sphere, cylinder, cone
         shape_msgs::SolidPrimitive box_;
 
         void addBox(std::string id, geometry_msgs::Pose pose, std::string link_name="world", std::string frame_id="world");

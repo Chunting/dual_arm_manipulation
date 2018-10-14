@@ -71,12 +71,12 @@ int main(int argc, char **argv)
     right_.setJointValueTarget("wrist_3_joint", 0.00015758105264953662);*/
 
     // short distance postion
-    right_.setJointValueTarget("elbow_joint", -1.9646600642315206);
-    right_.setJointValueTarget("shoulder_lift_joint", -2.2494529549924893);
-    right_.setJointValueTarget("shoulder_pan_joint", -1.1800545151007107);
-    right_.setJointValueTarget("wrist_1_joint", -0.41466027950402257);
-    right_.setJointValueTarget("wrist_2_joint", -0.0);
-    right_.setJointValueTarget("wrist_3_joint", 0.00300112795031922);
+    right_.setJointValueTarget("right_elbow_joint", -1.9646600642315206);
+    right_.setJointValueTarget("right_shoulder_lift_joint", -2.2494529549924893);
+    right_.setJointValueTarget("right_shoulder_pan_joint", -1.1800545151007107);
+    right_.setJointValueTarget("right_wrist_1_joint", -0.41466027950402257);
+    right_.setJointValueTarget("right_wrist_2_joint", -0.0);
+    right_.setJointValueTarget("right_wrist_3_joint", 0.00300112795031922);
 
     //right_.setJointValueTarget(ur10JointTarget);
     right_.plan(plan);
@@ -127,10 +127,6 @@ int main(int argc, char **argv)
     ros::Rate loop_rate(125);   // velocity-message publish rate
 
     Stopwatch stopwatch;
-
-
-
-
 
 /*
 

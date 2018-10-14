@@ -18,8 +18,8 @@ int main(int argc, char **argv){
     asyncSpinner.start();
 
     std::vector<std::string> ur_namespaces;
-    ur_namespaces.push_back("ur5");
-    ur_namespaces.push_back("ur10");
+    ur_namespaces.push_back("left");
+    ur_namespaces.push_back("right");
     UR_Logger ur_logger(nh, ur_namespaces);
 
     ur_logger.start(20);

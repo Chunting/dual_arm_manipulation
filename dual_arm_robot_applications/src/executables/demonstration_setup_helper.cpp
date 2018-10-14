@@ -44,20 +44,21 @@ int main(int argc, char **argv) {
     error.val = -1;
    
     geometry_msgs::Vector3Stamped direction;
-    direction.header.frame_id = "/stand_ground";
+    direction.header.frame_id = "world";
     direction.vector.x = 0;
     direction.vector.y = 0;
     direction.vector.z = 0.1;//0.01;
-    dualArmRobot.linearMove(direction, true, true,true);
+    dualArmRobot.moveHome();
+    //dualArmRobot.linearMove(direction, false, true,true);
     /*
     // move left to shelf
     while (error.val != 1){
         geometry_msgs::PoseStamped left_pose;
         // left_pose.header.frame_id = "shelf";
         left_pose.header.frame_id = "world";
-        left_pose.pose.position.x = dualArmRobot.left_last_goal_pose_.pose.position.x+0.1;
-        left_pose.pose.position.y = dualArmRobot.left_last_goal_pose_.pose.position.y;
-        left_pose.pose.position.z = dualArmRobot.left_last_goal_pose_.pose.position.z;
+        left_pose.pose.position.x = dualArmRobot.left_current_pose_.pose.position.x+0.1;
+        left_pose.pose.position.y = dualArmRobot.left_current_pose_.pose.position.y;
+        left_pose.pose.position.z = dualArmRobot.left_current_pose_.pose.position.z;
         KDL::Rotation left_rot;  // generated to easily assign quaternion of pose
         left_rot.DoRotY(3.14 / 2);
         left_rot.GetQuaternion(left_pose.pose.orientation.x, left_pose.pose.orientation.y, left_pose.pose.orientation.z,

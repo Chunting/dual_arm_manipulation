@@ -1,0 +1,82 @@
+rosrun tf tf_echo right_base right_ee_link
+
+At time 1539439929.784
+- Translation: [-0.000, -0.191, 1.001]
+- Rotation: in Quaternion [-0.000, 0.000, -0.707, 0.707]
+            in RPY (radian) [-0.000, -0.000, -1.571]
+            in RPY (degree) [-0.004, -0.000, -90.001]
+
+
+
+rosrun tf tf_echo left_base left_ee_link
+- Translation: [-0.000, -0.191, 1.001]
+- Rotation: in Quaternion [0.000, -0.000, -0.707, 0.707]
+            in RPY (radian) [0.000, -0.000, -1.<link name="table">
+		<visual>
+			<geometry>
+				<box size="0.8 1 0.65" />
+			</geometry>
+			<material name="orange_transparent"/>
+		</visual>
+		<collision>
+			<geometry>
+		<box size="0.8 1 0.65" />
+		</geometry>
+		<material name="blue_transparent"/>
+		</collision>
+	</link>571]
+            in RPY (degree) [0.001, -0.000, -89.994]
+
+
+-----------------------------------------------------------
+At the grasp position
+
+----------------------------------------------------------
+
+Left arm joint: -85.2 -80.87 71.25 -133 -89.84 -90
+Right arm joint: 89.33 -125.1 -52.5 -54.3 89.95 -0.2
+
+gnc428@gnc428-OptiPlex-3020:~/catkin_ws$ rosrun tf tf_echo left_base left_ee_link
+At time 1539485819.613
+- Translation: [-0.157, 0.566, 0.600]
+- Rotation: in Quaternion [-0.619, -0.340, 0.647, 0.287]
+            in RPY (radian) [-1.568, 0.651, 1.658]
+            in RPY (degree) [-89.830, 37.288, 95.007]
+
+^Cgnc428@gnc428-OptiPlex-3020:~/catkin_ws$ rosrun tf tf_echo right_base right_ee_link
+At time 1539485873.265
+- Translation: [0.115, 0.761, 0.447]
+- Rotation: in Quaternion [-0.310, 0.309, 0.634, 0.638]
+            in RPY (radian) [-0.006, 0.907, 1.561]
+            in RPY (degree) [-0.329, 51.975, 89.460]
+
+^Cgnc428@gnc428-OptiPlex-3020:~/catkin_ws$ rosrun tf tf_echo table right_ee_link
+At time 1539485897.697
+- Translation: [0.146, 0.027, 0.484]
+- Rotation: in Quaternion [0.532, -0.467, -0.469, 0.528]
+            in RPY (radian) [1.573, 0.006, -1.448]
+            in RPY (degree) [90.141, 0.331, -82.975]
+
+^Cgnc428@gnc428-OptiPlex-3020:~/catkin_ws$ rosrun tf tf_echo table right_ee_link
+At time 1539485992.391
+- Translation: [0.146, 0.027, 0.484]
+- Rotation: in Quaternion [0.532, -0.467, -0.469, 0.528]
+            in RPY (radian) [1.573, 0.006, -1.448]
+            in RPY (degree) [90.141, 0.332, -82.969]
+
+^Cgnc428@gnc428-OptiPlex-3020:~/catkin_ws$ rosrun tf tf_echo world table
+At time 1539486130.049
+- Translation: [-1.000, 0.000, 0.000]
+- Rotation: in Quaternion [0.000, 0.000, 0.000, 1.000]
+            in RPY (radian) [0.000, -0.000, 0.000]
+            in RPY (degree) [0.000, -0.000, 0.000]
+
+^Cgnc428@gnc428-OptiPlex-3020:~/catkin_ws$ rosrun tf tf_echo world right_base 
+At time 1539486165.205
+- Translation: [-0.000, 0.250, 0.600]
+- Rotation: in Quaternion [0.654, -0.270, -0.653, -0.270]
+            in RPY (radian) [-2.357, 1.570, -0.000]
+            in RPY (degree) [-135.046, 89.954, -0.000]
+
+
+

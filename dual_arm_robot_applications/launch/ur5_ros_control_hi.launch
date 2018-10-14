@@ -11,7 +11,7 @@
   <arg name="min_payload"  default="0.0"/>
   <arg name="max_payload"  default="3.0"/>
   <arg name="prefix" default="" />  
-  <arg name="max_velocity" default="10.0"/> <!-- [rad/s] -->
+  <arg name="max_velocity" default="5.0"/> <!-- [rad/s] -->
   <!-- robot model -->
   <include file="$(find ur_description)/launch/ur5_upload.launch">
     <arg name="limited" value="$(arg limited)"/>

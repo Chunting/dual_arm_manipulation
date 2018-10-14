@@ -16,12 +16,6 @@
   <!-- endeffector -->
   <xacro:include filename="$(find dual_arm_robot_description)/urdf/endeffector.urdf.xacro"/>
 
-  <!-- table 
-  <xacro:include filename="$(find dual_arm_robot_description)/urdf/table.urdf.xacro"/>
--->
-  <!-- place table 
-  <xacro:table/>
--->
   <xacro:property name="robot_horizontal_stand_width" value="0.5"/>
 	<xacro:property name="robot_vertical_stand_height" value="1.2"/>
 	
@@ -71,22 +65,34 @@
 		<material name="blue_transparent"/>
 		</collision>
 	</link>
+	<link name="table">
+		<visual>
+			<geometry>
+				<box size="0.8 1 0.87" />
+			</geometry>
+			<material name="orange_transparent"/>
+		</visual>
+		<collision>
+			<geometry>
+		<box size="0.8 1 0.8" />
+		</geometry>
+		<material name="blue_transparent"/>
+		</collision>
+	</link>
+  <joint name="table_joint" type="fixed" >
+    <parent link="world" />
+    <child link="table" />
+    <origin xyz="-1.1 0 0.45" rpy="0 0 0" />
+</joint>
 
   <!-- End of stand macros-->
   <!-- Place the stand in the world -->
   <link name="world"/>
-  <link name="stand_ground"/>
     <!-- place world reference -->
-	<joint name="world_to_stand_ground" type="fixed">
+	<joint name="world_to_stand1" type="fixed">
 		<parent link="world"/>
-		<child link="stand_ground"/>
-		<origin xyz="0 0 0" rpy="0 0 0"/>
-	</joint>	
-
-	<joint name="base_link_to_stand" type="fixed">
-		<parent link="stand_ground"/>
 		<child link="stand1"/>
-		<origin xyz="0 0 ${robot_vertical_stand_height/2}" rpy="0 0 0"/>
+		<origin xyz="0 0 0.6" rpy="0 0 0"/>
 	</joint>
 
 	<joint name="stand1_to_stand2" type="fixed">
@@ -94,19 +100,13 @@
 		<child link="stand2"/>
 		<origin xyz="0 0 ${robot_vertical_stand_height/2}" rpy="1.57 1.57 0"/>
 	</joint>
-<!--
-	<joint name="stand2_to_stand3" type="fixed">
-		<parent link="stand2"/>
-		<child link="stand3"/>
-		<origin xyz="-0.05 0 ${(robot_horizontal_stand_width/4)+0.15}" rpy="0 1.57 0"/>
+<!-- place a table 
+  	<joint name="world_to_table" type="fixed">
+		<parent link="world"/>
+		<child link="table"/>
+		<origin xyz="-1 0 0.5" rpy="0 0 0"/>
 	</joint>
-	
-	<joint name="stand2_to_stand4" type="fixed">
-		<parent link="stand2"/>
-		<child link="stand4"/>
-		<origin xyz="-0.05 0 -${(robot_horizontal_stand_width/4)+0.15}" rpy="0 1.57 0"/>
-	</joint>
--->
+	-->
   <!-- place ur5 left arm    -->
   <xacro:ur5_robot prefix="$(arg prefix_left)" joint_limited="$(arg limited)"/>
   <joint name="stand2_to_left_arm" type="fixed">

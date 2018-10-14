@@ -44,7 +44,7 @@
 
 
   <!-- ur planning execution - controllers.yaml of moveit config was altered to use ros control -->
-  <include file="$(find right_moveit_config)/launch/right_moveit_planning_execution.launch">
+  <include file="$(find ur5_moveit_config)/launch/ur5_moveit_planning_execution.launch">
     <arg name="limited" value="$(arg limited)"/>
   </include>
 

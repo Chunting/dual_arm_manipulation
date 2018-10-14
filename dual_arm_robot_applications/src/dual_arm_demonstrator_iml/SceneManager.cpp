@@ -15,11 +15,12 @@ SceneManager::SceneManager(ros::NodeHandle &nh) : nh_(nh) {
     }
 
     // constants
+    // Define box, For the box type, the X Y and Z dimensions are the length of the corresponding sides of the box.
     box_.type = box_.BOX;
     box_.dimensions.resize(3);
-    box_.dimensions[0] = 0.21;
-    box_.dimensions[1] = 0.105;
-    box_.dimensions[2] = 0.105;
+    box_.dimensions[0] = 0.26;
+    box_.dimensions[1] = 0.26;
+    box_.dimensions[2] = 0.2;
 }
 
 void SceneManager::addBox(std::string id, geometry_msgs::Pose pose, std::string link_name, std::string frame_id) {
@@ -80,14 +81,14 @@ void SceneManager::addShelf(std::string id, geometry_msgs::Pose pose, std::strin
 
 void SceneManager::setupScene() {
     // add shelf
-    geometry_msgs::Pose shelf_pose;
-    shelf_pose.position.x = -0.85;
-    shelf_pose.position.y = 0;
-    shelf_pose.position.z = 0.19;
-    KDL::Rotation shelf_rot;
-    shelf_rot.DoRotZ(-3.14/4);
-    shelf_rot.GetQuaternion(shelf_pose.orientation.x, shelf_pose.orientation.y, shelf_pose.orientation.z, shelf_pose.orientation.w);
-    addShelf("shelf", shelf_pose, "stand_ground", "stand_ground");
+    // geometry_msgs::Pose shelf_pose;
+    // shelf_pose.position.x = -0.85;
+    // shelf_pose.position.y = 0;
+    // shelf_pose.position.z = 0.19;
+    // KDL::Rotation shelf_rot;
+    // shelf_rot.DoRotZ(-3.14/4);
+    // shelf_rot.GetQuaternion(shelf_pose.orientation.x, shelf_pose.orientation.y, shelf_pose.orientation.z, shelf_pose.orientation.w);
+    // addShelf("shelf", shelf_pose, "world", "world");
     /*
     // add box1
     geometry_msgs::Pose box1_pose;
@@ -149,12 +150,12 @@ void SceneManager::setupScene() {
     */
     // add box7
     geometry_msgs::Pose box7_pose;
-    box7_pose.position.x = 0.02 + box_.dimensions[0]/2;
-    box7_pose.position.y = 0.02 + box_.dimensions[1]/2 + box_.dimensions[1];
-    box7_pose.position.z = 0.0155+0.52+0.0155 + box_.dimensions[2]/2 + box_.dimensions[2] + 0.001;
-    KDL::Rotation box7_rot;
-    box7_rot.GetQuaternion(box7_pose.orientation.x, box7_pose.orientation.y, box7_pose.orientation.z, box7_pose.orientation.w);
-    dual_arm_demonstrator_iml::SceneManager::addBox("box7", box7_pose, "shelf", "shelf");
+    box7_pose.position.x = 0.5 - box_.dimensions[0]/2;
+    box7_pose.position.y = 0;
+    box7_pose.position.z = 0.4 + box_.dimensions[2]/2 + 0.001;
+    // KDL::Rotation box7_rot;
+    // box7_rot.GetQuaternion(box7_pose.orientation.x, box7_pose.orientation.y, box7_pose.orientation.z, box7_pose.orientation.w);
+    dual_arm_demonstrator_iml::SceneManager::addBox("box7", box7_pose, "table", "table");
 }
 
 void SceneManager::setupSceneLift() {
@@ -166,7 +167,7 @@ void SceneManager::setupSceneLift() {
     KDL::Rotation box1_rot;
     box1_rot.DoRotZ(-3.14/4);
     box1_rot.GetQuaternion(box1_pose.orientation.x, box1_pose.orientation.y, box1_pose.orientation.z, box1_pose.orientation.w);
-    dual_arm_demonstrator_iml::SceneManager::addBox("box1", box1_pose, "stand_ground", "stand_ground");
+    dual_arm_demonstrator_iml::SceneManager::addBox("box1", box1_pose, "world", "world");
 
     // add box2
     /*
@@ -177,7 +178,7 @@ void SceneManager::setupSceneLift() {
     KDL::Rotation box2_rot;
     box2_rot.DoRotZ(-3.14/4);
     box2_rot.GetQuaternion(box2_pose.orientation.x, box2_pose.orientation.y, box2_pose.orientation.z, box2_pose.orientation.w);
-    dual_arm_demonstrator_iml::SceneManager::addBox("box2", box2_pose, "stand_ground", "stand_ground");*/
+    dual_arm_demonstrator_iml::SceneManager::addBox("box2", box2_pose, "world", "world");*/
 }
 
 void SceneManager::setupSceneLiftCO() { //with collision object
@@ -189,7 +190,7 @@ void SceneManager::setupSceneLiftCO() { //with collision object
     KDL::Rotation box1_rot;
     //box1_rot.DoRotZ(-3.14/4);
     box1_rot.GetQuaternion(box1_pose.orientation.x, box1_pose.orientation.y, box1_pose.orientation.z, box1_pose.orientation.w);
-    dual_arm_demonstrator_iml::SceneManager::addBox("box1", box1_pose, "stand_ground", "stand_ground");
+    dual_arm_demonstrator_iml::SceneManager::addBox("box1", box1_pose, "world", "world");
 
     // add box2
     geometry_msgs::Pose box2_pose;
@@ -199,7 +200,7 @@ void SceneManager::setupSceneLiftCO() { //with collision object
     KDL::Rotation box2_rot;
     box2_rot.DoRotZ(-3.14/2);
     box2_rot.GetQuaternion(box2_pose.orientation.x, box2_pose.orientation.y, box2_pose.orientation.z, box2_pose.orientation.w);
-    dual_arm_demonstrator_iml::SceneManager::addBox("box2", box2_pose, "stand_ground", "stand_ground");
+    dual_arm_demonstrator_iml::SceneManager::addBox("box2", box2_pose, "world", "world");
 
     // add
     /*
@@ -210,7 +211,7 @@ void SceneManager::setupSceneLiftCO() { //with collision object
     KDL::Rotation box3_rot;
     box3_rot.DoRotZ(-3.14/2);
     box3_rot.GetQuaternion(box3_pose.orientation.x, box3_pose.orientation.y, box3_pose.orientation.z, box3_pose.orientation.w);
-    dual_arm_demonstrator_iml::SceneManager::addBox("box3", box3_pose, "stand_ground", "stand_ground");*/
+    dual_arm_demonstrator_iml::SceneManager::addBox("box3", box3_pose, "world", "world");*/
 
     // add box4
     geometry_msgs::Pose box4_pose;
@@ -220,7 +221,7 @@ void SceneManager::setupSceneLiftCO() { //with collision object
     KDL::Rotation box4_rot;
     box4_rot.DoRotZ(-3.14/2);
     box4_rot.GetQuaternion(box4_pose.orientation.x, box4_pose.orientation.y, box4_pose.orientation.z, box4_pose.orientation.w);
-    dual_arm_demonstrator_iml::SceneManager::addBox("box4", box4_pose, "stand_ground", "stand_ground");
+    dual_arm_demonstrator_iml::SceneManager::addBox("box4", box4_pose, "world", "world");
 
     // add box5
     geometry_msgs::Pose box5_pose;
@@ -230,5 +231,5 @@ void SceneManager::setupSceneLiftCO() { //with collision object
     KDL::Rotation box5_rot;
     box5_rot.DoRotZ(-3.14/2);
     box5_rot.GetQuaternion(box5_pose.orientation.x, box5_pose.orientation.y, box5_pose.orientation.z, box5_pose.orientation.w);
-    dual_arm_demonstrator_iml::SceneManager::addBox("box5", box5_pose, "stand_ground", "stand_ground");
+    dual_arm_demonstrator_iml::SceneManager::addBox("box5", box5_pose, "world", "world");
 }

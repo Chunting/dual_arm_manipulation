@@ -72,6 +72,8 @@ std::string UR_Logger::headline(UR_Message_Listener ur_listener){
     std::vector<std::string> joint_names;
     //ros::param::get("/hardware_interface/joints", joint_names);
     nh_.getParam(ur_listener.ur_namespace_+"/hardware_interface/joints", joint_names);
+    std::cout << "namespace: " << ur_listener.ur_namespace_ << "/hardware_interface/joints" << std::endl;
+    // std::cout << joint_names << std::endl;
     if (joint_names.size() < 6){
         ROS_ERROR("UR Logger: could not properly load joint names");
     }

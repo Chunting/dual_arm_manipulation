@@ -60,7 +60,7 @@ int main(int argc, char **argv) {
     right_constraints.joint_constraints.push_back(jcm);
     dualArmRobot.right_.setPathConstraints(right_constraints);
 
-    jcm.joint_name="ur5_shoulder_pan_joint";
+    jcm.joint_name="left_shoulder_pan_joint";
     jcm.position = 0.0;
     jcm.tolerance_above = 1.0;
     jcm.tolerance_below = 1.0;
@@ -70,7 +70,7 @@ int main(int argc, char **argv) {
 
     // Pick box1
     geometry_msgs::Vector3Stamped direction;
-    direction.header.frame_id = "/stand_ground";
+    direction.header.frame_id = "world";
     direction.vector.x = 0;
     direction.vector.y = 0;
     direction.vector.z = 0;//0.01;
@@ -93,7 +93,7 @@ int main(int argc, char **argv) {
     //lift_pose.pose.position.z = lift_pose.pose.position.z +1;
     geometry_msgs::Vector3Stamped linear_move_direction;
     linear_move_direction.vector.z = 0.02;
-    linear_move_direction.header.frame_id = "stand_ground";
+    linear_move_direction.header.frame_id = "world";
 
 #ifndef OFFLINE
     // experiment just hold
