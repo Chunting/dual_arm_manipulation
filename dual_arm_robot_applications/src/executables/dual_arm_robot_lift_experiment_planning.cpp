@@ -45,7 +45,7 @@ int main(int argc, char **argv) {
 
     // move home
     dualArmRobot.moveHome();
-
+/*
     // setup constraints
     moveit_msgs::JointConstraint jcm;
     moveit_msgs::Constraints left_constraints;
@@ -61,7 +61,7 @@ int main(int argc, char **argv) {
     jcm.weight = 1.0;   
     right_constraints.joint_constraints.push_back(jcm);
     dualArmRobot.right_.setPathConstraints(right_constraints);
-
+*/
     /*
     moveit_msgs::JointConstraint jcm;
     moveit_msgs::Constraints left_constraints;
@@ -89,7 +89,7 @@ int main(int argc, char **argv) {
     jcm.weight = 1.0;
     left_constraints.joint_constraints.push_back(jcm);
     dualArmRobot.left_.setPathConstraints(left_constraints);*/
-
+/*
     jcm.joint_name="left_shoulder_pan_joint";
     jcm.position = 0.0;
     jcm.tolerance_above = 0.4;
@@ -97,14 +97,14 @@ int main(int argc, char **argv) {
     jcm.weight = 1.0;
     left_constraints.joint_constraints.push_back(jcm);
     dualArmRobot.left_.setPathConstraints(left_constraints);
-
+*/
     // Pick box1
     geometry_msgs::Vector3Stamped direction;
     direction.header.frame_id = "/world";
     direction.vector.x = 0;
     direction.vector.y = 0;
     direction.vector.z = 0.1;
-    if (!dualArmRobot.pickBox("box1", direction)) {
+    if (!dualArmRobot.pickBox("box7", direction)) {
         ROS_WARN("Pick failed");
         ROS_ERROR("Can't execute demonstration without successful pick. Demonstration aborted.");
         return 0;
@@ -121,7 +121,7 @@ int main(int argc, char **argv) {
 
     for (unsigned int i =0; i < 15 ; i++){
         ROS_INFO(":::::: START EVALUATION %i::::::", i);
-        dualArmRobot.planMoveObject("box1", lift_pose, 0.2);
+        dualArmRobot.planMoveObject("box7", lift_pose, 0.2);
         ROS_INFO(":::::: END EVALUATION %i::::::", i);
     }
 

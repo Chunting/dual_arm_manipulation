@@ -76,9 +76,9 @@ int main(int argc, char **argv) {
         geometry_msgs::PoseStamped right_pose;
         // right_pose.header.frame_id = "shelf";
         right_pose.header.frame_id = "world";
-        right_pose.pose.position.x = dualArmRobot.right_last_goal_pose_.pose.position.x+0.1;
-        right_pose.pose.position.y = dualArmRobot.right_last_goal_pose_.pose.position.y;
-        right_pose.pose.position.z = dualArmRobot.right_last_goal_pose_.pose.position.z;
+        right_pose.pose.position.x = dualArmRobot.right_current_pose_.pose.position.x+0.1;
+        right_pose.pose.position.y = dualArmRobot.right_current_pose_.pose.position.y;
+        right_pose.pose.position.z = dualArmRobot.right_current_pose_.pose.position.z;
         KDL::Rotation right_rot;  // generated to easily assign quaternion of pose
         right_rot.DoRotX(3.14 / 2);
         right_rot.GetQuaternion(right_pose.pose.orientation.x, right_pose.pose.orientation.y, right_pose.pose.orientation.z,
