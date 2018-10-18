@@ -5,7 +5,7 @@
 #include "dual_arm_toolbox/TrajectoryProcessor.h"
 
 using namespace dual_arm_toolbox;
-
+// fuses two trajectories into one; both should be of same length
 bool TrajectoryProcessor::fuse(moveit_msgs::RobotTrajectory &arms_trajectory,
                                moveit_msgs::RobotTrajectory arm1_trajectory,
                                moveit_msgs::RobotTrajectory arm2_trajectory) {
@@ -27,7 +27,7 @@ bool TrajectoryProcessor::fuse(moveit_msgs::RobotTrajectory &arms_trajectory,
     }
     return true;
 }
-
+// splits one trajectory for both arms into two trajectory for each arm
 bool TrajectoryProcessor::split(moveit_msgs::RobotTrajectory arms_trajectory,
                                 moveit_msgs::RobotTrajectory &arm1_trajectory,
                                 moveit_msgs::RobotTrajectory &arm2_trajectory,

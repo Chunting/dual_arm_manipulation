@@ -74,7 +74,7 @@ robot_state::RobotState DualArmRobot::getCurrentRobotState(){
     robot_state::RobotState current_state = ps->getCurrentState();
     return current_state;
 }
-
+// It's a class object
 moveit_msgs::RobotState DualArmRobot::getCurrentRobotStateMsg() {
     // # This message contains information about the robot state, i.e. the positions of its joints and links
     // http://docs.ros.org/melodic/api/moveit_msgs/html/msg/RobotState.html
@@ -83,10 +83,12 @@ moveit_msgs::RobotState DualArmRobot::getCurrentRobotStateMsg() {
     moveit::core::robotStateToRobotStateMsg(getCurrentRobotState(), current_state_msg);
     return current_state_msg;
 }
+// returns the Offset-Vector between both end effectors
 // KDL::Frame
 // represents a frame transformation in 3D space (rotation + translation) 
 // if V2 = Frame*V1 (V2 expressed in frame A, V1 expressed in frame B) then V2 = Frame.M*V1+Frame.p
-// Frame.M contains columns that represent the axes of frame B wrt frame A Frame.p contains the origin of frame B expressed in frame A. 
+// Frame.M contains columns that represent the axes of frame B wrt frame A 
+// Frame.p contains the origin of frame B expressed in frame A. 
 KDL::Frame DualArmRobot::getCurrentOffset(){
     geometry_msgs::PoseStamped left_pose = left_.getCurrentPose(left_.getEndEffectorLink());
     geometry_msgs::PoseStamped right_pose = right_.getCurrentPose(right_.getEndEffectorLink());
@@ -99,6 +101,7 @@ KDL::Frame DualArmRobot::getCurrentOffset(){
     return offset;
 }
  // calculates a trajectory for both arms based on the trajectory of one arm
+ // moveit_msgs::RobotTrajectory is a class object that contains two subclass, JointTrajectory and multi_dof_joint_trajectory
 bool DualArmRobot::adaptTrajectory(moveit_msgs::RobotTrajectory left_trajectory, 
                                     KDL::Frame offset, 
                                     moveit_msgs::RobotTrajectory& both_arms_trajectory, 
@@ -133,7 +136,7 @@ bool DualArmRobot::adaptTrajectory(moveit_msgs::RobotTrajectory left_trajectory,
     // ik service client setup
     // moveit_msgs::GetPositionIK # A service call to carry out an inverse kinematics computation
     ros::ServiceClient ik_client = nh_.serviceClient<moveit_msgs::GetPositionIK>("compute_ik");
-    // Aservice call to carry out an inverse kinematics computation
+    // A service call to carry out an inverse kinematics computation
     moveit_msgs::GetPositionIK ik_msg;
 
     // current state for initial seed
@@ -167,6 +170,7 @@ bool DualArmRobot::adaptTrajectory(moveit_msgs::RobotTrajectory left_trajectory,
         ik_msg.request.ik_request.pose_stamped.pose.position.x = frame_pose_right.p.x();
         ik_msg.request.ik_request.pose_stamped.pose.position.y = frame_pose_right.p.y();
         ik_msg.request.ik_request.pose_stamped.pose.position.z = frame_pose_right.p.z();
+        // Get the quaternion of this matrix(frame_pose_right) 
         frame_pose_right.M.GetQuaternion(
                 ik_msg.request.ik_request.pose_stamped.pose.orientation.x,
                 ik_msg.request.ik_request.pose_stamped.pose.orientation.y,
@@ -366,41 +370,41 @@ bool DualArmRobot::pickBox(std::string object_id , geometry_msgs::Vector3Stamped
     bool try_step;
     moveit::planning_interface::MoveItErrorCode error;
 
-    // move ur5
+    // move left arm
     
-    try_step = true;
-    while (try_step && ros::ok()) {
-        geometry_msgs::PoseStamped left_pose;
-        left_pose.header.frame_id = "table";
-        left_pose.pose.position.x = 0.176;
-        left_pose.pose.position.y = -0.275;
-        left_pose.pose.position.z = 0.642+0.1; //0.4+0.1
-        left_pose.pose.orientation.x = 0.657;
-        left_pose.pose.orientation.y = 0.753;
-        left_pose.pose.orientation.z = -0.004;
-        left_pose.pose.orientation.w = 0.043;
-        // KDL::Rotation left_rot;  // generated to easily assign quaternion of pose
-        // left_rot.DoRotY(3.14 / 2);
-        // left_rot.GetQuaternion(left_pose.pose.orientation.x, left_pose.pose.orientation.y, left_pose.pose.orientation.z,
-        //                       left_pose.pose.orientation.w);
-        left_.setStartState(left_current_robot_state_);
-        left_.setPoseTarget(left_pose);
-        moveit::planning_interface::MoveGroup::Plan left_plan;
-        error = left_.plan(left_plan);
-        if (error.val != 1) {
-            ROS_WARN("MoveIt!Error Code: %i", error.val);
-            try_step = try_again_question();
-            if (!try_step) return false;
-        } else {
-            ROS_INFO("Moving left arm into grasp position");
-            dual_arm_toolbox::TrajectoryProcessor::clean(left_plan.trajectory_);
-            dual_arm_toolbox::TrajectoryProcessor::scaleTrajectorySpeed(left_plan.trajectory_, 0.4);
-            execute(left_plan);
-            try_step = false;
-        }
-    }
+    // try_step = true;
+    // while (try_step && ros::ok()) {
+    //     geometry_msgs::PoseStamped left_pose;
+    //     left_pose.header.frame_id = "table";
+    //     left_pose.pose.position.x = 0.176;
+    //     left_pose.pose.position.y = -0.275;
+    //     left_pose.pose.position.z = 0.642+0.1; //0.4+0.1
+    //     left_pose.pose.orientation.x = 0.657;
+    //     left_pose.pose.orientation.y = 0.753;
+    //     left_pose.pose.orientation.z = -0.004;
+    //     left_pose.pose.orientation.w = 0.043;
+    //     // KDL::Rotation left_rot;  // generated to easily assign quaternion of pose
+    //     // left_rot.DoRotY(3.14 / 2);
+    //     // left_rot.GetQuaternion(left_pose.pose.orientation.x, left_pose.pose.orientation.y, left_pose.pose.orientation.z,
+    //     //                       left_pose.pose.orientation.w);
+    //     left_.setStartState(left_current_robot_state_);
+    //     left_.setPoseTarget(left_pose);
+    //     moveit::planning_interface::MoveGroup::Plan left_plan;
+    //     error = left_.plan(left_plan);
+    //     if (error.val != 1) {
+    //         ROS_WARN("MoveIt!Error Code: %i", error.val);
+    //         try_step = try_again_question();
+    //         if (!try_step) return false;
+    //     } else {
+    //         ROS_INFO("Moving left arm into grasp position");
+    //         dual_arm_toolbox::TrajectoryProcessor::clean(left_plan.trajectory_);
+    //         dual_arm_toolbox::TrajectoryProcessor::scaleTrajectorySpeed(left_plan.trajectory_, 0.4);
+    //         execute(left_plan);
+    //         try_step = false;
+    //     }
+    // }
 
-    // move right
+    // move right arm
     /*
     try_step = true;
     while (try_step && ros::ok()) {
@@ -441,13 +445,13 @@ bool DualArmRobot::pickBox(std::string object_id , geometry_msgs::Vector3Stamped
     while (try_step && ros::ok()) {
         geometry_msgs::PoseStamped left_pose;
         left_pose.header.frame_id = "table";
-        left_pose.pose.position.x = 0.176;
-        left_pose.pose.position.y = -0.275;
-        left_pose.pose.position.z = 0.642+0.1; //0.4+0.1
-        left_pose.pose.orientation.x = 0.657;
-        left_pose.pose.orientation.y = 0.753;
-        left_pose.pose.orientation.z = -0.004;
-        left_pose.pose.orientation.w = 0.043;
+        left_pose.pose.position.x = 0.303;
+        left_pose.pose.position.y = -0.116;
+        left_pose.pose.position.z = 0.606; //0.4+0.1
+        left_pose.pose.orientation.x = 0.429;
+        left_pose.pose.orientation.y = 0.480;
+        left_pose.pose.orientation.z = 0.601;
+        left_pose.pose.orientation.w = 0.473;
         // KDL::Rotation left_rot;  // generated to easily assign quaternion of pose
         // left_rot.DoRotY(3.14 / 2);
         // left_rot.GetQuaternion(left_pose.pose.orientation.x, left_pose.pose.orientation.y, left_pose.pose.orientation.z,
@@ -455,13 +459,13 @@ bool DualArmRobot::pickBox(std::string object_id , geometry_msgs::Vector3Stamped
 
         geometry_msgs::PoseStamped right_pose;
         right_pose.header.frame_id = "table";
-        right_pose.pose.position.x = 0.148;
-        right_pose.pose.position.y = 0.025;
-        right_pose.pose.position.z = 0.688+0.1;
-        right_pose.pose.orientation.x = 0.530;
-        right_pose.pose.orientation.x = -0.467;
-        right_pose.pose.orientation.x = -0.464;
-        right_pose.pose.orientation.x = 0.534;
+        right_pose.pose.position.x = 0.266;
+        right_pose.pose.position.y = 0.085;
+        right_pose.pose.position.z = 0.609;
+        right_pose.pose.orientation.x = -0.001;
+        right_pose.pose.orientation.y = -0.023;
+        right_pose.pose.orientation.z = -0.679;
+        right_pose.pose.orientation.w = 0.734;
         KDL::Rotation right_rot;  // generated to easily assign quaternion of pose
         //right_rot.DoRotY(3.14 / 2);
         //right_rot.DoRotX(3.14);
@@ -499,9 +503,9 @@ bool DualArmRobot::pickBox(std::string object_id , geometry_msgs::Vector3Stamped
         }
     }
 
-/*
+
     // Grasp
-    // move closer with right and ur5 by using cartesian path
+    // move closer with right and left arm by using cartesian path
     //if (!graspMove(0.075)) {
     if (!graspMove(0.075)) {
         ROS_WARN("failed moving closer to object");
@@ -530,8 +534,8 @@ bool DualArmRobot::pickBox(std::string object_id , geometry_msgs::Vector3Stamped
         left_waypoints.push_back(left_waypoint);
         double fraction = left_.computeCartesianPath(left_waypoints, 0.001, 0.0, left_trajectory, false);
         if (fraction < 1) {
-            ROS_INFO("Left arm cartesian path. (%.2f%% achieved)", fraction * 100.0);
-            ROS_INFO("Fraction is less than 100%%. Insufficient for dual-arm configuration. Pick can not be executed");
+            ROS_WARN("Left arm cartesian path. (%.2f%% achieved)", fraction * 100.0);
+            ROS_WARN("Fraction is less than 100%%. Insufficient for dual-arm configuration. Pick can not be executed");
             try_step = try_again_question();
             if (!try_step){
                 allowedArmCollision(false,object_id);
@@ -544,7 +548,8 @@ bool DualArmRobot::pickBox(std::string object_id , geometry_msgs::Vector3Stamped
     // get both arms trajectory
     arms_offset_ = getCurrentOffset();
     moveit_msgs::RobotTrajectory both_arms_trajectory;
-    if (adaptTrajectory(left_trajectory, arms_offset_, both_arms_trajectory)) ROS_INFO("successfully calculated trajectory for both arms");
+    if (adaptTrajectory(left_trajectory, arms_offset_, both_arms_trajectory)) 
+        ROS_INFO("successfully calculated trajectory for both arms");
     else {
         ROS_WARN("Problem adapting trajectory");
         allowedArmCollision(false,object_id);
@@ -567,7 +572,7 @@ bool DualArmRobot::pickBox(std::string object_id , geometry_msgs::Vector3Stamped
 
     ROS_INFO("executing plan");
     execute(both_arms_plan);
-    */
+    
     return true;
 }
 
@@ -1051,10 +1056,10 @@ void DualArmRobot::allowedArmCollision(bool enable, std::string left_attachedObj
     left_links.push_back("left_wrist_1_link");
     left_links.push_back("left_wrist_2_link");
     left_links.push_back("left_wrist_3_link");
-    left_links.push_back("left_ee_0");
-    left_links.push_back("left_ee_frame");
-    left_links.push_back("left_ee_spring");
-    left_links.push_back(left_attachedObject.c_str());
+    // left_links.push_back("left_ee_0");
+    // left_links.push_back("left_ee_frame");
+    // left_links.push_back("left_ee_spring");
+    // left_links.push_back(left_attachedObject.c_str());
 
     std::vector<std::string> right_links;
     right_links.push_back("right_ee_link");
@@ -1064,9 +1069,9 @@ void DualArmRobot::allowedArmCollision(bool enable, std::string left_attachedObj
     right_links.push_back("right_wrist_1_link");
     right_links.push_back("right_wrist_2_link");
     right_links.push_back("right_wrist_3_link");
-    right_links.push_back("right_ee_0");
-    right_links.push_back("right_ee_frame");
-    right_links.push_back("right_ee_spring");
+    // right_links.push_back("right_ee_0");
+    // right_links.push_back("right_ee_frame");
+    // right_links.push_back("right_ee_spring");
 
     acm.setEntry(left_links, right_links, enable);  //Set an entry corresponding to all possible pairs between two sets of elements.
 
@@ -1351,10 +1356,10 @@ bool DualArmRobot::moveHome() {
 
     // move both at simultaneously
 
-    moveit_msgs::RobotState robot_grasp_state_;
-    robot_grasp_state_ = getCurrentRobotStateMsg();
-    geometry_msgs::PoseStamped  left_grasp_pose_ = left_.getCurrentPose(left_.getEndEffectorLink());
-    geometry_msgs::PoseStamped  right_grasp_pose_ = right_.getCurrentPose(right_.getEndEffectorLink());
+    // moveit_msgs::RobotState robot_grasp_state_;
+    // robot_grasp_state_ = getCurrentRobotStateMsg();
+    // geometry_msgs::PoseStamped  left_grasp_pose_ = left_.getCurrentPose(left_.getEndEffectorLink());
+    // geometry_msgs::PoseStamped  right_grasp_pose_ = right_.getCurrentPose(right_.getEndEffectorLink());
     try_step = true;
     while (try_step && ros::ok()) {
         arms_.setNamedTarget("arms_up");
@@ -1370,31 +1375,31 @@ bool DualArmRobot::moveHome() {
             dual_arm_toolbox::TrajectoryProcessor::clean(arms_plan.trajectory_);
             dual_arm_toolbox::TrajectoryProcessor::scaleTrajectorySpeed(arms_plan.trajectory_, 0.4);
             execute(arms_plan);
-            // try_step = false;
-        }
-        ROS_INFO("Already in the home position");
-        sleep(2);
-        moveit_msgs::RobotState left_current_robot_state_temp_ = getCurrentRobotStateMsg();
-        arms_.setStartState(left_current_robot_state_temp_);
-        
-        arms_.setPoseTarget(left_grasp_pose_, left_.getEndEffectorLink());
-        arms_.setPoseTarget(right_grasp_pose_, right_.getEndEffectorLink());
-        // The representation of a motion plan (as ROS messages), it's a structure.
-        // THe method of plan(), compute a motion plan that takes the group declared in the constructor 
-        // from the current state to the specified target.
-        moveit::planning_interface::MoveGroup::Plan arms_plan_temp;
-        error = arms_.plan(arms_plan_temp);
-        if (error.val != 1) {
-            ROS_WARN("MoveIt!Error Code: %i", error.val);
-            try_step = try_again_question();
-            if (!try_step) return false;
-        } else {
-            ROS_INFO("Moving arms into start position");
-            dual_arm_toolbox::TrajectoryProcessor::clean(arms_plan_temp.trajectory_);
-            dual_arm_toolbox::TrajectoryProcessor::scaleTrajectorySpeed(arms_plan_temp.trajectory_, 0.4);
-            execute(arms_plan_temp);
             try_step = false;
         }
+        ROS_INFO("Already in the home position");
+        // sleep(2);
+        // moveit_msgs::RobotState left_current_robot_state_temp_ = getCurrentRobotStateMsg();
+        // arms_.setStartState(left_current_robot_state_temp_);
+        
+        // arms_.setPoseTarget(left_grasp_pose_, left_.getEndEffectorLink());
+        // arms_.setPoseTarget(right_grasp_pose_, right_.getEndEffectorLink());
+        // // The representation of a motion plan (as ROS messages), it's a structure.
+        // // THe method of plan(), compute a motion plan that takes the group declared in the constructor 
+        // // from the current state to the specified target.
+        // moveit::planning_interface::MoveGroup::Plan arms_plan_temp;
+        // error = arms_.plan(arms_plan_temp);
+        // if (error.val != 1) {
+        //     ROS_WARN("MoveIt!Error Code: %i", error.val);
+        //     try_step = try_again_question();
+        //     if (!try_step) return false;
+        // } else {
+        //     ROS_INFO("Moving arms into start position");
+        //     dual_arm_toolbox::TrajectoryProcessor::clean(arms_plan_temp.trajectory_);
+        //     dual_arm_toolbox::TrajectoryProcessor::scaleTrajectorySpeed(arms_plan_temp.trajectory_, 0.4);
+        //     execute(arms_plan_temp);
+        //     try_step = false;
+        // }
     }
     return true;
 }

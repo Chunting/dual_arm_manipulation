@@ -48,7 +48,7 @@ int main(int argc, char **argv) {
     direction.vector.x = 0;
     direction.vector.y = 0;
     direction.vector.z = 0.1;//0.01;
-    dualArmRobot.moveHome();
+    // dualArmRobot.moveHome();
     //dualArmRobot.linearMove(direction, false, true,true);
     /*
     // move left to shelf

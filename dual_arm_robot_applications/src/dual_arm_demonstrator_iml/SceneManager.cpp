@@ -19,8 +19,8 @@ SceneManager::SceneManager(ros::NodeHandle &nh) : nh_(nh) {
     box_.type = box_.BOX;
     box_.dimensions.resize(3);
     box_.dimensions[0] = 0.26;
-    box_.dimensions[1] = 0.26;
-    box_.dimensions[2] = 0.2;
+    box_.dimensions[1] = 0.13;
+    box_.dimensions[2] = 0.26;
 }
 
 void SceneManager::addBox(std::string id, geometry_msgs::Pose pose, std::string link_name, std::string frame_id) {
@@ -150,9 +150,9 @@ void SceneManager::setupScene() {
     */
     // add box7
     geometry_msgs::Pose box7_pose;
-    box7_pose.position.x = 0.5 - box_.dimensions[0]/2;
+    box7_pose.position.x = 0.4 - box_.dimensions[0]/2;
     box7_pose.position.y = 0;
-    box7_pose.position.z = 0.4 + box_.dimensions[2]/2 + 0.001;
+    box7_pose.position.z = 0.435 + box_.dimensions[2]/2 + 0.001;
     // KDL::Rotation box7_rot;
     // box7_rot.GetQuaternion(box7_pose.orientation.x, box7_pose.orientation.y, box7_pose.orientation.z, box7_pose.orientation.w);
     dual_arm_demonstrator_iml::SceneManager::addBox("box7", box7_pose, "table", "table");

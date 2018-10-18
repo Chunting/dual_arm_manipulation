@@ -11,12 +11,13 @@
     <!--SUBGROUPS: Groups can also be formed by referencing to already defined group names-->
     <group name="left_manipulator">
         <chain base_link="left_base_link" tip_link="left_ee_link" />
-        <group name="left_endeffector" />
+        <!-- <group name="left_endeffector" /> -->
     </group>
     <group name="right_manipulator">
         <chain base_link="right_base_link" tip_link="right_ee_link" />
-        <group name="right_endeffector" />
+        <!-- <group name="right_endeffector" /> -->
     </group>
+    <!-- 
     <group name="left_endeffector">
         <link name="left_ee_frame" />
         <link name="left_ee_spring" />
@@ -29,46 +30,48 @@
         <link name="right_ee_0" />
         <chain base_link="right_ee_frame" tip_link="right_ee_0" />
     </group>
+    -->
     <group name="arms">
         <group name="left_manipulator" />
         <group name="right_manipulator" />
     </group>
     <!--GROUP STATES: Purpose: Define a named state for a particular group, in terms of joint values. This is useful to define states like 'folded arms'-->
     <group_state name="left_up" group="left_manipulator">
-        <joint name="left_elbow_joint" value="-1.57" />
-        <joint name="left_shoulder_lift_joint" value="-0.785" />
-        <joint name="left_shoulder_pan_joint" value="0" />
-        <joint name="left_wrist_1_joint" value="0" />
-        <joint name="left_wrist_2_joint" value="-1.57" />
-        <joint name="left_wrist_3_joint" value="-1.57" />
+       
+        <joint name="left_shoulder_lift_joint" value="-1.098" />
+        <joint name="left_shoulder_pan_joint" value="-1.505" />
+        <joint name="left_elbow_joint" value="0.641" />
+        <joint name="left_wrist_1_joint" value="-2.083" />
+        <joint name="left_wrist_2_joint" value="-1.686" />
+        <joint name="left_wrist_3_joint" value="-2.094" />
     </group_state>
     <group_state name="right_up" group="right_manipulator">
-        <joint name="right_elbow_joint" value="1.57" />
-        <joint name="right_shoulder_lift_joint" value="-2.356" />
-        <joint name="right_shoulder_pan_joint" value="0" />
-        <joint name="right_wrist_1_joint" value="-1.57" />
-        <joint name="right_wrist_2_joint" value="1.57" />
-        <joint name="right_wrist_3_joint" value="0" />
+        <joint name="right_shoulder_lift_joint" value="-2.272" />
+        <joint name="right_shoulder_pan_joint" value="1.518" />
+        <joint name="right_elbow_joint" value="-0.226" />
+        <joint name="right_wrist_1_joint" value="-1.519" />
+        <joint name="right_wrist_2_joint" value="1.639" />
+        <joint name="right_wrist_3_joint" value="-1.58" />
     </group_state>
     <group_state name="arms_up" group="arms">
-        <joint name="right_elbow_joint" value="1.57" />
-        <joint name="right_shoulder_lift_joint" value="-2.356" />
-        <joint name="right_shoulder_pan_joint" value="0" />
-        <joint name="right_wrist_1_joint" value="-1.57" />
-        <joint name="right_wrist_2_joint" value="1.57" />
-        <joint name="right_wrist_3_joint" value="0" />
-        <joint name="left_elbow_joint" value="-1.57" />
-        <joint name="left_shoulder_lift_joint" value="-0.785" />
-        <joint name="left_shoulder_pan_joint" value="0" />
-        <joint name="left_wrist_1_joint" value="0" />
-        <joint name="left_wrist_2_joint" value="-1.57" />
-        <joint name="left_wrist_3_joint" value="-1.57" />
+               <joint name="right_shoulder_lift_joint" value="-2.272" />
+        <joint name="right_shoulder_pan_joint" value="1.518" />
+        <joint name="right_elbow_joint" value="-0.226" />
+        <joint name="right_wrist_1_joint" value="-1.519" />
+        <joint name="right_wrist_2_joint" value="1.639" />
+        <joint name="right_wrist_3_joint" value="-1.58" />
+        <joint name="left_shoulder_lift_joint" value="-1.098" />
+        <joint name="left_shoulder_pan_joint" value="-1.505" />
+        <joint name="left_elbow_joint" value="0.641" />
+        <joint name="left_wrist_1_joint" value="-2.083" />
+        <joint name="left_wrist_2_joint" value="-1.686" />
+        <joint name="left_wrist_3_joint" value="-2.094" />
     </group_state>
     <!--END EFFECTOR: Purpose: Represent information about an end effector.-->
-    <end_effector name="left_ee" parent_link="left_ee_link" group="left_endeffector" parent_group="left_manipulator" />
-    <end_effector name="right_ee" parent_link="right_ee_link" group="right_endeffector" parent_group="right_manipulator" />
+    <!-- <end_effector name="left_ee" parent_link="left_ee_link" group="left_endeffector" parent_group="left_manipulator" />
+    <end_effector name="right_ee" parent_link="right_ee_link" group="right_endeffector" parent_group="right_manipulator" /> -->
     <!--VIRTUAL JOINT: Purpose: this element defines a virtual joint between a robot link and an external frame of reference (considered fixed with respect to the robot)-->
-    <virtual_joint name="virtual_joint" type="fixed" parent_frame="robot_frame" child_link="stand1" />
+    <virtual_joint name="virtual_joint" type="fixed" parent_frame="robot_frame" child_link="world" />
     <!--DISABLE COLLISIONS: By default it is assumed that any link of the robot could potentially come into collision with any other link in the robot. This tag disables collision checking between a specified pair of links. -->
     <!--
     <disable_collisions link1="table_back" link2="table_camerahanger" reason="Never" />
@@ -137,6 +140,40 @@
     
     <disable_collisions link1="stand_ground" link2="left_base_link" reason="Never" />
     <disable_collisions link1="stand_ground" link2="left_shoulder_link" reason="Never" />
+
+    <disable_collisions link1="right_ee_spring" link2="right_wrist_1_link" reason="Never" />
+    <disable_collisions link1="right_ee_spring" link2="right_wrist_2_link" reason="Never" />
+    <disable_collisions link1="right_ee_spring" link2="right_wrist_3_link" reason="Never" />
+    <disable_collisions link1="right_ee_spring" link2="left_ee_frame" reason="Never" />
+    <disable_collisions link1="right_ee_spring" link2="left_ee_link" reason="Never" />
+    <disable_collisions link1="right_ee_spring" link2="left_wrist_2_link" reason="Never" />
+    <disable_collisions link1="right_ee_spring" link2="left_wrist_3_link" reason="Never" />
+    <disable_collisions link1="right_ee_frame" link2="right_ee_link" reason="Default" />
+    <disable_collisions link1="right_ee_frame" link2="right_ee_spring" reason="Adjacent" />
+    <disable_collisions link1="right_ee_frame" link2="right_wrist_1_link" reason="Never" />
+    <disable_collisions link1="right_ee_frame" link2="right_wrist_2_link" reason="Never" />
+    <disable_collisions link1="right_ee_frame" link2="right_wrist_3_link" reason="Adjacent" />
+    <disable_collisions link1="right_ee_frame" link2="left_ee_link" reason="Never" />
+    <disable_collisions link1="right_ee_frame" link2="left_wrist_2_link" reason="Never" />
+    <disable_collisions link1="right_ee_frame" link2="left_wrist_3_link" reason="Never" />
+    <disable_collisions link1="left_ee_frame" link2="left_ee_link" reason="Default" />
+    <disable_collisions link1="left_ee_frame" link2="left_ee_spring" reason="Adjacent" />
+    <disable_collisions link1="left_ee_frame" link2="left_wrist_1_link" reason="Never" />
+    <disable_collisions link1="left_ee_frame" link2="left_wrist_2_link" reason="Never" />
+    <disable_collisions link1="left_ee_frame" link2="left_wrist_3_link" reason="Adjacent" />
+    <disable_collisions link1="left_ee_spring" link2="left_wrist_1_link" reason="Never" />
+    <disable_collisions link1="left_ee_spring" link2="left_wrist_2_link" reason="Never" />
+    <disable_collisions link1="left_ee_spring" link2="left_wrist_3_link" reason="Never" />
+
+    <disable_collisions link1="right_ee_link" link2="right_ee_spring" reason="Never" />
+    <disable_collisions link1="table" link2="left_ee_frame" reason="Never" />
+    <disable_collisions link1="left_ee_link" link2="left_ee_spring" reason="Never" />
+    <disable_collisions link1="table" link2="left_ee_spring" reason="Never" />
+    <disable_collisions link1="right_base_link" link2="left_ee_spring" reason="Never" />
+    <disable_collisions link1="stand1" link2="left_ee_frame" reason="Never" />
+    <disable_collisions link1="right_base_link" link2="left_ee_frame" reason="Never" />
+
+
     -->
     <disable_collisions link1="table" link2="stand2" reason="Default" />
     <disable_collisions link1="table" link2="stand1" reason="Default" />
@@ -147,9 +184,9 @@
     <disable_collisions link1="table" link2="right_wrist_3_link" reason="Never" />
     <disable_collisions link1="table" link2="right_wrist_1_link" reason="Adjacent" />
     <disable_collisions link1="table" link2="left_base_link" reason="Never" />
-    <disable_collisions link1="table" link2="left_ee_frame" reason="Never" />
+
     <disable_collisions link1="table" link2="left_ee_link" reason="Never" />
-    <disable_collisions link1="table" link2="left_ee_spring" reason="Never" />
+
     <disable_collisions link1="table" link2="left_shoulder_link" reason="Never" />
     <disable_collisions link1="table" link2="left_upper_arm_link" reason="Never" />
     <disable_collisions link1="table" link2="left_wrist_1_link" reason="Never" />
@@ -168,9 +205,8 @@
     <disable_collisions link1="stand1" link2="right_shoulder_link" reason="Never" />
 
     <disable_collisions link1="stand1" link2="left_base_link" reason="Never" />
-    <disable_collisions link1="stand1" link2="left_ee_frame" reason="Never" />
+
     <disable_collisions link1="stand1" link2="left_ee_link" reason="Never" />
-    <disable_collisions link1="stand1" link2="left_ee_spring" reason="Never" />
     <disable_collisions link1="stand1" link2="left_forearm_link" reason="Never" />
     <disable_collisions link1="stand1" link2="left_shoulder_link" reason="Never" />
     <!---->
@@ -183,23 +219,16 @@
     <disable_collisions link1="right_base_link" link2="right_upper_arm_link" reason="Never" />
     <disable_collisions link1="right_base_link" link2="right_wrist_1_link" reason="Never" />
     <disable_collisions link1="right_base_link" link2="left_base_link" reason="Never" />
-    <disable_collisions link1="right_base_link" link2="left_ee_frame" reason="Never" />
+
     <disable_collisions link1="right_base_link" link2="left_ee_link" reason="Never" />
-    <disable_collisions link1="right_base_link" link2="left_ee_spring" reason="Never" />
+
     <disable_collisions link1="right_base_link" link2="left_forearm_link" reason="Never" />
     <disable_collisions link1="right_base_link" link2="left_shoulder_link" reason="Never" />
     <!--  -->
     <disable_collisions link1="right_base_link" link2="left_upper_arm_link" reason="Never" />
     <disable_collisions link1="right_base_link" link2="left_wrist_1_link" reason="Never" />
-    <disable_collisions link1="right_ee_frame" link2="right_ee_link" reason="Default" />
-    <disable_collisions link1="right_ee_frame" link2="right_ee_spring" reason="Adjacent" />
-    <disable_collisions link1="right_ee_frame" link2="right_wrist_1_link" reason="Never" />
-    <disable_collisions link1="right_ee_frame" link2="right_wrist_2_link" reason="Never" />
-    <disable_collisions link1="right_ee_frame" link2="right_wrist_3_link" reason="Adjacent" />
-    <disable_collisions link1="right_ee_frame" link2="left_ee_link" reason="Never" />
-    <disable_collisions link1="right_ee_frame" link2="left_wrist_2_link" reason="Never" />
-    <disable_collisions link1="right_ee_frame" link2="left_wrist_3_link" reason="Never" />
-    <disable_collisions link1="right_ee_link" link2="right_ee_spring" reason="Never" />
+  
+   
     <disable_collisions link1="right_ee_link" link2="right_wrist_1_link" reason="Never" />
     <disable_collisions link1="right_ee_link" link2="right_wrist_2_link" reason="Never" />
     <disable_collisions link1="right_ee_link" link2="right_wrist_3_link" reason="Adjacent" />
@@ -208,17 +237,12 @@
     <disable_collisions link1="right_ee_link" link2="left_wrist_1_link" reason="Never" />
     <disable_collisions link1="right_ee_link" link2="left_wrist_2_link" reason="Never" />
     <disable_collisions link1="right_ee_link" link2="left_wrist_3_link" reason="Never" />
-    <disable_collisions link1="right_ee_spring" link2="right_wrist_1_link" reason="Never" />
-    <disable_collisions link1="right_ee_spring" link2="right_wrist_2_link" reason="Never" />
-    <disable_collisions link1="right_ee_spring" link2="right_wrist_3_link" reason="Never" />
-    <disable_collisions link1="right_ee_spring" link2="left_ee_frame" reason="Never" />
-    <disable_collisions link1="right_ee_spring" link2="left_ee_link" reason="Never" />
-    <disable_collisions link1="right_ee_spring" link2="left_wrist_2_link" reason="Never" />
-    <disable_collisions link1="right_ee_spring" link2="left_wrist_3_link" reason="Never" />
+   
     <disable_collisions link1="right_forearm_link" link2="right_upper_arm_link" reason="Adjacent" />
     <disable_collisions link1="right_forearm_link" link2="right_wrist_1_link" reason="Adjacent" />
     <disable_collisions link1="right_forearm_link" link2="left_ee_link" reason="Never" />
-
+    <disable_collisions link1="left_forearm_link" link2="left_upper_arm_link" reason="Adjacent" />
+    <disable_collisions link1="left_forearm_link" link2="left_wrist_1_link" reason="Adjacent" />
     <disable_collisions link1="right_shoulder_link" link2="right_upper_arm_link" reason="Adjacent" />
     <disable_collisions link1="right_shoulder_link" link2="right_wrist_1_link" reason="Never" />
     <disable_collisions link1="right_shoulder_link" link2="right_wrist_2_link" reason="Never" />
@@ -240,20 +264,12 @@
     <disable_collisions link1="right_wrist_3_link" link2="left_wrist_3_link" reason="Never" />
     <disable_collisions link1="left_base_link" link2="left_shoulder_link" reason="Adjacent" />
 
-    <disable_collisions link1="left_ee_frame" link2="left_ee_link" reason="Default" />
-    <disable_collisions link1="left_ee_frame" link2="left_ee_spring" reason="Adjacent" />
-    <disable_collisions link1="left_ee_frame" link2="left_wrist_1_link" reason="Never" />
-    <disable_collisions link1="left_ee_frame" link2="left_wrist_2_link" reason="Never" />
-    <disable_collisions link1="left_ee_frame" link2="left_wrist_3_link" reason="Adjacent" />
-    <disable_collisions link1="left_ee_link" link2="left_ee_spring" reason="Never" />
+    
+
     <disable_collisions link1="left_ee_link" link2="left_wrist_1_link" reason="Never" />
     <disable_collisions link1="left_ee_link" link2="left_wrist_2_link" reason="Never" />
     <disable_collisions link1="left_ee_link" link2="left_wrist_3_link" reason="Adjacent" />
-    <disable_collisions link1="left_ee_spring" link2="left_wrist_1_link" reason="Never" />
-    <disable_collisions link1="left_ee_spring" link2="left_wrist_2_link" reason="Never" />
-    <disable_collisions link1="left_ee_spring" link2="left_wrist_3_link" reason="Never" />
-    <disable_collisions link1="left_forearm_link" link2="left_upper_arm_link" reason="Adjacent" />
-    <disable_collisions link1="left_forearm_link" link2="left_wrist_1_link" reason="Adjacent" />
+   
 
     <disable_collisions link1="left_shoulder_link" link2="left_upper_arm_link" reason="Adjacent" />
     <disable_collisions link1="left_wrist_1_link" link2="left_wrist_2_link" reason="Adjacent" />

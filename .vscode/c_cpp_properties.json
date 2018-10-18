@@ -27,7 +27,8 @@
                 "/home/gnc428/catkin_ws/src/ur_ws/src/robotiq_force_torque_sensor/include",
                 "/home/gnc428/catkin_ws/src/universal_robot/ur_kinematics/include",
                 "/home/gnc428/catkin_ws/src/ur_modern_driver/include",
-                "/usr/include"
+                "/usr/include",
+                "/usr/include/eigen3"
             ],
             "name": "Linux",
             "intelliSenseMode": "clang-x64",
