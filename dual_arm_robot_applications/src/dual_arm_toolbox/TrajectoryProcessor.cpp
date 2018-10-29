@@ -1,5 +1,5 @@
 //
-// Created by Daniel Höltgen on 17.10.16.
+// Created by Chunting  on 17.10.16.
 //
 
 #include "dual_arm_toolbox/TrajectoryProcessor.h"

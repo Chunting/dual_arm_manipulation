@@ -22,7 +22,7 @@ TO UPDATE CHANGES EASILY:
 update_ikfast_plugin.sh
 
 ???
-export OPENRAVE_PLUGINS="/home/daniel/catkin_ws/devel/share/openrave-0.9/plugins"
+export OPENRAVE_PLUGINS="/home/Chunting/catkin_ws/devel/share/openrave-0.9/plugins"
 
 
 DID NOT WORK

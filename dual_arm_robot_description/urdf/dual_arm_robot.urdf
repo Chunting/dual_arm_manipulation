@@ -24,7 +24,7 @@
     </plugin>
 -->
   </gazebo>
-  <!-- edited by Daniel Hoeltgen-->
+  <!-- edited by Chunting Hoeltgen-->
   <!-- measured from model -->
   <!--property name="ur5_shoulder_height" value="0.089159" /-->
   <!--property name="ur5_shoulder_offset" value="0.13585" /-->

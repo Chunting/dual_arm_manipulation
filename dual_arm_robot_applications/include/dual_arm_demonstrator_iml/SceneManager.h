@@ -1,5 +1,5 @@
 //
-// Created by daniel on 27.12.16.
+// Created by Chunting on 27.12.16.
 //
 
 #ifndef PROJECT_SCENEMANAGER_H

@@ -1,5 +1,5 @@
 //
-// Created by Daniel Höltgen on 20.10.16.
+// Created by Chunting  on 20.10.16.
 //
 
 #include <dual_arm_demonstrator_iml/SceneManager.h>

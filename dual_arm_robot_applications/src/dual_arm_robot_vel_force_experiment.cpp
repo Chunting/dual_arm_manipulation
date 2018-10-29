@@ -1,5 +1,5 @@
 //
-// Created by Daniel Höltgen.
+// Created by Chunting .
 //
 
 #include <moveit/move_group_interface/move_group.h>
