@@ -39,18 +39,46 @@ DualArmRobot::DualArmRobot(ros::NodeHandle& nh) :
     // frame_id:  /world
     left_current_pose_ = left_.getCurrentPose(left_.getEndEffectorLink());
     left_current_robot_state_ = getCurrentRobotStateMsg();
-    ROS_INFO("left_current_pose_ frame_id: %s, %f, %f, %f", 
+
+    // left_joint_values = getJointAngles("left_manipulator");
+    ROS_INFO("left_current_pose_ frame_id: %s, x=%f, y=%f, z=%f, qx=%f, qy=%f, qz=%f, qw=%f", 
         left_current_pose_.header.frame_id.c_str()
         ,left_current_pose_.pose.position.x
         ,left_current_pose_.pose.position.y
-        ,left_current_pose_.pose.position.z);
+        ,left_current_pose_.pose.position.z
+        ,left_current_pose_.pose.orientation.x
+        ,left_current_pose_.pose.orientation.y
+        ,left_current_pose_.pose.orientation.z
+        ,left_current_pose_.pose.orientation.w);
 
     right_current_pose_ = right_.getCurrentPose(right_.getEndEffectorLink());
-    ROS_INFO("right_current_pose_ frame_id: %s, %f, %f, %f", 
+    ROS_INFO("right_current_pose_ frame_id: %s, x=%f, y=%f, z=%f, qx=%f, qy=%f, qz=%f, qw=%f", 
         right_current_pose_.header.frame_id.c_str()
         ,right_current_pose_.pose.position.x
         ,right_current_pose_.pose.position.y
-        ,right_current_pose_.pose.position.z);
+        ,right_current_pose_.pose.position.z
+        ,right_current_pose_.pose.orientation.x
+        ,right_current_pose_.pose.orientation.y
+        ,right_current_pose_.pose.orientation.z
+        ,right_current_pose_.pose.orientation.w);
+    ROS_INFO("Publish the right arm joint state\n");
+    std::vector<std::string> rightJointNames = right_.getJoints();
+    std::vector<double> rightJointValues = right_.getCurrentJointValues();
+    for(std::size_t i=0; i<rightJointNames.size(); i++){
+        ROS_INFO("Joint %s: %f", rightJointNames[i].c_str(), radianToDegree(rightJointValues[i]));
+    }
+    ROS_INFO("Publish the left arm joint state\n");
+    std::vector<std::string> leftJointNames = left_.getJoints();
+    std::vector<double> leftJointValues = left_.getCurrentJointValues();
+    for(std::size_t i=0; i<leftJointNames.size(); i++){
+        ROS_INFO("Joint %s: %f", leftJointNames[i].c_str(), radianToDegree(leftJointValues[i]));
+    }
+    ROS_INFO("Publish the both arms joint state\n");
+    std::vector<std::string> armsJointNames = arms_.getJoints();
+    std::vector<double> armsJointValues = arms_.getCurrentJointValues();
+    for(std::size_t i=0; i<armsJointNames.size(); i++){
+        ROS_INFO("Joint %s: %f", armsJointNames[i].c_str(), armsJointValues[i]);
+    }
 
     // Controller Interface
     /*
@@ -1064,7 +1092,7 @@ void DualArmRobot::allowedArmCollision(bool enable, std::string left_attachedObj
     std::vector<std::string> right_links;
     right_links.push_back("right_ee_link");
     right_links.push_back("right_forearm_link");
-    right_links.push_back("right_tool0");
+    // right_links.push_back("right_tool0");
     right_links.push_back("right_upper_arm_link");
     right_links.push_back("right_wrist_1_link");
     right_links.push_back("right_wrist_2_link");
@@ -1276,6 +1304,34 @@ bool DualArmRobot::execute(moveit::planning_interface::MoveGroup::Plan plan) {
 #endif
 }
 
+// Get the joint angles
+// groupName: "left_manipulator" "right_manipulator" "arms"
+std::vector<double> DualArmRobot::getJointAngles(std::string groupName){
+    ROS_INFO("-------- Get Joint Angles-------------------------");
+    // setup planning scene
+    // Look up the robot description on the ROS parameter server and construct a RobotModel to use
+    robot_model_loader::RobotModelLoader robot_model_loader("robot_description");
+    robot_model::RobotModelPtr kinematic_model = robot_model_loader.getModel();
+    ROS_INFO("Model frame %s", kinematic_model->getModelFrame().c_str());
+    planning_scene::PlanningScene planningScene(kinematic_model);
+
+    // setup JointModelGroup
+    //ROS_INFO("Model frame: %s", kinematic_model->getModelFrame().c_str());
+    // Construct a RobotState that maintains the configuration of the robot.
+    robot_state::RobotStatePtr kinematic_state(new robot_state::RobotState(kinematic_model));
+
+    kinematic_state->setToDefaultValues();
+    const robot_state::JointModelGroup* joint_model_group = kinematic_model->getJointModelGroup(groupName);
+    const std::vector<std::string>& joint_names = joint_model_group->getJointModelNames();
+    std::vector<double> joint_values;
+    kinematic_state->copyJointGroupPositions(joint_model_group, joint_values);
+    for(std::size_t i=0; i<joint_names.size(); ++i){
+        ROS_INFO("Joint %s: %f", joint_names[i].c_str(), joint_values[i]);
+    }
+    return joint_values;
+
+
+}
 bool DualArmRobot::moveHome() {
     ROS_INFO("Moving arms into home position - both arms up");
     sleep(5);
@@ -1376,8 +1432,9 @@ bool DualArmRobot::moveHome() {
             dual_arm_toolbox::TrajectoryProcessor::scaleTrajectorySpeed(arms_plan.trajectory_, 0.4);
             execute(arms_plan);
             try_step = false;
+            ROS_INFO("Already in the home position");
         }
-        ROS_INFO("Already in the home position");
+        
         // sleep(2);
         // moveit_msgs::RobotState left_current_robot_state_temp_ = getCurrentRobotStateMsg();
         // arms_.setStartState(left_current_robot_state_temp_);

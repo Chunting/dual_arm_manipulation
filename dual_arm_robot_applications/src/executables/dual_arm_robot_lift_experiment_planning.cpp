@@ -39,12 +39,23 @@ int main(int argc, char **argv) {
 
     // Scene Setup
     dual_arm_demonstrator_iml::SceneManager sceneManager(nh);
+    
+    // Planning to a joint-space goal
+    std::vector<double> group_joint_values;
+    // read the current joint angles
+    //group_joint_values = dualArmRobot.getJointAngles("arms");
+    group_joint_values.clear();
+
     // with or without collision objects?
-    sceneManager.setupSceneLiftCO();
-//    sceneManager.setupSceneLift();
+    // sceneManager.setupSceneLiftCO();
+    //  sceneManager.setupSceneLift();
 
     // move home
-    dualArmRobot.moveHome();
+    // sleep(5);
+    // dualArmRobot.moveHome();
+    // sleep(5);
+    //group_joint_values = dualArmRobot.getJointAngles("arms");
+
 /*
     // setup constraints
     moveit_msgs::JointConstraint jcm;
@@ -99,31 +110,31 @@ int main(int argc, char **argv) {
     dualArmRobot.left_.setPathConstraints(left_constraints);
 */
     // Pick box1
-    geometry_msgs::Vector3Stamped direction;
-    direction.header.frame_id = "/world";
-    direction.vector.x = 0;
-    direction.vector.y = 0;
-    direction.vector.z = 0.1;
-    if (!dualArmRobot.pickBox("box7", direction)) {
-        ROS_WARN("Pick failed");
-        ROS_ERROR("Can't execute demonstration without successful pick. Demonstration aborted.");
-        return 0;
-    }
+    // geometry_msgs::Vector3Stamped direction;
+    // direction.header.frame_id = "/world";
+    // direction.vector.x = 0;
+    // direction.vector.y = 0;
+    // direction.vector.z = 0.1;
+    // if (!dualArmRobot.pickBox("box7", direction)) {
+    //     ROS_WARN("Pick failed");
+    //     ROS_ERROR("Can't execute demonstration without successful pick. Demonstration aborted.");
+    //     return 0;
+    // }
 
-    // clear path constraints
-    dualArmRobot.left_.clearPathConstraints();
-    dualArmRobot.right_.clearPathConstraints();
+    // // clear path constraints
+    // dualArmRobot.left_.clearPathConstraints();
+    // dualArmRobot.right_.clearPathConstraints();
 
-    // plan move up
-    geometry_msgs::PoseStamped start_pose = dualArmRobot.left_.getCurrentPose(dualArmRobot.left_.getEndEffectorLink());
-    geometry_msgs::PoseStamped lift_pose = start_pose;
-    lift_pose.pose.position.z = lift_pose.pose.position.z +0.6;
+    // // plan move up
+    // geometry_msgs::PoseStamped start_pose = dualArmRobot.left_.getCurrentPose(dualArmRobot.left_.getEndEffectorLink());
+    // geometry_msgs::PoseStamped lift_pose = start_pose;
+    // lift_pose.pose.position.z = lift_pose.pose.position.z + 0.6;
 
-    for (unsigned int i =0; i < 15 ; i++){
-        ROS_INFO(":::::: START EVALUATION %i::::::", i);
-        dualArmRobot.planMoveObject("box7", lift_pose, 0.2);
-        ROS_INFO(":::::: END EVALUATION %i::::::", i);
-    }
+    // for (unsigned int i =0; i < 15 ; i++){
+    //     ROS_INFO(":::::: START EVALUATION %i::::::", i);
+    //     dualArmRobot.planMoveObject("box7", lift_pose, 0.2);
+    //     ROS_INFO(":::::: END EVALUATION %i::::::", i);
+    // }
 
 
     // END

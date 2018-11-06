@@ -7,7 +7,7 @@
 
 // Robot status
 //#define OFFLINE
-
+#define PI 3.14159
 // Dual Arm Toolbox
 #include "dual_arm_toolbox/TrajectoryProcessor.h"
 #include "dual_arm_toolbox/Transform.h"
@@ -74,10 +74,13 @@ namespace dual_arm_demonstrator_iml {
 
         geometry_msgs::PoseStamped right_current_pose_;
         geometry_msgs::PoseStamped right_current_pose_temp_;
-
+        // The MoveGroup class can be easily setup using the group name
         moveit::planning_interface::MoveGroup left_;
         moveit::planning_interface::MoveGroup right_;
         moveit::planning_interface::MoveGroup arms_;
+
+        std::vector<double> left_joint_values;
+        std::vector<double> right_joint_values;
 
         // workaround for moveGroup method does not return attached objects correctly (issue)
         robot_state::RobotState getCurrentRobotState();
@@ -118,8 +121,13 @@ namespace dual_arm_demonstrator_iml {
         bool execute(moveit::planning_interface::MoveGroup::Plan plan);
 
         bool moveHome();
+        // Planning to a joint-space goal
+        std::vector<double> getJointAngles(std::string groupName);
 
-        bool moveInJointSpace();
+        double radianToDegree(double radian){
+            
+            return (radian*(180/PI));
+        }
     };
 }//ns
 #endif //PROJECT_DUALARMROBOT_H
