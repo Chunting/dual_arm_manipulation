@@ -61,19 +61,30 @@ DualArmRobot::DualArmRobot(ros::NodeHandle& nh) :
         ,right_current_pose_.pose.orientation.y
         ,right_current_pose_.pose.orientation.z
         ,right_current_pose_.pose.orientation.w);
-    ROS_INFO("Publish the right arm joint state\n");
+    ROS_INFO("\nPublish the right arm joint state\n");
+    ROS_INFO("Reference Frame: %s", right_.getPlanningFrame().c_str());
+    ROS_INFO("Reference Frame: %s", right_.getEndEffectorLink().c_str());
+    std::vector<double> rpy = right_.getCurrentRPY();
+    ROS_INFO("RPY: R=%f, P=%f, Y=%f", rpy[0], rpy[1], rpy[2]);
     std::vector<std::string> rightJointNames = right_.getJoints();
     std::vector<double> rightJointValues = right_.getCurrentJointValues();
     for(std::size_t i=0; i<rightJointNames.size(); i++){
         ROS_INFO("Joint %s: %f", rightJointNames[i].c_str(), radianToDegree(rightJointValues[i]));
     }
-    ROS_INFO("Publish the left arm joint state\n");
+
+
+    ROS_INFO("\nPublish the left arm joint state\n");
+        
+    ROS_INFO("Reference Frame: %s", left_.getPlanningFrame().c_str());
+    ROS_INFO("Reference Frame: %s", left_.getEndEffectorLink().c_str());
     std::vector<std::string> leftJointNames = left_.getJoints();
     std::vector<double> leftJointValues = left_.getCurrentJointValues();
     for(std::size_t i=0; i<leftJointNames.size(); i++){
         ROS_INFO("Joint %s: %f", leftJointNames[i].c_str(), radianToDegree(leftJointValues[i]));
     }
-    ROS_INFO("Publish the both arms joint state\n");
+    ROS_INFO("\nPublish the both arms joint state\n");
+    ROS_INFO("Reference Frame: %s", arms_.getPlanningFrame().c_str());
+    // ROS_INFO("Reference Frame: %s", arms_.getEndEffectorLink().c_str());
     std::vector<std::string> armsJointNames = arms_.getJoints();
     std::vector<double> armsJointValues = arms_.getCurrentJointValues();
     for(std::size_t i=0; i<armsJointNames.size(); i++){
@@ -81,28 +92,82 @@ DualArmRobot::DualArmRobot(ros::NodeHandle& nh) :
     }
 
 
-    /// 
-    ROS_INFO("-------- Get Joint Anglesm via Kinematic_state -------------------------");
-    // setup planning scene
-    // Look up the robot description on the ROS parameter server and construct a RobotModel to use
-    robot_model_loader::RobotModelLoader robot_model_loader("robot_description");
-    robot_model::RobotModelPtr kinematic_model = robot_model_loader.getModel();
-    ROS_INFO("Model frame %s", kinematic_model->getModelFrame().c_str());
-    planning_scene::PlanningScene planningScene(kinematic_model);
+    ROS_INFO("Planning test");
+    bool try_step;
+    moveit::planning_interface::MoveItErrorCode error;
 
-    // setup JointModelGroup
-    //ROS_INFO("Model frame: %s", kinematic_model->getModelFrame().c_str());
-    // Construct a RobotState that maintains the configuration of the robot.
-    robot_state::RobotStatePtr kinematic_state(new robot_state::RobotState(kinematic_model));
 
-    kinematic_state->setToDefaultValues();
-    const robot_state::JointModelGroup* joint_model_group = kinematic_model->getJointModelGroup(groupName);
-    const std::vector<std::string>& joint_names = joint_model_group->getJointModelNames();
-    std::vector<double> joint_values;
-    kinematic_state->copyJointGroupPositions(joint_model_group, joint_values);
-    for(std::size_t i=0; i<joint_names.size(); ++i){
-        ROS_INFO("Joint %s: %f", joint_names[i].c_str(), joint_values[i]);
+
+    // move both arms
+    try_step = true;
+    while (try_step && ros::ok()) {
+        // geometry_msgs::PoseStamped left_pose;
+        //left_pose.header.frame_id = "/world";
+        left_current_pose_.pose.position.x = left_current_pose_.pose.position.x-0.1;
+        // left_pose.pose.position.y = -0.116;
+        // left_pose.pose.position.z = 0.606; //0.4+0.1
+        // left_pose.pose.orientation.x = 0.429;
+        // left_pose.pose.orientation.y = 0.480;
+        // left_pose.pose.orientation.z = 0.601;
+        // left_pose.pose.orientation.w = 0.473;
+        // KDL::Rotation left_rot;  // generated to easily assign quaternion of pose
+        // left_rot.DoRotY(3.14 / 2);
+        // left_rot.GetQuaternion(left_pose.pose.orientation.x, left_pose.pose.orientation.y, left_pose.pose.orientation.z,
+        //                       left_pose.pose.orientation.w);
+
+        //geometry_msgs::PoseStamped right_pose;
+        //right_pose.header.frame_id = "/world";
+        right_current_pose_.pose.position.x = right_current_pose_.pose.position.x+0.1;;
+        // right_pose.pose.position.y = 0.085;
+        // right_pose.pose.position.z = 0.609;
+        // right_pose.pose.orientation.x = -0.001;
+        // right_pose.pose.orientation.y = -0.023;
+        // right_pose.pose.orientation.z = -0.679;
+        // right_pose.pose.orientation.w = 0.734;
+        KDL::Rotation right_rot;  // generated to easily assign quaternion of pose
+        //right_rot.DoRotY(3.14 / 2);
+        //right_rot.DoRotX(3.14);
+        // right_rot.GetQuaternion(right_pose.pose.orientation.x, right_pose.pose.orientation.y, right_pose.pose.orientation.z,
+        //                        right_pose.pose.orientation.w);
+
+        arms_.setStartState(left_current_robot_state_);
+        arms_.setPoseTarget(left_current_pose_, left_.getEndEffectorLink());
+        arms_.setPoseTarget(right_current_pose_, right_.getEndEffectorLink());
+        // The representation of a motion plan (as ROS messages), it's a structure.
+        moveit::planning_interface::MoveGroup::Plan arms_plan; 
+        // arms_ is a class of MoveGroup
+        ROS_INFO("Left arm target pose: %s  %f  %f  %f", 
+            left_current_pose_.header.frame_id.c_str(), 
+            left_current_pose_.pose.position.x,
+            left_current_pose_.pose.position.y,
+            left_current_pose_.pose.position.z);
+         ROS_INFO("\nRight arm target pose: %s  %f  %f  %f", 
+            right_current_pose_.header.frame_id.c_str(), 
+            right_current_pose_.pose.position.x,
+            right_current_pose_.pose.position.y,
+            right_current_pose_.pose.position.z);
+
+        error = arms_.plan(arms_plan);
+          // visualize plan
+        dual_arm_toolbox::TrajectoryProcessor::visualizePlan(arms_plan, 5);
+        if (error.val != 1) {
+            ROS_WARN("MoveIt!Error Code: %i", error.val);
+            try_step = try_again_question();
+            
+        } else {
+            ROS_INFO("Moving two arms into grasp position");
+            dual_arm_toolbox::TrajectoryProcessor::clean(arms_plan.trajectory_);
+            dual_arm_toolbox::TrajectoryProcessor::scaleTrajectorySpeed(arms_plan.trajectory_, 0.4);
+            execute(arms_plan);
+            try_step = false;
+        }
     }
+
+  
+    
+
+
+  // END_TUTORIAL
 
     // Controller Interface
     /*
@@ -122,7 +187,7 @@ robot_state::RobotState DualArmRobot::getCurrentRobotState(){
 
     // This is a convenience class for obtaining access to an instance of a l
 
-    planning_scene_monitor::LockedPlanningSceneRW ps(planning_scene_monitor_)
+    planning_scene_monitor::LockedPlanningSceneRW ps(planning_scene_monitor_);
 
     ps->getCurrentStateNonConst().update();
     // Definition of a kinematic state (both joint and link)
