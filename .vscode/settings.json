@@ -6,6 +6,22 @@
     "files.associations": {
         "array": "cpp",
         "slist": "cpp",
-        "initializer_list": "cpp"
+        "initializer_list": "cpp",
+        "cctype": "cpp",
+        "cmath": "cpp",
+        "csignal": "cpp",
+        "cstdarg": "cpp",
+        "cstddef": "cpp",
+        "cstdio": "cpp",
+        "cstdlib": "cpp",
+        "cstring": "cpp",
+        "ctime": "cpp",
+        "cwchar": "cpp",
+        "strstream": "cpp",
+        "iosfwd": "cpp",
+        "cinttypes": "cpp",
+        "cstdint": "cpp",
+        "typeindex": "cpp",
+        "cwctype": "cpp"
     }
 }

@@ -80,6 +80,30 @@ DualArmRobot::DualArmRobot(ros::NodeHandle& nh) :
         ROS_INFO("Joint %s: %f", armsJointNames[i].c_str(), armsJointValues[i]);
     }
 
+
+    /// 
+    ROS_INFO("-------- Get Joint Anglesm via Kinematic_state -------------------------");
+    // setup planning scene
+    // Look up the robot description on the ROS parameter server and construct a RobotModel to use
+    robot_model_loader::RobotModelLoader robot_model_loader("robot_description");
+    robot_model::RobotModelPtr kinematic_model = robot_model_loader.getModel();
+    ROS_INFO("Model frame %s", kinematic_model->getModelFrame().c_str());
+    planning_scene::PlanningScene planningScene(kinematic_model);
+
+    // setup JointModelGroup
+    //ROS_INFO("Model frame: %s", kinematic_model->getModelFrame().c_str());
+    // Construct a RobotState that maintains the configuration of the robot.
+    robot_state::RobotStatePtr kinematic_state(new robot_state::RobotState(kinematic_model));
+
+    kinematic_state->setToDefaultValues();
+    const robot_state::JointModelGroup* joint_model_group = kinematic_model->getJointModelGroup(groupName);
+    const std::vector<std::string>& joint_names = joint_model_group->getJointModelNames();
+    std::vector<double> joint_values;
+    kinematic_state->copyJointGroupPositions(joint_model_group, joint_values);
+    for(std::size_t i=0; i<joint_names.size(); ++i){
+        ROS_INFO("Joint %s: %f", joint_names[i].c_str(), joint_values[i]);
+    }
+
     // Controller Interface
     /*
 #ifdef SIMULATION
@@ -95,8 +119,11 @@ DualArmRobot::DualArmRobot(ros::NodeHandle& nh) :
 robot_state::RobotState DualArmRobot::getCurrentRobotState(){
     // Request planning scene state using a service call (service name)
     planning_scene_monitor_->requestPlanningSceneState("get_planning_scene");
-    // This is a convenience class for obtaining access to an instance of a locked PlanningScene. 
-    planning_scene_monitor::LockedPlanningSceneRW ps(planning_scene_monitor_);
+
+    // This is a convenience class for obtaining access to an instance of a l
+
+    planning_scene_monitor::LockedPlanningSceneRW ps(planning_scene_monitor_)
+
     ps->getCurrentStateNonConst().update();
     // Definition of a kinematic state (both joint and link)
     robot_state::RobotState current_state = ps->getCurrentState();
@@ -104,7 +131,8 @@ robot_state::RobotState DualArmRobot::getCurrentRobotState(){
 }
 // It's a class object
 moveit_msgs::RobotState DualArmRobot::getCurrentRobotStateMsg() {
-    // # This message contains information about the robot state, i.e. the positions of its joints and links
+    // # This message contains information about the robot state, i.e. the po
+
     // http://docs.ros.org/melodic/api/moveit_msgs/html/msg/RobotState.html
     moveit_msgs::RobotState current_state_msg;
     // Convert a MoveIt! robot state to a robot state message. 
