@@ -30,6 +30,75 @@ DualArmRobot::DualArmRobot(ros::NodeHandle& nh) :
     left_.allowReplanning(true);
     right_.allowReplanning(true);
 
+    // Controller Interface
+    /*#ifdef SIMULATION
+    left_controller_ = "fake_left_manipulator_controller";
+    right_controller_ = "fake_right_manipulator_controller";#endif
+
+    #ifndef SIMULATION*/
+    left_controller_ = "left/left_vel_based_pos_traj_controller";
+    right_controller_ = "right/right_vel_based_pos_traj_controller";
+    //#endif
+
+
+    // setup constraints
+    // moveit_msgs::JointConstraint jcm;
+    // moveit_msgs::Constraints left_constraints;
+    // moveit_msgs::Constraints right_constraints;
+    // moveit_msgs::Constraints both_constraints;
+    // ROS_INFO("Start to set up the constraints...");
+    // // when placing box on top ur5 can get blocked because wrist 1 reaches limit
+    // jcm.joint_name="left_wrist_1_joint";
+    // jcm.position = 0.0;
+    // jcm.tolerance_above = 3.0;
+    // jcm.tolerance_below = 3.0;
+    // jcm.weight = 1;
+    // left_constraints.joint_constraints.push_back(jcm);
+    // both_constraints.joint_constraints.push_back(jcm);
+    // left_.setPathConstraints(left_constraints);
+
+    // // ur5 can get blocked while placing without this constraint
+    // jcm.joint_name="left_elbow_joint";
+    // jcm.position = 0.0;
+    // jcm.tolerance_above = 3;
+    // jcm.tolerance_below = 3;
+    // jcm.weight = 0.5;
+    // left_constraints.joint_constraints.push_back(jcm);
+    // both_constraints.joint_constraints.push_back(jcm);
+    // left_.setPathConstraints(left_constraints);
+
+    // // ur5 sometimes blocks itself when picking the box on bottom, on top ur10 can get problems adapting its trajectory, this solve the issue.
+    // jcm.joint_name="left_shoulder_pan_joint";
+    // jcm.position = 0.0;
+    // jcm.tolerance_above = 3;
+    // jcm.tolerance_below = 3;
+    // jcm.weight = 1.0;
+    // left_constraints.joint_constraints.push_back(jcm);
+    // both_constraints.joint_constraints.push_back(jcm);
+    // left_.setPathConstraints(left_constraints);
+
+    // // ur5 sometimes blocks itself when picking the box on top, this should solve the issue
+    // jcm.joint_name="right_wrist_2_joint";
+    // jcm.position = 0;
+    // jcm.tolerance_above = 3;
+    // jcm.tolerance_below = 3;
+    // jcm.weight = 1.0;
+    // right_constraints.joint_constraints.push_back(jcm);
+    // both_constraints.joint_constraints.push_back(jcm);
+    // right_.setPathConstraints(right_constraints);
+
+    // jcm.joint_name="right_shoulder_pan_joint";
+    // jcm.position = 0.01;
+    // jcm.tolerance_above = 3;
+    // jcm.tolerance_below = 3;
+    // jcm.weight = 1.0;
+    // left_constraints.joint_constraints.push_back(jcm);
+    // both_constraints.joint_constraints.push_back(jcm);
+    // left_.setPathConstraints(left_constraints);
+
+    // arms_.setPathConstraints(both_constraints);
+    // ROS_INFO("Finished setting up the constraints...");
+
     // planning scene monitor
     // Subscribes to the topic planning_scene
     planning_scene_monitor_ = boost::make_shared<planning_scene_monitor::PlanningSceneMonitor>("robot_description");
@@ -66,6 +135,7 @@ DualArmRobot::DualArmRobot(ros::NodeHandle& nh) :
     ROS_INFO("Reference Frame: %s", right_.getEndEffectorLink().c_str());
     std::vector<double> rpy = right_.getCurrentRPY();
     ROS_INFO("RPY: R=%f, P=%f, Y=%f", rpy[0], rpy[1], rpy[2]);
+
     std::vector<std::string> rightJointNames = right_.getJoints();
     std::vector<double> rightJointValues = right_.getCurrentJointValues();
     for(std::size_t i=0; i<rightJointNames.size(); i++){
@@ -82,7 +152,8 @@ DualArmRobot::DualArmRobot(ros::NodeHandle& nh) :
     for(std::size_t i=0; i<leftJointNames.size(); i++){
         ROS_INFO("Joint %s: %f", leftJointNames[i].c_str(), radianToDegree(leftJointValues[i]));
     }
-    ROS_INFO("\nPublish the both arms joint state\n");
+
+    ROS_INFO("\nPublish both arms joint state\n");
     ROS_INFO("Reference Frame: %s", arms_.getPlanningFrame().c_str());
     // ROS_INFO("Reference Frame: %s", arms_.getEndEffectorLink().c_str());
     std::vector<std::string> armsJointNames = arms_.getJoints();
@@ -91,7 +162,7 @@ DualArmRobot::DualArmRobot(ros::NodeHandle& nh) :
         ROS_INFO("Joint %s: %f", armsJointNames[i].c_str(), armsJointValues[i]);
     }
 
-
+    
     ROS_INFO("Planning test");
     bool try_step;
     moveit::planning_interface::MoveItErrorCode error;
@@ -101,52 +172,68 @@ DualArmRobot::DualArmRobot(ros::NodeHandle& nh) :
     // move both arms
     try_step = true;
     while (try_step && ros::ok()) {
-        // geometry_msgs::PoseStamped left_pose;
-        //left_pose.header.frame_id = "/world";
-        left_current_pose_.pose.position.x = left_current_pose_.pose.position.x-0.1;
-        // left_pose.pose.position.y = -0.116;
-        // left_pose.pose.position.z = 0.606; //0.4+0.1
-        // left_pose.pose.orientation.x = 0.429;
-        // left_pose.pose.orientation.y = 0.480;
-        // left_pose.pose.orientation.z = 0.601;
-        // left_pose.pose.orientation.w = 0.473;
+        geometry_msgs::PoseStamped left_pose;
+        left_pose.header.frame_id = "/world";
+        left_pose.pose.position.x = left_current_pose_.pose.position.x;
+        left_pose.pose.position.y = left_current_pose_.pose.position.y;
+        left_pose.pose.position.z = left_current_pose_.pose.position.z-0.2; //0.4+0.1
+        left_pose.pose.orientation.x = left_current_pose_.pose.orientation.x;
+        left_pose.pose.orientation.y = left_current_pose_.pose.orientation.y;
+        left_pose.pose.orientation.z = left_current_pose_.pose.orientation.z;
+        left_pose.pose.orientation.w = left_current_pose_.pose.orientation.w;
         // KDL::Rotation left_rot;  // generated to easily assign quaternion of pose
         // left_rot.DoRotY(3.14 / 2);
         // left_rot.GetQuaternion(left_pose.pose.orientation.x, left_pose.pose.orientation.y, left_pose.pose.orientation.z,
         //                       left_pose.pose.orientation.w);
 
-        //geometry_msgs::PoseStamped right_pose;
-        //right_pose.header.frame_id = "/world";
-        right_current_pose_.pose.position.x = right_current_pose_.pose.position.x+0.1;;
-        // right_pose.pose.position.y = 0.085;
-        // right_pose.pose.position.z = 0.609;
-        // right_pose.pose.orientation.x = -0.001;
-        // right_pose.pose.orientation.y = -0.023;
-        // right_pose.pose.orientation.z = -0.679;
-        // right_pose.pose.orientation.w = 0.734;
-        KDL::Rotation right_rot;  // generated to easily assign quaternion of pose
+        geometry_msgs::PoseStamped right_pose;
+        right_pose.header.frame_id = "/world";
+        right_pose.pose.position.x = right_current_pose_.pose.position.x;
+        right_pose.pose.position.y = right_current_pose_.pose.position.y;
+        right_pose.pose.position.z = right_current_pose_.pose.position.z-0.2;
+        right_pose.pose.orientation.x = right_current_pose_.pose.orientation.x;
+        right_pose.pose.orientation.y = right_current_pose_.pose.orientation.y;
+        right_pose.pose.orientation.z = right_current_pose_.pose.orientation.z;
+        right_pose.pose.orientation.w = right_current_pose_.pose.orientation.w;
+        // KDL::Rotation right_rot;  // generated to easily assign quaternon of pose
         //right_rot.DoRotY(3.14 / 2);
         //right_rot.DoRotX(3.14);
         // right_rot.GetQuaternion(right_pose.pose.orientation.x, right_pose.pose.orientation.y, right_pose.pose.orientation.z,
         //                        right_pose.pose.orientation.w);
-
-        arms_.setStartState(left_current_robot_state_);
-        arms_.setPoseTarget(left_current_pose_, left_.getEndEffectorLink());
-        arms_.setPoseTarget(right_current_pose_, right_.getEndEffectorLink());
+        //  \brief If a different start state should be considered instead of the current state of the robot, 
+        //  this function sets that state
+        // arms_.setStartState(left_current_robot_state_);
+        arms_.setPoseTarget(left_pose, left_.getEndEffectorLink());
+        // arms_.setPoseTarget(right_current_pose_, right_.getEndEffectorLink());
         // The representation of a motion plan (as ROS messages), it's a structure.
         moveit::planning_interface::MoveGroup::Plan arms_plan; 
+        moveit::planning_interface::MoveGroup::Plan left_plan; 
+        moveit::planning_interface::MoveGroup::Plan right_plan; 
         // arms_ is a class of MoveGroup
-        ROS_INFO("Left arm target pose: %s  %f  %f  %f", 
-            left_current_pose_.header.frame_id.c_str(), 
-            left_current_pose_.pose.position.x,
-            left_current_pose_.pose.position.y,
-            left_current_pose_.pose.position.z);
-         ROS_INFO("\nRight arm target pose: %s  %f  %f  %f", 
-            right_current_pose_.header.frame_id.c_str(), 
-            right_current_pose_.pose.position.x,
-            right_current_pose_.pose.position.y,
-            right_current_pose_.pose.position.z);
+        ROS_INFO("Left arm EndEffector %s  target pose: %s  %f  %f  %f, qx=%f, qy=%f, qz=%f, qw=%f", 
+            left_.getEndEffectorLink().c_str(),
+            left_pose.header.frame_id.c_str(), 
+            left_pose.pose.position.x,
+            left_pose.pose.position.y,
+            left_pose.pose.position.z,
+            left_pose.pose.orientation.x
+            ,left_pose.pose.orientation.y
+            ,left_pose.pose.orientation.z
+            ,left_pose.pose.orientation.w);
+        // right_.setStartState(left_current_robot_state_);
+        right_.setPoseTarget(right_pose, right_.getEndEffectorLink());
+         ROS_INFO("\nRight arm EndEffector %s  target pose: %s  x=%f  y=%f  z=%f, qx=%f, qy=%f, qz=%f, qw=%f", 
+            right_.getEndEffectorLink().c_str(),
+            right_pose.header.frame_id.c_str(), 
+            right_pose.pose.position.x,
+            right_pose.pose.position.y,
+            right_pose.pose.position.z,
+            right_pose.pose.orientation.x
+            ,right_pose.pose.orientation.y
+            ,right_pose.pose.orientation.z
+            ,right_pose.pose.orientation.w);
 
+        // error = arms_.plan(arms_plan);
         error = arms_.plan(arms_plan);
           // visualize plan
         dual_arm_toolbox::TrajectoryProcessor::visualizePlan(arms_plan, 5);
@@ -158,27 +245,17 @@ DualArmRobot::DualArmRobot(ros::NodeHandle& nh) :
             ROS_INFO("Moving two arms into grasp position");
             dual_arm_toolbox::TrajectoryProcessor::clean(arms_plan.trajectory_);
             dual_arm_toolbox::TrajectoryProcessor::scaleTrajectorySpeed(arms_plan.trajectory_, 0.4);
+            // right_plan.trajectory_.joint_trajectory.time_from_start
             execute(arms_plan);
             try_step = false;
         }
     }
 
-  
-    
 
 
   // END_TUTORIAL
 
-    // Controller Interface
-    /*
-#ifdef SIMULATION
-    left_controller_ = "fake_left_manipulator_controller";
-    right_controller_ = "fake_right_manipulator_controller";
-#endif
-#ifndef SIMULATION*/
-    left_controller_ = "left/left_vel_based_pos_traj_controller";
-    right_controller_ = "right/right_vel_based_pos_traj_controller";
-//#endif
+
 }
 
 robot_state::RobotState DualArmRobot::getCurrentRobotState(){
@@ -1336,6 +1413,7 @@ bool DualArmRobot::execute(moveit::planning_interface::MoveGroup::Plan plan) {
         else ROS_INFO("Checked path. Path is valid. Executing...");
     }*/
     /// Print out the joint trajectory infomation
+    // 
     if (plan_left.trajectory_.joint_trajectory.joint_names.size() > 0){
         ROS_INFO("Trajectory sent to left arm");
         success_left = handle_left.sendTrajectory(plan_left.trajectory_);

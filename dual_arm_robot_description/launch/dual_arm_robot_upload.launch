@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-  <arg name="limited" default="false"/>
+  <arg name="limited" default="true"/>
   <arg name="prefix_left" default="left_"/>
   <arg name="prefix_right" default="right_"/>
 
