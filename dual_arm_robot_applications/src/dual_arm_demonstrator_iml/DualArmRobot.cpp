@@ -204,7 +204,7 @@ DualArmRobot::DualArmRobot(ros::NodeHandle& nh) :
         //  this function sets that state
         // arms_.setStartState(left_current_robot_state_);
         arms_.setPoseTarget(left_pose, left_.getEndEffectorLink());
-        // arms_.setPoseTarget(right_current_pose_, right_.getEndEffectorLink());
+        arms_.setPoseTarget(right_pose, right_.getEndEffectorLink());
         // The representation of a motion plan (as ROS messages), it's a structure.
         moveit::planning_interface::MoveGroup::Plan arms_plan; 
         moveit::planning_interface::MoveGroup::Plan left_plan; 
@@ -234,6 +234,14 @@ DualArmRobot::DualArmRobot(ros::NodeHandle& nh) :
             ,right_pose.pose.orientation.w);
 
         // error = arms_.plan(arms_plan);
+
+    ROS_INFO("Get active joints:");
+    // ROS_INFO("Reference Frame: %s", arms_.getEndEffectorLink().c_str());
+    std::vector<std::string> armsJointNames = arms_.getActiveJoints();
+    for(std::size_t i=0; i<armsJointNames.size(); i++){
+        ROS_INFO("Joint %s: ", armsJointNames[i].c_str());
+    }
+
         error = arms_.plan(arms_plan);
           // visualize plan
         dual_arm_toolbox::TrajectoryProcessor::visualizePlan(arms_plan, 5);
@@ -1260,8 +1268,8 @@ void DualArmRobot::allowedArmCollision(bool enable, std::string left_attachedObj
     // left_links.push_back(left_attachedObject.c_str());
 
     std::vector<std::string> right_links;
-    right_links.push_back("right_ee_link");
-    right_links.push_back("right_forearm_link");
+    // right_links.push_back("right_ee_link");
+    // right_links.push_back("right_forearm_link");
     // right_links.push_back("right_tool0");
     right_links.push_back("right_upper_arm_link");
     right_links.push_back("right_wrist_1_link");
