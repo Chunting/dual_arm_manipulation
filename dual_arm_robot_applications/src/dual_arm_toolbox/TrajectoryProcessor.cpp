@@ -28,6 +28,7 @@ bool TrajectoryProcessor::fuse(moveit_msgs::RobotTrajectory &arms_trajectory,
     return true;
 }
 // splits one trajectory for both arms into two trajectory for each arm
+// If the arms_trajectory only contains one arm's trajectory, the other arm's trajectory will be ignored by the comparison of arm prefix
 bool TrajectoryProcessor::split(moveit_msgs::RobotTrajectory arms_trajectory,
                                 moveit_msgs::RobotTrajectory &arm1_trajectory,
                                 moveit_msgs::RobotTrajectory &arm2_trajectory,
@@ -52,6 +53,7 @@ bool TrajectoryProcessor::split(moveit_msgs::RobotTrajectory arms_trajectory,
     arm2_trajectory.joint_trajectory.points.resize(arms_trajectory.joint_trajectory.points.size());
     for (unsigned int i = 0; i < arms_trajectory.joint_trajectory.points.size(); i++){
         for (unsigned int j = 0; j < arms_trajectory.joint_trajectory.joint_names.size(); j++){
+
             if (arms_trajectory.joint_trajectory.joint_names[j].compare(0,arm1_prefix.size(),arm1_prefix)==0){
                 /*arm1_trajectory.joint_trajectory.points[i].accelerations.push_back(
                         arms_trajectory.joint_trajectory.points[i].accelerations[j]);
@@ -80,7 +82,7 @@ bool TrajectoryProcessor::split(moveit_msgs::RobotTrajectory arms_trajectory,
     }
     return true;
 }
-
+// Check the time sequence in the trajectory points
 void TrajectoryProcessor::clean(moveit_msgs::RobotTrajectory &trajectory) {
     for (unsigned int i = 1; i < trajectory.joint_trajectory.points.size(); i++){
         if (trajectory.joint_trajectory.points[i-1].time_from_start >= trajectory.joint_trajectory.points[i].time_from_start){

@@ -68,13 +68,13 @@
 	<link name="table">
 		<visual>
 			<geometry>
-				<box size="0.8 1 0.87" />
+				<box size="0.8 1 0.94" />
 			</geometry>
 			<material name="orange_transparent"/>
 		</visual>
 		<collision>
 			<geometry>
-		<box size="0.8 1 0.8" />
+		<box size="1 1 1" />
 		</geometry>
 		<material name="blue_transparent"/>
 		</collision>
@@ -82,7 +82,7 @@
   <joint name="table_joint" type="fixed" >
     <parent link="world" />
     <child link="table" />
-    <origin xyz="-1.1 0 0.45" rpy="0 0 0" />
+    <origin xyz="-1.1 0 0.47" rpy="0 0 0" />
 </joint>
 
   <!-- End of stand macros-->

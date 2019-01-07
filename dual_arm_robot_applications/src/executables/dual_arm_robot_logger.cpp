@@ -21,9 +21,10 @@ int main(int argc, char **argv){
     ur_namespaces.push_back("left");
     ur_namespaces.push_back("right");
     UR_Logger ur_logger(nh, ur_namespaces);
-
+    // sampling rate, hz
     ur_logger.start(20);
-    ros::Duration(6).sleep();
+    // sampling time, second
+    ros::Duration(60).sleep();
     ur_logger.stop();
 
     ros::shutdown();

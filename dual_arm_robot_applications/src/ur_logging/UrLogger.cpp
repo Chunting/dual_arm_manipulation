@@ -135,7 +135,7 @@ std::string UR_Logger::data_line(UR_Message_Listener ur_listener){
     //std::vector<double> state_pos = last_state_msg_.position;
     if (ur_listener.last_state_msg_.position.size() == 6){        
         for (int i = 0; i < 6; i++ ){
-            converter << delimiter_ <<ur_listener.last_state_msg_.position[i];
+            converter << delimiter_ <<ur_listener.last_state_msg_.position[i]*(180/3.14159);
         }
     }
     else {
@@ -144,7 +144,7 @@ std::string UR_Logger::data_line(UR_Message_Listener ur_listener){
     // append state velocity
     if (ur_listener.last_state_msg_.velocity.size() == 6){
         for (int i = 0; i < 6; i++ ){
-            converter << delimiter_ << ur_listener.last_state_msg_.velocity[i];
+            converter << delimiter_ << ur_listener.last_state_msg_.velocity[i]*(180/3.14159);
         }
     }
     else {

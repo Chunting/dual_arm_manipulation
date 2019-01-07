@@ -41,15 +41,38 @@ int main(int argc, char **argv) {
     dual_arm_demonstrator_iml::SceneManager sceneManager(nh);
     sceneManager.setupScene();
     ROS_INFO("In the dual_arm_robot_demonstration...");
+    
     // move home
     dualArmRobot.moveHome();
-   /*
+   
     // setup constraints
     moveit_msgs::JointConstraint jcm;
     moveit_msgs::Constraints left_constraints;
     moveit_msgs::Constraints right_constraints;
     moveit_msgs::Constraints both_constraints;
     ROS_INFO("Start to set up the constraints...");
+
+    // ur5 sometimes blocks itself when picking the box on bottom, on top ur10 can get problems adapting its trajectory, this solve the issue.
+    jcm.joint_name="left_shoulder_pan_joint";
+    jcm.position = 0.0;
+    jcm.tolerance_above = 0.5;
+    jcm.tolerance_below = 2;
+    jcm.weight = 1.0;
+    left_constraints.joint_constraints.push_back(jcm);
+    both_constraints.joint_constraints.push_back(jcm);
+    dualArmRobot.left_.setPathConstraints(left_constraints);
+
+    // ur5 can get blocked while placing without this constraint
+    jcm.joint_name="left_elbow_joint";
+    jcm.position = 0.0;
+    jcm.tolerance_above = 3;
+    jcm.tolerance_below = 0.1;
+    jcm.weight = 0.5;
+    left_constraints.joint_constraints.push_back(jcm);
+    both_constraints.joint_constraints.push_back(jcm);
+    dualArmRobot.left_.setPathConstraints(left_constraints);
+
+    
     // when placing box on top ur5 can get blocked because wrist 1 reaches limit
     jcm.joint_name="left_wrist_1_joint";
     jcm.position = 0.0;
@@ -60,19 +83,8 @@ int main(int argc, char **argv) {
     both_constraints.joint_constraints.push_back(jcm);
     dualArmRobot.left_.setPathConstraints(left_constraints);
 
-    // ur5 can get blocked while placing without this constraint
-    jcm.joint_name="left_elbow_joint";
-    jcm.position = 0.0;
-    jcm.tolerance_above = 3;
-    jcm.tolerance_below = 3;
-    jcm.weight = 0.5;
-    left_constraints.joint_constraints.push_back(jcm);
-    both_constraints.joint_constraints.push_back(jcm);
-    dualArmRobot.left_.setPathConstraints(left_constraints);
-
-    // ur5 sometimes blocks itself when picking the box on bottom, on top ur10 can get problems adapting its trajectory, this solve the issue.
-    jcm.joint_name="left_shoulder_pan_joint";
-    jcm.position = 0.0;
+    jcm.joint_name="right_shoulder_pan_joint";
+    jcm.position = 0.01;
     jcm.tolerance_above = 3;
     jcm.tolerance_below = 3;
     jcm.weight = 1.0;
@@ -90,18 +102,11 @@ int main(int argc, char **argv) {
     both_constraints.joint_constraints.push_back(jcm);
     dualArmRobot.right_.setPathConstraints(right_constraints);
 
-    jcm.joint_name="right_shoulder_pan_joint";
-    jcm.position = 0.01;
-    jcm.tolerance_above = 3;
-    jcm.tolerance_below = 3;
-    jcm.weight = 1.0;
-    left_constraints.joint_constraints.push_back(jcm);
-    both_constraints.joint_constraints.push_back(jcm);
-    dualArmRobot.left_.setPathConstraints(left_constraints);
+    
 
     dualArmRobot.arms_.setPathConstraints(both_constraints);
     ROS_INFO("Finished setting up the constraints...");
-    */
+    
     // Eval
     ros::Time before_pick_7;
     ros::Duration manipulation_7;
@@ -110,49 +115,50 @@ int main(int argc, char **argv) {
     before_pick_7 = ros::Time::now();
     // Pick box7 on top
     geometry_msgs::Vector3Stamped direction;
-    direction.header.frame_id = "table";
+    direction.header.frame_id = "world";
     direction.vector.x = 0;
-    direction.vector.y = 0;
-    direction.vector.z = 0.1;
+    direction.vector.y = 0.3;
+    direction.vector.z = 0;
     if (!dualArmRobot.pickBox("box7", direction)) {
         ROS_WARN("Pick failed");
         ROS_ERROR("Can't execute demonstration without successful pick. Demonstration aborted.");
         return 0;
     }
+    
 
     // box7 goal pose
-    // geometry_msgs::Pose box7_goal_pose;
-    // box7_goal_pose.position.x = 0.02 + sceneManager.box_.dimensions[0]/2;
-    // box7_goal_pose.position.y = 0.02 + sceneManager.box_.dimensions[1]/2 - 0.005;
-    // box7_goal_pose.position.z = 0.0155+0.52+0.0155+sceneManager.box_.dimensions[2]/2 + 0.001;
-    // geometry_msgs::PoseStamped box7_goal_pose_stamped;
-    // box7_goal_pose_stamped.header.frame_id = "table";
-    // box7_goal_pose_stamped.pose = box7_goal_pose;
+    geometry_msgs::Pose box7_goal_pose;
+    box7_goal_pose.position.x = 0.02 + sceneManager.box_.dimensions[0]/2;
+    box7_goal_pose.position.y = 0.02 + sceneManager.box_.dimensions[1]/2 - 0.005;
+    box7_goal_pose.position.z = 0.0155+0.52+0.0155+sceneManager.box_.dimensions[2]/2 + 0.001;
+    geometry_msgs::PoseStamped box7_goal_pose_stamped;
+    box7_goal_pose_stamped.header.frame_id = "world";
+    box7_goal_pose_stamped.pose = box7_goal_pose;
 
 
-    // // clear constraints of ur5
-    // dualArmRobot.left_.clearPathConstraints();
+    // clear constraints of ur5
+    dualArmRobot.left_.clearPathConstraints();
 
-    // // Place box7
-    // geometry_msgs::Vector3 go_down;
-    // go_down.x =0;
-    // go_down.y =0;
-    // go_down.z =-0.15;
-    // if (!dualArmRobot.placeBox("box7", box7_goal_pose_stamped, go_down)){
-    //     ROS_WARN("Place Box failed");
-    //     ROS_ERROR("Demonstration aborted to avoid further problems");
-    //     return  0;
-    // }
+    // Place box7
+    geometry_msgs::Vector3 go_down;
+    go_down.x =0;
+    go_down.y =0;
+    go_down.z =-0.15;
+    if (!dualArmRobot.placeBox("box7", box7_goal_pose_stamped, go_down)){
+        ROS_WARN("Place Box failed");
+        ROS_ERROR("Demonstration aborted to avoid further problems");
+        return  0;
+    }
 
-    // // evaluation
-    // after_place_7 = ros::Time::now();
-    // manipulation_7 = after_place_7 - before_pick_7;
-    // ROS_INFO(":::::: VALUES EVALUATION ::::::");
-    // ROS_INFO("manipulation box 7 took: %li nsec", manipulation_7.toNSec());
-    // sleep(5);
-/*
+    // evaluation
+    after_place_7 = ros::Time::now();
+    manipulation_7 = after_place_7 - before_pick_7;
+    ROS_INFO(":::::: VALUES EVALUATION ::::::");
+    ROS_INFO("manipulation box 7 took: %li nsec", manipulation_7.toNSec());
+    sleep(5);
+
     dualArmRobot.moveHome();
-   
+   /*
     // setup constraints
     // ur5 sometimes blocks itself when moving the box on bottom, this should solve the issue
     left_constraints.joint_constraints.clear();

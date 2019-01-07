@@ -27,8 +27,10 @@ void SceneManager::addBox(std::string id, geometry_msgs::Pose pose, std::string 
     // TODO: attach object?
     // Define the attached object message
     moveit_msgs::AttachedCollisionObject attached_object;
-
+    /* The conllisionObject will be attached with a fixed joint to this link */
     attached_object.link_name = link_name;
+
+    /* The header must contain a valid TF frame */
     attached_object.object.header.frame_id = frame_id;
     attached_object.object.id = id;
 
@@ -149,13 +151,14 @@ void SceneManager::setupScene() {
     dual_arm_demonstrator_iml::SceneManager::addBox("box6", box6_pose, "shelf", "shelf");
     */
     // add box7
+    /* Box position in world frame */
     geometry_msgs::Pose box7_pose;
-    box7_pose.position.x = 0.4 - box_.dimensions[0]/2;
+    box7_pose.position.x = -0.7 - box_.dimensions[0]/2;
     box7_pose.position.y = 0;
-    box7_pose.position.z = 0.435 + box_.dimensions[2]/2 + 0.001;
+    box7_pose.position.z = 0.94+box_.dimensions[2]/2 + 0.005;
     // KDL::Rotation box7_rot;
     // box7_rot.GetQuaternion(box7_pose.orientation.x, box7_pose.orientation.y, box7_pose.orientation.z, box7_pose.orientation.w);
-    dual_arm_demonstrator_iml::SceneManager::addBox("box7", box7_pose, "table", "table");
+    dual_arm_demonstrator_iml::SceneManager::addBox("box7", box7_pose, "table", "world");
 }
 
 void SceneManager::setupSceneLift() {

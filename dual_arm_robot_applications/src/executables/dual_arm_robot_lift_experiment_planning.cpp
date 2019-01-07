@@ -34,17 +34,17 @@ int main(int argc, char **argv) {
     ROS_WARN("Robot offline");
     #endif
 
-    // Dual Arm Robot Setup
+    /* Dual Arm Robot Setup */
     dual_arm_demonstrator_iml::DualArmRobot dualArmRobot(nh);
 
-    // Scene Setup
+    /* Scene Setup */
     dual_arm_demonstrator_iml::SceneManager sceneManager(nh);
     
     // Planning to a joint-space goal
     std::vector<double> group_joint_values;
     // read the current joint angles
-    //group_joint_values = dualArmRobot.getJointAngles("arms");
-    group_joint_values.clear();
+    group_joint_values = dualArmRobot.getJointAngles("arms");
+    //group_joint_values.clear();
 
     // with or without collision objects?
     // sceneManager.setupSceneLiftCO();
@@ -52,27 +52,70 @@ int main(int argc, char **argv) {
 
     // move home
     // sleep(5);
-    // dualArmRobot.moveHome();
-    // sleep(5);
-    //group_joint_values = dualArmRobot.getJointAngles("arms");
+    dualArmRobot.moveHome();
+    sleep(5);
+    group_joint_values = dualArmRobot.getJointAngles("arms");
 
-/*
+
     // setup constraints
     moveit_msgs::JointConstraint jcm;
     moveit_msgs::Constraints left_constraints;
     moveit_msgs::Constraints right_constraints;
-    // Constrain the position of a joint to be within a certain bound
-    // the bound to be achieved is [position-tolerance_below, position+tolerance_above]
+    moveit_msgs::Constraints both_constraints;
+    ROS_INFO("Start to set up the constraints...");
+
+    // ur5 sometimes blocks itself when picking the box on bottom, on top ur10 can get problems adapting its trajectory, this solve the issue.
+    jcm.joint_name="left_shoulder_pan_joint";
+    jcm.position = 0.0;
+    jcm.tolerance_above = 0.5;
+    jcm.tolerance_below = 2;
+    jcm.weight = 1.0;
+    left_constraints.joint_constraints.push_back(jcm);
+    both_constraints.joint_constraints.push_back(jcm);
+    dualArmRobot.left_.setPathConstraints(left_constraints);
+
+    // ur5 can get blocked while placing without this constraint
+    jcm.joint_name="left_elbow_joint";
+    jcm.position = 0.0;
+    jcm.tolerance_above = 3;
+    jcm.tolerance_below = 0.1;
+    jcm.weight = 0.5;
+    left_constraints.joint_constraints.push_back(jcm);
+    both_constraints.joint_constraints.push_back(jcm);
+    dualArmRobot.left_.setPathConstraints(left_constraints);
+
+    
+    // when placing box on top ur5 can get blocked because wrist 1 reaches limit
+    jcm.joint_name="left_wrist_1_joint";
+    jcm.position = 0.0;
+    jcm.tolerance_above = 3.0;
+    jcm.tolerance_below = 3.0;
+    jcm.weight = 1;
+    left_constraints.joint_constraints.push_back(jcm);
+    both_constraints.joint_constraints.push_back(jcm);
+    dualArmRobot.left_.setPathConstraints(left_constraints);
+
     jcm.joint_name="right_shoulder_pan_joint";
-    jcm.position = 2.4;
-    jcm.tolerance_above = 0.7;
-    jcm.tolerance_below = 2.5;
-    // A weighting facor for this constraint
-    // (denotes relative importance to other constraints. Closer to zero means less important)
-    jcm.weight = 1.0;   
+    jcm.position = 0.01;
+    jcm.tolerance_above = 3;
+    jcm.tolerance_below = 3;
+    jcm.weight = 1.0;
+    left_constraints.joint_constraints.push_back(jcm);
+    both_constraints.joint_constraints.push_back(jcm);
+    dualArmRobot.left_.setPathConstraints(left_constraints);
+
+    jcm.joint_name="right_wrist_2_joint";
+    jcm.position = 0;
+    jcm.tolerance_above = 3;
+    jcm.tolerance_below = 3;
+    jcm.weight = 1.0;
     right_constraints.joint_constraints.push_back(jcm);
+    both_constraints.joint_constraints.push_back(jcm);
     dualArmRobot.right_.setPathConstraints(right_constraints);
-*/
+
+    dualArmRobot.arms_.setPathConstraints(both_constraints);
+    ROS_INFO("Finished setting up the constraints...");
+
     /*
     moveit_msgs::JointConstraint jcm;
     moveit_msgs::Constraints left_constraints;

@@ -124,6 +124,9 @@ namespace dual_arm_demonstrator_iml {
         // Planning to a joint-space goal
         std::vector<double> getJointAngles(std::string groupName);
 
+        moveit_msgs::RobotState getPositionIK(std::string& groupName, moveit_msgs::RobotState& seed_robot_state, geometry_msgs::PoseStamped poseIK);
+
+
         double radianToDegree(double radian){
             
             return (radian*(180/PI));
