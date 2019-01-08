@@ -74,7 +74,7 @@
 		</visual>
 		<collision>
 			<geometry>
-		<box size="1 1 1" />
+			<box size="1 1 0.95" />
 		</geometry>
 		<material name="blue_transparent"/>
 		</collision>

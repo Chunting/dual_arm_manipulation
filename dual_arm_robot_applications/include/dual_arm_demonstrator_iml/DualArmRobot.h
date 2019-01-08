@@ -59,12 +59,23 @@ namespace dual_arm_demonstrator_iml {
         ros::NodeHandle nh_;
         std::string left_controller_;
         std::string right_controller_;
-        moveit_msgs::RobotState left_current_robot_state_; // mounted with force sensor
+        moveit_msgs::RobotState current_dual_arm_state_; // mounted with force sensor
         double ee_dist_;    // distance to object because of endeffector size
         KDL::Frame arms_offset_;    // offset between arms
         bool try_again_question();
         // PlanningSceneMonitorPtr is aka std::shared_ptr<planning_scene_monitor::PlanningSceneMonitor>
         planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
+
+        robot_model_loader::RobotModelLoader robotModelLoader;
+        robot_model::RobotModelPtr kinematic_model;
+        //planning_scene::PlanningScene planningScene;
+
+        // setup JointModelGroup
+        // Construct a RobotState that maintains the configuration of the robot.
+        robot_state::RobotStatePtr kinematic_state;
+        // Represents the robot model for a particular group.
+        const robot_state::JointModelGroup* left_joint_model_group;
+        const robot_state::JointModelGroup* right_joint_model_group;
 
     public:
         DualArmRobot(ros::NodeHandle &nh);

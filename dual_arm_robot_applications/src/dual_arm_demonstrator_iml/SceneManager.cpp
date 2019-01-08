@@ -155,7 +155,7 @@ void SceneManager::setupScene() {
     geometry_msgs::Pose box7_pose;
     box7_pose.position.x = -0.7 - box_.dimensions[0]/2;
     box7_pose.position.y = 0;
-    box7_pose.position.z = 0.94+box_.dimensions[2]/2 + 0.005;
+    box7_pose.position.z = 0.94+box_.dimensions[2]/2 + 0.01;
     // KDL::Rotation box7_rot;
     // box7_rot.GetQuaternion(box7_pose.orientation.x, box7_pose.orientation.y, box7_pose.orientation.z, box7_pose.orientation.w);
     dual_arm_demonstrator_iml::SceneManager::addBox("box7", box7_pose, "table", "world");

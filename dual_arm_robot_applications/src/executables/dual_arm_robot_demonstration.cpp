@@ -127,35 +127,35 @@ int main(int argc, char **argv) {
     
 
     // box7 goal pose
-    geometry_msgs::Pose box7_goal_pose;
-    box7_goal_pose.position.x = 0.02 + sceneManager.box_.dimensions[0]/2;
-    box7_goal_pose.position.y = 0.02 + sceneManager.box_.dimensions[1]/2 - 0.005;
-    box7_goal_pose.position.z = 0.0155+0.52+0.0155+sceneManager.box_.dimensions[2]/2 + 0.001;
-    geometry_msgs::PoseStamped box7_goal_pose_stamped;
-    box7_goal_pose_stamped.header.frame_id = "world";
-    box7_goal_pose_stamped.pose = box7_goal_pose;
+    // geometry_msgs::Pose box7_goal_pose;
+    // box7_goal_pose.position.x = 0.02 + sceneManager.box_.dimensions[0]/2;
+    // box7_goal_pose.position.y = 0.02 + sceneManager.box_.dimensions[1]/2 - 0.005;
+    // box7_goal_pose.position.z = 0.0155+0.52+0.0155+sceneManager.box_.dimensions[2]/2 + 0.001;
+    // geometry_msgs::PoseStamped box7_goal_pose_stamped;
+    // box7_goal_pose_stamped.header.frame_id = "world";
+    // box7_goal_pose_stamped.pose = box7_goal_pose;
 
 
-    // clear constraints of ur5
-    dualArmRobot.left_.clearPathConstraints();
+    // // clear constraints of ur5
+    // dualArmRobot.left_.clearPathConstraints();
 
-    // Place box7
-    geometry_msgs::Vector3 go_down;
-    go_down.x =0;
-    go_down.y =0;
-    go_down.z =-0.15;
-    if (!dualArmRobot.placeBox("box7", box7_goal_pose_stamped, go_down)){
-        ROS_WARN("Place Box failed");
-        ROS_ERROR("Demonstration aborted to avoid further problems");
-        return  0;
-    }
+    // // Place box7
+    // geometry_msgs::Vector3 go_down;
+    // go_down.x =0;
+    // go_down.y =0;
+    // go_down.z =-0.15;
+    // if (!dualArmRobot.placeBox("box7", box7_goal_pose_stamped, go_down)){
+    //     ROS_WARN("Place Box failed");
+    //     ROS_ERROR("Demonstration aborted to avoid further problems");
+    //     return  0;
+    // }
 
-    // evaluation
-    after_place_7 = ros::Time::now();
-    manipulation_7 = after_place_7 - before_pick_7;
-    ROS_INFO(":::::: VALUES EVALUATION ::::::");
-    ROS_INFO("manipulation box 7 took: %li nsec", manipulation_7.toNSec());
-    sleep(5);
+    // // evaluation
+    // after_place_7 = ros::Time::now();
+    // manipulation_7 = after_place_7 - before_pick_7;
+    // ROS_INFO(":::::: VALUES EVALUATION ::::::");
+    // ROS_INFO("manipulation box 7 took: %li nsec", manipulation_7.toNSec());
+    // sleep(5);
 
     dualArmRobot.moveHome();
    /*

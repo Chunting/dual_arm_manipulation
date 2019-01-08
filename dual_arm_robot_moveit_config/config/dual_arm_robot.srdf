@@ -44,7 +44,7 @@
         <joint name="left_elbow_joint" value="0.694101" />
         <joint name="left_wrist_1_joint" value="-1.650266" />
         <joint name="left_wrist_2_joint" value="-1.679242" />
-        <joint name="left_wrist_3_joint" value="0" />
+        <joint name="left_wrist_3_joint" value="1.05" />
     </group_state>
     <group_state name="right_up" group="right_manipulator">
         <joint name="right_shoulder_pan_joint" value="1.694684" />
@@ -52,7 +52,7 @@
         <joint name="right_elbow_joint" value="-0.637897" />
         <joint name="right_wrist_1_joint" value="-1.580569" />
         <joint name="right_wrist_2_joint" value="1.467946" />
-        <joint name="right_wrist_3_joint" value="0" />
+        <joint name="right_wrist_3_joint" value="1.05" />
     </group_state>
     <group_state name="arms_up" group="arms">
         <joint name="left_shoulder_pan_joint" value="-1.5718435" />
@@ -60,13 +60,13 @@
         <joint name="left_elbow_joint" value="0.75485489" />
         <joint name="left_wrist_1_joint" value="-2.31151402" />
         <joint name="left_wrist_2_joint" value="-1.68720976" />
-        <joint name="left_wrist_3_joint" value="0" />
+        <joint name="left_wrist_3_joint" value="1.05" />
         <joint name="right_shoulder_pan_joint" value="1.694684" />
         <joint name="right_shoulder_lift_joint" value="-1.813046" />
         <joint name="right_elbow_joint" value="-0.637897" />
         <joint name="right_wrist_1_joint" value="-1.580569" />
         <joint name="right_wrist_2_joint" value="1.467946" />
-        <joint name="right_wrist_3_joint" value="0" />
+        <joint name="right_wrist_3_joint" value="1.05" />
     </group_state>
     <!--END EFFECTOR: Purpose: Represent information about an end effector.-->
     <!-- <end_effector name="left_ee" parent_link="left_ee_link" group="left_endeffector" parent_group="left_manipulator" />
