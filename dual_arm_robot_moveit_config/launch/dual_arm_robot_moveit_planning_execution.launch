@@ -9,5 +9,12 @@
   <!-- Launch moveit -->
   <include file="$(find dual_arm_robot_moveit_config)/launch/move_group.launch">
     <arg name="debug" default="$(arg debug)" />
+    <arg name="publish_monitored_planning_scene" value="true" />
   </include>
+
+    <!-- load the robot_description parameter before launching ROS-I nodes -->
+  <include file="$(find dual_arm_robot_moveit_config)/launch/planning_context.launch" >
+    <arg name="load_robot_description" value="true" />
+  </include>
+
 </launch>

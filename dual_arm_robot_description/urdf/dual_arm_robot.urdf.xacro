@@ -1,7 +1,7 @@
-<?xml version="1.0"?>
+<?xml version="1.0"?> <!--this tag must be in the first line of the xml files-->
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro"
        name="dual_arm_robot">
-
+<!-- rosrun xacro xacro.py dual_arm_robot.urdf.xacro >  dual_arm_robot.urdf -->
   <xacro:property name="pi" value="3.1415926535897931"/>
   <xacro:arg name="prefix_left" default="left_"/>
   <xacro:arg name="prefix_right" default="right_"/>
@@ -13,8 +13,9 @@
   <!-- ur5 -->
   <xacro:include filename="$(find dual_arm_robot_description)/urdf/ur5.urdf.xacro"/> <!-- file has been edited because of same variable names in ur5 and ur10 -->
 
-  <!-- endeffector -->
+  <!-- endeffector
   <xacro:include filename="$(find dual_arm_robot_description)/urdf/endeffector.urdf.xacro"/>
+-->
 
   <xacro:property name="robot_horizontal_stand_width" value="0.5"/>
 	<xacro:property name="robot_vertical_stand_height" value="1.2"/>
@@ -39,13 +40,13 @@
   <link name="stand1">
 		<visual>
 		<geometry>
-		<cylinder radius="0.0735" length="${robot_vertical_stand_height+0.2}"/>
+		<cylinder radius="0.0735" length="0.5"/>
 		</geometry>
 		<material name="orange_transparent"/>
 		</visual>
 		<collision>
 		<geometry>
-		<cylinder radius="0.0735" length="${robot_vertical_stand_height+0.2}"/>
+		<cylinder radius="0.0735" length="0.5"/>
 		</geometry>
 		<material name="blue_transparent"/>
 		</collision>
@@ -64,17 +65,34 @@
 		</geometry>
 		<material name="blue_transparent"/>
 		</collision>
+	</link>	
+<link name="stand_Base">
+		<visual>
+		<geometry>
+		<cylinder radius="0.5" length="0.7"/>
+		</geometry>
+		<material name="orange_transparent"/>
+		</visual>
+		<collision>
+		<geometry>
+		<cylinder radius="0.5" length="0.7"/>
+		</geometry>
+		<material name="blue_transparent"/>
+		</collision>
 	</link>
+
+
+
 	<link name="table">
 		<visual>
 			<geometry>
-				<box size="0.8 1 0.94" />
+				<box size="1 1.2 0.92" />
 			</geometry>
 			<material name="orange_transparent"/>
 		</visual>
 		<collision>
 			<geometry>
-			<box size="1 1 0.95" />
+		<box size="1 1.2 0.92" />
 		</geometry>
 		<material name="blue_transparent"/>
 		</collision>
@@ -82,24 +100,32 @@
   <joint name="table_joint" type="fixed" >
     <parent link="world" />
     <child link="table" />
-    <origin xyz="-1.1 0 0.47" rpy="0 0 0" />
+    <origin xyz="-1 0 0.46" rpy="0 0 0" />
 </joint>
 
   <!-- End of stand macros-->
   <!-- Place the stand in the world -->
   <link name="world"/>
     <!-- place world reference -->
-	<joint name="world_to_stand1" type="fixed">
+  <joint name="world_to_stand_Base" type="fixed">
 		<parent link="world"/>
+		<child link="stand_Base"/>
+		<origin xyz="0 0 0.35" rpy="0 0 0"/>
+	</joint>
+
+	<joint name="Base_to_stand1" type="fixed">
+		<parent link="stand_Base"/>
 		<child link="stand1"/>
 		<origin xyz="0 0 0.6" rpy="0 0 0"/>
 	</joint>
 
+
 	<joint name="stand1_to_stand2" type="fixed">
 		<parent link="stand1"/>
 		<child link="stand2"/>
-		<origin xyz="0 0 ${robot_vertical_stand_height/2}" rpy="1.57 1.57 0"/>
+		<origin xyz="0 0 0.25" rpy="1.57 1.57 0"/>
 	</joint>
+	
 <!-- place a table 
   	<joint name="world_to_table" type="fixed">
 		<parent link="world"/>

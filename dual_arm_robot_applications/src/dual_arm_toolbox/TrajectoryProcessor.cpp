@@ -18,6 +18,7 @@ bool TrajectoryProcessor::fuse(moveit_msgs::RobotTrajectory &arms_trajectory,
     }
     for (unsigned int i=0; i < arm2_trajectory.joint_trajectory.joint_names.size(); i++)
         arms_trajectory.joint_trajectory.joint_names.push_back(arm2_trajectory.joint_trajectory.joint_names[i]);
+        
     for (unsigned int i=0; i < arms_trajectory.joint_trajectory.points.size(); i++){
         for (unsigned int j=0; j < arm2_trajectory.joint_trajectory.joint_names.size(); j++){
             arms_trajectory.joint_trajectory.points[i].positions.push_back(arm2_trajectory.joint_trajectory.points[i].positions[j]);

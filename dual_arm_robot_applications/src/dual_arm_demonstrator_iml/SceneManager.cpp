@@ -37,11 +37,12 @@ void SceneManager::addBox(std::string id, geometry_msgs::Pose pose, std::string 
     attached_object.object.primitives.push_back(box_);
     attached_object.object.primitive_poses.push_back(pose);
 
-    // Define operation: add
+    /* Define operation: add */
     attached_object.object.operation = attached_object.object.ADD;
 
-    ROS_INFO("Adding %s into the world", id.c_str());
+    ROS_INFO("\nAdding %s into the world", id.c_str());
     moveit_msgs::PlanningScene planning_scene;
+    /* Add the object into the environment by adding it to the set of collision objects in the "world" part of the planning scene */
     planning_scene.world.collision_objects.push_back(attached_object.object);
     planning_scene.is_diff = true;
     planning_scene_diff_publisher_.publish(planning_scene);
@@ -153,7 +154,7 @@ void SceneManager::setupScene() {
     // add box7
     /* Box position in world frame */
     geometry_msgs::Pose box7_pose;
-    box7_pose.position.x = -0.7 - box_.dimensions[0]/2;
+    box7_pose.position.x = -1.1 - box_.dimensions[0]/2;  // should be 0.7
     box7_pose.position.y = 0;
     box7_pose.position.z = 0.94+box_.dimensions[2]/2 + 0.01;
     // KDL::Rotation box7_rot;

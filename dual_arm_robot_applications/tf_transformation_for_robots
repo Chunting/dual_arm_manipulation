@@ -174,6 +174,19 @@ At time 1546766745.872
 At time 1546766746.653
 
 
+========= Grasp Position OFFSET =============================================
+
+chunting@chunting-UR:~/catkin_ws$ rosrun tf tf_echo left_ee_link right_ee_link
+At time 1547089967.935
+- Translation: [0.193, -0.007, 0.001]
+- Rotation: in Quaternion [0.008, 0.940, -0.340, -0.009]
+            in RPY (radian) [-2.448, -0.012, 3.120]
+            in RPY (degree) [-140.256, -0.684, 178.749]
+
+
+
+
+
 
 
 

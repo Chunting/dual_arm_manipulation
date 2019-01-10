@@ -63,7 +63,7 @@ right_vel_based_pos_traj_controller:
 right_vel_based_admittance_traj_controller:
    type: velocity_controllers/JointTrajectoryAdmittanceController
    root_name: right_base
-   tip_name: right_tool0
+   tip_name: right_ee_link
    contact_force: 30 #[N]
    max_velocity: 0.2
    max_shift: 0.15

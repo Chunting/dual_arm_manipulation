@@ -70,9 +70,10 @@ namespace dual_arm_demonstrator_iml {
         robot_model::RobotModelPtr kinematic_model;
         //planning_scene::PlanningScene planningScene;
 
-        // setup JointModelGroup
+
         // Construct a RobotState that maintains the configuration of the robot.
         robot_state::RobotStatePtr kinematic_state;
+        // setup JointModelGroup
         // Represents the robot model for a particular group.
         const robot_state::JointModelGroup* left_joint_model_group;
         const robot_state::JointModelGroup* right_joint_model_group;
@@ -132,12 +133,19 @@ namespace dual_arm_demonstrator_iml {
         bool execute(moveit::planning_interface::MoveGroup::Plan plan);
 
         bool moveHome();
+        bool moveGraspPosition();
         // Planning to a joint-space goal
         std::vector<double> getJointAngles(std::string groupName);
 
         moveit_msgs::RobotState getPositionIK(std::string& groupName, moveit_msgs::RobotState& seed_robot_state, geometry_msgs::PoseStamped poseIK);
+        std::vector<double>  getPositionIK(const robot_state::JointModelGroup* joint_model_group, const geometry_msgs::Pose &pose);
 
+        geometry_msgs::PoseStamped getPositionFK(std::string& endEffectorLink, moveit_msgs::RobotState& seed_robot_state);
+        // Eigen::Affine3d& getPositionFK(const robot_state::JointModelGroup* joint_model_group, std::string& endEffectorLink);
 
+        Eigen::MatrixXd  getJacobian(const robot_state::JointModelGroup* joint_model_group, Eigen::Vector3d &reference_point_position );
+
+        void PrintPose(geometry_msgs::Pose &pose);
         double radianToDegree(double radian){
             
             return (radian*(180/PI));

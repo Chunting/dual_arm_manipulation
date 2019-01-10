@@ -22,6 +22,7 @@
         "cinttypes": "cpp",
         "cstdint": "cpp",
         "typeindex": "cpp",
-        "cwctype": "cpp"
+        "cwctype": "cpp",
+        "core": "cpp"
     }
 }

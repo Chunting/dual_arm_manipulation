@@ -40,7 +40,7 @@ int main(int argc, char **argv) {
     // Scene Setup
     dual_arm_demonstrator_iml::SceneManager sceneManager(nh);
     sceneManager.setupScene();
-    ROS_INFO("In the dual_arm_robot_demonstration...");
+    ROS_INFO("\nIn the dual_arm_robot_demonstration...");
     
     // move home
     dualArmRobot.moveHome();
@@ -50,7 +50,7 @@ int main(int argc, char **argv) {
     moveit_msgs::Constraints left_constraints;
     moveit_msgs::Constraints right_constraints;
     moveit_msgs::Constraints both_constraints;
-    ROS_INFO("Start to set up the constraints...");
+    ROS_INFO("\n\nStart to set up the constraints...");
 
     // ur5 sometimes blocks itself when picking the box on bottom, on top ur10 can get problems adapting its trajectory, this solve the issue.
     jcm.joint_name="left_shoulder_pan_joint";
@@ -105,7 +105,7 @@ int main(int argc, char **argv) {
     
 
     dualArmRobot.arms_.setPathConstraints(both_constraints);
-    ROS_INFO("Finished setting up the constraints...");
+    ROS_INFO("Finished setting up the constraints...\n\n");
     
     // Eval
     ros::Time before_pick_7;
@@ -117,8 +117,8 @@ int main(int argc, char **argv) {
     geometry_msgs::Vector3Stamped direction;
     direction.header.frame_id = "world";
     direction.vector.x = 0;
-    direction.vector.y = 0.3;
-    direction.vector.z = 0;
+    direction.vector.y = 0;
+    direction.vector.z = 0.2;
     if (!dualArmRobot.pickBox("box7", direction)) {
         ROS_WARN("Pick failed");
         ROS_ERROR("Can't execute demonstration without successful pick. Demonstration aborted.");
