@@ -9,7 +9,7 @@ UR_Logger::UR_Logger(ros::NodeHandle &nh, std::vector<std::string> ur_namespaces
         ur_listeners_.push_back(new UR_Message_Listener(nh_, ur_namespaces[i]));
     }
 
-    delimiter_ ='\t';
+    delimiter_ =',';
 
     ROS_INFO("Initialising UR Logger"); //it needs to be waited until msgs can be received
     sleep(1);
@@ -64,7 +64,7 @@ void UR_Logger::generate_logfile_name(){       //automatically generate a name
 
     strftime (buffer,20,"%Y%m%d%H%M%S", timeinfo);
     std::string log_suffix = buffer;
-    logfile_name_="ur_log_"+log_suffix+".csv";
+    logfile_name_="./src/dual_arm_manipulation/dataLog/ur_log_"+log_suffix+".csv";
 }
 
 
@@ -80,46 +80,46 @@ std::string UR_Logger::headline(UR_Message_Listener ur_listener){
     std::stringstream ss;
 
     // append time
-    ss << "time [s]";
+    ss << "time";
 
     // append position state
-    std::string state_pos_prefix = "state_pos:";
-    std::string state_pos_suffix = " [rad]";
+    std::string state_pos_prefix = "state_pos_";
+    //std::string state_pos_suffix = " [rad]";
     for (int i = 0; i < 6; i++ ){
-        ss << delimiter_ << state_pos_prefix << ur_listener.last_state_msg_.name[i] << state_pos_suffix;
+        ss << delimiter_ << state_pos_prefix << ur_listener.last_state_msg_.name[i];// << state_pos_suffix;
     }
 
     // append state velocity
-    std::string state_vel_prefix = "state_vel:";
-    std::string state_vel_suffix = " [rad/s]";
+    std::string state_vel_prefix = "state_vel_";
+    //std::string state_vel_suffix = " [rad/s]";
     for (int i = 0; i < 6; i++ ){
-        ss << delimiter_ << state_vel_prefix << ur_listener.last_state_msg_.name[i] << state_vel_suffix;
+        ss << delimiter_ << state_vel_prefix << ur_listener.last_state_msg_.name[i];// << state_vel_suffix;
     }
 
     // append wrench
-    std::string wrench_force_prefix = "tcp_wrench_force:";
-    std::string wrench_force_suffix = " [N]";
-    ss << delimiter_ << wrench_force_prefix << "x" << wrench_force_suffix
-        << delimiter_ << wrench_force_prefix << "y" << wrench_force_suffix
-        << delimiter_ << wrench_force_prefix << "z" << wrench_force_suffix;
-    std::string wrench_torque_prefix = "tcp_wrench_torque:";
-    std::string wrench_torque_suffix = " [Nm]";
-    ss << delimiter_ << wrench_torque_prefix << "x" << wrench_torque_suffix
-        << delimiter_ << wrench_torque_prefix << "y" << wrench_torque_suffix
-        << delimiter_ << wrench_torque_prefix << "z" << wrench_torque_suffix;
+    std::string wrench_force_prefix = "tcp_wrench_force_";
+    //std::string wrench_force_suffix = " [N]";
+    ss << delimiter_ << wrench_force_prefix << "x"
+        << delimiter_ << wrench_force_prefix << "y"
+        << delimiter_ << wrench_force_prefix << "z";
+    std::string wrench_torque_prefix = "tcp_wrench_torque_";
+    //std::string wrench_torque_suffix = " [Nm]";
+    ss << delimiter_ << wrench_torque_prefix << "x" 
+        << delimiter_ << wrench_torque_prefix << "y" 
+        << delimiter_ << wrench_torque_prefix << "z";
 
     // append target position
-    std::string target_pos_prefix = "target_pos:";
-    std::string target_pos_suffix = " [rad]";
+    std::string target_pos_prefix = "target_pos_";
+    //std::string target_pos_suffix = " [rad]";
     for (int i = 0; i < 6; i++ ){
-        ss << delimiter_ << target_pos_prefix << joint_names[i] << target_pos_suffix;
+        ss << delimiter_ << target_pos_prefix << joint_names[i];// << target_pos_suffix;
     }
 
     // append target velocity
-    std::string target_vel_prefix = "target_vel:";
-    std::string target_vel_suffix = " [rad/s]";
+    std::string target_vel_prefix = "target_vel_";
+    //std::string target_vel_suffix = " [rad/s]";
     for (int i = 0; i < 6; i++ ){
-        ss << delimiter_ << target_vel_prefix << joint_names[i] << target_vel_suffix;
+        ss << delimiter_ << target_vel_prefix << joint_names[i];// << target_vel_suffix;
     }
     return ss.str();
 }

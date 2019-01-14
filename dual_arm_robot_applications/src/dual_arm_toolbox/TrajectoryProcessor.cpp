@@ -112,7 +112,9 @@ void TrajectoryProcessor::scaleTrajectorySpeed(moveit_msgs::RobotTrajectory& tra
 bool TrajectoryProcessor::computeVelocities(moveit_msgs::RobotTrajectory& trajectory, moveit::planning_interface::MoveGroup& moveGroup){
     dual_arm_toolbox::TrajectoryProcessor::computeTimeFromStart(trajectory, 0.4);
     robot_trajectory::RobotTrajectory rt(moveGroup.getCurrentState()->getRobotModel(), "arms");
+   
     rt.setRobotTrajectoryMsg(*moveGroup.getCurrentState(), trajectory);// get a RobotTrajectory from trajectory
+     /* This class modifies the timestamps of a trajectory to respect velocity and acceleration contraints */
     trajectory_processing::IterativeParabolicTimeParameterization iptp;
     if (!iptp.computeTimeStamps(rt)){
         ROS_WARN("computed time stamp FAILED.");

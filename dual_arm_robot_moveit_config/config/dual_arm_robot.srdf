@@ -26,7 +26,7 @@
         <joint name="left_elbow_joint" value="0.694101" />
         <joint name="left_wrist_1_joint" value="-1.6502" />
         <joint name="left_wrist_2_joint" value="-1.6792" />
-        <joint name="left_wrist_3_joint" value="-2.12795" />
+        <joint name="left_wrist_3_joint" value="1.764426" />
     </group_state>
     <group_state name="right_up" group="right_manipulator">
         <joint name="right_shoulder_pan_joint" value="1.58335" />
@@ -42,7 +42,7 @@
         <joint name="left_elbow_joint" value="0.694101" />
         <joint name="left_wrist_1_joint" value="-1.6502" />
         <joint name="left_wrist_2_joint" value="-1.6792" />
-        <joint name="left_wrist_3_joint" value="-2.12795" />
+        <joint name="left_wrist_3_joint" value="1.764426" />
         <joint name="right_shoulder_pan_joint" value="1.5833" />
         <joint name="right_shoulder_lift_joint" value="-1.49531" />
         <joint name="right_elbow_joint" value="-0.6941" />

@@ -1,7 +1,3 @@
-//
-// Created by Chunting  on 23.12.16.
-//
-
 // ROS
 #include <ros/ros.h>
 #include <geometry_msgs/Pose.h>
@@ -23,6 +19,8 @@
 #include "dual_arm_demonstrator_iml/DualArmRobot.h"
 #include "dual_arm_demonstrator_iml/SceneManager.h"
 
+// UR Logger
+#include "ur_logging/UrLogger.h"
 
 int main(int argc, char **argv) {
     ros::init(argc, argv, "shelf_setup_helper");
@@ -45,56 +43,59 @@ int main(int argc, char **argv) {
    
     geometry_msgs::Vector3Stamped direction;
     direction.header.frame_id = "world";
-    direction.vector.x = 0;
-    direction.vector.y = 0;
-    direction.vector.z = 0.1;//0.01;
+   
+
+    std::vector<std::string> ur_namespaces;
+    ur_namespaces.push_back("left");
+    ur_namespaces.push_back("right");
+    UR_Logger ur_logger(nh, ur_namespaces);
+    ur_logger.start(125);
+
+    ROS_INFO("========== MOVE HOME POSITION =================");
+    dualArmRobot.moveHome();
+    sleep(1);
+    ROS_INFO("========== MOVE GRASP POSITION =================");
+    dualArmRobot.moveGraspPosition();
+    sleep(1);
+    ROS_INFO("========== MOVE CLOSER =================");
+    dualArmRobot.graspMove(0.01);
+    // sleep(1);
+    // ROS_INFO("========== GET OFFSET =================");
+    // dualArmRobot.getCurrentOffset();
+    // sleep(1);
+    // ROS_INFO("========== LIFT BOX BACK =================");
+    // direction.vector.x = 0;
+    // direction.vector.y = 0;
+    // direction.vector.z = 0.1;
+    // dualArmRobot.linearMove(direction, false, true,true);
+    // ROS_INFO("========== LEFT MOVE =================");
+    // direction.vector.x = 0;
+    // direction.vector.y = -0.2;
+    // direction.vector.z = 0;
+    // dualArmRobot.linearMove(direction, true, true,true);
+    // ROS_INFO("========== RIGHT MOVE =================");
+    // direction.vector.x = 0;
+    // direction.vector.y = 0.2;
+    // direction.vector.z = 0;
+    // dualArmRobot.linearMove(direction, true, true,true);
+    // ROS_INFO("========== PUT BOX DOWN =================");
+    // direction.vector.x = 0;
+    // direction.vector.y = 0;
+    // direction.vector.z = -0.1;
+    // dualArmRobot.linearMove(direction, true, true,true);
+    // sleep(1);
+    // ROS_INFO("========== MOVE AWAY =================");
+    // dualArmRobot.graspMove(-0.02);
+    // sleep(1);
+    // ROS_INFO("========== MOVE HOME POSITION =================");
     // dualArmRobot.moveHome();
-    //dualArmRobot.linearMove(direction, false, true,true);
-    /*
-    // move left to shelf
-    while (error.val != 1){
-        geometry_msgs::PoseStamped left_pose;
-        // left_pose.header.frame_id = "shelf";
-        left_pose.header.frame_id = "world";
-        left_pose.pose.position.x = dualArmRobot.left_current_pose_.pose.position.x+0.1;
-        left_pose.pose.position.y = dualArmRobot.left_current_pose_.pose.position.y;
-        left_pose.pose.position.z = dualArmRobot.left_current_pose_.pose.position.z;
-        KDL::Rotation left_rot;  // generated to easily assign quaternion of pose
-        left_rot.DoRotY(3.14 / 2);
-        left_rot.GetQuaternion(left_pose.pose.orientation.x, left_pose.pose.orientation.y, left_pose.pose.orientation.z,
-                              left_pose.pose.orientation.w);
-        dualArmRobot.left_.setPoseTarget(left_pose, dualArmRobot.left_.getEndEffectorLink());
+    // sleep(1);
+    ur_logger.stop();
 
-        error = dualArmRobot.left_.plan(left_plan);
+   
 
-    }
-    dualArmRobot.execute(left_plan);
 
-    error.val = -1;
-    while (error.val != 1){
-        // move ur10 to shelf
-        geometry_msgs::PoseStamped right_pose;
-        // right_pose.header.frame_id = "shelf";
-        right_pose.header.frame_id = "world";
-        right_pose.pose.position.x = dualArmRobot.right_current_pose_.pose.position.x+0.1;
-        right_pose.pose.position.y = dualArmRobot.right_current_pose_.pose.position.y;
-        right_pose.pose.position.z = dualArmRobot.right_current_pose_.pose.position.z;
-        KDL::Rotation right_rot;  // generated to easily assign quaternion of pose
-        right_rot.DoRotX(3.14 / 2);
-        right_rot.GetQuaternion(right_pose.pose.orientation.x, right_pose.pose.orientation.y, right_pose.pose.orientation.z,
-                               right_pose.pose.orientation.w);
-        dualArmRobot.right_.setPoseTarget(right_pose, dualArmRobot.right_.getEndEffectorLink());
-
-        error = dualArmRobot.right_.plan(right_plan);
-
-    }
-    dualArmRobot.execute(right_plan);
-
-    // move closer
-    dualArmRobot.graspMove(0.07);
-*/
     // END
-    ROS_INFO("Place the shelf between the robot arms as displayed in rviz!");
     ros::shutdown();
     return 0;
 }
