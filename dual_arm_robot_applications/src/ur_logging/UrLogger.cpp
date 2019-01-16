@@ -62,7 +62,7 @@ void UR_Logger::generate_logfile_name(){       //automatically generate a name
     time (&rawtime);
     timeinfo = localtime(&rawtime);
 
-    strftime (buffer,20,"%Y%m%d%H%M%S", timeinfo);
+    strftime (buffer,20,"%Y_%m_%d_%H_%M%S", timeinfo);
     std::string log_suffix = buffer;
     logfile_name_="./src/dual_arm_manipulation/dataLog/ur_log_"+log_suffix+".csv";
 }

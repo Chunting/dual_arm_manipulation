@@ -21,54 +21,53 @@
     </group>
     <!--GROUP STATES: Purpose: Define a named state for a particular group, in terms of joint values. This is useful to define states like 'folded arms'-->
     <group_state name="left_up" group="left_manipulator">
-        <joint name="left_shoulder_pan_joint" value="-1.5833" />
-        <joint name="left_shoulder_lift_joint" value="-1.4953" />
         <joint name="left_elbow_joint" value="0.694101" />
+        <joint name="left_shoulder_lift_joint" value="-1.4953" />
+        <joint name="left_shoulder_pan_joint" value="-1.5833" />
         <joint name="left_wrist_1_joint" value="-1.6502" />
         <joint name="left_wrist_2_joint" value="-1.6792" />
-        <joint name="left_wrist_3_joint" value="1.764426" />
+        <joint name="left_wrist_3_joint" value="1.76443" />
     </group_state>
     <group_state name="right_up" group="right_manipulator">
-        <joint name="right_shoulder_pan_joint" value="1.58335" />
-        <joint name="right_shoulder_lift_joint" value="-1.49531" />
         <joint name="right_elbow_joint" value="-0.6941" />
+        <joint name="right_shoulder_lift_joint" value="-1.49531" />
+        <joint name="right_shoulder_pan_joint" value="1.58335" />
         <joint name="right_wrist_1_joint" value="-1.65027" />
         <joint name="right_wrist_2_joint" value="1.67924" />
         <joint name="right_wrist_3_joint" value="2.12795" />
     </group_state>
     <group_state name="arms_up" group="arms">
-        <joint name="left_shoulder_pan_joint" value="-1.5833" />
-        <joint name="left_shoulder_lift_joint" value="-1.4953" />
         <joint name="left_elbow_joint" value="0.694101" />
+        <joint name="left_shoulder_lift_joint" value="-1.4953" />
+        <joint name="left_shoulder_pan_joint" value="-1.5833" />
         <joint name="left_wrist_1_joint" value="-1.6502" />
         <joint name="left_wrist_2_joint" value="-1.6792" />
-        <joint name="left_wrist_3_joint" value="1.764426" />
-        <joint name="right_shoulder_pan_joint" value="1.5833" />
-        <joint name="right_shoulder_lift_joint" value="-1.49531" />
+        <joint name="left_wrist_3_joint" value="1.76443" />
         <joint name="right_elbow_joint" value="-0.6941" />
+        <joint name="right_shoulder_lift_joint" value="-1.49531" />
+        <joint name="right_shoulder_pan_joint" value="1.5833" />
         <joint name="right_wrist_1_joint" value="-1.65027" />
         <joint name="right_wrist_2_joint" value="1.67924" />
         <joint name="right_wrist_3_joint" value="2.12795" />
     </group_state>
-
-     <group_state name="grasp_position" group="arms">
-        <joint name="left_shoulder_pan_joint" value="-1.459408" />
-        <joint name="left_shoulder_lift_joint" value="-1.587423" />
-        <joint name="left_elbow_joint" value="2.011501" />
-        <joint name="left_wrist_1_joint" value="-2.901752" />
-        <joint name="left_wrist_2_joint" value="-1.685589" />
-        <joint name="left_wrist_3_joint" value="1.764426" />
-        <joint name="right_shoulder_pan_joint" value="1.508839" />
-        <joint name="right_shoulder_lift_joint" value="-1.974562" />
-        <joint name="right_elbow_joint" value="-1.771865" />
-        <joint name="right_wrist_1_joint" value="-0.294800" />
-        <joint name="right_wrist_2_joint" value="1.599369" />
-        <joint name="right_wrist_3_joint" value="2.090452" />
+    <group_state name="grasp_position" group="arms">
+        <joint name="left_elbow_joint" value="2.0115" />
+        <joint name="left_shoulder_lift_joint" value="-1.58742" />
+        <joint name="left_shoulder_pan_joint" value="-1.45941" />
+        <joint name="left_wrist_1_joint" value="-2.90175" />
+        <joint name="left_wrist_2_joint" value="-1.68559" />
+        <joint name="left_wrist_3_joint" value="1.76443" />
+        <joint name="right_elbow_joint" value="-1.77187" />
+        <joint name="right_shoulder_lift_joint" value="-1.97456" />
+        <joint name="right_shoulder_pan_joint" value="1.50884" />
+        <joint name="right_wrist_1_joint" value="-0.2948" />
+        <joint name="right_wrist_2_joint" value="1.59937" />
+        <joint name="right_wrist_3_joint" value="2.09045" />
     </group_state>
     <!--VIRTUAL JOINT: Purpose: this element defines a virtual joint between a robot link and an external frame of reference (considered fixed with respect to the robot)-->
     <virtual_joint name="virtual_joint" type="fixed" parent_frame="stand1" child_link="world" />
     <!--DISABLE COLLISIONS: By default it is assumed that any link of the robot could potentially come into collision with any other link in the robot. This tag disables collision checking between a specified pair of links. -->
-       <disable_collisions link1="left_base_link" link2="left_shoulder_link" reason="Adjacent" />
+    <disable_collisions link1="left_base_link" link2="left_shoulder_link" reason="Adjacent" />
     <disable_collisions link1="left_base_link" link2="right_base_link" reason="Never" />
     <disable_collisions link1="left_base_link" link2="right_shoulder_link" reason="Never" />
     <disable_collisions link1="left_base_link" link2="stand1" reason="Never" />

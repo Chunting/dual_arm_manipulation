@@ -71,15 +71,19 @@ namespace dual_arm_demonstrator_iml {
         //planning_scene::PlanningScene planningScene;
 
 
+
+      
+
+    public:
+        DualArmRobot(ros::NodeHandle &nh);
+        
         // Construct a RobotState that maintains the configuration of the robot.
         robot_state::RobotStatePtr kinematic_state;
+
         // setup JointModelGroup
         // Represents the robot model for a particular group.
         const robot_state::JointModelGroup* left_joint_model_group;
         const robot_state::JointModelGroup* right_joint_model_group;
-
-    public:
-        DualArmRobot(ros::NodeHandle &nh);
         // Get the current pose of end effector
         geometry_msgs::PoseStamped left_current_pose_;
         geometry_msgs::PoseStamped left_current_pose_temp_;
@@ -137,7 +141,7 @@ namespace dual_arm_demonstrator_iml {
         // Planning to a joint-space goal
         std::vector<double> getJointAngles(std::string groupName);
 
-        moveit_msgs::RobotState getPositionIK(std::string& groupName, moveit_msgs::RobotState& seed_robot_state, geometry_msgs::PoseStamped poseIK);
+        moveit_msgs::RobotState getPositionIK(std::string& groupName, moveit_msgs::RobotState& seed_robot_state, geometry_msgs::PoseStamped &poseIK);
         std::vector<double>  getPositionIK(const robot_state::JointModelGroup* joint_model_group, const geometry_msgs::Pose &pose);
 
         geometry_msgs::PoseStamped getPositionFK(std::string& endEffectorLink, moveit_msgs::RobotState& seed_robot_state);

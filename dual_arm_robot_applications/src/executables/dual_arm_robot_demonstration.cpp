@@ -118,7 +118,7 @@ int main(int argc, char **argv) {
     direction.header.frame_id = "world";
     direction.vector.x = 0;
     direction.vector.y = 0;
-    direction.vector.z = 0.2;
+    direction.vector.z = 0.3;
     if (!dualArmRobot.pickBox("box7", direction)) {
         ROS_WARN("Pick failed");
         ROS_ERROR("Can't execute demonstration without successful pick. Demonstration aborted.");
