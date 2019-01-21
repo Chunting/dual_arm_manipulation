@@ -142,7 +142,7 @@
         <limit lower="${-pi}" upper="${pi}" effort="150.0" velocity="2"/>
       </xacro:unless>
       <xacro:if value="${joint_limited}">
-        <limit lower="${-2.0*pi}" upper="${2.*pi}" effort="150.0" velocity="2"/>
+        <limit lower="${-pi}" upper="${pi}" effort="150.0" velocity="2"/>
       </xacro:if>
       <dynamics damping="0.0" friction="0.0"/>
     </joint>
@@ -301,7 +301,8 @@
     <joint name="${prefix}ee_fixed_joint" type="fixed">
       <parent link="${prefix}wrist_3_link" />
       <child link = "${prefix}ee_link" />
-      <origin xyz="0.0 ${ur5_wrist_3_length} 0.0" rpy="${pi/2} ${pi} ${-pi}" />
+      <!--origin xyz="0.0 ${ur5_wrist_3_length} 0.0" rpy="${pi/2} ${pi} ${-pi}" /-->
+      <origin xyz="0.0 ${ur5_wrist_3_length} 0.0" rpy="0.0 0.0 ${pi/2.0}" />
     </joint>
 
     <link name="${prefix}ee_link">
@@ -329,14 +330,14 @@
     </joint>
 
     <!-- Frame coincident with all-zeros TCP on UR controller -->
-    <!--
+    
     <link name="${prefix}tool0"/>
     <joint name="${prefix}wrist_3_link-tool0_fixed_joint" type="fixed">
       <origin xyz="0 ${ur5_wrist_3_length} 0" rpy="${pi/-2.0} 0 0"/>
       <parent link="${prefix}wrist_3_link"/>
       <child link="${prefix}tool0"/>
     </joint>
-    -->
+    
 
   </xacro:macro>
 </robot>

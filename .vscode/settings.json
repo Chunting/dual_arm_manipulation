@@ -23,6 +23,8 @@
         "cstdint": "cpp",
         "typeindex": "cpp",
         "cwctype": "cpp",
-        "core": "cpp"
+        "core": "cpp",
+        "chrono": "cpp",
+        "ratio": "cpp"
     }
 }

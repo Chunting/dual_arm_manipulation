@@ -193,20 +193,20 @@ DualArmRobot::DualArmRobot(ros::NodeHandle& nh) :
     std::vector<double> rpy = right_.getCurrentRPY();
     ROS_INFO("RPY: R=%f, P=%f, Y=%f", rpy[0], rpy[1], rpy[2]);
 
-    std::vector<std::string> rightJointNames = right_.getActiveJoints();
-    std::vector<double> rightJointValues = right_.getCurrentJointValues();
-    for(std::size_t i=0; i<rightJointNames.size(); i++){
-        ROS_INFO("Joint %s: %f", rightJointNames[i].c_str(), radianToDegree(rightJointValues[i]));
-    }
+    // std::vector<std::string> rightJointNames = right_.getActiveJoints();
+    // std::vector<double> rightJointValues = right_.getCurrentJointValues();
+    // for(std::size_t i=0; i<rightJointNames.size(); i++){
+    //     ROS_INFO("Joint %s: %f", rightJointNames[i].c_str(), radianToDegree(rightJointValues[i]));
+    // }
 
     ROS_INFO("\n\nPublish the left arm joint state");
     ROS_INFO("Reference Frame: %s", left_.getPlanningFrame().c_str());
     ROS_INFO("EndEffectorLink: %s", left_.getEndEffectorLink().c_str());
-    std::vector<std::string> leftJointNames = left_.getActiveJoints();
-    std::vector<double> leftJointValues = left_.getCurrentJointValues();
-    for(std::size_t i=0; i<leftJointNames.size(); i++){
-        ROS_INFO("Joint %s: %f", leftJointNames[i].c_str(), radianToDegree(leftJointValues[i]));
-    }
+    // std::vector<std::string> leftJointNames = left_.getActiveJoints();
+    // std::vector<double> leftJointValues = left_.getCurrentJointValues();
+    // for(std::size_t i=0; i<leftJointNames.size(); i++){
+    //     ROS_INFO("Joint %s: %f", leftJointNames[i].c_str(), radianToDegree(leftJointValues[i]));
+    // }
 
     ROS_INFO("\n\nPublish both arms joint state");
     ROS_INFO("Reference Frame: %s", arms_.getPlanningFrame().c_str());
@@ -264,8 +264,8 @@ KDL::Frame DualArmRobot::getCurrentOffset(){
 
     geometry_msgs::Pose temp_pose;
     dual_arm_toolbox::Transform::transformKDLtoPose(offset, temp_pose);
-    ROS_INFO("== OFFSET ==");
-    PrintPose(temp_pose);
+    // ROS_INFO("== OFFSET ==");
+    // PrintPose(temp_pose);
     return offset;
 }
  // calculates a trajectory for both arms based on the trajectory of one arm
@@ -432,7 +432,44 @@ bool DualArmRobot::graspMove(double distance, bool avoid_collisions, bool use_le
     if (distance > 0) ROS_INFO("Moving towards object");
     if (distance < 0) ROS_INFO("Moving away from object");
 
-    // ur5
+    // right
+    if (use_right) try_step = true;
+    while (try_step && ros::ok()) {
+        right_.setStartStateToCurrentState();
+        std::vector<geometry_msgs::Pose> right_waypoints;
+        geometry_msgs::Pose right_waypoint = right_.getCurrentPose(right_.getEndEffectorLink()).pose;
+        right_waypoints.push_back(right_waypoint);
+
+        // transform distance vector
+        KDL::Vector right_vec_d;  // distance vector
+        KDL::Frame right_p_eef;   // endeffector frame
+        dual_arm_toolbox::Transform::transformPoseToKDL(right_waypoint, right_p_eef);
+        right_vec_d.x(distance);
+        right_vec_d.y(0);
+        right_vec_d.z(0);
+        right_vec_d = right_p_eef.M * right_vec_d;     // Rotate distance vector
+
+        // calculate waypoint
+        right_waypoint.position.x = right_waypoint.position.x + right_vec_d.x();
+        right_waypoint.position.y = right_waypoint.position.y + right_vec_d.y();
+        right_waypoint.position.z = right_waypoint.position.z + right_vec_d.z();
+
+        right_waypoints.push_back(right_waypoint);
+        moveit_msgs::RobotTrajectory right_trajectory;
+        fraction = right_.computeCartesianPath(right_waypoints, 0.001, 0.0, right_trajectory, avoid_collisions);
+        if (fraction < 0.9) {
+            ROS_WARN("Right arm cartesian path. (%.2f%% achieved)", fraction * 100.0);
+            try_step = try_again_question();
+            if (!try_step) return false;
+        } else {
+            moveit::planning_interface::MoveGroup::Plan right_plan;
+            dual_arm_toolbox::TrajectoryProcessor::clean(right_trajectory);
+            right_plan.trajectory_ = right_trajectory;
+            execute(right_plan);
+            try_step = false;
+        }
+    }
+    sleep(1);
     if (use_left) try_step = true;
     while (try_step && ros::ok()) {
         /* Update the robot state */
@@ -448,9 +485,9 @@ bool DualArmRobot::graspMove(double distance, bool avoid_collisions, bool use_le
         KDL::Vector left_vec_d;  // distance vector
         KDL::Frame left_p_eef;   // endeffector frame
         dual_arm_toolbox::Transform::transformPoseToKDL(left_waypoint, left_p_eef);
-        left_vec_d.x(0);
+        left_vec_d.x(distance);
         left_vec_d.y(0);
-        left_vec_d.z(distance);
+        left_vec_d.z(0);
         left_vec_d = left_p_eef.M * left_vec_d;     // Rotate distance vector
         ROS_INFO(" X=%f Y=%f Z=%f",left_vec_d.x(),left_vec_d.y(),left_vec_d.z());
 
@@ -477,43 +514,6 @@ bool DualArmRobot::graspMove(double distance, bool avoid_collisions, bool use_le
         }
     }
 
-    // right
-    if (use_right) try_step = true;
-    while (try_step && ros::ok()) {
-        right_.setStartStateToCurrentState();
-        std::vector<geometry_msgs::Pose> right_waypoints;
-        geometry_msgs::Pose right_waypoint = right_.getCurrentPose(right_.getEndEffectorLink()).pose;
-        right_waypoints.push_back(right_waypoint);
-
-        // transform distance vector
-        KDL::Vector right_vec_d;  // distance vector
-        KDL::Frame right_p_eef;   // endeffector frame
-        dual_arm_toolbox::Transform::transformPoseToKDL(right_waypoint, right_p_eef);
-        right_vec_d.x(0);
-        right_vec_d.y(0);
-        right_vec_d.z(distance);
-        right_vec_d = right_p_eef.M * right_vec_d;     // Rotate distance vector
-
-        // calculate waypoint
-        right_waypoint.position.x = right_waypoint.position.x + right_vec_d.x();
-        right_waypoint.position.y = right_waypoint.position.y + right_vec_d.y();
-        right_waypoint.position.z = right_waypoint.position.z + right_vec_d.z();
-
-        right_waypoints.push_back(right_waypoint);
-        moveit_msgs::RobotTrajectory right_trajectory;
-        fraction = right_.computeCartesianPath(right_waypoints, 0.001, 0.0, right_trajectory, avoid_collisions);
-        if (fraction < 0.9) {
-            ROS_WARN("Right arm cartesian path. (%.2f%% achieved)", fraction * 100.0);
-            try_step = try_again_question();
-            if (!try_step) return false;
-        } else {
-            moveit::planning_interface::MoveGroup::Plan right_plan;
-            dual_arm_toolbox::TrajectoryProcessor::clean(right_trajectory);
-            right_plan.trajectory_ = right_trajectory;
-            execute(right_plan);
-            try_step = false;
-        }
-    }
 
     return true;
 }
@@ -1497,11 +1497,11 @@ moveit_msgs::RobotState DualArmRobot::getPositionIK(std::string& groupName,
        This state MUST contain state for all joints to be used by IK solver to compute IK.
        The list of joints can be found using SRDF for the corresponding group.
     */
-    ik_msg.request.ik_request.robot_state = seed_robot_state;
-        ROS_INFO("Get Current State Message: ");
-    for(int i=0; i<ik_msg.request.ik_request.robot_state.joint_state.name.size();++i){
-        ROS_INFO("%s  %f", ik_msg.request.ik_request.robot_state.joint_state.name[i].c_str(), ik_msg.request.ik_request.robot_state.joint_state.position[i]);
-    }
+    // ik_msg.request.ik_request.robot_state = seed_robot_state;
+    //     ROS_INFO("Get Current State Message: ");
+    // for(int i=0; i<ik_msg.request.ik_request.robot_state.joint_state.name.size();++i){
+    //     ROS_INFO("%s  %f", ik_msg.request.ik_request.robot_state.joint_state.name[i].c_str(), ik_msg.request.ik_request.robot_state.joint_state.position[i]);
+    // }
     ik_msg.request.ik_request.attempts = 5;
     ik_msg.request.ik_request.avoid_collisions = true;
     

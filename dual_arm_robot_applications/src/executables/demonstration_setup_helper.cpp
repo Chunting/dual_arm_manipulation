@@ -157,84 +157,94 @@ int main(int argc, char **argv) {
 
     dualArmRobot.kinematic_state->enforceBounds();
 
-    ROS_INFO("========== TEST IK  -- LEFT =================");
-    geometry_msgs::PoseStamped left_pose = dualArmRobot.left_.getCurrentPose(dualArmRobot.left_.getEndEffectorLink());
-    dualArmRobot.PrintPose(left_pose.pose);
-    std::vector<double> left_joint_values = dualArmRobot.getPositionIK(dualArmRobot.left_joint_model_group, left_pose.pose);
+//     ROS_INFO("========== TEST IK  -- LEFT =================");
+//     geometry_msgs::PoseStamped left_pose = dualArmRobot.left_.getCurrentPose(dualArmRobot.left_.getEndEffectorLink());
+//     dualArmRobot.PrintPose(left_pose.pose);
 
-    // dualArmRobot.kinematic_state->setJointGroupPositions(dualArmRobot.left_joint_model_group, left_joint_values);
-    // ROS_INFO_STREAM("Current state is " <<dualArmRobot.kinematic_state->satisfiesBounds(left_joint_model_group));
+//     std::vector<double> left_joint_values = dualArmRobot.getPositionIK(dualArmRobot.left_joint_model_group, left_pose.pose);
 
-    // fk -> pos left
-    KDL::Frame frame_pose_left;
-    dualArmRobot.kinematic_state->setJointGroupPositions(dualArmRobot.left_joint_model_group, left_joint_values);
-    const Eigen::Affine3d &end_effector_pose_left = dualArmRobot.kinematic_state->getGlobalLinkTransform(dualArmRobot.left_.getEndEffectorLink());
-    tf::transformEigenToKDL(end_effector_pose_left, frame_pose_left);
+//     // ROS_INFO_STREAM("Current state is " <<dualArmRobot.kinematic_state->satisfiesBounds(left_joint_model_group));
 
-    geometry_msgs::Pose left_temp_pose;
-    dual_arm_toolbox::Transform::transformKDLtoPose(frame_pose_left, left_temp_pose);
-    ROS_INFO("frame_pose_left end_effector: %s", dualArmRobot.left_.getEndEffectorLink().c_str());
-    dualArmRobot.PrintPose(left_temp_pose);
+//     // fk -> pos left
+//     KDL::Frame frame_pose_left;
+//     dualArmRobot.kinematic_state->setJointGroupPositions(dualArmRobot.left_joint_model_group, left_joint_values);
+//     const Eigen::Affine3d &end_effector_pose_left = dualArmRobot.kinematic_state->getGlobalLinkTransform(dualArmRobot.left_.getEndEffectorLink());
+//     tf::transformEigenToKDL(end_effector_pose_left, frame_pose_left);
 
-    ROS_INFO("========== TEST IK  -- RIGHT =================");
-    geometry_msgs::PoseStamped right_pose = dualArmRobot.right_.getCurrentPose(dualArmRobot.right_.getEndEffectorLink());
-    dualArmRobot.PrintPose(right_pose.pose);
-    moveit_msgs::RobotState seed_robot_state = dualArmRobot.getCurrentRobotStateMsg();
-    std::string groupName = dualArmRobot.right_.getName();
-    moveit_msgs::RobotState IK_robot_state = dualArmRobot.getPositionIK(groupName, seed_robot_state, right_pose);
+//     geometry_msgs::Pose left_temp_pose;
+//     dual_arm_toolbox::Transform::transformKDLtoPose(frame_pose_left, left_temp_pose);
+//     ROS_INFO("FK left end_effector: %s", dualArmRobot.left_.getEndEffectorLink().c_str());
+//     dualArmRobot.PrintPose(left_temp_pose);
 
-    // fk -> pos left
-   std::string right_endeffector = dualArmRobot.right_.getEndEffectorLink();
-   geometry_msgs::PoseStamped FK_PoseStamped = dualArmRobot.getPositionFK(right_endeffector, IK_robot_state);
+//     ROS_INFO("========== TEST IK  -- RIGHT =================");
+//     geometry_msgs::PoseStamped right_pose = dualArmRobot.right_.getCurrentPose(dualArmRobot.right_.getEndEffectorLink());
+//     dualArmRobot.PrintPose(right_pose.pose);
+//     moveit_msgs::RobotState seed_robot_state = dualArmRobot.getCurrentRobotStateMsg();
+//     std::string groupName = dualArmRobot.right_.getName();
+//     moveit_msgs::RobotState IK_robot_state = dualArmRobot.getPositionIK(groupName, seed_robot_state, right_pose);
+
+//     // fk -> pos right
+//    std::string right_endeffector = dualArmRobot.right_.getEndEffectorLink();
+//    geometry_msgs::PoseStamped FK_PoseStamped = dualArmRobot.getPositionFK(right_endeffector, IK_robot_state);
 
 
+//     std::vector<double> right_joint_values = dualArmRobot.right_.getCurrentJointValues();
+//     KDL::Frame frame_pose_right;
+//     dualArmRobot.kinematic_state->setJointGroupPositions(dualArmRobot.right_joint_model_group, right_joint_values);
+//     const Eigen::Affine3d &end_effector_pose_right = dualArmRobot.kinematic_state->getGlobalLinkTransform(dualArmRobot.right_.getEndEffectorLink());
+//     tf::transformEigenToKDL(end_effector_pose_right, frame_pose_right);
 
-    // KDL::Frame frame_pose_right;
-    // dualArmRobot.kinematic_state->setJointGroupPositions(dualArmRobot.right_joint_model_group, right_joint_values);
-    // const Eigen::Affine3d &end_effector_pose_right = dualArmRobot.kinematic_state->getGlobalLinkTransform(dualArmRobot.right_.getEndEffectorLink());
-    // tf::transformEigenToKDL(end_effector_pose_right, frame_pose_right);
-
-    // geometry_msgs::Pose right_temp_pose;
-    // dual_arm_toolbox::Transform::transformKDLtoPose(frame_pose_right, right_temp_pose);
-    ROS_INFO("frame_pose_left end_effector: %s", dualArmRobot.right_.getEndEffectorLink().c_str());
-    dualArmRobot.PrintPose(FK_PoseStamped.pose);
-    // ROS_INFO("========== MOVE GRASP POSITION =================");
-    // dualArmRobot.moveGraspPosition();
-    // sleep(1);
-    // ROS_INFO("========== MOVE CLOSER =================");
-    // dualArmRobot.graspMove(0.01);
-    // sleep(1);
-    // ROS_INFO("========== GET OFFSET =================");
-    // dualArmRobot.getCurrentOffset();
-    // sleep(1);
-    // ROS_INFO("========== LIFT BOX UP =================");
-    // direction.vector.x = 0;
-    // direction.vector.y = 0;
-    // direction.vector.z = 0.1;
-    // dualArmRobot.linearMove(direction, false, true,true);
-    // ROS_INFO("========== LEFT MOVE =================");
-    // direction.vector.x = 0;
-    // direction.vector.y = -0.2;
-    // direction.vector.z = 0;
-    // dualArmRobot.linearMove(direction, true, true,true);
-    // ROS_INFO("========== RIGHT MOVE =================");
-    // direction.vector.x = 0;
-    // direction.vector.y = 0.2;
-    // direction.vector.z = 0;
-    // dualArmRobot.linearMove(direction, true, true,true);
-    ROS_INFO("========== PUT BOX DOWN =================");
+//     geometry_msgs::Pose right_temp_pose;
+//     dual_arm_toolbox::Transform::transformKDLtoPose(frame_pose_right, right_temp_pose);
+//     ROS_INFO("frame_pose_right end_effector: %s", dualArmRobot.right_.getEndEffectorLink().c_str());
+//     dualArmRobot.PrintPose(FK_PoseStamped.pose);
+    ROS_INFO("========== MOVE GRASP POSITION =================");
+    dualArmRobot.moveGraspPosition();
+    sleep(1);
+    ROS_INFO("========== MOVE CLOSER =================");
+    dualArmRobot.graspMove(0.015);
+    sleep(1);
+    ROS_INFO("========== GET OFFSET =================");
+    dualArmRobot.getCurrentOffset();
+    sleep(1);
+    ROS_INFO("========== LIFT BOX UP =================");
+    direction.vector.x = 0;
+    direction.vector.y = 0;
+    direction.vector.z = 0.1;
+    dualArmRobot.linearMove(direction, true, true,true);
+    ROS_INFO("========== LEFT MOVE =================");
     direction.vector.x = 0;
     direction.vector.y = -0.1;
     direction.vector.z = 0;
-    dualArmRobot.linearMoveParallel(direction,"box7", 0.5);
-    // dualArmRobot.linearMove(direction, true, true,true);
-    // sleep(1);
-    // ROS_INFO("========== MOVE AWAY =================");
-    // dualArmRobot.graspMove(-0.02);
-    // sleep(1);
-    // ROS_INFO("========== MOVE HOME POSITION =================");
-    // dualArmRobot.moveHome();
-    // sleep(1);
+    dualArmRobot.linearMove(direction, true, true,true);
+    ROS_INFO("========== LEFT FORWARD =================");
+    direction.vector.x = -0.1;
+    direction.vector.y = 0;
+    direction.vector.z = 0;
+    dualArmRobot.linearMove(direction, true, true,true);
+    ROS_INFO("========== RIGHT MOVE =================");
+    direction.vector.x = 0;
+    direction.vector.y = 0.1;
+    direction.vector.z = 0;
+    dualArmRobot.linearMove(direction, true, true,true);
+    ROS_INFO("========== LEFT BACK =================");
+    direction.vector.x = 0.1;
+    direction.vector.y = 0;
+    direction.vector.z = 0;
+    dualArmRobot.linearMove(direction, true, true,true);
+    ROS_INFO("========== PUT BOX DOWN =================");
+    direction.vector.x = 0;
+    direction.vector.y = 0;
+    direction.vector.z = -0.1;
+    // dualArmRobot.linearMoveParallel(direction,"box7", 0.5);
+    dualArmRobot.linearMove(direction, true, true,true);
+    sleep(1);
+    ROS_INFO("========== MOVE AWAY =================");
+    dualArmRobot.graspMove(-0.02);
+    sleep(1);
+    ROS_INFO("========== MOVE HOME POSITION =================");
+    dualArmRobot.moveHome();
+    sleep(1);
     ur_logger.stop();
 
    

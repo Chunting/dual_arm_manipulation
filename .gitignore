@@ -26,3 +26,7 @@
 *.exe
 *.out
 *.app
+
+dataLog/
+
+\.vscode/settings\.json

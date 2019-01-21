@@ -158,6 +158,24 @@ At time 1546765420.092
             in RPY (degree) [-135.046, 89.954, -0.000]
 
 
+chunting@chunting-UR:~/catkin_ws$ rosrun tf tf_echo left_base left_base_link
+At time 1546766683.592
+- Translation: [0.000, 0.000, 0.000]
+- Rotation: in Quaternion [0.000, 0.000, 1.000, 0.000]
+            in RPY (radian) [-0.000, -0.000, 3.142]
+            in RPY (degree) [-0.000, -0.000, 180.000]
+
+chunting@chunting-UR:~/catkin_ws$ rosrun tf tf_echo right_base right_base_link
+At time 1546766745.872
+- Translation: [0.000, 0.000, 0.000]
+- Rotation: in Quaternion [0.000, 0.000, 1.000, 0.000]
+            in RPY (radian) [0.000, -0.000, 3.142]
+            in RPY (degree) [0.000, -0.000, 180.000]
+At time 1546766746.653
+
+
+
+
 
 
 

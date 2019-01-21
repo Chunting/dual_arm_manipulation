@@ -10,11 +10,13 @@ bool TrajectoryProcessor::fuse(moveit_msgs::RobotTrajectory &arms_trajectory,
                                moveit_msgs::RobotTrajectory arm1_trajectory,
                                moveit_msgs::RobotTrajectory arm2_trajectory) {
     arms_trajectory = arm1_trajectory;
-    if (arm1_trajectory.joint_trajectory.points.size() != arm2_trajectory.joint_trajectory.points.size()){
-        int i1 = arm1_trajectory.joint_trajectory.points.size();
-        int i2 = arm2_trajectory.joint_trajectory.points.size();
+    int i1 = arm1_trajectory.joint_trajectory.points.size();
+    int i2 = arm2_trajectory.joint_trajectory.points.size();
+    int num = i1<i2?i1:i2;
+    if (i1 != i2){
+       
         ROS_WARN("fuse trajectory: unequal size of trajectory points. arm1: %i, arm2: %i", i1, i2);
-        return false;
+        // return false;
     }
     for (unsigned int i=0; i < arm2_trajectory.joint_trajectory.joint_names.size(); i++)
         arms_trajectory.joint_trajectory.joint_names.push_back(arm2_trajectory.joint_trajectory.joint_names[i]);
