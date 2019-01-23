@@ -145,7 +145,6 @@ int main(int argc, char **argv)
     right_.setJointValueTarget("right_wrist_2_joint", -0.0);
     right_.setJointValueTarget("right_wrist_3_joint", 0.00300112795031922);
 
-    //right_.setJointValueTarget(ur10JointTarget);
     right_.plan(plan);
     ROS_WARN("visualizing plan. STRG+C to interrupt.");
     sleep(4);

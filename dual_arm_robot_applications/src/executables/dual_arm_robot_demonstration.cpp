@@ -52,7 +52,6 @@ int main(int argc, char **argv) {
     moveit_msgs::Constraints both_constraints;
     ROS_INFO("\n\nStart to set up the constraints...");
 
-    // ur5 sometimes blocks itself when picking the box on bottom, on top ur10 can get problems adapting its trajectory, this solve the issue.
     jcm.joint_name="left_shoulder_pan_joint";
     jcm.position = 0.0;
     jcm.tolerance_above = 0.5;
@@ -92,7 +91,6 @@ int main(int argc, char **argv) {
     both_constraints.joint_constraints.push_back(jcm);
     dualArmRobot.left_.setPathConstraints(left_constraints);
 
-    // ur10 sometimes blocks itself when picking the box on top, this should solve the issue
     jcm.joint_name="right_wrist_2_joint";
     jcm.position = 0;
     jcm.tolerance_above = 3;
@@ -194,7 +192,6 @@ int main(int argc, char **argv) {
     dualArmRobot.left_.setPathConstraints(left_constraints);
     both_constraints.joint_constraints.push_back(jcm);
 
-    // ur5 sometimes blocks itself when picking the box on bottom, on top ur10 can get problems adapting its trajectory, this solve the issue.
     jcm.joint_name="left_shoulder_pan_joint";
     jcm.position = -2.4;
     jcm.tolerance_above = 2.4;

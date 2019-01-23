@@ -13,6 +13,10 @@
   <arg name="max_velocity_left" default="5.0"/> <!-- [rad/s] -->
   <arg name="max_velocity_right" default="5.0"/> <!-- [rad/s] -->
 
+  <arg name="base_frame" default="world" />
+  <arg name="left_tool_frame" default="$(arg prefix_left)ee_link" />
+  <arg name="right_tool_frame" default="$(arg prefix_right)ee_link" />
+
   <!-- dual_arm_robot model -->
   <include file="$(find dual_arm_robot_description)/launch/dual_arm_robot_upload.launch">
     <arg name="limited" value="$(arg limited)"/>
@@ -31,6 +35,8 @@
       <param name="max_velocity" type="double" value="$(arg max_velocity_left)"/>
       <param name="use_ros_control" type="bool" value="True"/>
       <param name="prefix" value="$(arg prefix_left)" />
+      <param name="base_frame" type="str" value="$(arg base_frame)"/>
+      <param name="tool_frame" type="str" value="$(arg left_tool_frame)"/>
     </node>
     
     <!-- left controller settings -->
@@ -61,6 +67,8 @@
       <param name="max_velocity" type="double" value="$(arg max_velocity_right)"/>
       <param name="use_ros_control" type="bool" value="True"/>
       <param name="prefix" value="$(arg prefix_right)" />
+      <param name="base_frame" type="str" value="$(arg base_frame)"/>
+      <param name="tool_frame" type="str" value="$(arg right_tool_frame)"/>
     </node>
     
     <!-- right controller settings -->

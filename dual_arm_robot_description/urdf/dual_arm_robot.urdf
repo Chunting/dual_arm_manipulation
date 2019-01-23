@@ -39,7 +39,6 @@
   <!-- In CAD this distance is 0.930, but in the spec it is 0.09465 -->
   <!--property name="ur5_wrist_3_length" value="0.0823" /-->
   <!-- manually measured -->
-  <!-- file has been edited because of same variable names in ur5 and ur10 -->
   <material name="orange_transparent">
     <color rgba="1 0.5 0 0.4"/>
   </material>

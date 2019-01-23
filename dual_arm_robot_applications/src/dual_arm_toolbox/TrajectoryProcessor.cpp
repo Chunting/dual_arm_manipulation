@@ -12,16 +12,17 @@ bool TrajectoryProcessor::fuse(moveit_msgs::RobotTrajectory &arms_trajectory,
     arms_trajectory = arm1_trajectory;
     int i1 = arm1_trajectory.joint_trajectory.points.size();
     int i2 = arm2_trajectory.joint_trajectory.points.size();
-    int num = i1<i2?i1:i2;
+    int num = std::min(i1,i2);
+    // int num = i1<i2?i1:i2;
     if (i1 != i2){
-       
         ROS_WARN("fuse trajectory: unequal size of trajectory points. arm1: %i, arm2: %i", i1, i2);
         // return false;
     }
     for (unsigned int i=0; i < arm2_trajectory.joint_trajectory.joint_names.size(); i++)
         arms_trajectory.joint_trajectory.joint_names.push_back(arm2_trajectory.joint_trajectory.joint_names[i]);
-        
-    for (unsigned int i=0; i < arms_trajectory.joint_trajectory.points.size(); i++){
+
+    // std::cout<< "arms_trajectory points " << arms_trajectory.joint_trajectory.points.size() std::endl;
+    for (unsigned int i=0; i < num; i++){
         for (unsigned int j=0; j < arm2_trajectory.joint_trajectory.joint_names.size(); j++){
             arms_trajectory.joint_trajectory.points[i].positions.push_back(arm2_trajectory.joint_trajectory.points[i].positions[j]);
             arms_trajectory.joint_trajectory.points[i].accelerations.push_back(arm2_trajectory.joint_trajectory.points[i].accelerations[j]);

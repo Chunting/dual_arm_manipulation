@@ -64,7 +64,6 @@ int main(int argc, char **argv) {
     moveit_msgs::Constraints both_constraints;
     ROS_INFO("Start to set up the constraints...");
 
-    // ur5 sometimes blocks itself when picking the box on bottom, on top ur10 can get problems adapting its trajectory, this solve the issue.
     jcm.joint_name="left_shoulder_pan_joint";
     jcm.position = 0.0;
     jcm.tolerance_above = 0.5;

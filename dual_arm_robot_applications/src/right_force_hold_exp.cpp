@@ -78,7 +78,6 @@ int main(int argc, char **argv)
     right_.setJointValueTarget("right_wrist_2_joint", -0.0);
     right_.setJointValueTarget("right_wrist_3_joint", 0.00300112795031922);
 
-    //right_.setJointValueTarget(ur10JointTarget);
     right_.plan(plan);
     ROS_WARN("visualizing plan. STRG+C to interrupt.");
     sleep(4);
@@ -92,14 +91,14 @@ int main(int argc, char **argv)
 
     // create ur_logger. Use this namespace
     std::vector<std::string> ur_namespaces;
-    ur_namespaces.push_back("");
+    ur_namespaces.push_back("right");
     UR_Logger ur_logger(nh, ur_namespaces);
 
     // stop controller
     ros::ServiceClient right_srv_switch_controller = nh.serviceClient<controller_manager_msgs::SwitchController>("controller_manager/switch_controller");
     controller_manager_msgs::SwitchController srv_req;
     srv_req.request.strictness = controller_manager_msgs::SwitchController::Request::BEST_EFFORT;
-    srv_req.request.stop_controllers.push_back("vel_based_pos_traj_controller");
+    srv_req.request.stop_controllers.push_back("right_vel_based_pos_traj_controller");
     bool success = right_srv_switch_controller.call(srv_req);
     ROS_INFO("Stopping controller %s",success?"SUCCEDED":"FAILED");
     srv_req.request.stop_controllers.clear();

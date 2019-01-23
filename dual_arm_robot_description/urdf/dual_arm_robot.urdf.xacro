@@ -11,7 +11,7 @@
   <xacro:include filename="$(find ur_description)/urdf/common.gazebo.xacro"/>
 
   <!-- ur5 -->
-  <xacro:include filename="$(find dual_arm_robot_description)/urdf/ur5.urdf.xacro"/> <!-- file has been edited because of same variable names in ur5 and ur10 -->
+  <xacro:include filename="$(find dual_arm_robot_description)/urdf/ur5.urdf.xacro"/> 
 
   <!-- endeffector
   <xacro:include filename="$(find dual_arm_robot_description)/urdf/endeffector.urdf.xacro"/>
@@ -40,13 +40,13 @@
   <link name="stand1">
 		<visual>
 		<geometry>
-		<cylinder radius="0.0735" length="0.5"/>
+		<cylinder radius="0.08" length="0.8"/>
 		</geometry>
 		<material name="orange_transparent"/>
 		</visual>
 		<collision>
 		<geometry>
-		<cylinder radius="0.0735" length="0.5"/>
+		<cylinder radius="0.08" length="0.8"/>
 		</geometry>
 		<material name="blue_transparent"/>
 		</collision>
@@ -55,13 +55,13 @@
 	<link name="stand2">
 		<visual>
 		<geometry>
-		<cylinder radius="0.0735" length="${robot_horizontal_stand_width}"/>
+		<cylinder radius="0.08" length="${robot_horizontal_stand_width}"/>
 		</geometry>
 		<material name="orange_transparent"/>
 		</visual>
 		<collision>
 		<geometry>
-		<cylinder radius="0.0735" length="${robot_horizontal_stand_width}"/>
+		<cylinder radius="0.08" length="${robot_horizontal_stand_width}"/>
 		</geometry>
 		<material name="blue_transparent"/>
 		</collision>

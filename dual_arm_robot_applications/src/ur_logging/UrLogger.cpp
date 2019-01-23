@@ -73,7 +73,10 @@ std::string UR_Logger::headline(UR_Message_Listener ur_listener){
     //ros::param::get("/hardware_interface/joints", joint_names);
     nh_.getParam(ur_listener.ur_namespace_+"/hardware_interface/joints", joint_names);
     std::cout << "namespace: " << ur_listener.ur_namespace_ << "/hardware_interface/joints" << std::endl;
-    // std::cout << joint_names << std::endl;
+    for(int i=0; i<joint_names.size(); ++i){
+        std::cout << joint_names[i] << "  ";
+    }
+    std::cout << std::endl;
     if (joint_names.size() < 6){
         ROS_ERROR("UR Logger: could not properly load joint names");
     }
@@ -96,6 +99,20 @@ std::string UR_Logger::headline(UR_Message_Listener ur_listener){
         ss << delimiter_ << state_vel_prefix << ur_listener.last_state_msg_.name[i];// << state_vel_suffix;
     }
 
+    // append Cartesian state position
+    std::string state_C_prefix = "state_pos_"+ur_listener.ur_namespace_+"_";
+    //std::string wrench_force_suffix = " [N]";
+    ss << delimiter_ << state_C_prefix << "x"
+        << delimiter_ << state_C_prefix << "y"
+        << delimiter_ << state_C_prefix << "z";
+     // append Cartesian state rotation
+    std::string state_R_prefix = "state_rot_"+ur_listener.ur_namespace_+"_";
+    //std::string wrench_force_suffix = " [N]";
+    ss << delimiter_ << state_R_prefix << "qx"
+        << delimiter_ << state_R_prefix << "qy"
+        << delimiter_ << state_R_prefix << "qz"
+        << delimiter_ << state_R_prefix << "qw";
+/*
     // append wrench
     std::string wrench_force_prefix = "tcp_wrench_force_";
     //std::string wrench_force_suffix = " [N]";
@@ -121,6 +138,7 @@ std::string UR_Logger::headline(UR_Message_Listener ur_listener){
     for (int i = 0; i < 6; i++ ){
         ss << delimiter_ << target_vel_prefix << joint_names[i];// << target_vel_suffix;
     }
+    */
     return ss.str();
 }
 
@@ -150,6 +168,19 @@ std::string UR_Logger::data_line(UR_Message_Listener ur_listener){
     else {
         converter << delimiter_ << delimiter_ << delimiter_ << delimiter_ << delimiter_ << delimiter_;
     }
+    // append Cartesian position 
+    
+    converter << delimiter_ << ur_listener.last_tform_msg_.transform.translation.x
+        << delimiter_ << ur_listener.last_tform_msg_.transform.translation.y
+        << delimiter_ << ur_listener.last_tform_msg_.transform.translation.z;
+    // append Cartesian rotation quaternion
+    converter << delimiter_ << ur_listener.last_tform_msg_.transform.rotation.x
+        << delimiter_ << ur_listener.last_tform_msg_.transform.rotation.y
+        << delimiter_ << ur_listener.last_tform_msg_.transform.rotation.z
+        << delimiter_ << ur_listener.last_tform_msg_.transform.rotation.w;
+        
+
+    /*
     // append tcp wrench force
     converter << delimiter_ << ur_listener.last_wrench_msg_.wrench.force.x
         << delimiter_ << ur_listener.last_wrench_msg_.wrench.force.y
@@ -172,7 +203,7 @@ std::string UR_Logger::data_line(UR_Message_Listener ur_listener){
     else {
         converter << delimiter_ << delimiter_ << delimiter_ << delimiter_ << delimiter_ << delimiter_;
     }
-
+    */
     return converter.str();
 }
 
