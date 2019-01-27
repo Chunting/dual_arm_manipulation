@@ -44,6 +44,7 @@
 // ROS
 #include <ros/ros.h>
 #include <geometry_msgs/Pose.h>
+#include <trajectory_msgs/JointTrajectory.h>
 
 // KDL
 #include <kdl/frames_io.hpp>

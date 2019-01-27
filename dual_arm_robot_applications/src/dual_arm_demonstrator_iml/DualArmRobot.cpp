@@ -1330,6 +1330,7 @@ bool DualArmRobot::execute(moveit::planning_interface::MoveGroup::Plan plan) {
     if (plan_left.trajectory_.joint_trajectory.joint_names.size() > 0){
         ROS_INFO("Trajectory sent to left arm");
         dual_arm_toolbox::TrajectoryProcessor::visualizePlan(plan_left, 0);
+        dual_arm_toolbox::TrajectoryProcessor::publishPlanTrajectory(plan_left, 0);
         //PrintTrajectory(plan_left.trajectory_);
         success_left = handle_left.sendTrajectory(plan_left.trajectory_);
     }
@@ -1337,6 +1338,7 @@ bool DualArmRobot::execute(moveit::planning_interface::MoveGroup::Plan plan) {
     if (plan_right.trajectory_.joint_trajectory.joint_names.size() > 0){
         ROS_INFO("Trajectory sent to right arm");
         dual_arm_toolbox::TrajectoryProcessor::visualizePlan(plan_right, 0);
+        dual_arm_toolbox::TrajectoryProcessor::publishPlanTrajectory(plan_right, 0);
         //PrintTrajectory(plan_right.trajectory_);
         success_right = handle_right.sendTrajectory(plan_right.trajectory_);
     }

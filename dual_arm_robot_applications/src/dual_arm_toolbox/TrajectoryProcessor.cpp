@@ -137,3 +137,13 @@ void TrajectoryProcessor::visualizePlan(moveit::planning_interface::MoveGroup::P
     display_publisher.publish(display_trajectory);
     sleep(sec);
 }
+
+void TrajectoryProcessor::publishPlanTrajectory(moveit::planning_interface::MoveGroup::Plan& plan, unsigned int sec){
+    ros::NodeHandle nh;
+    ros::Publisher execTrajectoryPub_ = nh.advertise<moveit_msgs::RobotTrajectory>("/execute_my_trajectory", 1, true);
+    moveit_msgs::RobotTrajectory trajectory_ = plan.trajectory_;
+    ROS_INFO("Publishing plan and waiting for %i seconds", sec);
+    execTrajectoryPub_.publish(trajectory_);
+    // execTrajectorySub_ = nh_.subscribe<moveit_msgs::RobotTrajectory>(EXEC_TRAJECTORY_TOPIC, 0, boost::bind(&Executor::execTrajectory, this, _1));
+    sleep(sec);
+}

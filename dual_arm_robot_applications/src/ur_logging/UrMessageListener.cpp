@@ -6,6 +6,7 @@ UR_Message_Listener::UR_Message_Listener(ros::NodeHandle& nh, std::string ur_nam
     wrench_sub_ = nh_.subscribe(ur_namespace+"/tcp_wrench", 1, &UR_Message_Listener::wrenchCallback, this);
     speed_traj_sub_ = nh_.subscribe(ur_namespace+"/ur_driver/joint_speed", 1, &UR_Message_Listener::speed_trajCallback, this);
     state_sub_ = nh_.subscribe("/joint_states", 1, &UR_Message_Listener::stateCallback, this);
+    execTrajectorySub_ = nh_.subscribe<moveit_msgs::RobotTrajectory>("/execute_my_trajectory", 1, &UR_Message_Listener::trajectoryCallback, this);
     
     //m_rawTFLogLatest.fromNSec(0);
     pose_sub_ = nh_.subscribe("/tf", 1, &UR_Message_Listener::tfCallback, this);
@@ -86,4 +87,18 @@ void UR_Message_Listener::tfCallback(const tf2_msgs::TFMessage::ConstPtr& msg){
     //         //         last_tform_msg_.transform.rotation.w );
     //     } 
     // }
+}
+
+void UR_Message_Listener::trajectoryCallback(const moveit_msgs::RobotTrajectory::ConstPtr& msg){
+    moveit_msgs::RobotTrajectory trajectory = *(msg.get());
+    if (trajectory.joint_trajectory.points.size() == 0)  return;
+    for (unsigned int i = 0; i < trajectory.joint_trajectory.points.size(); i++){
+        ROS_INFO("Points %d", i);
+        for (unsigned int a = 0; a < trajectory.joint_trajectory.points[i].positions.size(); a++){
+            ROS_INFO("%s: pos %f\t vel %f", 
+            trajectory.joint_trajectory.joint_names[a].c_str(), 
+            trajectory.joint_trajectory.points[i].positions[a],
+            trajectory.joint_trajectory.points[i].velocities[a]);
+        }
+    }
 }

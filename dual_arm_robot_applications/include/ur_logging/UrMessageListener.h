@@ -9,6 +9,9 @@
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/PoseStamped.h>
 
+#include <moveit/robot_trajectory/robot_trajectory.h>
+#include <moveit_msgs/RobotTrajectory.h>
+
 class UR_Message_Listener{  //handles callbacks and saves last received messages
 protected:
     ros::NodeHandle nh_;
@@ -16,6 +19,7 @@ protected:
     ros::Subscriber speed_traj_sub_;
     ros::Subscriber state_sub_;
     ros::Subscriber pose_sub_;
+    ros::Subscriber execTrajectorySub_;
 
 
 public:
@@ -37,4 +41,5 @@ private:
     void speed_trajCallback(const trajectory_msgs::JointTrajectory::Ptr& msg);
     void stateCallback(const sensor_msgs::JointState::Ptr& msg);
     void tfCallback(const tf2_msgs::TFMessage::ConstPtr& msg);
+    void trajectoryCallback(const moveit_msgs::RobotTrajectory::ConstPtr& msg);
 };
