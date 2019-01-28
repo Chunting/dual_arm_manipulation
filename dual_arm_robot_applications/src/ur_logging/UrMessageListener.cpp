@@ -90,15 +90,15 @@ void UR_Message_Listener::tfCallback(const tf2_msgs::TFMessage::ConstPtr& msg){
 }
 
 void UR_Message_Listener::trajectoryCallback(const moveit_msgs::RobotTrajectory::ConstPtr& msg){
-    moveit_msgs::RobotTrajectory trajectory = *(msg.get());
-    if (trajectory.joint_trajectory.points.size() == 0)  return;
-    for (unsigned int i = 0; i < trajectory.joint_trajectory.points.size(); i++){
+    last_trajectory_msg_ = *(msg.get());
+    if (last_trajectory_msg_.joint_trajectory.points.size() == 0)  return;
+    for (unsigned int i = 0; i < last_trajectory_msg_.joint_trajectory.points.size(); i++){
         ROS_INFO("Points %d", i);
-        for (unsigned int a = 0; a < trajectory.joint_trajectory.points[i].positions.size(); a++){
-            ROS_INFO("%s: pos %f\t vel %f", 
-            trajectory.joint_trajectory.joint_names[a].c_str(), 
-            trajectory.joint_trajectory.points[i].positions[a],
-            trajectory.joint_trajectory.points[i].velocities[a]);
+        for (unsigned int a = 0; a < last_trajectory_msg_.joint_trajectory.points[i].positions.size(); a++){
+            ROS_INFO("%s:\tpos %f\tvel %f", 
+            last_trajectory_msg_.joint_trajectory.joint_names[a].c_str(), 
+            last_trajectory_msg_.joint_trajectory.points[i].positions[a],
+            last_trajectory_msg_.joint_trajectory.points[i].velocities[a]);
         }
     }
 }

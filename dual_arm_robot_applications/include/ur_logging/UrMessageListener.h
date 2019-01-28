@@ -30,7 +30,7 @@ public:
     geometry_msgs::WrenchStamped last_wrench_msg_;
     sensor_msgs::JointState last_state_msg_;
     geometry_msgs::TransformStamped last_tform_msg_;
-    // tf::StampedTransform last_transform_;
+    moveit_msgs::RobotTrajectory last_trajectory_msg_
     std::string ur_prefix_;
     
     // ros::Time m_rawTFLogLatest;
