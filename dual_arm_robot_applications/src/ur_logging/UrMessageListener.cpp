@@ -90,15 +90,19 @@ void UR_Message_Listener::tfCallback(const tf2_msgs::TFMessage::ConstPtr& msg){
 }
 
 void UR_Message_Listener::trajectoryCallback(const moveit_msgs::RobotTrajectory::ConstPtr& msg){
-    last_trajectory_msg_ = *(msg.get());
-    if (last_trajectory_msg_.joint_trajectory.points.size() == 0)  return;
-    for (unsigned int i = 0; i < last_trajectory_msg_.joint_trajectory.points.size(); i++){
-        ROS_INFO("Points %d", i);
-        for (unsigned int a = 0; a < last_trajectory_msg_.joint_trajectory.points[i].positions.size(); a++){
-            ROS_INFO("%s:\tpos %f\tvel %f", 
-            last_trajectory_msg_.joint_trajectory.joint_names[a].c_str(), 
-            last_trajectory_msg_.joint_trajectory.points[i].positions[a],
-            last_trajectory_msg_.joint_trajectory.points[i].velocities[a]);
+    std::string name = "left_";
+    if (name.compare(0,ur_prefix_.size(), ur_prefix_) == 0){    // "joint_states" receives messages of all robots. This is seperating the searched one from the others.
+        last_trajectory_msg_ = *(msg.get());
+        ROS_INFO("Header time  %f ", last_trajectory_msg_.joint_trajectory.header.stamp.toSec());
+        for (unsigned int i = 0; i < last_trajectory_msg_.joint_trajectory.points.size(); i++){
+            ROS_INFO("Listening Points %d  %f ", i, last_trajectory_msg_.joint_trajectory.header.stamp.toSec()+last_trajectory_msg_.joint_trajectory.points[i].time_from_start.toSec());
+            for (unsigned int a = 0; a < last_trajectory_msg_.joint_trajectory.points[i].positions.size(); a++){
+                ROS_INFO("%s:\tpos %f\tvel %f", 
+                last_trajectory_msg_.joint_trajectory.joint_names[a].c_str(), 
+                last_trajectory_msg_.joint_trajectory.points[i].positions[a],
+                last_trajectory_msg_.joint_trajectory.points[i].velocities[a]);
+            }
         }
     }
+    
 }

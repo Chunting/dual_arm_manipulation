@@ -1311,11 +1311,10 @@ bool DualArmRobot::execute(moveit::planning_interface::MoveGroup::Plan plan) {
     //moveit_simple_controller_manager::FollowJointTrajectoryControllerHandle handle_right("right/right_vel_based_traj_admittance_controller","follow_joint_trajectory");
 
     // for both arms trajectories: because in planning each arm was not aware of the other there is a collision check before executing the trajectory
-    /* TODO: put in again later
+    // TODO: put in again later
     if ((plan_left.trajectory_.joint_trajectory.joint_names.size() > 0) && (plan_right.trajectory_.joint_trajectory.joint_names.size() > 0)){
         // check trajectory for collisions
-        robot_model_loader::RobotModelLoader robot_model_loader(
-                "robot_description");
+        robot_model_loader::RobotModelLoader robot_model_loader("robot_description");
         robot_model::RobotModelPtr kinematic_model = robot_model_loader.getModel();
         planning_scene::PlanningScene planningScene(kinematic_model);
         bool isValid = planningScene.isPathValid(plan.start_state_,plan.trajectory_,"arms");
@@ -1324,31 +1323,29 @@ bool DualArmRobot::execute(moveit::planning_interface::MoveGroup::Plan plan) {
             return false;
         }
         else ROS_INFO("Checked path. Path is valid. Executing...");
-    }*/
+    }
     /// Print out the joint trajectory infomation
-    // 
+    dual_arm_toolbox::TrajectoryProcessor::publishPlanTrajectory(plan, 1);
     if (plan_left.trajectory_.joint_trajectory.joint_names.size() > 0){
         ROS_INFO("Trajectory sent to left arm");
         dual_arm_toolbox::TrajectoryProcessor::visualizePlan(plan_left, 0);
-        dual_arm_toolbox::TrajectoryProcessor::publishPlanTrajectory(plan_left, 0);
-        //PrintTrajectory(plan_left.trajectory_);
         success_left = handle_left.sendTrajectory(plan_left.trajectory_);
     }
 
     if (plan_right.trajectory_.joint_trajectory.joint_names.size() > 0){
         ROS_INFO("Trajectory sent to right arm");
         dual_arm_toolbox::TrajectoryProcessor::visualizePlan(plan_right, 0);
-        dual_arm_toolbox::TrajectoryProcessor::publishPlanTrajectory(plan_right, 0);
-        //PrintTrajectory(plan_right.trajectory_);
         success_right = handle_right.sendTrajectory(plan_right.trajectory_);
     }
 
-    if (plan_left.trajectory_.joint_trajectory.joint_names.size() > 0) 
+    if (plan_left.trajectory_.joint_trajectory.joint_names.size() > 0){
         success_left = handle_left.waitForExecution();
+    }
     else success_left = true;
     
-    if (plan_right.trajectory_.joint_trajectory.joint_names.size() > 0) 
+    if (plan_right.trajectory_.joint_trajectory.joint_names.size() > 0) {
         success_right = handle_right.waitForExecution();
+    }
     else success_right = true;
     sleep(0.5);  // to be sure robot is at goal position
 
@@ -1408,8 +1405,6 @@ std::vector<double> DualArmRobot::getJointAngles(std::string groupName){
 }
 /* Move the robot to its home position defined in SRDF file */
 bool DualArmRobot::moveHome() {
-    ROS_INFO("\nMoving arms into home position");
-    sleep(2);
     int try_count = 0;
     bool try_step;
     moveit::planning_interface::MoveItErrorCode error;

@@ -156,7 +156,6 @@ int main(int argc, char **argv) {
     ROS_INFO("========== MOVE HOME POSITION =================");
     dualArmRobot.moveHome();
     sleep(1);
-
     dualArmRobot.kinematic_state->enforceBounds();
 
     // ROS_INFO("========== TEST IK  -- LEFT =================");
@@ -206,7 +205,7 @@ int main(int argc, char **argv) {
     ROS_INFO("========== MOVE GRASP POSITION =================");
     dualArmRobot.moveGraspPosition();
     sleep(1);
-  
+  /*
     ROS_INFO("========== MOVE CLOSER =================");
     dualArmRobot.graspMove(0.015);
     sleep(6);
@@ -263,7 +262,7 @@ int main(int argc, char **argv) {
     sleep(1);
     ur_logger.stop();
 
-   
+   */
 
 
     // END

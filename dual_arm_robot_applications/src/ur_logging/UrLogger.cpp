@@ -25,21 +25,35 @@ UR_Logger::~UR_Logger(){
 
 
 void UR_Logger::start(int log_rate){
-    if (logfile_name_ == ""){     //automatically generate a name if no name specified
+    if (logfile_name_ == "" || logfile_name_command_ == ""){     //automatically generate a name if no name specified
         generate_logfile_name();
     }
 
     // write headline
     logfile_.open(logfile_name_.c_str(), std::ofstream::out | std::ofstream::trunc);   //generate new file from beginning
-    for (int i = 0; i < ur_listeners_.size(); i++){
-        logfile_ << headline(*ur_listeners_[i]);
-        if (i < (ur_listeners_.size()-1)){
-            logfile_ << delimiter_;
+    if(logfile_.is_open()){
+        for (int i = 0; i < ur_listeners_.size(); i++){
+            logfile_ << headline(*ur_listeners_[i]);
+            if (i < (ur_listeners_.size()-1)){
+                logfile_ << delimiter_;
+            }
         }
+        logfile_ << std::endl;
+        ROS_INFO("Writing log at %iHz to %s. Press Ctrl-C to stop.", log_rate, logfile_name_.c_str());
     }
-    logfile_ << std::endl;
 
-    ROS_INFO("Writing log at %iHz to %s. Press Ctrl-C to stop.", log_rate, logfile_name_.c_str());
+    logfile_command_.open(logfile_name_command_.c_str(), std::ofstream::out | std::ofstream::trunc);   //generate new file from beginning
+    if(logfile_command_.is_open()){
+        logfile_command_ << "PC_time" << delimiter_ << "head_time";
+        for (int i = 0; i < ur_listeners_.size(); i++){
+            logfile_command_ << headline_command(*ur_listeners_[i]);
+            // if (i < (ur_listeners_.size()-1)){
+            //     logfile_command_ << delimiter_;
+            // }
+        }
+        logfile_command_ << std::endl;
+        ROS_INFO("Writing log at %iHz to %s. Press Ctrl-C to stop.", log_rate, logfile_name_command_.c_str());
+    }
     stopwatch_.restart();
     double log_duration;
     log_duration = 1.0/log_rate;
@@ -51,6 +65,7 @@ void UR_Logger::stop(){
     ROS_INFO("Stopped logging");
     timer_.stop();
     logfile_.close();
+    logfile_command_.close();
 }
 
 
@@ -65,18 +80,14 @@ void UR_Logger::generate_logfile_name(){       //automatically generate a name
     strftime (buffer,20,"%Y_%m_%d_%H_%M%S", timeinfo);
     std::string log_suffix = buffer;
     logfile_name_="./src/dual_arm_manipulation/dataLog/ur_log_"+log_suffix+".csv";
+    logfile_name_command_ = "./src/dual_arm_manipulation/dataLog/ur_command_"+log_suffix+".csv";
 }
 
 
 std::string UR_Logger::headline(UR_Message_Listener ur_listener){
     std::vector<std::string> joint_names;
-    //ros::param::get("/hardware_interface/joints", joint_names);
     nh_.getParam(ur_listener.ur_namespace_+"/hardware_interface/joints", joint_names);
     std::cout << "namespace: " << ur_listener.ur_namespace_ << "/hardware_interface/joints" << std::endl;
-    for(int i=0; i<joint_names.size(); ++i){
-        std::cout << joint_names[i] << "  ";
-    }
-    std::cout << std::endl;
     if (joint_names.size() < 6){
         ROS_ERROR("UR Logger: could not properly load joint names");
     }
@@ -138,7 +149,7 @@ std::string UR_Logger::headline(UR_Message_Listener ur_listener){
     for (int i = 0; i < 6; i++ ){
         ss << delimiter_ << target_vel_prefix << joint_names[i];// << target_vel_suffix;
     }
-    */
+*/   
     return ss.str();
 }
 
@@ -191,19 +202,83 @@ std::string UR_Logger::data_line(UR_Message_Listener ur_listener){
         << delimiter_ << ur_listener.last_wrench_msg_.wrench.torque.z;
 
     // append target position
-    converter << delimiter_ << delimiter_ << delimiter_ << delimiter_ << delimiter_ << delimiter_;
-
-    // append target velocity
-    if (ur_listener.last_speed_traj_msg_.points.size()==1){
-        trajectory_msgs::JointTrajectoryPoint traj_point = ur_listener.last_speed_traj_msg_.points[0];
-        for (int i = 0; i < 6; i++ ){
-            converter << delimiter_ << traj_point.velocities[i];
+    if (ur_listener.last_trajectory_msg_.joint_trajectory.points.size() > 0) {
+        for (unsigned int i = 0; i < ur_listener.last_trajectory_msg_.joint_trajectory.points.size(); i++){
+            for (unsigned int a = 0; a < ur_listener.last_trajectory_msg_.joint_trajectory.points[i].positions.size(); a++){
+                ROS_INFO("%s:\tpos %f\tvel %f", 
+                ur_listener.last_trajectory_msg_.joint_trajectory.joint_names[a].c_str(), 
+                ur_listener.last_trajectory_msg_.joint_trajectory.points[i].positions[a],
+                ur_listener.last_trajectory_msg_.joint_trajectory.points[i].velocities[a]);
+            }
         }
-    }
-    else {
+    }else {
         converter << delimiter_ << delimiter_ << delimiter_ << delimiter_ << delimiter_ << delimiter_;
     }
+
+    // // append target velocity
+    // if (ur_listener.last_speed_traj_msg_.points.size()==1){
+    //     trajectory_msgs::JointTrajectoryPoint traj_point = ur_listener.last_speed_traj_msg_.points[0];
+    //     for (int i = 0; i < 6; i++ ){
+    //         converter << delimiter_ << traj_point.velocities[i];
+    //     }
+    // }
+    // else {
+    //     converter << delimiter_ << delimiter_ << delimiter_ << delimiter_ << delimiter_ << delimiter_;
+    // }
     */
+    
+    return converter.str();
+}
+
+
+std::string UR_Logger::headline_command(UR_Message_Listener ur_listener){
+    std::vector<std::string> joint_names;
+    nh_.getParam(ur_listener.ur_namespace_+"/hardware_interface/joints", joint_names);
+    if (joint_names.size() < 6){
+        ROS_ERROR("UR Logger: could not properly load joint names");
+    }
+    std::stringstream ss;
+    
+    // append time
+    // ss << "PC_time" << delimiter_ << "head_time";
+
+    // append position command
+    std::string command_pos_prefix = "command_pos_";
+    for (int i = 0; i < ur_listener.last_state_msg_.name.size(); i++ ){
+        ss << delimiter_ << command_pos_prefix << joint_names[i];
+    }
+
+    // append command velocity
+    std::string command_vel_prefix = "command_vel_";
+    for (int i = 0; i < ur_listener.last_state_msg_.name.size(); i++ ){
+        ss << delimiter_ << command_vel_prefix << joint_names[i];
+    }
+
+    // std::cout << ss.str() << std::endl;
+    
+    return ss.str();
+}
+std::string UR_Logger::data_line_command(UR_Message_Listener ur_listener){
+    std::ostringstream converter;    // stream used to convert numbers to string
+    // append target position
+    for (unsigned int i = 0; i < ur_listener.last_trajectory_msg_.joint_trajectory.points.size(); i++){
+        // append time
+        converter << (stopwatch_.elapsed().toSec()) << delimiter_ << ur_listener.last_trajectory_msg_.joint_trajectory.points[i].time_from_start.toSec();
+        for (unsigned int a = 0; a < 6; a++){
+            converter << delimiter_ << ur_listener.last_trajectory_msg_.joint_trajectory.points[i].positions[a];  
+        }
+        for (unsigned int a = 0; a < 6; a++){
+            converter << delimiter_ << ur_listener.last_trajectory_msg_.joint_trajectory.points[i].velocities[a];  
+        }
+        for (unsigned int a = 6; a < ur_listener.last_trajectory_msg_.joint_trajectory.points[i].positions.size(); a++){
+            converter << delimiter_ << ur_listener.last_trajectory_msg_.joint_trajectory.points[i].positions[a];  
+        }
+        for (unsigned int a = 6; a < ur_listener.last_trajectory_msg_.joint_trajectory.points[i].positions.size(); a++){
+            converter << delimiter_ << ur_listener.last_trajectory_msg_.joint_trajectory.points[i].velocities[a];  
+        }
+        converter << std::endl;
+    }  
+    
     return converter.str();
 }
 
@@ -216,6 +291,15 @@ void UR_Logger::logCallback(const ros::TimerEvent&){
         }
     }
     logfile_ << std::endl;
+
+    for(int i = 0; i < ur_listeners_.size(); i++){
+        logfile_command_ << data_line_command(*ur_listeners_[i]);
+        // if (i < (ur_listeners_.size()-1)){
+        //     logfile_command_ << delimiter_;
+        // }
+    }
+    //logfile_command_ << std::endl;
+    
 }
 
 /* Simple Log-Node
