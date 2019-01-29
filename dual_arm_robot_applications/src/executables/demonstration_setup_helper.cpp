@@ -34,7 +34,11 @@ int main(int argc, char **argv) {
     // Scene Setup
     dual_arm_demonstrator_iml::SceneManager sceneManager(nh);
     sceneManager.setupScene();
-
+    std::vector<std::string> ur_namespaces;
+    ur_namespaces.push_back("left");
+    ur_namespaces.push_back("right");
+    UR_Logger ur_logger(nh, ur_namespaces);
+    ur_logger.start(125);
     // variables
     moveit::planning_interface::MoveGroup::Plan left_plan;
     moveit::planning_interface::MoveGroup::Plan right_plan;
@@ -147,11 +151,7 @@ int main(int argc, char **argv) {
     direction.header.frame_id = "world";
    
 
-    std::vector<std::string> ur_namespaces;
-    ur_namespaces.push_back("left");
-    ur_namespaces.push_back("right");
-    UR_Logger ur_logger(nh, ur_namespaces);
-    ur_logger.start(125);
+   
 
     ROS_INFO("========== MOVE HOME POSITION =================");
     dualArmRobot.moveHome();
@@ -259,12 +259,12 @@ int main(int argc, char **argv) {
     sleep(1);
     ROS_INFO("========== MOVE HOME POSITION =================");
     dualArmRobot.moveHome();
-    sleep(1);
-    ur_logger.stop();
+    
 
    */
 
-
+    sleep(1);
+    ur_logger.stop();
     // END
     ros::shutdown();
     return 0;

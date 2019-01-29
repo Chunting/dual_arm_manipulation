@@ -25,6 +25,7 @@
         "cwctype": "cpp",
         "core": "cpp",
         "chrono": "cpp",
-        "ratio": "cpp"
+        "ratio": "cpp",
+        "thread": "cpp"
     }
 }

@@ -53,6 +53,8 @@
 // Controller Interface
 #include <moveit_simple_controller_manager/follow_joint_trajectory_controller_handle.h>
 
+// multi-thread
+#include<thread>
 
 namespace dual_arm_demonstrator_iml {
     class DualArmRobot {
@@ -77,7 +79,7 @@ namespace dual_arm_demonstrator_iml {
 
     public:
         DualArmRobot(ros::NodeHandle &nh);
-        
+        ~DualArmRobot();
         // Construct a RobotState that maintains the configuration of the robot.
         robot_state::RobotStatePtr kinematic_state;
 
@@ -99,6 +101,9 @@ namespace dual_arm_demonstrator_iml {
         std::vector<double> left_joint_values;
         std::vector<double> right_joint_values;
 
+        std::thread* pose_publish_thread_;
+
+        void publishPoseMsg();
         // workaround for moveGroup method does not return attached objects correctly (issue)
         robot_state::RobotState getCurrentRobotState();
         moveit_msgs::RobotState getCurrentRobotStateMsg();

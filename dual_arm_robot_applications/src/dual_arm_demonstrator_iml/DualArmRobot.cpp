@@ -54,7 +54,8 @@ DualArmRobot::DualArmRobot(ros::NodeHandle& nh) :
     left_controller_ = "left/left_vel_based_pos_traj_controller";
     right_controller_ = "right/right_vel_based_pos_traj_controller";
     //#endif
-
+   //subscribe to the data topic of interest
+	pose_publish_thread_ = new std::thread(boost::bind(&DualArmRobot::publishPoseMsg, this));
 
     // setup constraints
     moveit_msgs::JointConstraint jcm;
@@ -147,8 +148,7 @@ DualArmRobot::DualArmRobot(ros::NodeHandle& nh) :
     right_.setPathConstraints(right_constraints);
 
     arms_.setPathConstraints(both_constraints);
-    ROS_INFO("Finished setting up the constraints...");
-
+   
     // planning scene monitor
     // Subscribes to the topic planning_scene
     planning_scene_monitor_ = boost::make_shared<planning_scene_monitor::PlanningSceneMonitor>("robot_description");
@@ -214,7 +214,10 @@ DualArmRobot::DualArmRobot(ros::NodeHandle& nh) :
     }
 
 }
-
+DualArmRobot::~DualArmRobot()
+{
+    // pose_publish_thread_->joint();
+}
 robot_state::RobotState DualArmRobot::getCurrentRobotState(){
     // Request planning scene state using a service call (service name)
     planning_scene_monitor_->requestPlanningSceneState("get_planning_scene");
@@ -1650,10 +1653,20 @@ void DualArmRobot::PrintTrajectory(const moveit_msgs::RobotTrajectory &trajector
         }
 }
 
-// Eigen::Affine3d& DualArmRobot::getPositionFK(const robot_state::JointModelGroup* joint_model_group, std::string& endEffectorLink){
-//     Eigen::Affine3d &end_effector_state = kinematic_state->getGlobalLinkTransform(EndEffectorLink);
-//     /* Print end-effector pose. Remember that this is in the model frame */
-//     ROS_INFO_STREAM("Translation: " << end_effector_state.translation());
-//     ROS_INFO_STREAM("Rotation: " << end_effector_state.rotation());
-//     return end_effector_state;
-// }
+void DualArmRobot::publishPoseMsg() {
+		ros::Publisher left_pose_pub = nh_.advertise<geometry_msgs::PoseStamped>("left/pose", 1);
+        ros::Publisher right_pose_pub = nh_.advertise<geometry_msgs::PoseStamped>("right/pose", 1);
+        geometry_msgs::PoseStamped left_current_pose_temp_;
+        geometry_msgs::PoseStamped right_current_pose_temp_;
+        ros::Rate rate(125);
+        while(ros::ok()){
+                left_current_pose_temp_ = left_.getCurrentPose(left_.getEndEffectorLink());
+                right_current_pose_temp_ = right_.getCurrentPose(right_.getEndEffectorLink());
+                left_pose_pub.publish(left_current_pose_temp_);
+                right_pose_pub.publish(right_current_pose_temp_);
+                ros::spinOnce();
+                rate.sleep();
+        }
+        
+
+}

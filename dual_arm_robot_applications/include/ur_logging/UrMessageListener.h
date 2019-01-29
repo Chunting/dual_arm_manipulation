@@ -30,16 +30,16 @@ public:
     geometry_msgs::WrenchStamped last_wrench_msg_;
     sensor_msgs::JointState last_state_msg_;
     geometry_msgs::TransformStamped last_tform_msg_;
+    geometry_msgs::PoseStamped last_pose_msg_;
     moveit_msgs::RobotTrajectory last_trajectory_msg_;
+    bool newTrajectory = false;
     std::string ur_prefix_;
-    
-    // ros::Time m_rawTFLogLatest;
-    tf::Transformer *m_tf;
+    int count = 0;
     
 private:
     void wrenchCallback(const geometry_msgs::WrenchStamped::Ptr& msg);
     void speed_trajCallback(const trajectory_msgs::JointTrajectory::Ptr& msg);
     void stateCallback(const sensor_msgs::JointState::Ptr& msg);
-    void tfCallback(const tf2_msgs::TFMessage::ConstPtr& msg);
+    void poseCallback(const geometry_msgs::PoseStamped::ConstPtr& msg);
     void trajectoryCallback(const moveit_msgs::RobotTrajectory::ConstPtr& msg);
 };
