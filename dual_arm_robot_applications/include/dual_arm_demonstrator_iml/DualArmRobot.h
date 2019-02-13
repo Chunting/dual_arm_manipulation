@@ -154,11 +154,10 @@ namespace dual_arm_demonstrator_iml {
         // Eigen::Affine3d& getPositionFK(const robot_state::JointModelGroup* joint_model_group, std::string& endEffectorLink);
 
         Eigen::MatrixXd  getJacobian(const robot_state::JointModelGroup* joint_model_group, Eigen::Vector3d &reference_point_position );
-
+        void setConstraints();
         void PrintPose(geometry_msgs::Pose &pose);
         void PrintTrajectory(const moveit_msgs::RobotTrajectory &trajectory);
         double radianToDegree(double radian){
-            
             return (radian*(180/PI));
         }
     };

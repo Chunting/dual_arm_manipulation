@@ -44,114 +44,9 @@ int main(int argc, char **argv) {
     moveit::planning_interface::MoveGroup::Plan right_plan;
     moveit::planning_interface::MoveItErrorCode error;
     error.val = -1;
-   
-
- // setup constraints
-    moveit_msgs::JointConstraint jcm;
-    moveit_msgs::Constraints left_constraints;
-    moveit_msgs::Constraints right_constraints;
-    moveit_msgs::Constraints both_constraints;
-    ROS_INFO("Start to set up the constraints...");
-    // when placing box on top ur5 can get blocked because wrist 1 reaches limit
-    jcm.joint_name="left_wrist_1_joint";
-    jcm.position = 0.0;
-    jcm.tolerance_above = 3.0;
-    jcm.tolerance_below = 3.0;
-    jcm.weight = 1;
-    left_constraints.joint_constraints.push_back(jcm);
-    both_constraints.joint_constraints.push_back(jcm);
-
-    jcm.joint_name="left_shoulder_pan_joint";
-    jcm.position = 0.0;
-    jcm.tolerance_above = 3;
-    jcm.tolerance_below = 3;
-    jcm.weight = 1.0;
-    left_constraints.joint_constraints.push_back(jcm);
-    both_constraints.joint_constraints.push_back(jcm);
-
-
-    jcm.joint_name="left_shoulder_lift_joint";
-    jcm.position = 0.0;
-    jcm.tolerance_above = 3;
-    jcm.tolerance_below = 3;
-    jcm.weight = 1.0;
-    left_constraints.joint_constraints.push_back(jcm);
-    both_constraints.joint_constraints.push_back(jcm);
-
-
-    // ur5 can get blocked while placing without this constraint
-    jcm.joint_name="left_elbow_joint";
-    jcm.position = 0.0;
-    jcm.tolerance_above = 3;
-    jcm.tolerance_below = 3;
-    jcm.weight = 0.5;
-    left_constraints.joint_constraints.push_back(jcm);
-    both_constraints.joint_constraints.push_back(jcm);
-
-    jcm.joint_name="left_wrist_2_joint";
-    jcm.position = 0.0;
-    jcm.tolerance_above = 3;
-    jcm.tolerance_below = 3;
-    jcm.weight = 1.0;
-    left_constraints.joint_constraints.push_back(jcm);
-    both_constraints.joint_constraints.push_back(jcm);
-
-    jcm.joint_name="left_wrist_3_joint";
-    jcm.position = 0.0;
-    jcm.tolerance_above = 3;
-    jcm.tolerance_below = 3;
-    jcm.weight = 1.0;
-    left_constraints.joint_constraints.push_back(jcm);
-    both_constraints.joint_constraints.push_back(jcm);
-    
-    // ur5 sometimes blocks itself when picking the box on top, this should solve the issue
-
-    jcm.joint_name="right_shoulder_pan_joint";
-    jcm.position = 0.01;
-    jcm.tolerance_above = 3;
-    jcm.tolerance_below = 0;
-    jcm.weight = 1.0;
-    right_constraints.joint_constraints.push_back(jcm);
-    both_constraints.joint_constraints.push_back(jcm);
-
-
-    jcm.joint_name="right_shoulder_lift_joint";
-    jcm.position = 0.01;
-    jcm.tolerance_above = 3;
-    jcm.tolerance_below = 3;
-    jcm.weight = 1.0;
-    right_constraints.joint_constraints.push_back(jcm);
-    both_constraints.joint_constraints.push_back(jcm);
-
-
-    jcm.joint_name="right_wrist_2_joint";
-    jcm.position = 0;
-    jcm.tolerance_above = 3;
-    jcm.tolerance_below = 3;
-    jcm.weight = 1.0;
-    right_constraints.joint_constraints.push_back(jcm);
-    both_constraints.joint_constraints.push_back(jcm);
-
-
-    jcm.joint_name="right_wrist_3_joint";
-    jcm.position = 0;
-    jcm.tolerance_above = 3;
-    jcm.tolerance_below = 3;
-    jcm.weight = 1.0;
-    right_constraints.joint_constraints.push_back(jcm);
-    both_constraints.joint_constraints.push_back(jcm);
-
-    dualArmRobot.left_.setPathConstraints(left_constraints);
-    dualArmRobot.right_.setPathConstraints(right_constraints);
-    dualArmRobot.arms_.setPathConstraints(both_constraints);
-    ROS_INFO("Finished setting up the constraints...");
-
 
     geometry_msgs::Vector3Stamped direction;
     direction.header.frame_id = "world";
-   
-
-   
 
     ROS_INFO("========== MOVE HOME POSITION =================");
     dualArmRobot.moveHome();
@@ -205,7 +100,7 @@ int main(int argc, char **argv) {
     ROS_INFO("========== MOVE GRASP POSITION =================");
     dualArmRobot.moveGraspPosition();
     sleep(1);
-  /*
+  
     ROS_INFO("========== MOVE CLOSER =================");
     dualArmRobot.graspMove(0.015);
     sleep(6);
@@ -223,6 +118,7 @@ int main(int argc, char **argv) {
     direction.vector.z = 0.1;
     dualArmRobot.linearMove(direction, true, true,true);
     sleep(2);
+    /*
     ROS_INFO("========== MOVE LEFT =================");
     direction.vector.x = 0;
     direction.vector.y = -0.1;
@@ -247,6 +143,7 @@ int main(int argc, char **argv) {
     // direction.vector.z = 0;
     // dualArmRobot.linearMove(direction, true, true,true);
     // sleep(2);
+    */
     ROS_INFO("========== PUT BOX DOWN =================");
     direction.vector.x = 0;
     direction.vector.y = 0;
@@ -259,9 +156,6 @@ int main(int argc, char **argv) {
     sleep(1);
     ROS_INFO("========== MOVE HOME POSITION =================");
     dualArmRobot.moveHome();
-    
-
-   */
 
     sleep(1);
     ur_logger.stop();

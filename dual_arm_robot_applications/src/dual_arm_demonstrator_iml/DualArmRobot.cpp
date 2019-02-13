@@ -56,98 +56,6 @@ DualArmRobot::DualArmRobot(ros::NodeHandle& nh) :
     //#endif
    //subscribe to the data topic of interest
 	pose_publish_thread_ = new std::thread(boost::bind(&DualArmRobot::publishPoseMsg, this));
-
-    // setup constraints
-    moveit_msgs::JointConstraint jcm;
-    moveit_msgs::Constraints left_constraints;
-    moveit_msgs::Constraints right_constraints;
-    moveit_msgs::Constraints both_constraints;
-    ROS_INFO("Start to set up the constraints...");
-    // when placing box on top ur5 can get blocked because wrist 1 reaches limit
-    jcm.joint_name="left_wrist_1_joint";
-    jcm.position = 0.0;
-    jcm.tolerance_above = 3.0;
-    jcm.tolerance_below = 3.0;
-    jcm.weight = 1;
-    left_constraints.joint_constraints.push_back(jcm);
-    both_constraints.joint_constraints.push_back(jcm);
-    left_.setPathConstraints(left_constraints);
-
-    jcm.joint_name="left_shoulder_pan_joint";
-    jcm.position = 0.0;
-    jcm.tolerance_above = 3;
-    jcm.tolerance_below = 3;
-    jcm.weight = 1.0;
-    left_constraints.joint_constraints.push_back(jcm);
-    both_constraints.joint_constraints.push_back(jcm);
-    left_.setPathConstraints(left_constraints);
-
-    jcm.joint_name="left_shoulder_lift_joint";
-    jcm.position = 0.0;
-    jcm.tolerance_above = 3;
-    jcm.tolerance_below = 3;
-    jcm.weight = 1.0;
-    left_constraints.joint_constraints.push_back(jcm);
-    both_constraints.joint_constraints.push_back(jcm);
-    left_.setPathConstraints(left_constraints);
-
-    // ur5 can get blocked while placing without this constraint
-    jcm.joint_name="left_elbow_joint";
-    jcm.position = 0.0;
-    jcm.tolerance_above = 3;
-    jcm.tolerance_below = 3;
-    jcm.weight = 0.5;
-    left_constraints.joint_constraints.push_back(jcm);
-    both_constraints.joint_constraints.push_back(jcm);
-    left_.setPathConstraints(left_constraints);
-
-    jcm.joint_name="left_wrist_3_joint";
-    jcm.position = 0.0;
-    jcm.tolerance_above = 3;
-    jcm.tolerance_below = 3;
-    jcm.weight = 1.0;
-    left_constraints.joint_constraints.push_back(jcm);
-    both_constraints.joint_constraints.push_back(jcm);
-    left_.setPathConstraints(left_constraints);
-    // ur5 sometimes blocks itself when picking the box on top, this should solve the issue
-
-    jcm.joint_name="right_shoulder_pan_joint";
-    jcm.position = 0.01;
-    jcm.tolerance_above = 3;
-    jcm.tolerance_below = 3;
-    jcm.weight = 1.0;
-    right_constraints.joint_constraints.push_back(jcm);
-    both_constraints.joint_constraints.push_back(jcm);
-    right_.setPathConstraints(right_constraints);
-
-    jcm.joint_name="right_shoulder_lift_joint";
-    jcm.position = 0.01;
-    jcm.tolerance_above = 3;
-    jcm.tolerance_below = 3;
-    jcm.weight = 1.0;
-    right_constraints.joint_constraints.push_back(jcm);
-    both_constraints.joint_constraints.push_back(jcm);
-    right_.setPathConstraints(right_constraints);
-
-    jcm.joint_name="right_wrist_2_joint";
-    jcm.position = 0;
-    jcm.tolerance_above = 3;
-    jcm.tolerance_below = 3;
-    jcm.weight = 1.0;
-    right_constraints.joint_constraints.push_back(jcm);
-    both_constraints.joint_constraints.push_back(jcm);
-    right_.setPathConstraints(right_constraints);
-
-    jcm.joint_name="right_wrist_3_joint";
-    jcm.position = 0;
-    jcm.tolerance_above = 3;
-    jcm.tolerance_below = 3;
-    jcm.weight = 1.0;
-    right_constraints.joint_constraints.push_back(jcm);
-    both_constraints.joint_constraints.push_back(jcm);
-    right_.setPathConstraints(right_constraints);
-
-    arms_.setPathConstraints(both_constraints);
    
     // planning scene monitor
     // Subscribes to the topic planning_scene
@@ -158,6 +66,7 @@ DualArmRobot::DualArmRobot(ros::NodeHandle& nh) :
     // frame_id:  /world
     left_current_pose_ = left_.getCurrentPose(left_.getEndEffectorLink());
     current_dual_arm_state_ = getCurrentRobotStateMsg();
+    setConstraints();
 
     // left_joint_values = getJointAngles("left_manipulator");
     ROS_INFO("\nleft_current_pose_ frame_id: %s, end_effector: %s, x=%f, y=%f, z=%f, qx=%f, qy=%f, qz=%f, qw=%f\n", 
@@ -314,7 +223,7 @@ bool DualArmRobot::adaptTrajectory(moveit_msgs::RobotTrajectory left_trajectory,
         kinematic_state->setJointGroupPositions(left_joint_model_group, left_joint_values);
         const Eigen::Affine3d &end_effector_pose_left = kinematic_state->getGlobalLinkTransform(left_.getEndEffectorLink());
         tf::transformEigenToKDL(end_effector_pose_left, frame_pose_left);
- /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////       
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////       
         geometry_msgs::Pose left_temp_pose;
         dual_arm_toolbox::Transform::transformKDLtoPose(frame_pose_left, left_temp_pose);
         ROS_INFO("Get end_effector from joint points in trajectory: %s", left_.getEndEffectorLink().c_str());
@@ -1660,13 +1569,104 @@ void DualArmRobot::publishPoseMsg() {
         geometry_msgs::PoseStamped right_current_pose_temp_;
         ros::Rate rate(125);
         while(ros::ok()){
-                left_current_pose_temp_ = left_.getCurrentPose(left_.getEndEffectorLink());
-                right_current_pose_temp_ = right_.getCurrentPose(right_.getEndEffectorLink());
-                left_pose_pub.publish(left_current_pose_temp_);
-                right_pose_pub.publish(right_current_pose_temp_);
-                ros::spinOnce();
-                rate.sleep();
+            left_current_pose_temp_ = left_.getCurrentPose(left_.getEndEffectorLink());
+            right_current_pose_temp_ = right_.getCurrentPose(right_.getEndEffectorLink());
+            left_pose_pub.publish(left_current_pose_temp_);
+            right_pose_pub.publish(right_current_pose_temp_);
+            ros::spinOnce();
+            rate.sleep();
         }
-        
+}
+void DualArmRobot::setConstraints() {
+  // setup constraints
+    moveit_msgs::JointConstraint jcm;
+    moveit_msgs::Constraints left_constraints;
+    moveit_msgs::Constraints right_constraints;
+    moveit_msgs::Constraints both_constraints;
+    ROS_INFO("Start to set up the constraints...");
+    // when placing box on top ur5 can get blocked because wrist 1 reaches limit
+    jcm.joint_name="left_wrist_1_joint";
+    jcm.position = 0.0;
+    jcm.tolerance_above = 3.0;
+    jcm.tolerance_below = 3.0;
+    jcm.weight = 1;
+    left_constraints.joint_constraints.push_back(jcm);
+    both_constraints.joint_constraints.push_back(jcm);
+    left_.setPathConstraints(left_constraints);
 
+    jcm.joint_name="left_shoulder_pan_joint";
+    jcm.position = 0.0;
+    jcm.tolerance_above = 3;
+    jcm.tolerance_below = 3;
+    jcm.weight = 1.0;
+    left_constraints.joint_constraints.push_back(jcm);
+    both_constraints.joint_constraints.push_back(jcm);
+    left_.setPathConstraints(left_constraints);
+
+    jcm.joint_name="left_shoulder_lift_joint";
+    jcm.position = 0.0;
+    jcm.tolerance_above = 3;
+    jcm.tolerance_below = 3;
+    jcm.weight = 1.0;
+    left_constraints.joint_constraints.push_back(jcm);
+    both_constraints.joint_constraints.push_back(jcm);
+    left_.setPathConstraints(left_constraints);
+
+    // ur5 can get blocked while placing without this constraint
+    jcm.joint_name="left_elbow_joint";
+    jcm.position = 0.0;
+    jcm.tolerance_above = 3;
+    jcm.tolerance_below = 3;
+    jcm.weight = 0.5;
+    left_constraints.joint_constraints.push_back(jcm);
+    both_constraints.joint_constraints.push_back(jcm);
+    left_.setPathConstraints(left_constraints);
+
+    jcm.joint_name="left_wrist_3_joint";
+    jcm.position = 0.0;
+    jcm.tolerance_above = 3;
+    jcm.tolerance_below = 3;
+    jcm.weight = 1.0;
+    left_constraints.joint_constraints.push_back(jcm);
+    both_constraints.joint_constraints.push_back(jcm);
+    left_.setPathConstraints(left_constraints);
+    // ur5 sometimes blocks itself when picking the box on top, this should solve the issue
+
+    jcm.joint_name="right_shoulder_pan_joint";
+    jcm.position = 0.01;
+    jcm.tolerance_above = 3;
+    jcm.tolerance_below = 3;
+    jcm.weight = 1.0;
+    right_constraints.joint_constraints.push_back(jcm);
+    both_constraints.joint_constraints.push_back(jcm);
+    right_.setPathConstraints(right_constraints);
+
+    jcm.joint_name="right_shoulder_lift_joint";
+    jcm.position = 0.01;
+    jcm.tolerance_above = 3;
+    jcm.tolerance_below = 3;
+    jcm.weight = 1.0;
+    right_constraints.joint_constraints.push_back(jcm);
+    both_constraints.joint_constraints.push_back(jcm);
+    right_.setPathConstraints(right_constraints);
+
+    jcm.joint_name="right_wrist_2_joint";
+    jcm.position = 0;
+    jcm.tolerance_above = 3;
+    jcm.tolerance_below = 3;
+    jcm.weight = 1.0;
+    right_constraints.joint_constraints.push_back(jcm);
+    both_constraints.joint_constraints.push_back(jcm);
+    right_.setPathConstraints(right_constraints);
+
+    jcm.joint_name="right_wrist_3_joint";
+    jcm.position = 0;
+    jcm.tolerance_above = 3;
+    jcm.tolerance_below = 3;
+    jcm.weight = 1.0;
+    right_constraints.joint_constraints.push_back(jcm);
+    both_constraints.joint_constraints.push_back(jcm);
+    right_.setPathConstraints(right_constraints);
+
+    arms_.setPathConstraints(both_constraints);
 }
