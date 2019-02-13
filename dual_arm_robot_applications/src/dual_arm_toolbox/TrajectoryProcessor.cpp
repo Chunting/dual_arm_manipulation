@@ -144,6 +144,15 @@ void TrajectoryProcessor::publishPlanTrajectory(moveit::planning_interface::Move
     moveit_msgs::RobotTrajectory trajectory_ = plan.trajectory_;
     ROS_INFO("Publishing plan and waiting for %i seconds", sec);
     execTrajectoryPub_.publish(trajectory_);
-    // execTrajectorySub_ = nh_.subscribe<moveit_msgs::RobotTrajectory>(EXEC_TRAJECTORY_TOPIC, 0, boost::bind(&Executor::execTrajectory, this, _1));
     sleep(sec);
+    ROS_INFO("Header time  %f ", trajectory_.joint_trajectory.header.stamp.toSec());
+        for (unsigned int i = 0; i < trajectory_.joint_trajectory.points.size(); i++){
+            ROS_INFO("Listening Points %d  %f ", i, trajectory_.joint_trajectory.header.stamp.toSec()+trajectory_.joint_trajectory.points[i].time_from_start.toSec());
+            for (unsigned int a = 0; a < trajectory_.joint_trajectory.points[i].positions.size(); a++){
+                ROS_INFO("%s:\tpos %f\tvel %f", 
+                trajectory_.joint_trajectory.joint_names[a].c_str(), 
+                trajectory_.joint_trajectory.points[i].positions[a]*(180/3.14159),
+                trajectory_.joint_trajectory.points[i].velocities[a]*(180/3.14159));
+            }
+        }
 }

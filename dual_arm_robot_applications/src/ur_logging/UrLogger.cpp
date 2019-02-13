@@ -267,21 +267,49 @@ std::string UR_Logger::data_line_command(UR_Message_Listener &ur_listener){
             // It waits for 1 sec after pulish the trojectory
             double timeStamp = (stopwatch_.elapsed().toSec()) + ur_listener.last_trajectory_msg_.joint_trajectory.points[i].time_from_start.toSec()+1;
             converter << timeStamp << delimiter_ << ur_listener.last_trajectory_msg_.joint_trajectory.points[i].time_from_start.toSec();
+            int jn = ur_listener.last_trajectory_msg_.joint_trajectory.joint_names.size();
             // joint position of left arm
-            for (unsigned int a = 0; a < 6; a++){
-                converter << delimiter_ << ur_listener.last_trajectory_msg_.joint_trajectory.points[i].positions[a]*(180/3.14159);  
-            }
-            // joint velocity of left arm
-            for (unsigned int a = 0; a < 6; a++){
-                converter << delimiter_ << ur_listener.last_trajectory_msg_.joint_trajectory.points[i].velocities[a]*(180/3.14159);  
-            }
-            // joint position of right arm
-            for (unsigned int a = 6; a < ur_listener.last_trajectory_msg_.joint_trajectory.points[i].positions.size(); a++){
-                converter << delimiter_ << ur_listener.last_trajectory_msg_.joint_trajectory.points[i].positions[a]*(180/3.14159);  
-            }
-            // joint velocity of right arm
-            for (unsigned int a = 6; a < ur_listener.last_trajectory_msg_.joint_trajectory.points[i].positions.size(); a++){
-                converter << delimiter_ << ur_listener.last_trajectory_msg_.joint_trajectory.points[i].velocities[a]*(180/3.14159);  
+            if(jn == 12){
+
+                for (unsigned int a = 0; a < 6; a++){
+                    converter << delimiter_ << ur_listener.last_trajectory_msg_.joint_trajectory.points[i].positions[a]*(180/3.14159);  
+                }
+                // joint velocity of left arm
+                for (unsigned int a = 0; a < 6; a++){
+                    converter << delimiter_ << ur_listener.last_trajectory_msg_.joint_trajectory.points[i].velocities[a]*(180/3.14159);  
+                }
+                // joint position of right arm
+                for (unsigned int a = 6; a < ur_listener.last_trajectory_msg_.joint_trajectory.points[i].positions.size(); a++){
+                    converter << delimiter_ << ur_listener.last_trajectory_msg_.joint_trajectory.points[i].positions[a]*(180/3.14159);  
+                }
+                // joint velocity of right arm
+                for (unsigned int a = 6; a < ur_listener.last_trajectory_msg_.joint_trajectory.points[i].positions.size(); a++){
+                    converter << delimiter_ << ur_listener.last_trajectory_msg_.joint_trajectory.points[i].velocities[a]*(180/3.14159);  
+                }
+            } else if(jn == 6) {
+                std::string jointname = ur_listener.last_trajectory_msg_.joint_trajectory.joint_names[0];
+                std::string right = "right_";
+                if(jointname.compare(0, right.size(), right) == 0){
+                    converter << delimiter_ << delimiter_ << delimiter_ << delimiter_ << delimiter_ << delimiter_;
+                    converter << delimiter_ << delimiter_ << delimiter_ << delimiter_ << delimiter_ << delimiter_;
+                    for (unsigned int a = 0; a < 6; a++){
+                        converter << delimiter_ << ur_listener.last_trajectory_msg_.joint_trajectory.points[i].positions[a]*(180/3.14159);  
+                    }
+                    // joint velocity of right arm
+                    for (unsigned int a = 0; a < 6; a++){
+                        converter << delimiter_ << ur_listener.last_trajectory_msg_.joint_trajectory.points[i].velocities[a]*(180/3.14159);  
+                    }
+                }else{
+                    for (unsigned int a = 0; a < 6; a++){
+                        converter << delimiter_ << ur_listener.last_trajectory_msg_.joint_trajectory.points[i].positions[a]*(180/3.14159);  
+                    }
+                    // joint velocity of left arm
+                    for (unsigned int a = 0; a < 6; a++){
+                        converter << delimiter_ << ur_listener.last_trajectory_msg_.joint_trajectory.points[i].velocities[a]*(180/3.14159);  
+                    }
+                    converter << delimiter_ << delimiter_ << delimiter_ << delimiter_ << delimiter_ << delimiter_;
+                    converter << delimiter_ << delimiter_ << delimiter_ << delimiter_ << delimiter_ << delimiter_;
+                }
             }
             converter << std::endl;
         }

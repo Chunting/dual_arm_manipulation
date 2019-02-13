@@ -49,8 +49,9 @@ void UR_Message_Listener::poseCallback(const geometry_msgs::PoseStamped::ConstPt
 }
 
 void UR_Message_Listener::trajectoryCallback(const moveit_msgs::RobotTrajectory::ConstPtr& msg){
-    std::string name = "left_";
-    if (name.compare(0,ur_prefix_.size(), ur_prefix_) == 0  && (msg->joint_trajectory.points.size()>0) ) {    // "joint_states" receives messages of all robots. This is seperating the searched one from the others.
+    std::string left = "left_";
+    std::string right = "right_";
+    if (left.compare(0,ur_prefix_.size(), ur_prefix_) == 0  && (msg->joint_trajectory.points.size()>0) ) {    // "joint_states" receives messages of all robots. This is seperating the searched one from the others.
         last_trajectory_msg_ = *(msg.get());
         newTrajectory = true;
         // ROS_INFO("Header time  %f ", last_trajectory_msg_.joint_trajectory.header.stamp.toSec());
@@ -63,6 +64,9 @@ void UR_Message_Listener::trajectoryCallback(const moveit_msgs::RobotTrajectory:
         //         last_trajectory_msg_.joint_trajectory.points[i].velocities[a]);
         //     }
         // }
+    } else if(right.compare(0,ur_prefix_.size(), ur_prefix_) == 0  && (msg->joint_trajectory.points.size()>0) ){
+        last_trajectory_msg_ = *(msg.get());
+        newTrajectory = true;
     }
     
 }
