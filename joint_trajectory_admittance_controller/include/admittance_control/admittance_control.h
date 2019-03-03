@@ -1,5 +1,5 @@
 //
-// Created by Daniel Höltgen on 07.10.16.
+// Created by Chunting  on 07.10.18.
 //
 
 // ROS
@@ -138,6 +138,10 @@ void AdmittanceControl::starting() {
 
 void AdmittanceControl::update_admittance_state(std::vector<double>& position, const ros::Duration& period) {
     // Solver
+    // KDL::ChainIkSolverVel_pinv
+    // An inverse velocity kinematics algorithm based on the generalize pseudo inverse to calculate the
+    // velocity transformation from Cartesian to joint space of a general KDL::Chain.
+    // It uses a svd-calculation based on householders rotations.
     KDL::ChainIkSolverVel_pinv ikSolverVel(kdl_chain_);
     KDL::ChainFkSolverPos_recursive fkSolverPos(kdl_chain_);
     KDL::ChainIkSolverPos_NR ikSolverPosNR(kdl_chain_, fkSolverPos, ikSolverVel, 100, 1e-6);

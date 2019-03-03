@@ -1,7 +1,3 @@
-//
-// Created by Daniel Höltgen on 23.12.16.
-//
-
 // ROS
 #include <ros/ros.h>
 #include <geometry_msgs/Pose.h>
@@ -23,6 +19,8 @@
 #include "dual_arm_demonstrator_iml/DualArmRobot.h"
 #include "dual_arm_demonstrator_iml/SceneManager.h"
 
+// UR Logger
+#include "ur_logging/UrLogger.h"
 
 int main(int argc, char **argv) {
     ros::init(argc, argv, "shelf_setup_helper");
@@ -36,55 +34,132 @@ int main(int argc, char **argv) {
     // Scene Setup
     dual_arm_demonstrator_iml::SceneManager sceneManager(nh);
     sceneManager.setupScene();
-
+    std::vector<std::string> ur_namespaces;
+    ur_namespaces.push_back("left");
+    ur_namespaces.push_back("right");
+    UR_Logger ur_logger(nh, ur_namespaces);
+    ur_logger.start(125);
     // variables
-    moveit::planning_interface::MoveGroup::Plan ur5_plan;
-    moveit::planning_interface::MoveGroup::Plan ur10_plan;
+    moveit::planning_interface::MoveGroup::Plan left_plan;
+    moveit::planning_interface::MoveGroup::Plan right_plan;
     moveit::planning_interface::MoveItErrorCode error;
     error.val = -1;
 
-    // move ur5 to shelf
-    while (error.val != 1){
-        geometry_msgs::PoseStamped ur5_pose;
-        ur5_pose.header.frame_id = "shelf";
-        ur5_pose.pose.position.x = -0.07;
-        ur5_pose.pose.position.y = 0.125;
-        ur5_pose.pose.position.z = 0.53;
-        KDL::Rotation ur5_rot;  // generated to easily assign quaternion of pose
-        ur5_rot.DoRotY(3.14 / 2);
-        ur5_rot.GetQuaternion(ur5_pose.pose.orientation.x, ur5_pose.pose.orientation.y, ur5_pose.pose.orientation.z,
-                              ur5_pose.pose.orientation.w);
-        dualArmRobot.ur5_.setPoseTarget(ur5_pose, dualArmRobot.ur5_.getEndEffectorLink());
+    geometry_msgs::Vector3Stamped direction;
+    direction.header.frame_id = "world";
 
-        error = dualArmRobot.ur5_.plan(ur5_plan);
+    ROS_INFO("========== MOVE HOME POSITION =================");
+    dualArmRobot.moveHome();
+    sleep(1);
+    dualArmRobot.kinematic_state->enforceBounds();
 
-    }
-    dualArmRobot.execute(ur5_plan);
+    // ROS_INFO("========== TEST IK  -- LEFT =================");
+    // geometry_msgs::PoseStamped left_pose = dualArmRobot.left_.getCurrentPose(dualArmRobot.left_.getEndEffectorLink());
+    // dualArmRobot.PrintPose(left_pose.pose);
 
-    error.val = -1;
-    while (error.val != 1){
-        // move ur10 to shelf
-        geometry_msgs::PoseStamped ur10_pose;
-        ur10_pose.header.frame_id = "shelf";
-        ur10_pose.pose.position.x = 0.125;
-        ur10_pose.pose.position.y = 0.25 + 0.07;
-        ur10_pose.pose.position.z = 0.53;
-        KDL::Rotation ur10_rot;  // generated to easily assign quaternion of pose
-        ur10_rot.DoRotX(3.14 / 2);
-        ur10_rot.GetQuaternion(ur10_pose.pose.orientation.x, ur10_pose.pose.orientation.y, ur10_pose.pose.orientation.z,
-                               ur10_pose.pose.orientation.w);
-        dualArmRobot.ur10_.setPoseTarget(ur10_pose, dualArmRobot.ur10_.getEndEffectorLink());
+    // std::vector<double> left_joint_values = dualArmRobot.getPositionIK(dualArmRobot.left_joint_model_group, left_pose.pose);
 
-        error = dualArmRobot.ur10_.plan(ur10_plan);
+    // // ROS_INFO_STREAM("Current state is " <<dualArmRobot.kinematic_state->satisfiesBounds(left_joint_model_group));
 
-    }
-    dualArmRobot.execute(ur10_plan);
+    // // fk -> pos left
+    // KDL::Frame frame_pose_left;
+    // dualArmRobot.kinematic_state->setJointGroupPositions(dualArmRobot.left_joint_model_group, left_joint_values);
+    // const Eigen::Affine3d &end_effector_pose_left = dualArmRobot.kinematic_state->getGlobalLinkTransform(dualArmRobot.left_.getEndEffectorLink());
+    // tf::transformEigenToKDL(end_effector_pose_left, frame_pose_left);
 
-    // move closer
-    dualArmRobot.graspMove(0.07);
+    // geometry_msgs::Pose left_temp_pose;
+    // dual_arm_toolbox::Transform::transformKDLtoPose(frame_pose_left, left_temp_pose);
+    // ROS_INFO("FK left end_effector: %s", dualArmRobot.left_.getEndEffectorLink().c_str());
+    // dualArmRobot.PrintPose(left_temp_pose);
 
+//     ROS_INFO("========== TEST IK  -- RIGHT =================");
+//     geometry_msgs::PoseStamped right_pose = dualArmRobot.right_.getCurrentPose(dualArmRobot.right_.getEndEffectorLink());
+//     ROS_INFO("Current Pose: ");
+//     dualArmRobot.PrintPose(right_pose.pose);
+//     moveit_msgs::RobotState seed_robot_state = dualArmRobot.getCurrentRobotStateMsg();
+//     std::string groupName = dualArmRobot.right_.getName();
+//     moveit_msgs::RobotState IK_robot_state = dualArmRobot.getPositionIK(groupName, seed_robot_state, right_pose);
+
+//     // fk -> pos right
+//    std::string right_endeffector = dualArmRobot.right_.getEndEffectorLink();
+//    geometry_msgs::PoseStamped FK_PoseStamped = dualArmRobot.getPositionFK(right_endeffector, IK_robot_state);
+
+
+//     std::vector<double> right_joint_values = dualArmRobot.right_.getCurrentJointValues();
+//     KDL::Frame frame_pose_right;
+//     dualArmRobot.kinematic_state->setJointGroupPositions(dualArmRobot.right_joint_model_group, right_joint_values);
+//     const Eigen::Affine3d &end_effector_pose_right = dualArmRobot.kinematic_state->getGlobalLinkTransform(dualArmRobot.right_.getEndEffectorLink());
+//     tf::transformEigenToKDL(end_effector_pose_right, frame_pose_right);
+
+//     geometry_msgs::Pose right_temp_pose;
+//     dual_arm_toolbox::Transform::transformKDLtoPose(frame_pose_right, right_temp_pose);
+//     ROS_INFO("frame_pose_right end_effector: %s", dualArmRobot.right_.getEndEffectorLink().c_str());
+//     dualArmRobot.PrintPose(FK_PoseStamped.pose);
+
+    
+    ROS_INFO("========== MOVE GRASP POSITION =================");
+    dualArmRobot.moveGraspPosition();
+    sleep(1);
+  
+    ROS_INFO("========== MOVE CLOSER =================");
+    dualArmRobot.graspMove(0.015);
+    sleep(6);
+    // ROS_INFO("========== GET OFFSET =================");
+    // dualArmRobot.getCurrentOffset();
+    // sleep(1);
+    ROS_INFO("========== LIFT BOX UP =================");
+    // ROS_INFO("========== TEST LINEARMOVEPARALLEL =================");
+    // direction.vector.x = 0;
+    // direction.vector.y = 0;
+    // direction.vector.z = 0.04;
+    // dualArmRobot.linearMoveParallel(direction,"box7", 0.5);
+    direction.vector.x = 0;
+    direction.vector.y = 0;
+    direction.vector.z = 0.1;
+    dualArmRobot.linearMove(direction, true, true,true);
+    sleep(2);
+    /*
+    ROS_INFO("========== MOVE LEFT =================");
+    direction.vector.x = 0;
+    direction.vector.y = -0.1;
+    direction.vector.z = 0;
+    dualArmRobot.linearMove(direction, true, true,true);
+    sleep(2);
+    // ROS_INFO("========== MOVE FORWARD =================");
+    // direction.vector.x = -0.1;
+    // direction.vector.y = 0;
+    // direction.vector.z = 0;
+    // dualArmRobot.linearMove(direction, true, true,true);
+    // sleep(2);
+    ROS_INFO("========== MOVE RIGHT =================");
+    direction.vector.x = 0;
+    direction.vector.y = 0.1;
+    direction.vector.z = 0;
+    dualArmRobot.linearMove(direction, true, true,true);
+    sleep(2);
+    // ROS_INFO("========== MOVE BACK =================");
+    // direction.vector.x = 0.1;
+    // direction.vector.y = 0;
+    // direction.vector.z = 0;
+    // dualArmRobot.linearMove(direction, true, true,true);
+    // sleep(2);
+    */
+    ROS_INFO("========== PUT BOX DOWN =================");
+    direction.vector.x = 0;
+    direction.vector.y = 0;
+    direction.vector.z = -0.1;
+    // dualArmRobot.linearMoveParallel(direction,"box7", 0.5);
+    dualArmRobot.linearMove(direction, true, true,true);
+    sleep(2);
+    ROS_INFO("========== MOVE AWAY =================");
+    dualArmRobot.graspMove(-0.02);
+    sleep(1);
+    ROS_INFO("========== MOVE HOME POSITION =================");
+    dualArmRobot.moveHome();
+
+    sleep(1);
+    ur_logger.stop();
     // END
-    ROS_INFO("Place the shelf between the robot arms as displayed in rviz!");
     ros::shutdown();
     return 0;
 }

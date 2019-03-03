@@ -1,5 +1,5 @@
 //
-// Created by daniel on 24.03.17.
+// Created by Chunting on 24.03.17.
 //
 
 // ROS
@@ -18,12 +18,13 @@ int main(int argc, char **argv){
     asyncSpinner.start();
 
     std::vector<std::string> ur_namespaces;
-    ur_namespaces.push_back("ur5");
-    ur_namespaces.push_back("ur10");
+    ur_namespaces.push_back("left");
+    ur_namespaces.push_back("right");
     UR_Logger ur_logger(nh, ur_namespaces);
-
+    // sampling rate, hz
     ur_logger.start(20);
-    ros::Duration(6).sleep();
+    // sampling time, second
+    ros::Duration(60).sleep();
     ur_logger.stop();
 
     ros::shutdown();

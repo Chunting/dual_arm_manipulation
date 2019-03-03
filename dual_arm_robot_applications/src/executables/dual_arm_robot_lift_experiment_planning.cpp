@@ -1,5 +1,5 @@
 //
-// Created by Daniel Höltgen on 08.04.17.
+// Created by Chunting  on 08.04.17.
 //
 
 // ROS
@@ -34,92 +34,149 @@ int main(int argc, char **argv) {
     ROS_WARN("Robot offline");
     #endif
 
-    // Dual Arm Robot Setup
+    /* Dual Arm Robot Setup */
     dual_arm_demonstrator_iml::DualArmRobot dualArmRobot(nh);
 
-    // Scene Setup
+    /* Scene Setup */
     dual_arm_demonstrator_iml::SceneManager sceneManager(nh);
+    
+    // Planning to a joint-space goal
+    std::vector<double> group_joint_values;
+    // read the current joint angles
+    group_joint_values = dualArmRobot.getJointAngles("arms");
+    //group_joint_values.clear();
+
     // with or without collision objects?
-    sceneManager.setupSceneLiftCO();
-//    sceneManager.setupSceneLift();
+    // sceneManager.setupSceneLiftCO();
+    //  sceneManager.setupSceneLift();
 
     // move home
+    // sleep(5);
     dualArmRobot.moveHome();
+    sleep(5);
+    group_joint_values = dualArmRobot.getJointAngles("arms");
+
 
     // setup constraints
     moveit_msgs::JointConstraint jcm;
-    moveit_msgs::Constraints ur5_constraints;
-    moveit_msgs::Constraints ur10_constraints;
-    jcm.joint_name="ur10_shoulder_pan_joint";
-    jcm.position = 2.4;
-    jcm.tolerance_above = 0.7;
-    jcm.tolerance_below = 2.5;
+    moveit_msgs::Constraints left_constraints;
+    moveit_msgs::Constraints right_constraints;
+    moveit_msgs::Constraints both_constraints;
+    ROS_INFO("Start to set up the constraints...");
+
+    jcm.joint_name="left_shoulder_pan_joint";
+    jcm.position = 0.0;
+    jcm.tolerance_above = 0.5;
+    jcm.tolerance_below = 2;
     jcm.weight = 1.0;
-    ur10_constraints.joint_constraints.push_back(jcm);
-    dualArmRobot.ur10_.setPathConstraints(ur10_constraints);
+    left_constraints.joint_constraints.push_back(jcm);
+    both_constraints.joint_constraints.push_back(jcm);
+    dualArmRobot.left_.setPathConstraints(left_constraints);
+
+    // ur5 can get blocked while placing without this constraint
+    jcm.joint_name="left_elbow_joint";
+    jcm.position = 0.0;
+    jcm.tolerance_above = 3;
+    jcm.tolerance_below = 0.1;
+    jcm.weight = 0.5;
+    left_constraints.joint_constraints.push_back(jcm);
+    both_constraints.joint_constraints.push_back(jcm);
+    dualArmRobot.left_.setPathConstraints(left_constraints);
+
+    
+    // when placing box on top ur5 can get blocked because wrist 1 reaches limit
+    jcm.joint_name="left_wrist_1_joint";
+    jcm.position = 0.0;
+    jcm.tolerance_above = 3.0;
+    jcm.tolerance_below = 3.0;
+    jcm.weight = 1;
+    left_constraints.joint_constraints.push_back(jcm);
+    both_constraints.joint_constraints.push_back(jcm);
+    dualArmRobot.left_.setPathConstraints(left_constraints);
+
+    jcm.joint_name="right_shoulder_pan_joint";
+    jcm.position = 0.01;
+    jcm.tolerance_above = 3;
+    jcm.tolerance_below = 3;
+    jcm.weight = 1.0;
+    left_constraints.joint_constraints.push_back(jcm);
+    both_constraints.joint_constraints.push_back(jcm);
+    dualArmRobot.left_.setPathConstraints(left_constraints);
+
+    jcm.joint_name="right_wrist_2_joint";
+    jcm.position = 0;
+    jcm.tolerance_above = 3;
+    jcm.tolerance_below = 3;
+    jcm.weight = 1.0;
+    right_constraints.joint_constraints.push_back(jcm);
+    both_constraints.joint_constraints.push_back(jcm);
+    dualArmRobot.right_.setPathConstraints(right_constraints);
+
+    dualArmRobot.arms_.setPathConstraints(both_constraints);
+    ROS_INFO("Finished setting up the constraints...");
 
     /*
     moveit_msgs::JointConstraint jcm;
-    moveit_msgs::Constraints ur5_constraints;
-    moveit_msgs::Constraints ur10_constraints;
-    jcm.joint_name="ur10_shoulder_pan_joint";
+    moveit_msgs::Constraints left_constraints;
+    moveit_msgs::Constraints right_constraints;
+    jcm.joint_name="right_shoulder_pan_joint";
     jcm.position = -2.4;
     jcm.tolerance_above = 2.5;
     jcm.tolerance_below = 0.7;
     jcm.weight = 1.0;
-    ur10_constraints.joint_constraints.push_back(jcm);
-    dualArmRobot.ur10_.setPathConstraints(ur10_constraints);*/
+    right_constraints.joint_constraints.push_back(jcm);
+    dualArmRobot.right_.setPathConstraints(right_constraints);*/
     /*
-    jcm.joint_name="ur10_wrist_2_joint";
+    jcm.joint_name="right_wrist_2_joint";
     jcm.position = 3.0;
     jcm.tolerance_above = 1.0;
     jcm.tolerance_below = 4.0;
     jcm.weight = 1.0;
-    ur10_constraints.joint_constraints.push_back(jcm);
-    dualArmRobot.ur10_.setPathConstraints(ur10_constraints);*/
+    right_constraints.joint_constraints.push_back(jcm);
+    dualArmRobot.right_.setPathConstraints(right_constraints);*/
 /*
-    jcm.joint_name="ur5_shoulder_pan_joint";
+    jcm.joint_name="left_shoulder_pan_joint";
     jcm.position = 0.0;
     jcm.tolerance_above = 1.0;
     jcm.tolerance_below = 1.0;
     jcm.weight = 1.0;
-    ur5_constraints.joint_constraints.push_back(jcm);
-    dualArmRobot.ur5_.setPathConstraints(ur5_constraints);*/
-
-    jcm.joint_name="ur5_shoulder_pan_joint";
+    left_constraints.joint_constraints.push_back(jcm);
+    dualArmRobot.left_.setPathConstraints(left_constraints);*/
+/*
+    jcm.joint_name="left_shoulder_pan_joint";
     jcm.position = 0.0;
     jcm.tolerance_above = 0.4;
     jcm.tolerance_below = 0.4;
     jcm.weight = 1.0;
-    ur5_constraints.joint_constraints.push_back(jcm);
-    dualArmRobot.ur5_.setPathConstraints(ur5_constraints);
-
+    left_constraints.joint_constraints.push_back(jcm);
+    dualArmRobot.left_.setPathConstraints(left_constraints);
+*/
     // Pick box1
-    geometry_msgs::Vector3Stamped direction;
-    direction.header.frame_id = "/table_ground";
-    direction.vector.x = 0;
-    direction.vector.y = 0;
-    direction.vector.z = 0.1;
-    if (!dualArmRobot.pickBox("box1", direction)) {
-        ROS_WARN("Pick failed");
-        ROS_ERROR("Can't execute demonstration without successful pick. Demonstration aborted.");
-        return 0;
-    }
+    // geometry_msgs::Vector3Stamped direction;
+    // direction.header.frame_id = "/world";
+    // direction.vector.x = 0;
+    // direction.vector.y = 0;
+    // direction.vector.z = 0.1;
+    // if (!dualArmRobot.pickBox("box7", direction)) {
+    //     ROS_WARN("Pick failed");
+    //     ROS_ERROR("Can't execute demonstration without successful pick. Demonstration aborted.");
+    //     return 0;
+    // }
 
-    // clear path constraints
-    dualArmRobot.ur5_.clearPathConstraints();
-    dualArmRobot.ur10_.clearPathConstraints();
+    // // clear path constraints
+    // dualArmRobot.left_.clearPathConstraints();
+    // dualArmRobot.right_.clearPathConstraints();
 
-    // plan move up
-    geometry_msgs::PoseStamped start_pose = dualArmRobot.ur5_.getCurrentPose(dualArmRobot.ur5_.getEndEffectorLink());
-    geometry_msgs::PoseStamped lift_pose = start_pose;
-    lift_pose.pose.position.z = lift_pose.pose.position.z +0.6;
+    // // plan move up
+    // geometry_msgs::PoseStamped start_pose = dualArmRobot.left_.getCurrentPose(dualArmRobot.left_.getEndEffectorLink());
+    // geometry_msgs::PoseStamped lift_pose = start_pose;
+    // lift_pose.pose.position.z = lift_pose.pose.position.z + 0.6;
 
-    for (unsigned int i =0; i < 15 ; i++){
-        ROS_INFO(":::::: START EVALUATION %i::::::", i);
-        dualArmRobot.planMoveObject("box1", lift_pose, 0.2);
-        ROS_INFO(":::::: END EVALUATION %i::::::", i);
-    }
+    // for (unsigned int i =0; i < 15 ; i++){
+    //     ROS_INFO(":::::: START EVALUATION %i::::::", i);
+    //     dualArmRobot.planMoveObject("box7", lift_pose, 0.2);
+    //     ROS_INFO(":::::: END EVALUATION %i::::::", i);
+    // }
 
 
     // END

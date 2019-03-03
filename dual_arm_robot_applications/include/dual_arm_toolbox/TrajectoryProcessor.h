@@ -1,5 +1,5 @@
 //
-// Created by daniel on 27.12.16.
+// Created by Chunting on 27.12.16.
 //
 
 #ifndef PROJECT_TRAJECTORYPROCESSOR_H
@@ -21,6 +21,8 @@
 #include <moveit_msgs/AttachedCollisionObject.h>
 #include <moveit_msgs/GetStateValidity.h>
 #include <moveit_msgs/DisplayRobotState.h>
+#include <moveit/robot_trajectory/robot_trajectory.h>
+#include <moveit_msgs/RobotTrajectory.h>
 //#include <controller_manager/controller_manager.h>
 //#include <moveit_ros_control_interface>
 
@@ -62,6 +64,7 @@ namespace dual_arm_toolbox {
         computeVelocities(moveit_msgs::RobotTrajectory &trajectory, moveit::planning_interface::MoveGroup &moveGroup);
 
         static void visualizePlan(moveit::planning_interface::MoveGroup::Plan &plan, unsigned int sec);
+        static void publishPlanTrajectory(moveit::planning_interface::MoveGroup::Plan& plan, unsigned int sec);
     };
 }//namespace
 #endif //PROJECT_TRAJECTORYPROCESSOR_H

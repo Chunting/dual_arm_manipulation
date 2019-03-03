@@ -52,7 +52,7 @@ planner_configs:
     max_nearest_neighbors: 10  # use k nearest neighbors. default: 10
   PRMstarkConfigDefault:
     type: geometric::PRMstar
-ur5_manipulator:
+left_manipulator:
   planner_configs:
     - SBLkConfigDefault
     - ESTkConfigDefault
@@ -65,9 +65,9 @@ ur5_manipulator:
     - TRRTkConfigDefault
     - PRMkConfigDefault
     - PRMstarkConfigDefault
-  projection_evaluator: joints(ur5_shoulder_pan_joint,ur5_shoulder_lift_joint)
-  longest_valid_segment_fraction: 0.005 # in rad maximaler wert ergibt sich aus summe_der_joint_ranges*dieser_wert
-ur10_manipulator:
+  projection_evaluator: joints(left_shoulder_pan_joint,left_shoulder_lift_joint)
+  longest_valid_segment_fraction: 0.05
+right_manipulator:
   planner_configs:
     - SBLkConfigDefault
     - ESTkConfigDefault
@@ -80,34 +80,8 @@ ur10_manipulator:
     - TRRTkConfigDefault
     - PRMkConfigDefault
     - PRMstarkConfigDefault
-  projection_evaluator: joints(ur10_shoulder_pan_joint,ur10_shoulder_lift_joint)
-  longest_valid_segment_fraction: 0.005
-ur5_endeffector:
-  planner_configs:
-    - SBLkConfigDefault
-    - ESTkConfigDefault
-    - LBKPIECEkConfigDefault
-    - BKPIECEkConfigDefault
-    - KPIECEkConfigDefault
-    - RRTkConfigDefault
-    - RRTConnectkConfigDefault
-    - RRTstarkConfigDefault
-    - TRRTkConfigDefault
-    - PRMkConfigDefault
-    - PRMstarkConfigDefault
-ur10_endeffector:
-  planner_configs:
-    - SBLkConfigDefault
-    - ESTkConfigDefault
-    - LBKPIECEkConfigDefault
-    - BKPIECEkConfigDefault
-    - KPIECEkConfigDefault
-    - RRTkConfigDefault
-    - RRTConnectkConfigDefault
-    - RRTstarkConfigDefault
-    - TRRTkConfigDefault
-    - PRMkConfigDefault
-    - PRMstarkConfigDefault
+  projection_evaluator: joints(right_shoulder_pan_joint,right_shoulder_lift_joint)
+  longest_valid_segment_fraction: 0.05
 arms:
   planner_configs:
     - SBLkConfigDefault
@@ -121,5 +95,5 @@ arms:
     - TRRTkConfigDefault
     - PRMkConfigDefault
     - PRMstarkConfigDefault
-  projection_evaluator: joints(ur10_shoulder_pan_joint,ur10_shoulder_lift_joint)
-  longest_valid_segment_fraction: 0.005
+  projection_evaluator: joints(left_shoulder_pan_joint,left_shoulder_lift_joint)
+  longest_valid_segment_fraction: 0.05

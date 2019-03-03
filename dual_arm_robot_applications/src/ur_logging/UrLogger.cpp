@@ -9,7 +9,7 @@ UR_Logger::UR_Logger(ros::NodeHandle &nh, std::vector<std::string> ur_namespaces
         ur_listeners_.push_back(new UR_Message_Listener(nh_, ur_namespaces[i]));
     }
 
-    delimiter_ ='\t';
+    delimiter_ =',';
 
     ROS_INFO("Initialising UR Logger"); //it needs to be waited until msgs can be received
     sleep(1);
@@ -25,21 +25,35 @@ UR_Logger::~UR_Logger(){
 
 
 void UR_Logger::start(int log_rate){
-    if (logfile_name_ == ""){     //automatically generate a name if no name specified
+    if (logfile_name_ == "" || logfile_name_command_ == ""){     //automatically generate a name if no name specified
         generate_logfile_name();
     }
 
     // write headline
     logfile_.open(logfile_name_.c_str(), std::ofstream::out | std::ofstream::trunc);   //generate new file from beginning
-    for (int i = 0; i < ur_listeners_.size(); i++){
-        logfile_ << headline(*ur_listeners_[i]);
-        if (i < (ur_listeners_.size()-1)){
-            logfile_ << delimiter_;
+    if(logfile_.is_open()){
+        for (int i = 0; i < ur_listeners_.size(); i++){
+            logfile_ << headline(*ur_listeners_[i]);
+            if (i < (ur_listeners_.size()-1)){
+                logfile_ << delimiter_;
+            }
         }
+        logfile_ << std::endl;
+        ROS_INFO("Writing log at %iHz to %s. Press Ctrl-C to stop.", log_rate, logfile_name_.c_str());
     }
-    logfile_ << std::endl;
 
-    ROS_INFO("Writing log at %iHz to %s. Press Ctrl-C to stop.", log_rate, logfile_name_.c_str());
+    logfile_command_.open(logfile_name_command_.c_str(), std::ofstream::out | std::ofstream::trunc);   //generate new file from beginning
+    if(logfile_command_.is_open()){
+        logfile_command_ << "PC_time" << delimiter_ << "head_time";
+        for (int i = 0; i < ur_listeners_.size(); i++){
+            logfile_command_ << headline_command(*ur_listeners_[i]);
+            // if (i < (ur_listeners_.size()-1)){
+            //     logfile_command_ << delimiter_;
+            // }
+        }
+        logfile_command_ << std::endl;
+        ROS_INFO("Writing log at %iHz to %s. Press Ctrl-C to stop.", log_rate, logfile_name_command_.c_str());
+    }
     stopwatch_.restart();
     double log_duration;
     log_duration = 1.0/log_rate;
@@ -51,6 +65,7 @@ void UR_Logger::stop(){
     ROS_INFO("Stopped logging");
     timer_.stop();
     logfile_.close();
+    logfile_command_.close();
 }
 
 
@@ -62,68 +77,84 @@ void UR_Logger::generate_logfile_name(){       //automatically generate a name
     time (&rawtime);
     timeinfo = localtime(&rawtime);
 
-    strftime (buffer,20,"%Y%m%d%H%M%S", timeinfo);
+    strftime (buffer,20,"%Y_%m_%d_%H_%M%S", timeinfo);
     std::string log_suffix = buffer;
-    logfile_name_="ur_log_"+log_suffix+".csv";
+    logfile_name_="./src/dual_arm_manipulation/dataLog/ur_log_"+log_suffix+".csv";
+    logfile_name_command_ = "./src/dual_arm_manipulation/dataLog/ur_command_"+log_suffix+".csv";
 }
 
 
-std::string UR_Logger::headline(UR_Message_Listener ur_listener){
+std::string UR_Logger::headline(UR_Message_Listener &ur_listener){
     std::vector<std::string> joint_names;
-    //ros::param::get("/hardware_interface/joints", joint_names);
     nh_.getParam(ur_listener.ur_namespace_+"/hardware_interface/joints", joint_names);
+    std::cout << "namespace: " << ur_listener.ur_namespace_ << "/hardware_interface/joints" << std::endl;
     if (joint_names.size() < 6){
         ROS_ERROR("UR Logger: could not properly load joint names");
     }
     std::stringstream ss;
 
     // append time
-    ss << "time [s]";
+    ss << "time";
 
     // append position state
-    std::string state_pos_prefix = "state_pos:";
-    std::string state_pos_suffix = " [rad]";
+    std::string state_pos_prefix = "state_pos_";
+    //std::string state_pos_suffix = " [rad]";
     for (int i = 0; i < 6; i++ ){
-        ss << delimiter_ << state_pos_prefix << ur_listener.last_state_msg_.name[i] << state_pos_suffix;
+        ss << delimiter_ << state_pos_prefix << ur_listener.last_state_msg_.name[i];// << state_pos_suffix;
     }
 
     // append state velocity
-    std::string state_vel_prefix = "state_vel:";
-    std::string state_vel_suffix = " [rad/s]";
+    std::string state_vel_prefix = "state_vel_";
+    //std::string state_vel_suffix = " [rad/s]";
     for (int i = 0; i < 6; i++ ){
-        ss << delimiter_ << state_vel_prefix << ur_listener.last_state_msg_.name[i] << state_vel_suffix;
+        ss << delimiter_ << state_vel_prefix << ur_listener.last_state_msg_.name[i];// << state_vel_suffix;
     }
 
+    // append Cartesian state position
+    std::string state_C_prefix = "state_pos_"+ur_listener.ur_namespace_+"_";
+    //std::string wrench_force_suffix = " [N]";
+    ss << delimiter_ << state_C_prefix << "x"
+        << delimiter_ << state_C_prefix << "y"
+        << delimiter_ << state_C_prefix << "z";
+     // append Cartesian state rotation
+    std::string state_R_prefix = "state_rot_"+ur_listener.ur_namespace_+"_";
+    //std::string wrench_force_suffix = " [N]";
+    ss << delimiter_ << state_R_prefix << "qx"
+        << delimiter_ << state_R_prefix << "qy"
+        << delimiter_ << state_R_prefix << "qz"
+        << delimiter_ << state_R_prefix << "qw";
+/*
     // append wrench
-    std::string wrench_force_prefix = "tcp_wrench_force:";
-    std::string wrench_force_suffix = " [N]";
-    ss << delimiter_ << wrench_force_prefix << "x" << wrench_force_suffix
-        << delimiter_ << wrench_force_prefix << "y" << wrench_force_suffix
-        << delimiter_ << wrench_force_prefix << "z" << wrench_force_suffix;
-    std::string wrench_torque_prefix = "tcp_wrench_torque:";
-    std::string wrench_torque_suffix = " [Nm]";
-    ss << delimiter_ << wrench_torque_prefix << "x" << wrench_torque_suffix
-        << delimiter_ << wrench_torque_prefix << "y" << wrench_torque_suffix
-        << delimiter_ << wrench_torque_prefix << "z" << wrench_torque_suffix;
+    std::string wrench_force_prefix = "tcp_wrench_force_";
+    //std::string wrench_force_suffix = " [N]";
+    ss << delimiter_ << wrench_force_prefix << "x"
+        << delimiter_ << wrench_force_prefix << "y"
+        << delimiter_ << wrench_force_prefix << "z";
+    std::string wrench_torque_prefix = "tcp_wrench_torque_";
+    //std::string wrench_torque_suffix = " [Nm]";
+    ss << delimiter_ << wrench_torque_prefix << "x" 
+        << delimiter_ << wrench_torque_prefix << "y" 
+        << delimiter_ << wrench_torque_prefix << "z";
 
     // append target position
-    std::string target_pos_prefix = "target_pos:";
-    std::string target_pos_suffix = " [rad]";
+    std::string target_pos_prefix = "target_pos_";
+    //std::string target_pos_suffix = " [rad]";
     for (int i = 0; i < 6; i++ ){
-        ss << delimiter_ << target_pos_prefix << joint_names[i] << target_pos_suffix;
+        ss << delimiter_ << target_pos_prefix << joint_names[i];// << target_pos_suffix;
     }
 
     // append target velocity
-    std::string target_vel_prefix = "target_vel:";
-    std::string target_vel_suffix = " [rad/s]";
+    std::string target_vel_prefix = "target_vel_";
+    //std::string target_vel_suffix = " [rad/s]";
     for (int i = 0; i < 6; i++ ){
-        ss << delimiter_ << target_vel_prefix << joint_names[i] << target_vel_suffix;
+        ss << delimiter_ << target_vel_prefix << joint_names[i];// << target_vel_suffix;
     }
+*/   
     return ss.str();
 }
 
 
-std::string UR_Logger::data_line(UR_Message_Listener ur_listener){
+std::string UR_Logger::data_line(UR_Message_Listener &ur_listener){
 
     std::ostringstream converter;    // stream used to convert numbers to string
     // append time
@@ -133,7 +164,7 @@ std::string UR_Logger::data_line(UR_Message_Listener ur_listener){
     //std::vector<double> state_pos = last_state_msg_.position;
     if (ur_listener.last_state_msg_.position.size() == 6){        
         for (int i = 0; i < 6; i++ ){
-            converter << delimiter_ <<ur_listener.last_state_msg_.position[i];
+            converter << delimiter_ <<ur_listener.last_state_msg_.position[i]*(180/3.14159);
         }
     }
     else {
@@ -142,12 +173,25 @@ std::string UR_Logger::data_line(UR_Message_Listener ur_listener){
     // append state velocity
     if (ur_listener.last_state_msg_.velocity.size() == 6){
         for (int i = 0; i < 6; i++ ){
-            converter << delimiter_ << ur_listener.last_state_msg_.velocity[i];
+            converter << delimiter_ << ur_listener.last_state_msg_.velocity[i]*(180/3.14159);
         }
     }
     else {
         converter << delimiter_ << delimiter_ << delimiter_ << delimiter_ << delimiter_ << delimiter_;
     }
+    // append Cartesian position 
+    
+    converter << delimiter_ << ur_listener.last_pose_msg_.pose.position.x
+        << delimiter_ << ur_listener.last_pose_msg_.pose.position.y
+        << delimiter_ << ur_listener.last_pose_msg_.pose.position.z;
+    // append Cartesian rotation quaternion
+    converter << delimiter_ << ur_listener.last_pose_msg_.pose.orientation.x
+        << delimiter_ << ur_listener.last_pose_msg_.pose.orientation.y
+        << delimiter_ << ur_listener.last_pose_msg_.pose.orientation.z
+        << delimiter_ << ur_listener.last_pose_msg_.pose.orientation.w;
+        
+
+    /*
     // append tcp wrench force
     converter << delimiter_ << ur_listener.last_wrench_msg_.wrench.force.x
         << delimiter_ << ur_listener.last_wrench_msg_.wrench.force.y
@@ -158,19 +202,123 @@ std::string UR_Logger::data_line(UR_Message_Listener ur_listener){
         << delimiter_ << ur_listener.last_wrench_msg_.wrench.torque.z;
 
     // append target position
-    converter << delimiter_ << delimiter_ << delimiter_ << delimiter_ << delimiter_ << delimiter_;
-
-    // append target velocity
-    if (ur_listener.last_speed_traj_msg_.points.size()==1){
-        trajectory_msgs::JointTrajectoryPoint traj_point = ur_listener.last_speed_traj_msg_.points[0];
-        for (int i = 0; i < 6; i++ ){
-            converter << delimiter_ << traj_point.velocities[i];
+    if (ur_listener.last_trajectory_msg_.joint_trajectory.points.size() > 0) {
+        for (unsigned int i = 0; i < ur_listener.last_trajectory_msg_.joint_trajectory.points.size(); i++){
+            for (unsigned int a = 0; a < ur_listener.last_trajectory_msg_.joint_trajectory.points[i].positions.size(); a++){
+                ROS_INFO("%s:\tpos %f\tvel %f", 
+                ur_listener.last_trajectory_msg_.joint_trajectory.joint_names[a].c_str(), 
+                ur_listener.last_trajectory_msg_.joint_trajectory.points[i].positions[a],
+                ur_listener.last_trajectory_msg_.joint_trajectory.points[i].velocities[a]);
+            }
         }
-    }
-    else {
+    }else {
         converter << delimiter_ << delimiter_ << delimiter_ << delimiter_ << delimiter_ << delimiter_;
     }
 
+    // // append target velocity
+    // if (ur_listener.last_speed_traj_msg_.points.size()==1){
+    //     trajectory_msgs::JointTrajectoryPoint traj_point = ur_listener.last_speed_traj_msg_.points[0];
+    //     for (int i = 0; i < 6; i++ ){
+    //         converter << delimiter_ << traj_point.velocities[i];
+    //     }
+    // }
+    // else {
+    //     converter << delimiter_ << delimiter_ << delimiter_ << delimiter_ << delimiter_ << delimiter_;
+    // }
+    */
+    
+    return converter.str();
+}
+
+
+std::string UR_Logger::headline_command(UR_Message_Listener &ur_listener){
+    std::vector<std::string> joint_names;
+    nh_.getParam(ur_listener.ur_namespace_+"/hardware_interface/joints", joint_names);
+    if (joint_names.size() < 6){
+        ROS_ERROR("UR Logger: could not properly load joint names");
+    }
+    std::stringstream ss;
+    
+    // append time
+    // ss << "PC_time" << delimiter_ << "head_time";
+
+    // append position command
+    std::string command_pos_prefix = "command_pos_";
+    for (int i = 0; i < ur_listener.last_state_msg_.name.size(); i++ ){
+        ss << delimiter_ << command_pos_prefix << joint_names[i];
+    }
+
+    // append command velocity
+    std::string command_vel_prefix = "command_vel_";
+    for (int i = 0; i < ur_listener.last_state_msg_.name.size(); i++ ){
+        ss << delimiter_ << command_vel_prefix << joint_names[i];
+    }
+
+    // std::cout << ss.str() << std::endl;
+    
+    return ss.str();
+}
+std::string UR_Logger::data_line_command(UR_Message_Listener &ur_listener){
+    std::ostringstream converter;    // stream used to convert numbers to string
+    //  Only record the new data
+    if(ur_listener.newTrajectory == true){
+        for (unsigned int i = 0; i < ur_listener.last_trajectory_msg_.joint_trajectory.points.size(); i++){
+            // append time      PCtime+time_from_start
+            // It waits for 1 sec after pulish the trojectory
+            double timeStamp = (stopwatch_.elapsed().toSec()) + ur_listener.last_trajectory_msg_.joint_trajectory.points[i].time_from_start.toSec()+1;
+            converter << timeStamp << delimiter_ << ur_listener.last_trajectory_msg_.joint_trajectory.points[i].time_from_start.toSec();
+            int jn = ur_listener.last_trajectory_msg_.joint_trajectory.joint_names.size();
+            // joint position of left arm
+            if(jn == 12){
+
+                for (unsigned int a = 0; a < 6; a++){
+                    converter << delimiter_ << ur_listener.last_trajectory_msg_.joint_trajectory.points[i].positions[a]*(180/3.14159);  
+                }
+                // joint velocity of left arm
+                for (unsigned int a = 0; a < 6; a++){
+                    converter << delimiter_ << ur_listener.last_trajectory_msg_.joint_trajectory.points[i].velocities[a]*(180/3.14159);  
+                }
+                // joint position of right arm
+                for (unsigned int a = 6; a < ur_listener.last_trajectory_msg_.joint_trajectory.points[i].positions.size(); a++){
+                    converter << delimiter_ << ur_listener.last_trajectory_msg_.joint_trajectory.points[i].positions[a]*(180/3.14159);  
+                }
+                // joint velocity of right arm
+                for (unsigned int a = 6; a < ur_listener.last_trajectory_msg_.joint_trajectory.points[i].positions.size(); a++){
+                    converter << delimiter_ << ur_listener.last_trajectory_msg_.joint_trajectory.points[i].velocities[a]*(180/3.14159);  
+                }
+            } else if(jn == 6) {
+                std::string jointname = ur_listener.last_trajectory_msg_.joint_trajectory.joint_names[0];
+                std::string right = "right_";
+                if(jointname.compare(0, right.size(), right) == 0){
+                    converter << delimiter_ << delimiter_ << delimiter_ << delimiter_ << delimiter_ << delimiter_;
+                    converter << delimiter_ << delimiter_ << delimiter_ << delimiter_ << delimiter_ << delimiter_;
+                    for (unsigned int a = 0; a < 6; a++){
+                        converter << delimiter_ << ur_listener.last_trajectory_msg_.joint_trajectory.points[i].positions[a]*(180/3.14159);  
+                    }
+                    // joint velocity of right arm
+                    for (unsigned int a = 0; a < 6; a++){
+                        converter << delimiter_ << ur_listener.last_trajectory_msg_.joint_trajectory.points[i].velocities[a]*(180/3.14159);  
+                    }
+                }else{
+                    for (unsigned int a = 0; a < 6; a++){
+                        converter << delimiter_ << ur_listener.last_trajectory_msg_.joint_trajectory.points[i].positions[a]*(180/3.14159);  
+                    }
+                    // joint velocity of left arm
+                    for (unsigned int a = 0; a < 6; a++){
+                        converter << delimiter_ << ur_listener.last_trajectory_msg_.joint_trajectory.points[i].velocities[a]*(180/3.14159);  
+                    }
+                    converter << delimiter_ << delimiter_ << delimiter_ << delimiter_ << delimiter_ << delimiter_;
+                    converter << delimiter_ << delimiter_ << delimiter_ << delimiter_ << delimiter_ << delimiter_;
+                }
+            }
+            converter << std::endl;
+        }
+        ur_listener.last_trajectory_msg_.joint_trajectory.points.clear();
+        ur_listener.newTrajectory = false;  
+        
+    }
+   
+    
     return converter.str();
 }
 
@@ -183,6 +331,11 @@ void UR_Logger::logCallback(const ros::TimerEvent&){
         }
     }
     logfile_ << std::endl;
+
+    //for(int i = 0; i < ur_listeners_.size(); i++){
+    if(ur_listeners_[0]->newTrajectory)
+        logfile_command_ << data_line_command(*ur_listeners_[0]);
+    //}    
 }
 
 /* Simple Log-Node

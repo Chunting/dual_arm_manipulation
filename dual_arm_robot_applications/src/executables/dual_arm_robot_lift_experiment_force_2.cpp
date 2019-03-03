@@ -1,5 +1,5 @@
 //
-// Created by Daniel Höltgen on 08.04.17.
+// Created by Chunting  on 08.04.17.
 //
 
 // ROS
@@ -49,28 +49,28 @@ int main(int argc, char **argv) {
 
     // setup constraints
     moveit_msgs::JointConstraint jcm;
-    moveit_msgs::Constraints ur5_constraints;
-    moveit_msgs::Constraints ur10_constraints;
+    moveit_msgs::Constraints left_constraints;
+    moveit_msgs::Constraints right_constraints;
 
-    jcm.joint_name="ur10_shoulder_pan_joint";
+    jcm.joint_name="right_shoulder_pan_joint";
     jcm.position = 2.4;
     jcm.tolerance_above = 0.7;
     jcm.tolerance_below = 2.5;
     jcm.weight = 1.0;
-    ur10_constraints.joint_constraints.push_back(jcm);
-    dualArmRobot.ur10_.setPathConstraints(ur10_constraints);
+    right_constraints.joint_constraints.push_back(jcm);
+    dualArmRobot.right_.setPathConstraints(right_constraints);
 
-    jcm.joint_name="ur5_shoulder_pan_joint";
+    jcm.joint_name="left_shoulder_pan_joint";
     jcm.position = 0.0;
     jcm.tolerance_above = 1.0;
     jcm.tolerance_below = 1.0;
     jcm.weight = 1.0;
-    ur5_constraints.joint_constraints.push_back(jcm);
-    dualArmRobot.ur5_.setPathConstraints(ur5_constraints);
+    left_constraints.joint_constraints.push_back(jcm);
+    dualArmRobot.left_.setPathConstraints(left_constraints);
 
     // Pick box1
     geometry_msgs::Vector3Stamped direction;
-    direction.header.frame_id = "/table_ground";
+    direction.header.frame_id = "world";
     direction.vector.x = 0;
     direction.vector.y = 0;
     direction.vector.z = 0;//0.01;
@@ -80,20 +80,20 @@ int main(int argc, char **argv) {
         return 0;
     }
     /*
-    geometry_msgs::PoseStamped place_pose_ur5 = dualArmRobot.ur5_.getCurrentPose(dualArmRobot.ur5_.getEndEffectorLink());
-    place_pose_ur5.pose.position.z = place_pose_ur5.pose.position.z - direction.vector.z;*/
+    geometry_msgs::PoseStamped place_pose_left = dualArmRobot.left_.getCurrentPose(dualArmRobot.left_.getEndEffectorLink());
+    place_pose_left.pose.position.z = place_pose_left.pose.position.z - direction.vector.z;*/
 
     // clear path constraints
-    dualArmRobot.ur5_.clearPathConstraints();
-    dualArmRobot.ur10_.clearPathConstraints();
+    dualArmRobot.left_.clearPathConstraints();
+    dualArmRobot.right_.clearPathConstraints();
 
     // plan move and execute
-    //geometry_msgs::PoseStamped start_pose = dualArmRobot.ur5_.getCurrentPose(dualArmRobot.ur5_.getEndEffectorLink());
+    //geometry_msgs::PoseStamped start_pose = dualArmRobot.left_.getCurrentPose(dualArmRobot.left_.getEndEffectorLink());
     //geometry_msgs::PoseStamped lift_pose = start_pose;
     //lift_pose.pose.position.z = lift_pose.pose.position.z +1;
     geometry_msgs::Vector3Stamped linear_move_direction;
     linear_move_direction.vector.z = 0.00;
-    linear_move_direction.header.frame_id = "table_ground";
+    linear_move_direction.header.frame_id = "world";
 
 //#ifndef OFFLINE
     // experiment just hold
@@ -108,7 +108,7 @@ int main(int argc, char **argv) {
     ROS_INFO("Starting Log now");
     // start log
     std::vector<std::string> ur_namespaces;
-    ur_namespaces.push_back("ur5");
+    ur_namespaces.push_back("left");
     UR_Logger ur_logger(nh, ur_namespaces);
     ur_logger.start(100);
 
@@ -156,7 +156,7 @@ int main(int argc, char **argv) {
     /*
     geometry_msgs::Vector3Stamped close_direction;
     close_direction.vector.z = -direction.vector.z;
-    dualArmRobot.placeBox("box1", place_pose_ur5, close_direction.vector);*/
+    dualArmRobot.placeBox("box1", place_pose_left, close_direction.vector);*/
 
     // END
     ROS_INFO("Finished demonstration");

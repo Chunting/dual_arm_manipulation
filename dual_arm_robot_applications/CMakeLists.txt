@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(dual_arm_robot_applications)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+# C++14: set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y")
+
+
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
@@ -199,32 +203,83 @@ install(DIRECTORY include/${PROJECT_NAME}/
 # catkin_add_nosetests(test)
 
 
-add_executable(dual_arm_robot_vel_force_experiment src/dual_arm_robot_vel_force_experiment.cpp src/ur_logging/UrLogger.cpp src/ur_logging/Stopwatch.cpp src/ur_logging/UrMessageListener.cpp)
+add_executable(dual_arm_robot_vel_force_experiment 
+              src/dual_arm_robot_vel_force_experiment.cpp 
+              src/ur_logging/UrLogger.cpp 
+              src/ur_logging/Stopwatch.cpp 
+              src/ur_logging/UrMessageListener.cpp)
 target_link_libraries(dual_arm_robot_vel_force_experiment ${catkin_LIBRARIES})
 
-add_executable(ur10_force_hold_exp src/ur10_force_hold_exp.cpp src/ur_logging/UrLogger.cpp src/ur_logging/Stopwatch.cpp src/ur_logging/UrMessageListener.cpp)
-target_link_libraries(ur10_force_hold_exp ${catkin_LIBRARIES})
+add_executable(right_force_hold_exp src/right_force_hold_exp.cpp 
+              src/ur_logging/UrLogger.cpp src/ur_logging/Stopwatch.cpp 
+              src/ur_logging/UrMessageListener.cpp)
+target_link_libraries(right_force_hold_exp ${catkin_LIBRARIES})
 
-# add_executable(tcp_wrench_publisher src/tcp_wrench_publisher.cpp)
-# target_link_libraries(tcp_wrench_publisher ${catkin_LIBRARIES})
+#add_executable(tcp_wrench_publisher src/tcp_wrench_publisher.cpp)
+#target_link_libraries(tcp_wrench_publisher ${catkin_LIBRARIES})
 
-add_executable(dual_arm_robot_logger src/executables/dual_arm_robot_logger.cpp src/ur_logging/UrLogger.cpp src/ur_logging/Stopwatch.cpp src/ur_logging/UrMessageListener.cpp)
+add_executable(dual_arm_robot_logger 
+              src/executables/dual_arm_robot_logger.cpp 
+              src/ur_logging/UrLogger.cpp 
+              src/ur_logging/Stopwatch.cpp 
+              src/ur_logging/UrMessageListener.cpp)
 target_link_libraries(dual_arm_robot_logger ${catkin_LIBRARIES})
 
-add_executable(dual_arm_robot_demonstration src/executables/dual_arm_robot_demonstration.cpp src/dual_arm_toolbox/TrajectoryProcessor.cpp src/dual_arm_toolbox/Transform.cpp src/dual_arm_demonstrator_iml/DualArmRobot.cpp src/dual_arm_demonstrator_iml/SceneManager.cpp)
+add_executable(dual_arm_robot_demonstration 
+              src/executables/dual_arm_robot_demonstration.cpp 
+              src/dual_arm_toolbox/TrajectoryProcessor.cpp 
+              src/dual_arm_toolbox/Transform.cpp 
+              src/dual_arm_demonstrator_iml/DualArmRobot.cpp 
+              src/dual_arm_demonstrator_iml/SceneManager.cpp)
 target_link_libraries(dual_arm_robot_demonstration ${catkin_LIBRARIES})
 
-add_executable(dual_arm_robot_lift_experiment_planning src/executables/dual_arm_robot_lift_experiment_planning.cpp src/dual_arm_toolbox/TrajectoryProcessor.cpp src/dual_arm_toolbox/Transform.cpp src/dual_arm_demonstrator_iml/DualArmRobot.cpp src/dual_arm_demonstrator_iml/SceneManager.cpp)
+add_executable(dual_arm_robot_lift_experiment_planning 
+              src/executables/dual_arm_robot_lift_experiment_planning.cpp 
+              src/dual_arm_toolbox/TrajectoryProcessor.cpp 
+              src/dual_arm_toolbox/Transform.cpp 
+              src/dual_arm_demonstrator_iml/DualArmRobot.cpp 
+              src/dual_arm_demonstrator_iml/SceneManager.cpp)
 target_link_libraries(dual_arm_robot_lift_experiment_planning ${catkin_LIBRARIES})
 
-add_executable(dual_arm_robot_lift_experiment_force src/executables/dual_arm_robot_lift_experiment_force.cpp src/dual_arm_toolbox/TrajectoryProcessor.cpp src/dual_arm_toolbox/Transform.cpp src/dual_arm_demonstrator_iml/DualArmRobot.cpp src/dual_arm_demonstrator_iml/SceneManager.cpp src/ur_logging/UrLogger.cpp src/ur_logging/Stopwatch.cpp src/ur_logging/UrMessageListener.cpp)
+add_executable(dual_arm_robot_lift_experiment_force 
+              src/executables/dual_arm_robot_lift_experiment_force.cpp 
+              src/dual_arm_toolbox/TrajectoryProcessor.cpp 
+              src/dual_arm_toolbox/Transform.cpp 
+              src/dual_arm_demonstrator_iml/DualArmRobot.cpp 
+              src/dual_arm_demonstrator_iml/SceneManager.cpp 
+              src/ur_logging/UrLogger.cpp 
+              src/ur_logging/Stopwatch.cpp 
+              src/ur_logging/UrMessageListener.cpp)
 target_link_libraries(dual_arm_robot_lift_experiment_force ${catkin_LIBRARIES})
 
-add_executable(dual_arm_robot_lift_experiment_force_1 src/executables/dual_arm_robot_lift_experiment_force_1.cpp src/dual_arm_toolbox/TrajectoryProcessor.cpp src/dual_arm_toolbox/Transform.cpp src/dual_arm_demonstrator_iml/DualArmRobot.cpp src/dual_arm_demonstrator_iml/SceneManager.cpp src/ur_logging/UrLogger.cpp src/ur_logging/Stopwatch.cpp src/ur_logging/UrMessageListener.cpp)
+add_executable(dual_arm_robot_lift_experiment_force_1 
+              src/executables/dual_arm_robot_lift_experiment_force_1.cpp 
+              src/dual_arm_toolbox/TrajectoryProcessor.cpp 
+              src/dual_arm_toolbox/Transform.cpp 
+              src/dual_arm_demonstrator_iml/DualArmRobot.cpp 
+              src/dual_arm_demonstrator_iml/SceneManager.cpp 
+              src/ur_logging/UrLogger.cpp src/ur_logging/Stopwatch.cpp 
+              src/ur_logging/UrMessageListener.cpp)
 target_link_libraries(dual_arm_robot_lift_experiment_force_1 ${catkin_LIBRARIES})
 
-add_executable(dual_arm_robot_lift_experiment_force_2 src/executables/dual_arm_robot_lift_experiment_force_2.cpp src/dual_arm_toolbox/TrajectoryProcessor.cpp src/dual_arm_toolbox/Transform.cpp src/dual_arm_demonstrator_iml/DualArmRobot.cpp src/dual_arm_demonstrator_iml/SceneManager.cpp src/ur_logging/UrLogger.cpp src/ur_logging/Stopwatch.cpp src/ur_logging/UrMessageListener.cpp)
+add_executable(dual_arm_robot_lift_experiment_force_2 
+              src/executables/dual_arm_robot_lift_experiment_force_2.cpp 
+              src/dual_arm_toolbox/TrajectoryProcessor.cpp 
+              src/dual_arm_toolbox/Transform.cpp 
+              src/dual_arm_demonstrator_iml/DualArmRobot.cpp 
+              src/dual_arm_demonstrator_iml/SceneManager.cpp 
+              src/ur_logging/UrLogger.cpp 
+              src/ur_logging/Stopwatch.cpp 
+              src/ur_logging/UrMessageListener.cpp)
 target_link_libraries(dual_arm_robot_lift_experiment_force_2 ${catkin_LIBRARIES})
 
-add_executable(demonstration_setup_helper src/executables/demonstration_setup_helper.cpp src/dual_arm_toolbox/TrajectoryProcessor.cpp src/dual_arm_toolbox/Transform.cpp src/dual_arm_demonstrator_iml/DualArmRobot.cpp src/dual_arm_demonstrator_iml/SceneManager.cpp)
+add_executable(demonstration_setup_helper 
+              src/executables/demonstration_setup_helper.cpp 
+              src/dual_arm_toolbox/TrajectoryProcessor.cpp 
+              src/dual_arm_toolbox/Transform.cpp 
+              src/dual_arm_demonstrator_iml/DualArmRobot.cpp 
+              src/dual_arm_demonstrator_iml/SceneManager.cpp
+              src/ur_logging/UrLogger.cpp 
+              src/ur_logging/Stopwatch.cpp 
+              src/ur_logging/UrMessageListener.cpp)
 target_link_libraries(demonstration_setup_helper ${catkin_LIBRARIES})
