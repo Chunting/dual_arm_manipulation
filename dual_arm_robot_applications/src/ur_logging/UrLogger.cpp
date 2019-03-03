@@ -123,7 +123,7 @@ std::string UR_Logger::headline(UR_Message_Listener &ur_listener){
         << delimiter_ << state_R_prefix << "qy"
         << delimiter_ << state_R_prefix << "qz"
         << delimiter_ << state_R_prefix << "qw";
-/*
+
     // append wrench
     std::string wrench_force_prefix = "tcp_wrench_force_";
     //std::string wrench_force_suffix = " [N]";
@@ -135,7 +135,7 @@ std::string UR_Logger::headline(UR_Message_Listener &ur_listener){
     ss << delimiter_ << wrench_torque_prefix << "x" 
         << delimiter_ << wrench_torque_prefix << "y" 
         << delimiter_ << wrench_torque_prefix << "z";
-
+/*
     // append target position
     std::string target_pos_prefix = "target_pos_";
     //std::string target_pos_suffix = " [rad]";
@@ -191,7 +191,7 @@ std::string UR_Logger::data_line(UR_Message_Listener &ur_listener){
         << delimiter_ << ur_listener.last_pose_msg_.pose.orientation.w;
         
 
-    /*
+    
     // append tcp wrench force
     converter << delimiter_ << ur_listener.last_wrench_msg_.wrench.force.x
         << delimiter_ << ur_listener.last_wrench_msg_.wrench.force.y
@@ -200,7 +200,7 @@ std::string UR_Logger::data_line(UR_Message_Listener &ur_listener){
     converter << delimiter_ << ur_listener.last_wrench_msg_.wrench.torque.x
         << delimiter_ << ur_listener.last_wrench_msg_.wrench.torque.y
         << delimiter_ << ur_listener.last_wrench_msg_.wrench.torque.z;
-
+/*
     // append target position
     if (ur_listener.last_trajectory_msg_.joint_trajectory.points.size() > 0) {
         for (unsigned int i = 0; i < ur_listener.last_trajectory_msg_.joint_trajectory.points.size(); i++){
