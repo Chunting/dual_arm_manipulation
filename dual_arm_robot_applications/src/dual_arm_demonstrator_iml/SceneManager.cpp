@@ -40,7 +40,7 @@ void SceneManager::addBox(std::string id, geometry_msgs::Pose pose, std::string 
     /* Define operation: add */
     attached_object.object.operation = attached_object.object.ADD;
 
-    ROS_INFO("\nAdding %s into the world", id.c_str());
+    ROS_INFO("Adding %s into the world", id.c_str());
     moveit_msgs::PlanningScene planning_scene;
     /* Add the object into the environment by adding it to the set of collision objects in the "world" part of the planning scene */
     planning_scene.world.collision_objects.push_back(attached_object.object);

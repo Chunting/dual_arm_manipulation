@@ -1281,8 +1281,6 @@ bool DualArmRobot::execute(moveit::planning_interface::MoveGroup::Plan plan) {
         sleep(2); // to be sure robot is at goal position
         left_current_pose_ = left_.getCurrentPose(left_.getEndEffectorLink());
     }
-
-   
     return success_left&&success_right;
 #endif
 #ifdef OFFLINE
@@ -1312,8 +1310,6 @@ std::vector<double> DualArmRobot::getJointAngles(std::string groupName){
         ROS_INFO("Joint %s: %f", joint_names[i].c_str(), joint_values[i]);
     }
     return joint_values;
-
-
 }
 /* Move the robot to its home position defined in SRDF file */
 bool DualArmRobot::moveHome() {
@@ -1492,7 +1488,7 @@ std::vector<double>  DualArmRobot::getPositionIK(const robot_state::JointModelGr
        ROS_INFO("Did not find IK solution!");
     }
     return joint_values;
- }
+}
 
 Eigen::MatrixXd  DualArmRobot::getJacobian(const robot_state::JointModelGroup* joint_model_group, Eigen::Vector3d &reference_point_position ){
     Eigen::MatrixXd jacobian;
@@ -1505,7 +1501,7 @@ Eigen::MatrixXd  DualArmRobot::getJacobian(const robot_state::JointModelGroup* j
    return jacobian;
  }
 
- geometry_msgs::PoseStamped DualArmRobot::getPositionFK(std::string& endEffectorLink, moveit_msgs::RobotState& seed_robot_state){
+geometry_msgs::PoseStamped DualArmRobot::getPositionFK(std::string& endEffectorLink, moveit_msgs::RobotState& seed_robot_state){
     // fk service client setup
     // Use a service to call the forward kinematics and then update the target pose in cartisian space
     geometry_msgs::PoseStamped poseFK;
@@ -1567,7 +1563,7 @@ void DualArmRobot::publishPoseMsg() {
         ros::Publisher right_pose_pub = nh_.advertise<geometry_msgs::PoseStamped>("right/pose", 1);
         geometry_msgs::PoseStamped left_current_pose_temp_;
         geometry_msgs::PoseStamped right_current_pose_temp_;
-        ros::Rate rate(125);
+        ros::Rate rate(100);
         while(ros::ok()){
             left_current_pose_temp_ = left_.getCurrentPose(left_.getEndEffectorLink());
             right_current_pose_temp_ = right_.getCurrentPose(right_.getEndEffectorLink());

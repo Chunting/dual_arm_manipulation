@@ -12,6 +12,11 @@
 #include <moveit/robot_trajectory/robot_trajectory.h>
 #include <moveit_msgs/RobotTrajectory.h>
 
+#include "std_msgs/String.h"
+#include "robotiq_force_torque_sensor/ft_sensor.h"
+#include "robotiq_force_torque_sensor/sensor_accessor.h"
+#include <sstream>
+
 class UR_Message_Listener{  //handles callbacks and saves last received messages
 protected:
     ros::NodeHandle nh_;
@@ -32,11 +37,13 @@ public:
     geometry_msgs::TransformStamped last_tform_msg_;
     geometry_msgs::PoseStamped last_pose_msg_;
     moveit_msgs::RobotTrajectory last_trajectory_msg_;
+    robotiq_force_torque_sensor::ft_sensor last_force_msg_;
     bool newTrajectory = false;
     std::string ur_prefix_;
     int count = 0;
     
 private:
+    void reCallback(const robotiq_force_torque_sensor::ft_sensor::Ptr& msg);
     void wrenchCallback(const geometry_msgs::WrenchStamped::Ptr& msg);
     void speed_trajCallback(const trajectory_msgs::JointTrajectory::Ptr& msg);
     void stateCallback(const sensor_msgs::JointState::Ptr& msg);
