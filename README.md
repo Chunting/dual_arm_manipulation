@@ -1,10 +1,3 @@
-dual_arm_manipulation
-
-This project is forked from https://github.com/danielhoeltgen/Dual-Arm-Robot-Force-Controlled-Object-Manipulation
-
-I create a new project for this, just to make it convenient for the version management.
-
-
 # Dual-Arm-Robot-Force-Controlled-Object-Manipulation
 This Repository is the complete workspace of a project that realizes force-controlled object manipulation with a dual-arm-robot (UR5 and UR10). You can watch a demonstration video of the system by following this link: https://www.youtube.com/watch?v=O0-cC2ST5L8
 
@@ -29,4 +22,3 @@ joint_trajectory_admittance_controller: This package contains the source code of
 # Documentation:
 For German speakers my master's thesis provides detailed information. For everyone else I hope some of the diagrams are useful!
 https://drive.google.com/file/d/0B-7XIb6B00m6WUFaQndJS2NzZUE/view?usp=sharing
-

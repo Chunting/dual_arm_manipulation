@@ -7,8 +7,6 @@ project(dual_arm_robot_driver)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
-  tf
-  moveit_ros_planning_interface
 )
 
 ## System dependencies are found with CMake's conventions
@@ -114,7 +112,7 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 # include_directories(include)
-include_directories( include
+include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
