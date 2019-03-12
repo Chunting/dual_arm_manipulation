@@ -13,10 +13,10 @@ UR_Message_Listener::UR_Message_Listener(ros::NodeHandle& nh, std::string ur_nam
     if (ur_namespace_.size() > 0){
         ur_prefix_ = ur_namespace_+"_";
     }
-    ros::Subscriber sub1 = nh_.subscribe(ur_namespace+"/robotiq_force_torque_sensor",1, &UR_Message_Listener::reCallback, this);
-    // ros::ServiceClient client = nh_.serviceClient<robotiq_force_torque_sensor::sensor_accessor>("robotiq_force_torque_sensor_acc");
+    ros::Subscriber sub1 = nh_.subscribe(ur_namespace+"/robotiq_ft_sensor",1, &UR_Message_Listener::reCallback, this);
+    // ros::ServiceClient client = nh_.serviceClient<robotiq_ft_sensor::sensor_accessor>("robotiq_ft_sensor_acc");
     
-    // robotiq_force_torque_sensor::sensor_accessor srv;
+    // robotiq_ft_sensor::sensor_accessor srv;
 
 	int count = 0;
     ros::ok();
@@ -56,7 +56,7 @@ void UR_Message_Listener::stateCallback(const sensor_msgs::JointState::Ptr& msg)
         last_state_msg_ = *msg;
     }
 }
-void UR_Message_Listener::reCallback(const robotiq_force_torque_sensor::ft_sensor::Ptr& msg)
+void UR_Message_Listener::reCallback(const robotiq_ft_sensor::ft_sensor::Ptr& msg)
 {
     ROS_INFO("I heard: ");
     last_force_msg_ = *msg;

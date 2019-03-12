@@ -1,11 +1,10 @@
 moveit_setup_assistant_config:
   URDF:
     package: dual_arm_robot_description
-    relative_path: urdf/dual_arm_robot.urdf.xacro
-    use_jade_xacro: true
+    relative_path: urdf/dual_arm_robot_gripper.urdf.xacro
   SRDF:
     relative_path: config/dual_arm_robot.srdf
   CONFIG:
     author_name: Chunting Jiao
     author_email: jiaochunting@gmail.com
-    generated_timestamp: 1547622764
+    generated_timestamp: 1551808891

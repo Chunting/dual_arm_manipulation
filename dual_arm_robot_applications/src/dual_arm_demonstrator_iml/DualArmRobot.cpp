@@ -1521,7 +1521,7 @@ geometry_msgs::PoseStamped DualArmRobot::getPositionFK(std::string& endEffectorL
     poseFK = fk_msg.response.pose_stamped[0];
 
     // left_joint_values = getJointAngles("left_manipulator");
-    ROS_INFO("\nposeFK frame_id: %s, end_effector: %s, x=%f, y=%f, z=%f, qx=%f, qy=%f, qz=%f, qw=%f\n", 
+    ROS_INFO("poseFK frame_id: %s, end_effector: %s, x=%f, y=%f, z=%f, qx=%f, qy=%f, qz=%f, qw=%f\n", 
         poseFK.header.frame_id.c_str()
         ,endEffectorLink.c_str()
         ,poseFK.pose.position.x

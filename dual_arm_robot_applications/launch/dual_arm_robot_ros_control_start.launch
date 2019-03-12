@@ -1,8 +1,0 @@
-<?xml version="1.0"?>
-<!-- note: controllers.yaml in moveit_config has to be setup for specific controller -->
-<launch>
-  
-  <node name="dual_arm_robot_demonstration" pkg="dual_arm_robot_applications" type="dual_arm_robot_demonstration" respawn="true" output="screen"/>
-  <!--node name="dual_arm_robot_logger" pkg="dual_arm_robot_applications" type="dual_arm_robot_logger" respawn="true" output="screen"/-->
-
-</launch>

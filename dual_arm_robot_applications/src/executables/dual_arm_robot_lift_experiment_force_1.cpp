@@ -45,37 +45,11 @@ int main(int argc, char **argv) {
     sceneManager.setupSceneLift();
 
     // move home
-    // dualArmRobot.moveHome();
-
-    // setup constraints
-    moveit_msgs::JointConstraint jcm;
-    moveit_msgs::Constraints left_constraints;
-    moveit_msgs::Constraints right_constraints;
-
-    jcm.joint_name="right_shoulder_pan_joint";
-    jcm.position = 2.4;
-    jcm.tolerance_above = 0.7;
-    jcm.tolerance_below = 2.5;
-    jcm.weight = 1.0;
-    right_constraints.joint_constraints.push_back(jcm);
-    dualArmRobot.right_.setPathConstraints(right_constraints);
-
-    jcm.joint_name="left_shoulder_pan_joint";
-    jcm.position = 0.0;
-    jcm.tolerance_above = 1.0;
-    jcm.tolerance_below = 1.0;
-    jcm.weight = 1.0;
-    left_constraints.joint_constraints.push_back(jcm);
-    dualArmRobot.left_.setPathConstraints(left_constraints);
-
-
+    dualArmRobot.moveHome();
     /*
     geometry_msgs::PoseStamped place_pose_left = dualArmRobot.left_.getCurrentPose(dualArmRobot.left_.getEndEffectorLink());
     place_pose_left.pose.position.z = place_pose_left.pose.position.z - direction.vector.z;*/
 
-    // clear path constraints
-//    dualArmRobot.left_.clearPathConstraints();
-//    dualArmRobot.right_.clearPathConstraints();
 
     // plan move and execute
     //geometry_msgs::PoseStamped start_pose = dualArmRobot.left_.getCurrentPose(dualArmRobot.left_.getEndEffectorLink());

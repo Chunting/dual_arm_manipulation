@@ -22,3 +22,14 @@ controller_list:
       - right_wrist_2_joint
       - right_wrist_3_joint
 
+##-------------for real gripper-----------------------------
+  - name: /joint_position_controller #/simple_gripper/joint_position_controller
+    action_ns: gripper_cmd #follow_joint_trajectory #Robotiq2FCommand #gripper_action #gripper_cmd
+    type: GripperCommand #FollowJointTrajectory #Robotiq2FActionController #GripperCommand
+   default: true
+    joints:
+      - robotiq_85_left_knuckle_joint
+    initial:
+     - group: right_gripper
+       pose:  open
+

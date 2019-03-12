@@ -283,3 +283,14 @@ add_executable(demonstration_setup_helper
               src/ur_logging/Stopwatch.cpp 
               src/ur_logging/UrMessageListener.cpp)
 target_link_libraries(demonstration_setup_helper ${catkin_LIBRARIES})
+
+add_executable(dual_arm_robot_grasp_experiment 
+              src/executables/dual_arm_robot_grasp_experiment.cpp 
+              src/dual_arm_toolbox/TrajectoryProcessor.cpp 
+              src/dual_arm_toolbox/Transform.cpp 
+              src/dual_arm_demonstrator_iml/DualArmRobot.cpp 
+              src/dual_arm_demonstrator_iml/SceneManager.cpp
+              src/ur_logging/UrLogger.cpp 
+              src/ur_logging/Stopwatch.cpp 
+              src/ur_logging/UrMessageListener.cpp)
+target_link_libraries(dual_arm_robot_grasp_experiment ${catkin_LIBRARIES})
