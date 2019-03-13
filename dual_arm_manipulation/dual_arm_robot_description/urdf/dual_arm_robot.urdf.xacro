@@ -13,9 +13,12 @@
   <!-- ur5 -->
   <xacro:include filename="$(find dual_arm_robot_description)/urdf/ur5.urdf.xacro"/> 
 
-  <!-- endeffector
+  <!-- ft300 -->
+	<xacro:include filename="$(find robotiq_ft_sensor)/urdf/robotiq_fts300.urdf.xacro" />
+
+  <!-- endeffector -->
   <xacro:include filename="$(find dual_arm_robot_description)/urdf/endeffector.urdf.xacro"/>
--->
+
 
   <xacro:property name="robot_horizontal_stand_width" value="0.5"/>
 	<xacro:property name="robot_vertical_stand_height" value="1.2"/>
@@ -141,15 +144,26 @@
    <origin xyz="0 0 ${(robot_horizontal_stand_width/2)}" rpy="${pi/4.0} 0 0"/>
   </joint>
 
+
+  <!-- place robotiq_fts300 to left arm -->
+	
+  <xacro:robotiq_fts300 prefix=""/>
+  <!-- mount the fts to the robot -->
+  <joint name="$(arg prefix_left)fts_fix" type="fixed" >
+    <origin xyz="0 0 0" rpy="0 1.57 0"/>
+    <parent link="$(arg prefix_left)ee_link" />
+    <child link="fts_robotside" />
+  </joint>
+	
   <!-- place ur5 endeffector -->
-	<!--
+	
   <xacro:endeffector prefix="$(arg prefix_left)"/>
   <joint name="$(arg prefix_left)ee_mount" type="fixed">
-    <parent link="$(arg prefix_left)ee_link" />
+    <parent link="fts_toolside" />
     <child link = "$(arg prefix_left)ee_frame" />
-    <origin xyz="0.0 0.0 0.0" rpy="${pi/2.0} 0.0 ${pi/2.0}" />
+    <origin xyz="0.0 0.0 0.0" rpy="0 0.0 0" />
   </joint>
-	-->
+	
   
 <!--
   <joint name="$(arg prefix_left)ee_mount" type="fixed">
@@ -167,14 +181,14 @@
   </joint>
 
   <!-- place ur5 right endeffector -->
-	<!--
+	
   <xacro:endeffector prefix="$(arg prefix_right)"/>
   <joint name="$(arg prefix_right)ee_mount" type="fixed">
     <parent link="$(arg prefix_right)ee_link" />
     <child link = "$(arg prefix_right)ee_frame" />
     <origin xyz="0.0 0.0 0.0" rpy="${pi/2.0} 0.0 ${pi/2.0}" />
   </joint>
-	-->
+
   
 <!--
   <joint name="$(arg prefix_right)ee_mount" type="fixed">
