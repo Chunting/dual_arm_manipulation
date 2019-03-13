@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="limited" default="true"/>
+  <arg name="prefix_left" default="left_"/>
+  <arg name="prefix_right" default="right_"/>
+
+  <param name="robot_description" command="$(find xacro)/xacro.py '$(find dual_arm_robot_description)/urdf/dual_arm_robot.urdf.xacro' prefix_left:=$(arg prefix_left) prefix_right:=$(arg prefix_right) limited:=$(arg limited)"/>
+</launch>

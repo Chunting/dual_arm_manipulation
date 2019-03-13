@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<!-- note: controllers.yaml in moveit_config has to be setup for specific controller -->
+<launch>
+  <!-- robot_ip: IP-address of the robot's socket-messaging server -->
+  <arg name="ip_left" default="192.168.1.101"/> <!-- UR5 left arm IP address -->
+  <arg name="ip_right" default="192.168.1.102"/> <!-- UR5 right arm IP address -->
+  <!-- for limited setup: make sure that both robots are in vailid position, otherwise ompl throws an error -->
+  <arg name="limited" default="true"/>
+  <arg name="min_payload"  default="0.0"/>
+  <arg name="max_payload"  default="5.0"/>
+  <arg name="prefix_left" default="left_"/>
+  <arg name="prefix_right" default="right_"/>
+  <arg name="config" default="true"/>
+  
+  <!-- dual_arm_robot bringup. including ros controllers -->
+  <include file="$(find dual_arm_robot_driver)/launch/dual_arm_robot_bringup_ros_control.launch">
+    <arg name="ip_left" value="$(arg ip_left)"/>
+    <arg name="ip_right" value="$(arg ip_right)"/>
+    <arg name="limited" value="$(arg limited)"/>
+    <arg name="min_payload"  value="$(arg min_payload)"/>
+    <arg name="max_payload"  value="$(arg max_payload)"/>
+    <arg name="prefix_left" value="$(arg prefix_left)"/>
+    <arg name="prefix_right" value="$(arg prefix_right)"/>
+  </include>
+
+  <!-- MoveIt! Setup -->
+  <!-- dual arm robot planning execution -->
+  <include file="$(find dual_arm_robot_moveit_config)/launch/dual_arm_robot_moveit_planning_execution.launch"/>
+  <param name="move_group/trajectory_execution/allowed_start_tolerance" value="0.5" />
+
+  <!-- dual arm robot rviz moveit -->
+  <include file="$(find dual_arm_robot_moveit_config)/launch/moveit_rviz.launch">
+    <arg name="config" value="$(arg config)"/>
+  </include>
+
+  <node name="ft_sensor" pkg="robotiq_force_torque_sensor" type="rq_sensor" respawn="true" output="screen">
+	
+  </node>
+
+</launch>

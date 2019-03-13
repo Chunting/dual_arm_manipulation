@@ -1,0 +1,20 @@
+<launch>
+  <arg name="sim" default="false" />
+  <arg name="debug" default="false" />
+    
+  <!-- Remap follow_joint_trajectory -->
+  <remap if="$(arg sim)" from="left/left_vel_based_pos_traj_controller/follow_joint_trajectory" to="fake_left_manipulator_controller/follow_joint_trajectory"/>
+  <remap if="$(arg sim)" from="right/right_vel_based_pos_traj_controller/follow_joint_trajectory" to="fake_right_manipulator_controller/follow_joint_trajectory"/>
+
+  <!-- Launch moveit -->
+  <include file="$(find dual_arm_robot_moveit_config)/launch/move_group.launch">
+    <arg name="debug" default="$(arg debug)" />
+    <arg name="publish_monitored_planning_scene" value="true" />
+  </include>
+
+    <!-- load the robot_description parameter before launching ROS-I nodes -->
+  <include file="$(find dual_arm_robot_moveit_config)/launch/planning_context.launch" >
+    <arg name="load_robot_description" value="true" />
+  </include>
+
+</launch>
