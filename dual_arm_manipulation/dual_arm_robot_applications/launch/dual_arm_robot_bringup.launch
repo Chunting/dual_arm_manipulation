@@ -36,7 +36,7 @@
   </include>
   
   <!-- Connect to Force Torque Sensor -->
-  <node name="ft_sensor" pkg="robotiq_ft_sensor" type="rq_sensor" respawn="true" output="screen"></node>
+  <node name="ft_sensor" pkg="robotiq_force_torque_sensor" type="rq_sensor" respawn="true" output="screen"></node>
 
   <!-- Connect to 3 finger gripper 
   <node name="robotiq_3f_gripper_control" pkg="robotiq_3f_gripper_control" type="Robotiq3FGripperTcpNode.py" args="192.168.1.11"/>
