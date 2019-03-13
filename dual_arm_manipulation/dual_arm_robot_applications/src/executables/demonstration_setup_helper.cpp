@@ -47,11 +47,12 @@ int main(int argc, char **argv) {
 
     geometry_msgs::Vector3Stamped direction;
     direction.header.frame_id = "world";
-
+    dualArmRobot.setConstraints();
+    dualArmRobot.kinematic_state->enforceBounds();
     ROS_INFO("========== MOVE HOME POSITION =================");
     dualArmRobot.moveHome();
     sleep(1);
-    dualArmRobot.kinematic_state->enforceBounds();
+    
 
     // ROS_INFO("========== TEST IK  -- LEFT =================");
     // geometry_msgs::PoseStamped left_pose = dualArmRobot.left_.getCurrentPose(dualArmRobot.left_.getEndEffectorLink());
@@ -102,7 +103,7 @@ int main(int argc, char **argv) {
     sleep(1);
   
     ROS_INFO("========== MOVE CLOSER =================");
-    dualArmRobot.graspMove(0.015);
+    dualArmRobot.graspMove(0.001);
     sleep(6);
     // ROS_INFO("========== GET OFFSET =================");
     // dualArmRobot.getCurrentOffset();
@@ -152,7 +153,7 @@ int main(int argc, char **argv) {
     dualArmRobot.linearMove(direction, true, true,true);
     sleep(2);
     ROS_INFO("========== MOVE AWAY =================");
-    dualArmRobot.graspMove(-0.02);
+    dualArmRobot.graspMove(-0.01);
     sleep(1);
     ROS_INFO("========== MOVE HOME POSITION =================");
     dualArmRobot.moveHome();

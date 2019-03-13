@@ -142,17 +142,17 @@ void TrajectoryProcessor::publishPlanTrajectory(moveit::planning_interface::Move
     ros::NodeHandle nh;
     ros::Publisher execTrajectoryPub_ = nh.advertise<moveit_msgs::RobotTrajectory>("/execute_my_trajectory", 1, true);
     moveit_msgs::RobotTrajectory trajectory_ = plan.trajectory_;
-    ROS_INFO("Publishing plan and waiting for %i seconds", sec);
+    // ROS_INFO("Publishing plan and waiting for %i seconds", sec);
     execTrajectoryPub_.publish(trajectory_);
     sleep(sec);
-    ROS_INFO("Header time  %f ", trajectory_.joint_trajectory.header.stamp.toSec());
-        for (unsigned int i = 0; i < trajectory_.joint_trajectory.points.size(); i++){
-            ROS_INFO("Listening Points %d  %f ", i, trajectory_.joint_trajectory.header.stamp.toSec()+trajectory_.joint_trajectory.points[i].time_from_start.toSec());
-            for (unsigned int a = 0; a < trajectory_.joint_trajectory.points[i].positions.size(); a++){
-                ROS_INFO("%s:\tpos %f\tvel %f", 
-                trajectory_.joint_trajectory.joint_names[a].c_str(), 
-                trajectory_.joint_trajectory.points[i].positions[a]*(180/3.14159),
-                trajectory_.joint_trajectory.points[i].velocities[a]*(180/3.14159));
-            }
-        }
+    // ROS_INFO("Header time  %f ", trajectory_.joint_trajectory.header.stamp.toSec());
+        // for (unsigned int i = 0; i < trajectory_.joint_trajectory.points.size(); i++){
+        //     ROS_INFO("Listening Points %d  %f ", i, trajectory_.joint_trajectory.header.stamp.toSec()+trajectory_.joint_trajectory.points[i].time_from_start.toSec());
+        //     for (unsigned int a = 0; a < trajectory_.joint_trajectory.points[i].positions.size(); a++){
+        //         /ROS_INFO("%s:\tpos %f\tvel %f", 
+        //         trajectory_.joint_trajectory.joint_names[a].c_str(), 
+        //         trajectory_.joint_trajectory.points[i].positions[a]*(180/3.14159),
+        //         trajectory_.joint_trajectory.points[i].velocities[a]*(180/3.14159));
+        //     }
+        // }
 }

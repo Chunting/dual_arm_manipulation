@@ -32,10 +32,10 @@ DualArmRobot::DualArmRobot(ros::NodeHandle& nh) :
     // Spceciy the maximum amount of time to use when planning
     left_.setPlanningTime(5);
     // Set the number of times the motion plan is to be computed, the default value is 1
-    left_.setNumPlanningAttempts(25);
+    left_.setNumPlanningAttempts(10);
 
     right_.setPlanningTime(5);
-    right_.setNumPlanningAttempts(25);
+    right_.setNumPlanningAttempts(10);
 
     // setup planner
     // Specify a planner to be used for further planning
@@ -46,15 +46,9 @@ DualArmRobot::DualArmRobot(ros::NodeHandle& nh) :
     right_.allowReplanning(true);
 
     // Controller Interface
-    /*#ifdef SIMULATION
-    left_controller_ = "fake_left_manipulator_controller";
-    right_controller_ = "fake_right_manipulator_controller";#endif
-
-    #ifndef SIMULATION*/
     left_controller_ = "left/left_vel_based_pos_traj_controller";
     right_controller_ = "right/right_vel_based_pos_traj_controller";
-    //#endif
-   //subscribe to the data topic of interest
+    //subscribe to the data topic of interest
 	pose_publish_thread_ = new std::thread(boost::bind(&DualArmRobot::publishPoseMsg, this));
    
     // planning scene monitor
@@ -277,9 +271,9 @@ bool DualArmRobot::adaptTrajectory(moveit_msgs::RobotTrajectory left_trajectory,
         // write results into trajectory msg
         for (unsigned int j=0; j < ik_msg.response.solution.joint_state.position.size(); j++){
             both_arms_trajectory.joint_trajectory.points[i].positions.push_back(ik_msg.response.solution.joint_state.position[j]);
-            ROS_INFO("%s: pos %f", 
-                ik_msg.response.solution.joint_state.name[j].c_str(), 
-                ik_msg.response.solution.joint_state.position[j]);
+            // ROS_INFO("%s: pos %f", 
+            //     ik_msg.response.solution.joint_state.name[j].c_str(), 
+            //     ik_msg.response.solution.joint_state.position[j]);
         }
 
         // use result as seed for next calculation
@@ -344,6 +338,7 @@ bool DualArmRobot::graspMove(double distance, bool avoid_collisions, bool use_le
     if (distance < 0) ROS_INFO("Moving away from object");
 
     // right
+    /*
     if (use_right) try_step = true;
     while (try_step && ros::ok()) {
         right_.setStartStateToCurrentState();
@@ -381,6 +376,7 @@ bool DualArmRobot::graspMove(double distance, bool avoid_collisions, bool use_le
         }
     }
     sleep(1);
+    */
     if (use_left) try_step = true;
     while (try_step && ros::ok()) {
         /* Update the robot state */
@@ -1325,9 +1321,9 @@ bool DualArmRobot::moveHome() {
         std::vector<std::string> joint_names;
         joint_names = arms_.getJointNames();
         home_rs.copyJointGroupPositions(joint_model_group,home);
-        for(int i=0; i<joint_names.size(); i++){
-            ROS_INFO("%s : desired position  %f", joint_names[i].c_str(), home[i]);
-        }
+        // for(int i=0; i<joint_names.size(); i++){
+        //     ROS_INFO("%s : desired position  %f", joint_names[i].c_str(), home[i]);
+        // }
         moveit::planning_interface::MoveGroup::Plan arms_plan;
         error = arms_.plan(arms_plan);
         if (error.val != 1) {
@@ -1621,7 +1617,7 @@ void DualArmRobot::setConstraints() {
     jcm.joint_name="left_wrist_3_joint";
     jcm.position = 0.0;
     jcm.tolerance_above = 3;
-    jcm.tolerance_below = 3;
+    jcm.tolerance_below = 1;
     jcm.weight = 1.0;
     left_constraints.joint_constraints.push_back(jcm);
     both_constraints.joint_constraints.push_back(jcm);
