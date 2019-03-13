@@ -29,3 +29,9 @@ controller_list:
       - right_wrist_1_joint
       - right_wrist_2_joint
       - right_wrist_3_joint
+  - name: fake_left_ee_controller
+    joints:
+      []
+  - name: fake_right_ee_controller
+    joints:
+      []
