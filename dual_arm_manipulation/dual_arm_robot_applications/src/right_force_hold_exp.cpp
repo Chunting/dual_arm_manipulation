@@ -120,10 +120,10 @@ int main(int argc, char **argv)
     // start logging
     ur_logger.start(50);
 
-    ROS_INFO("Publishing velocity commands to right_ at 125Hz");
+    ROS_INFO("Publishing velocity commands to right_ at 100Hz");
 
     // publish messages
-    ros::Rate loop_rate(125);   // velocity-message publish rate
+    ros::Rate loop_rate(100);   // velocity-message publish rate
 
     Stopwatch stopwatch;
 

@@ -38,7 +38,7 @@ int main(int argc, char **argv) {
     ur_namespaces.push_back("left");
     ur_namespaces.push_back("right");
     UR_Logger ur_logger(nh, ur_namespaces);
-    ur_logger.start(125);
+    ur_logger.start(100);
     // variables
     moveit::planning_interface::MoveGroup::Plan left_plan;
     moveit::planning_interface::MoveGroup::Plan right_plan;
