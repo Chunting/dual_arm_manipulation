@@ -30,3 +30,9 @@
 dataLog/
 
 \.vscode/settings\.json
+
+robotiq
+
+ros_canopen
+
+universal_robot
