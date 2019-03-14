@@ -1,3 +1,5 @@
+// rosrun dual_arm_robot_appliations left_force_hold_exp
+
 #include <moveit/move_group_interface/move_group.h>
 #include <controller_manager_msgs/SwitchController.h>
 #include <controller_manager_msgs/SwitchControllerRequest.h>
@@ -70,6 +72,7 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "ur_const_vel_publisher");
     ros::NodeHandle nh;
     ros::Publisher left_speed_pub = nh.advertise<trajectory_msgs::JointTrajectory>("/left/ur_driver/joint_speed", 1);
+    ros::Publisher ur_script_pub = nh.advertise<std_msgs::String>("/left/ur_driver/URScript",1);
     ros::AsyncSpinner asyncSpinner(2);
     asyncSpinner.start();
 
@@ -80,7 +83,36 @@ int main(int argc, char **argv)
     moveit::planning_interface::MoveGroup left_("left_manipulator");
     moveit::planning_interface::MoveGroup::Plan plan;
     left_.setPlanningTime(30);
+ 
 
+    std_msgs::String temp;
+    std::string cmd_str;
+//        std::string force_mode="force_mode( tool_pose(), [0, 0, 1, 0, 0, 0], [0.0, 0.0, 0.0, 0.0, 0.0, 0.0], 2, [0.05, 0.05, 0.05, 0.17, 0.17, 0.17])\n";
+//        std::string free_drive_mode = "\tfreedrive_mode()\n";
+    // while(ros::ok()){
+    //     bool last_io_button = true;
+    //         ros::spinOnce();
+    //         if(!last_io_button && io_button_){
+    //             cmd_str = "def myProg():\n";
+    //             cmd_str += "\twhile (True):\n";
+    //             cmd_str += "\t\tfreedrive_mode()\n";
+    //             cmd_str +="\t\tsync()\n";
+    //             cmd_str += "\tend\n";
+    //             cmd_str +="end\n";
+    //             temp.data = cmd_str;
+    //             pub_free_drive_.publish(temp);
+    //         }
+    //         if(last_io_button && !io_button_){
+    //             cmd_str = "def myProg():\n";
+    //             cmd_str += "\twhile (True):\n";
+    //             cmd_str += "\t\tend_freedrive_mode()\n";
+    //             cmd_str +="\t\tsleep(0.5)\n";
+    //             cmd_str += "\tend\n";
+    //             cmd_str +="end\n";
+    //             temp.data = cmd_str;
+    //             pub_free_drive_.publish(temp);
+    //         }
+/*
     ROS_WARN("robot is moving without collision checking. BE CAREFUL!");
     ROS_INFO("waiting 10 Seconds. Press Ctrl-C if Robot is in the wrong start position");
     ROS_INFO("Reference Frame: %s", left_.getPlanningFrame().c_str());
@@ -105,22 +137,13 @@ int main(int argc, char **argv)
     }
     ros::Duration(10).sleep();
 
-    //long distance position
-    /*
-    left_.setJointValueTarget("elbow_joint", -1.366541959239651);
-    left_.setJointValueTarget("shoulder_lift_joint", -2.573810648739345);
-    left_.setJointValueTarget("shoulder_pan_joint", 0.5943102022167164);
-    left_.setJointValueTarget("wrist_1_joint", -0.7533539281232803);
-    left_.setJointValueTarget("wrist_2_joint", -0.0);
-    left_.setJointValueTarget("wrist_3_joint", 0.00015758105264953662);*/
-
     // short distance postion
-    left_.setJointValueTarget("left_shoulder_pan_joint", 1.6);
-    left_.setJointValueTarget("left_shoulder_lift_joint", -1.876);
-    left_.setJointValueTarget("left_elbow_joint", 1.58);
-    left_.setJointValueTarget("left_wrist_1_joint", -0.585);
-    left_.setJointValueTarget("left_wrist_2_joint", 1.57);
-    left_.setJointValueTarget("left_wrist_3_joint", -1.57);
+    left_.setJointValueTarget("left_shoulder_pan_joint", -1.57);
+    left_.setJointValueTarget("left_shoulder_lift_joint", -1.678);
+    left_.setJointValueTarget("left_elbow_joint", 1.829);
+    left_.setJointValueTarget("left_wrist_1_joint", -2.62);
+    left_.setJointValueTarget("left_wrist_2_joint", -1.57);
+    left_.setJointValueTarget("left_wrist_3_joint", 1.57);
 
     // Specify a planner to be used for further planning
     left_.setPlannerId("RRTConnectkConfigDefault");
@@ -155,7 +178,7 @@ int main(int argc, char **argv)
     //left_.execute(plan);
     sleep(5);
 
-
+*/
     // ::::::: Run Experiments :::::::
     // variables
     double velocity = 0.005;
@@ -179,24 +202,33 @@ int main(int argc, char **argv)
     geometry_msgs::PoseStamped current_pose = left_.getCurrentPose();
     std::cout << "x: " << current_pose.pose.position.x << "\ty: " << current_pose.pose.position.y << "\tz:  " << current_pose.pose.position.z << std::endl;
     double radius = sqrt(current_pose.pose.position.x*current_pose.pose.position.x + current_pose.pose.position.y*current_pose.pose.position.y);
-    std::cout << "RADIUS: " << radius << std::endl;
+    
     double omega = velocity/radius;
+
+    std::cout << "RADIUS: " << radius << "  omega: " << omega << std::endl;
     //double moving_time = moving_distance/velocity; //move 3cm, obstacle is around 1-2 cm away.
 
     // Output Message Speed = const
     trajectory_msgs::JointTrajectory joint_traj; //containing speed command
-
-    // joint_traj.joint_names.push_back("left_shoulder_pan_joint");
-    // joint_traj.joint_names.push_back("left_shoulder_lift_joint");
-    // joint_traj.joint_names.push_back("left_elbow_joint");
-    // joint_traj.joint_names.push_back("left_wrist_1_joint");
-    // joint_traj.joint_names.push_back("left_wrist_2_joint");
-    // joint_traj.joint_names.push_back("left_wrist_3_joint");
-
     trajectory_msgs::JointTrajectoryPoint traj_point;
     traj_point.velocities.assign(6,0);
     traj_point.velocities[0] = -omega;
     joint_traj.points.push_back(traj_point);
+
+    geometry_msgs::TwistStamped tool_velocity;
+    geometry_msgs::Twist t;
+    t.linear.x = 0;
+	t.linear.y = 0.05;
+	t.linear.z = 0;
+
+	t.angular.x = 0;
+	t.angular.y = 0;
+	t.angular.z = 0;
+
+    tool_velocity.twist = t;
+
+	
+
 
     // start logging
     ur_logger.start(50);
@@ -208,35 +240,44 @@ int main(int argc, char **argv)
 
     Stopwatch stopwatch;
 
-    ROS_INFO("trying to hold 30N");
+    ROS_INFO("trying to hold 10N");
     for(int i=0; i<joint_traj.joint_names.size(); ++i){
         ROS_INFO("Joint name  %s", joint_traj.joint_names[i].c_str());
     }
-    while (ros::ok() && (stopwatch.elapsed().toSec()<20))
+    while (ros::ok() && (stopwatch.elapsed().toSec()<200))
     {
         double res_force = sqrt(subscriber.last_wrench_msg_.Fx*subscriber.last_wrench_msg_.Fx 
                                 +subscriber.last_wrench_msg_.Fy*subscriber.last_wrench_msg_.Fy);
 
-        if (res_force < 30){
+        if (res_force < 10){
             // Removes the last element in the vector, effectively reducing the container size by one.
-            joint_traj.points.pop_back();
-            traj_point.velocities[0] = -omega;
-            joint_traj.points.push_back(traj_point);
+            // joint_traj.points.pop_back();
+            // traj_point.velocities[2] = 0.1;
+            // joint_traj.points.push_back(traj_point);
+
+            t.linear.y = 0.05;
+            ROS_INFO("I heard: Force [%f]  FX[%f] FY[%f] FZ[%f]", res_force, subscriber.last_wrench_msg_.Fx, subscriber.last_wrench_msg_.Fy, subscriber.last_wrench_msg_.Fz);
 
         }
-        else if (res_force  < 40){
-            joint_traj.points.pop_back();
-            traj_point.velocities[0] = 0.0;
-            joint_traj.points.push_back(traj_point);
+        else if (res_force  < 30){
+            // joint_traj.points.pop_back();
+            // traj_point.velocities[2] = 0.0;
+            // joint_traj.points.push_back(traj_point);
+            t.linear.y = -0.05;
         }
         else{
-            joint_traj.points.pop_back();
-            traj_point.velocities[0] = omega;
-            joint_traj.points.push_back(traj_point);
+            // joint_traj.points.pop_back();
+            // traj_point.velocities[0] = -0.1;
+            // joint_traj.points.push_back(traj_point);
+
+            t.linear.y = 0;
         }
 
-        joint_traj.header.stamp = ros::Time::now();
-        left_speed_pub.publish(joint_traj);
+        // joint_traj.header.stamp = ros::Time::now();
+        // left_speed_pub.publish(joint_traj);
+
+        tool_velocity.header.stamp = ros::Time::now();
+        // left_tool_vel_pub_.publish(tool_velocity);
 
         ros::spinOnce();
         loop_rate.sleep();
@@ -245,14 +286,14 @@ int main(int argc, char **argv)
     ROS_INFO("moving back");
     stopwatch.restart();
 
-    while (ros::ok() && (stopwatch.elapsed().toSec()<10))
-    {
-        joint_traj.header.stamp = ros::Time::now();
-        left_speed_pub.publish(joint_traj);
+    // while (ros::ok() && (stopwatch.elapsed().toSec()<10))
+    // {
+    //     joint_traj.header.stamp = ros::Time::now();
+    //     left_speed_pub.publish(joint_traj);
 
-        ros::spinOnce();
-        loop_rate.sleep();
-    }
+    //     ros::spinOnce();
+    //     loop_rate.sleep();
+    // }
 
     ROS_INFO("Stopped publishing");
 

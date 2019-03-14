@@ -119,6 +119,7 @@ void TrajectoryProcessor::clean(moveit_msgs::RobotTrajectory &trajectory) {
     }
 }
 
+// Set timestamp
 void TrajectoryProcessor::computeTimeFromStart(moveit_msgs::RobotTrajectory& trajectory, double step_t){
     for (unsigned int i=0; i < trajectory.joint_trajectory.points.size(); i++){
         trajectory.joint_trajectory.points[i].time_from_start.fromSec(i*step_t);
@@ -136,7 +137,8 @@ void TrajectoryProcessor::scaleTrajectorySpeed(moveit_msgs::RobotTrajectory& tra
 }
 
 bool TrajectoryProcessor::computeVelocities(moveit_msgs::RobotTrajectory& trajectory, moveit::planning_interface::MoveGroup& moveGroup){
-    dual_arm_toolbox::TrajectoryProcessor::computeTimeFromStart(trajectory, 0.4);
+    dual_arm_toolbox::TrajectoryProcessor::computeTimeFromStart(trajectory, 0.4); // 400ms
+    // Maintain a sequence of waypoints and the time durations between these waypoints.
     robot_trajectory::RobotTrajectory rt(moveGroup.getCurrentState()->getRobotModel(), "arms");
    
     rt.setRobotTrajectoryMsg(*moveGroup.getCurrentState(), trajectory);// get a RobotTrajectory from trajectory
@@ -168,14 +170,14 @@ void TrajectoryProcessor::publishPlanTrajectory(moveit::planning_interface::Move
     // ROS_INFO("Publishing plan and waiting for %i seconds", sec);
     execTrajectoryPub_.publish(trajectory_);
     sleep(sec);
-    // ROS_INFO("Header time  %f ", trajectory_.joint_trajectory.header.stamp.toSec());
-        // for (unsigned int i = 0; i < trajectory_.joint_trajectory.points.size(); i++){
-        //     ROS_INFO("Listening Points %d  %f ", i, trajectory_.joint_trajectory.header.stamp.toSec()+trajectory_.joint_trajectory.points[i].time_from_start.toSec());
-        //     for (unsigned int a = 0; a < trajectory_.joint_trajectory.points[i].positions.size(); a++){
-        //         /ROS_INFO("%s:\tpos %f\tvel %f", 
-        //         trajectory_.joint_trajectory.joint_names[a].c_str(), 
-        //         trajectory_.joint_trajectory.points[i].positions[a]*(180/3.14159),
-        //         trajectory_.joint_trajectory.points[i].velocities[a]*(180/3.14159));
-        //     }
-        // }
+    ROS_INFO("Header time  %f ", trajectory_.joint_trajectory.header.stamp.toSec());
+        for (unsigned int i = 0; i < trajectory_.joint_trajectory.points.size(); i++){
+            ROS_INFO("Listening Points %d  %f ", i, trajectory_.joint_trajectory.header.stamp.toSec()+trajectory_.joint_trajectory.points[i].time_from_start.toSec());
+            for (unsigned int a = 0; a < trajectory_.joint_trajectory.points[i].positions.size(); a++){
+                ROS_INFO("%s:\tpos %f\tvel %f", 
+                trajectory_.joint_trajectory.joint_names[a].c_str(), 
+                trajectory_.joint_trajectory.points[i].positions[a]*(180/3.14159),
+                trajectory_.joint_trajectory.points[i].velocities[a]*(180/3.14159));
+            }
+        }
 }
