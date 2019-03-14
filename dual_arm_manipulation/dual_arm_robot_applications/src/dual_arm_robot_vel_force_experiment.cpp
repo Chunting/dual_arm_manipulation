@@ -40,7 +40,7 @@ void run_experiment(ros::NodeHandle &nh, ros::Publisher &left_speed_pub, moveit:
     std::cout << "x: " << current_pose.pose.position.x << "\ty: " << current_pose.pose.position.y << "\tz:  " << current_pose.pose.position.z << std::endl;
     double radius = sqrt(current_pose.pose.position.x*current_pose.pose.position.x + current_pose.pose.position.y*current_pose.pose.position.y);
     std::cout << "RADIUS: " << radius << std::endl;
-    double omega = velocity/radius;
+    double omega = 0.1;//velocity/radius;
     double moving_time = moving_distance/velocity; //move 3cm, obstacle is around 1-2 cm away.
 
     // Output Message Speed = const
@@ -178,16 +178,16 @@ int main(int argc, char **argv)
     // ROS_INFO("Publishing plan and waiting for %i seconds", sec);
     execTrajectoryPub_.publish(trajectory_);
     sleep(1);
-    ROS_INFO("Header time  %f ", trajectory_.joint_trajectory.header.stamp.toSec());
-        for (unsigned int i = 0; i < trajectory_.joint_trajectory.points.size(); i++){
-            ROS_INFO("Listening Points %d  %f ", i, trajectory_.joint_trajectory.header.stamp.toSec()+trajectory_.joint_trajectory.points[i].time_from_start.toSec());
-            for (unsigned int a = 0; a < trajectory_.joint_trajectory.points[i].positions.size(); a++){
-                ROS_INFO("%s:\tpos %f\tvel %f", 
-                trajectory_.joint_trajectory.joint_names[a].c_str(), 
-                trajectory_.joint_trajectory.points[i].positions[a]*(180/3.14159),
-                trajectory_.joint_trajectory.points[i].velocities[a]*(180/3.14159));
-            }
-        }
+    // ROS_INFO("Header time  %f ", trajectory_.joint_trajectory.header.stamp.toSec());
+    //     for (unsigned int i = 0; i < trajectory_.joint_trajectory.points.size(); i++){
+    //         ROS_INFO("Listening Points %d  %f ", i, trajectory_.joint_trajectory.header.stamp.toSec()+trajectory_.joint_trajectory.points[i].time_from_start.toSec());
+    //         for (unsigned int a = 0; a < trajectory_.joint_trajectory.points[i].positions.size(); a++){
+    //             ROS_INFO("%s:\tpos %f\tvel %f", 
+    //             trajectory_.joint_trajectory.joint_names[a].c_str(), 
+    //             trajectory_.joint_trajectory.points[i].positions[a]*(180/3.14159),
+    //             trajectory_.joint_trajectory.points[i].velocities[a]*(180/3.14159));
+    //         }
+    //     }
 
     ROS_WARN("visualizing plan. STRG+C to interrupt.");
     sleep(4);

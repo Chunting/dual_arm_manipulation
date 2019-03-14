@@ -1,4 +1,4 @@
-// rosrun dual_arm_robot_appliations left_force_hold_exp
+// rosrun dual_arm_robot_applications left_force_hold_exp
 
 #include <moveit/move_group_interface/move_group.h>
 #include <controller_manager_msgs/SwitchController.h>
@@ -112,7 +112,7 @@ int main(int argc, char **argv)
     //             temp.data = cmd_str;
     //             pub_free_drive_.publish(temp);
     //         }
-/*
+
     ROS_WARN("robot is moving without collision checking. BE CAREFUL!");
     ROS_INFO("waiting 10 Seconds. Press Ctrl-C if Robot is in the wrong start position");
     ROS_INFO("Reference Frame: %s", left_.getPlanningFrame().c_str());
@@ -136,7 +136,7 @@ int main(int argc, char **argv)
          ROS_INFO("Joint %s: %f", leftJointNames[i].c_str(), leftJointValues[i]);
     }
     ros::Duration(10).sleep();
-
+/*
     // short distance postion
     left_.setJointValueTarget("left_shoulder_pan_joint", -1.57);
     left_.setJointValueTarget("left_shoulder_lift_joint", -1.678);
@@ -212,8 +212,8 @@ int main(int argc, char **argv)
     trajectory_msgs::JointTrajectory joint_traj; //containing speed command
     trajectory_msgs::JointTrajectoryPoint traj_point;
     traj_point.velocities.assign(6,0);
-    traj_point.velocities[0] = -omega;
-    joint_traj.points.push_back(traj_point);
+    traj_point.velocities[5] = 0.1;
+    // joint_traj.points.push_back(traj_point);
 
     geometry_msgs::TwistStamped tool_velocity;
     geometry_msgs::Twist t;
@@ -244,11 +244,28 @@ int main(int argc, char **argv)
     for(int i=0; i<joint_traj.joint_names.size(); ++i){
         ROS_INFO("Joint name  %s", joint_traj.joint_names[i].c_str());
     }
-    while (ros::ok() && (stopwatch.elapsed().toSec()<200))
+    int loop = 10;
+    while (ros::ok() && loop>0)
     {
         double res_force = sqrt(subscriber.last_wrench_msg_.Fx*subscriber.last_wrench_msg_.Fx 
                                 +subscriber.last_wrench_msg_.Fy*subscriber.last_wrench_msg_.Fy);
 
+        if(loop%2 == 0){
+            traj_point.velocities[5] = 0.1;
+            joint_traj.points.push_back(traj_point);
+            joint_traj.header.stamp = ros::Time::now();
+            left_speed_pub.publish(joint_traj);
+            sleep(2);
+        }else {
+            
+            traj_point.velocities[5] = -0.1;
+            joint_traj.points.push_back(traj_point);
+            joint_traj.header.stamp = ros::Time::now();
+            left_speed_pub.publish(joint_traj);
+            sleep(2);
+        }
+        loop--;
+        /*
         if (res_force < 10){
             // Removes the last element in the vector, effectively reducing the container size by one.
             // joint_traj.points.pop_back();
@@ -272,11 +289,11 @@ int main(int argc, char **argv)
 
             t.linear.y = 0;
         }
-
+        */
         // joint_traj.header.stamp = ros::Time::now();
         // left_speed_pub.publish(joint_traj);
 
-        tool_velocity.header.stamp = ros::Time::now();
+        // tool_velocity.header.stamp = ros::Time::now();
         // left_tool_vel_pub_.publish(tool_velocity);
 
         ros::spinOnce();

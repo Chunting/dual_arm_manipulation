@@ -1195,6 +1195,7 @@ bool DualArmRobot::linearMove(geometry_msgs::Vector3Stamped direction,
     dual_arm_toolbox::TrajectoryProcessor::fuse(both_arms_trajectory, left_trajectory,right_trajectory);
     moveit::planning_interface::MoveGroup::Plan arms_plan;
     dual_arm_toolbox::TrajectoryProcessor::clean(both_arms_trajectory);
+    dual_arm_toolbox::TrajectoryProcessor::scaleTrajectorySpeed(both_arms_trajectory, 0.4);
     arms_plan.trajectory_ = both_arms_trajectory;
     bool success = execute(arms_plan);
     if(!success) ROS_WARN("Both arm's trajectory failed! ");

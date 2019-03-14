@@ -1,0 +1,30 @@
+{
+    "configurations": [
+        {
+            "browse": {
+                "databaseFilename": "",
+                "limitSymbolsToIncludedHeaders": true
+            },
+            "includePath": [
+                "/home/chunting/catkin_ws/devel/include",
+                "/opt/ros/indigo/include",
+                "/home/chunting/catkin_ws/src/dual_arm_manipulation/dual_arm_manipulation/dual_arm_robot_applications/include",
+                "/home/chunting/catkin_ws/src/dual_arm_manipulation/dual_arm_manipulation/joint_trajectory_admittance_controller/include",
+                "/home/chunting/catkin_ws/src/dual_arm_manipulation/dual_arm_manipulation/my_cart_controller_pkg/include",
+                "/home/chunting/catkin_ws/src/dual_arm_manipulation/dual_arm_manipulation/my_controller_pkg/include",
+                "/home/chunting/catkin_ws/src/dual_arm_manipulation/robotiq/robotiq_action_server/include",
+                "/home/chunting/catkin_ws/src/dual_arm_manipulation/robotiq/robotiq_c_model_control/include",
+                "/home/chunting/catkin_ws/src/dual_arm_manipulation/robotiq/robotiq_ethercat/include",
+                "/home/chunting/catkin_ws/src/dual_arm_manipulation/robotiq/robotiq_force_torque_sensor/include",
+                "/home/chunting/catkin_ws/src/dual_arm_manipulation/robotiq/robotiq_s_model_articulated_gazebo_plugins/include",
+                "/home/chunting/catkin_ws/src/dual_arm_manipulation/robotiq/robotiq_s_model_control/include",
+                "/home/chunting/catkin_ws/src/dual_arm_manipulation/universal_robot/universal_robot/ur_kinematics/include",
+                "/home/chunting/catkin_ws/src/dual_arm_manipulation/ur_modern_driver/include",
+                "/usr/include"
+            ],
+            "name": "Linux",
+            "intelliSenseMode": "gcc-x64"
+        }
+    ],
+    "version": 4
+}

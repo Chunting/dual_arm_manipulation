@@ -85,7 +85,7 @@ int main(int argc, char **argv) {
 
     
     // when placing box on top ur5 can get blocked because wrist 1 reaches limit
-    jcm.joint_name="left_wrist_1_joint";
+    jcm.joint_name="left_wrist_3_joint";
     jcm.position = 0.0;
     jcm.tolerance_above = 3.0;
     jcm.tolerance_below = 3.0;
