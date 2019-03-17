@@ -54,6 +54,9 @@
 
 // multi-thread
 #include<thread>
+// Robotiq force torque sensor
+#include "robotiq_force_torque_sensor/ft_sensor.h"
+#include "robotiq_force_torque_sensor/sensor_accessor.h"
 
 namespace dual_arm_demonstrator_iml {
     class DualArmRobot {
@@ -161,4 +164,16 @@ namespace dual_arm_demonstrator_iml {
         }
     };
 }//ns
+
+class Subscriber{  //handles callbacks and saves last received messages
+protected:
+    ros::Subscriber wrench_sub_;
+    ros::NodeHandle nh_;
+public:
+    Subscriber(ros::NodeHandle& nh);
+    robotiq_force_torque_sensor::ft_sensor last_wrench_msg_;
+private:
+    void wrenchCallback(const robotiq_force_torque_sensor::ft_sensor::Ptr& msg);
+};
+
 #endif //PROJECT_DUALARMROBOT_H

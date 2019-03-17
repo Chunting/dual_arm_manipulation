@@ -155,13 +155,13 @@
     <child link="fts_robotside" />
   </joint>
 	-->
-  <!-- place ur5 endeffector -->
+  <!-- place ur5 endeffector  -->
 	
   <xacro:endeffector prefix="$(arg prefix_left)"/>
   <joint name="$(arg prefix_left)ee_mount" type="fixed">
     <parent link="fts_toolside" />
     <child link = "$(arg prefix_left)ee_frame" />
-    <origin xyz="0.0 0.0 0.0" rpy="0 0.0 0" />
+    <origin xyz="0.0 0.0 0.0" rpy="0 0 0 " />
   </joint>
 	
   
