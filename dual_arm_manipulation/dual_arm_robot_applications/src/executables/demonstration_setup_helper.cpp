@@ -136,10 +136,11 @@ int main(int argc, char **argv) {
   
     ROS_INFO("========== MOVE CLOSER =================");
    
-    dualArmRobot.graspMove(0.014);
+    dualArmRobot.graspMove(0.025, false);
     double res_force = sqrt(subscriber.last_wrench_msg_.Fx*subscriber.last_wrench_msg_.Fx 
                             + subscriber.last_wrench_msg_.Fy*subscriber.last_wrench_msg_.Fy
                             + subscriber.last_wrench_msg_.Fz*subscriber.last_wrench_msg_.Fz);
+                            
     while (res_force < 30){
         dualArmRobot.graspMove(0.001);
         res_force = sqrt(subscriber.last_wrench_msg_.Fx*subscriber.last_wrench_msg_.Fx 
@@ -191,19 +192,19 @@ int main(int argc, char **argv) {
     direction.vector.y = -0.05;
     direction.vector.z = 0;
     dualArmRobot.linearMove(direction, true, true,true);
-    sleep(1);
+    // sleep(1);
     ROS_INFO("========== MOVE FORWARD =================");
     direction.vector.x = -0.05;
     direction.vector.y = 0;
     direction.vector.z = 0;
     dualArmRobot.linearMove(direction, true, true,true);
-    sleep(1);
+    // sleep(1);
     ROS_INFO("========== MOVE RIGHT =================");
     direction.vector.x = 0;
     direction.vector.y = 0.05;
     direction.vector.z = 0;
     dualArmRobot.linearMove(direction, true, true,true);
-    sleep(1);
+    // sleep(1);
     // ROS_INFO("========== MOVE BACK =================");
     // direction.vector.x = 0.05;
     // direction.vector.y = 0;
@@ -219,8 +220,8 @@ int main(int argc, char **argv) {
     dualArmRobot.linearMove(direction, true, true,true);
     sleep(1);
     ROS_INFO("========== MOVE AWAY =================");
-    dualArmRobot.graspMove(-0.01);
-    sleep(1);
+    dualArmRobot.graspMove(-0.01, false);
+    // sleep(1);
     ROS_INFO("========== MOVE HOME POSITION =================");
     dualArmRobot.moveHome();
 

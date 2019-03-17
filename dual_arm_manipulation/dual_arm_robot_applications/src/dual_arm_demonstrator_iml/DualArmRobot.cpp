@@ -414,6 +414,9 @@ bool DualArmRobot::graspMove(double distance, bool avoid_collisions, bool use_le
         }
         else {
             dual_arm_toolbox::TrajectoryProcessor::clean(left_trajectory);
+            if(!avoid_collisions){
+               dual_arm_toolbox::TrajectoryProcessor::scaleTrajectorySpeed(left_trajectory, 0.15); 
+            }
             moveit::planning_interface::MoveGroup::Plan left_plan;
             left_plan.trajectory_ = left_trajectory;
             execute(left_plan);
@@ -1058,7 +1061,7 @@ void DualArmRobot::allowedArmCollision(bool enable, std::string left_attachedObj
     planningSceneMsg.is_diff = true;
     planning_scene_diff_publisher.publish(planningSceneMsg);
     ROS_INFO("Allowed collision between robot arms %s", enable?"ENABLED":"DISABLED");
-    sleep(2);
+   // sleep(2);
 }
 
 bool DualArmRobot::linearMove(geometry_msgs::Vector3Stamped direction, 
@@ -1128,7 +1131,7 @@ bool DualArmRobot::linearMove(geometry_msgs::Vector3Stamped direction,
             //     ROS_WARN("Left arm trajectory failed! ");
             try_step = false;
         }
-        sleep(1);
+        // sleep(1);
     }
     // right arm
     if (use_right) try_step = true;
@@ -1256,7 +1259,7 @@ bool DualArmRobot::execute(moveit::planning_interface::MoveGroup::Plan plan) {
         success_right = handle_right.waitForExecution();
     }
     else success_right = true;
-    sleep(0.5);  // to be sure robot is at goal position
+    // sleep(0.5);  // to be sure robot is at goal position
 
     // update the left arm's target state based on the last point of the trajectory.
     if (plan_left.trajectory_.joint_trajectory.joint_names.size()) {
@@ -1275,7 +1278,7 @@ bool DualArmRobot::execute(moveit::planning_interface::MoveGroup::Plan plan) {
         current_dual_arm_state_.joint_state.velocity = plan_left.trajectory_.joint_trajectory.points[
                 plan_left.trajectory_.joint_trajectory.points.size() - 1].velocities;
 
-        sleep(2); // to be sure robot is at goal position
+        //sleep(2); // to be sure robot is at goal position
         left_current_pose_ = left_.getCurrentPose(left_.getEndEffectorLink());
     }
     return success_left&&success_right;
@@ -1283,7 +1286,7 @@ bool DualArmRobot::execute(moveit::planning_interface::MoveGroup::Plan plan) {
 #ifdef OFFLINE
 
     double error = arms_.execute(plan);
-    sleep(2); // to be sure robot is at goal position
+    // sleep(2); // to be sure robot is at goal position
     left_current_pose_ = left_.getCurrentPose(left_.getEndEffectorLink());
     current_dual_arm_state_.is_diff = true;
     current_dual_arm_state_.joint_state.position = left_.getCurrentJointValues();
