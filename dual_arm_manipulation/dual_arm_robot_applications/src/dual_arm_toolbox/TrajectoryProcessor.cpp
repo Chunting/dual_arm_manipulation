@@ -13,20 +13,43 @@ bool TrajectoryProcessor::fuse(moveit_msgs::RobotTrajectory &arms_trajectory,
     int i1 = arm1_trajectory.joint_trajectory.points.size();
     int i2 = arm2_trajectory.joint_trajectory.points.size();
     int num = std::min(i1,i2);
-    // int num = i1<i2?i1:i2;
-    if (i1 != i2){
-        ROS_WARN("fuse trajectory: unequal size of trajectory points. arm1: %i, arm2: %i", i1, i2);
-        // return false;
-    }
-    for (unsigned int i=0; i < arm2_trajectory.joint_trajectory.joint_names.size(); i++)
+    if(i1<=i2){
+        /* If arm1_trajectory has fewer points, remove the first points of arm2_trajectory,
+           then the two arms have the same number of points to run*/
+        num = i1;
+        arms_trajectory = arm1_trajectory;
+        for (unsigned int i=0; i < arm2_trajectory.joint_trajectory.joint_names.size(); i++)
         arms_trajectory.joint_trajectory.joint_names.push_back(arm2_trajectory.joint_trajectory.joint_names[i]);
-
-    // std::cout<< "arms_trajectory points " << arms_trajectory.joint_trajectory.points.size() std::endl;
-    for (unsigned int i=0; i < num; i++){
-        for (unsigned int j=0; j < arm2_trajectory.joint_trajectory.joint_names.size(); j++){
-            arms_trajectory.joint_trajectory.points[i].positions.push_back(arm2_trajectory.joint_trajectory.points[i].positions[j]);
-            arms_trajectory.joint_trajectory.points[i].accelerations.push_back(arm2_trajectory.joint_trajectory.points[i].accelerations[j]);
-            arms_trajectory.joint_trajectory.points[i].velocities.push_back(arm2_trajectory.joint_trajectory.points[i].velocities[j]);
+        for (unsigned int i=0; i < num; i++){
+            for (unsigned int j=0; j < arm2_trajectory.joint_trajectory.joint_names.size(); j++){
+                int offset = i2-num;
+                arms_trajectory.joint_trajectory.points[i].positions.push_back(arm2_trajectory.joint_trajectory.points[i+offset].positions[j]);
+                arms_trajectory.joint_trajectory.points[i].accelerations.push_back(arm2_trajectory.joint_trajectory.points[i+offset].accelerations[j]);
+                arms_trajectory.joint_trajectory.points[i].velocities.push_back(arm2_trajectory.joint_trajectory.points[i+offset].velocities[j]);
+            }
+        }
+    } else {
+        /* If arm2_trajectory has fewer points, remove the first points of arm1_trajectory
+            then the two arms have the same number of points to run*/
+        num = i2;
+        for (unsigned int i=0; i < arm1_trajectory.joint_trajectory.joint_names.size(); i++)
+            arms_trajectory.joint_trajectory.joint_names.push_back(arm1_trajectory.joint_trajectory.joint_names[i]);
+        for (unsigned int i=0; i < arm2_trajectory.joint_trajectory.joint_names.size(); i++)
+            arms_trajectory.joint_trajectory.joint_names.push_back(arm2_trajectory.joint_trajectory.joint_names[i]);
+        for (unsigned int i=0; i < num; i++){
+            int offset = i1-num;
+            for (unsigned int j=0; j < arm1_trajectory.joint_trajectory.joint_names.size(); j++){
+                arms_trajectory.joint_trajectory.points[i].positions.push_back(arm1_trajectory.joint_trajectory.points[i+offset].positions[j]);
+                arms_trajectory.joint_trajectory.points[i].accelerations.push_back(arm1_trajectory.joint_trajectory.points[i+offset].accelerations[j]);
+                arms_trajectory.joint_trajectory.points[i].velocities.push_back(arm1_trajectory.joint_trajectory.points[i+offset].velocities[j]);
+            }
+        }
+        for (unsigned int i=0; i < num; i++){
+            for (unsigned int j=0; j < arm2_trajectory.joint_trajectory.joint_names.size(); j++){
+                arms_trajectory.joint_trajectory.points[i].positions.push_back(arm2_trajectory.joint_trajectory.points[i].positions[j]);
+                arms_trajectory.joint_trajectory.points[i].accelerations.push_back(arm2_trajectory.joint_trajectory.points[i].accelerations[j]);
+                arms_trajectory.joint_trajectory.points[i].velocities.push_back(arm2_trajectory.joint_trajectory.points[i].velocities[j]);
+            }
         }
     }
     return true;
@@ -96,6 +119,7 @@ void TrajectoryProcessor::clean(moveit_msgs::RobotTrajectory &trajectory) {
     }
 }
 
+// Set timestamp
 void TrajectoryProcessor::computeTimeFromStart(moveit_msgs::RobotTrajectory& trajectory, double step_t){
     for (unsigned int i=0; i < trajectory.joint_trajectory.points.size(); i++){
         trajectory.joint_trajectory.points[i].time_from_start.fromSec(i*step_t);
@@ -113,7 +137,8 @@ void TrajectoryProcessor::scaleTrajectorySpeed(moveit_msgs::RobotTrajectory& tra
 }
 
 bool TrajectoryProcessor::computeVelocities(moveit_msgs::RobotTrajectory& trajectory, moveit::planning_interface::MoveGroup& moveGroup){
-    dual_arm_toolbox::TrajectoryProcessor::computeTimeFromStart(trajectory, 0.4);
+    dual_arm_toolbox::TrajectoryProcessor::computeTimeFromStart(trajectory, 0.4); // 400ms
+    // Maintain a sequence of waypoints and the time durations between these waypoints.
     robot_trajectory::RobotTrajectory rt(moveGroup.getCurrentState()->getRobotModel(), "arms");
    
     rt.setRobotTrajectoryMsg(*moveGroup.getCurrentState(), trajectory);// get a RobotTrajectory from trajectory
@@ -142,17 +167,17 @@ void TrajectoryProcessor::publishPlanTrajectory(moveit::planning_interface::Move
     ros::NodeHandle nh;
     ros::Publisher execTrajectoryPub_ = nh.advertise<moveit_msgs::RobotTrajectory>("/execute_my_trajectory", 1, true);
     moveit_msgs::RobotTrajectory trajectory_ = plan.trajectory_;
-    ROS_INFO("Publishing plan and waiting for %i seconds", sec);
+    // ROS_INFO("Publishing plan and waiting for %i seconds", sec);
     execTrajectoryPub_.publish(trajectory_);
     sleep(sec);
-    ROS_INFO("Header time  %f ", trajectory_.joint_trajectory.header.stamp.toSec());
-        for (unsigned int i = 0; i < trajectory_.joint_trajectory.points.size(); i++){
-            ROS_INFO("Listening Points %d  %f ", i, trajectory_.joint_trajectory.header.stamp.toSec()+trajectory_.joint_trajectory.points[i].time_from_start.toSec());
-            for (unsigned int a = 0; a < trajectory_.joint_trajectory.points[i].positions.size(); a++){
-                ROS_INFO("%s:\tpos %f\tvel %f", 
-                trajectory_.joint_trajectory.joint_names[a].c_str(), 
-                trajectory_.joint_trajectory.points[i].positions[a]*(180/3.14159),
-                trajectory_.joint_trajectory.points[i].velocities[a]*(180/3.14159));
-            }
-        }
+    // ROS_INFO("Header time  %f ", trajectory_.joint_trajectory.header.stamp.toSec());
+    //     for (unsigned int i = 0; i < trajectory_.joint_trajectory.points.size(); i++){
+    //         ROS_INFO("Listening Points %d  %f ", i, trajectory_.joint_trajectory.header.stamp.toSec()+trajectory_.joint_trajectory.points[i].time_from_start.toSec());
+    //         for (unsigned int a = 0; a < trajectory_.joint_trajectory.points[i].positions.size(); a++){
+    //             ROS_INFO("%s:\tpos %f\tvel %f", 
+    //             trajectory_.joint_trajectory.joint_names[a].c_str(), 
+    //             trajectory_.joint_trajectory.points[i].positions[a]*(180/3.14159),
+    //             trajectory_.joint_trajectory.points[i].velocities[a]*(180/3.14159));
+    //         }
+    //     }
 }

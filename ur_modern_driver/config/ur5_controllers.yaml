@@ -1,6 +1,6 @@
 # Settings for ros_control control loop
 hardware_control_loop:
-   loop_hz: 125
+   loop_hz: 100
 
 # Settings for ros_control hardware interface
 hardware_interface:
@@ -15,12 +15,12 @@ hardware_interface:
 # Publish all joint states ----------------------------------
 joint_state_controller:
    type:         joint_state_controller/JointStateController
-   publish_rate: 125
+   publish_rate: 100
 
 # Publish wrench ----------------------------------
 force_torque_sensor_controller:
    type:         force_torque_sensor_controller/ForceTorqueSensorController
-   publish_rate: 125
+   publish_rate: 100
 
 # Joint Trajectory Controller - position based -------------------------------
 # For detailed explanations of parameter see http://wiki.ros.org/joint_trajectory_controller
@@ -43,7 +43,7 @@ pos_based_pos_traj_controller:
       wrist_2_joint: {trajectory: 0.1, goal: 0.1}
       wrist_3_joint: {trajectory: 0.1, goal: 0.1}
    stop_trajectory_duration: 0.5
-   state_publish_rate:  125
+   state_publish_rate:  100
    action_monitor_rate: 10
 
    # state_publish_rate:  50 # Defaults to 50
@@ -71,7 +71,7 @@ vel_based_pos_traj_controller:
       wrist_2_joint: {trajectory: 0.1, goal: 0.1}
       wrist_3_joint: {trajectory: 0.1, goal: 0.1}
    stop_trajectory_duration: 0.5
-   state_publish_rate:  125
+   state_publish_rate:  100
    action_monitor_rate: 10
    gains:
       #!!These values are useable, but maybe not optimal

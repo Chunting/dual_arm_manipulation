@@ -19,7 +19,6 @@
 
 // MoveIt!
 #include <moveit/move_group_interface/move_group.h>
-#include <controller_manager_msgs/SwitchController.h>
 #include <moveit/planning_scene_interface/planning_scene_interface.h>
 #include <moveit/planning_scene/planning_scene.h>
 #include <moveit_msgs/PlanningScene.h>

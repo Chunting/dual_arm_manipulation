@@ -210,10 +210,10 @@ add_executable(dual_arm_robot_vel_force_experiment
               src/ur_logging/UrMessageListener.cpp)
 target_link_libraries(dual_arm_robot_vel_force_experiment ${catkin_LIBRARIES})
 
-add_executable(right_force_hold_exp src/right_force_hold_exp.cpp 
+add_executable(left_force_hold_exp src/left_force_hold_exp.cpp 
               src/ur_logging/UrLogger.cpp src/ur_logging/Stopwatch.cpp 
               src/ur_logging/UrMessageListener.cpp)
-target_link_libraries(right_force_hold_exp ${catkin_LIBRARIES})
+target_link_libraries(left_force_hold_exp ${catkin_LIBRARIES})
 
 #add_executable(tcp_wrench_publisher src/tcp_wrench_publisher.cpp)
 #target_link_libraries(tcp_wrench_publisher ${catkin_LIBRARIES})

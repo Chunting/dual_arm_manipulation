@@ -1,3 +1,4 @@
+// rosrun dual_arm_robot_applications demonstration_setup_helper
 // ROS
 #include <ros/ros.h>
 #include <geometry_msgs/Pose.h>
@@ -21,7 +22,36 @@
 
 // UR Logger
 #include "ur_logging/UrLogger.h"
+class Subscriber{  //handles callbacks and saves last received messages
+protected:
+    ros::Subscriber wrench_sub_;
+    ros::NodeHandle nh_;
+public:
+    Subscriber(ros::NodeHandle& nh);
+    robotiq_force_torque_sensor::ft_sensor last_wrench_msg_;
+private:
+    void wrenchCallback(const robotiq_force_torque_sensor::ft_sensor::Ptr& msg);
+};
 
+Subscriber::Subscriber(ros::NodeHandle& nh) : nh_(nh){
+
+    wrench_sub_ = nh_.subscribe("/robotiq_force_torque_sensor", 1, &Subscriber::wrenchCallback, this);
+    ros::ServiceClient client = nh_.serviceClient<robotiq_force_torque_sensor::sensor_accessor>("robotiq_force_torque_sensor_acc");
+    robotiq_force_torque_sensor::sensor_accessor srv;
+   
+    if(ros::ok()){
+         srv.request.command = "SET ZRO";
+	    if(client.call(srv)){
+		    ROS_INFO("ret: %s", srv.response.res.c_str());
+	    }
+    }
+}
+
+void Subscriber::wrenchCallback(const robotiq_force_torque_sensor::ft_sensor::Ptr& msg){
+    last_wrench_msg_ = *msg;
+    // ROS_INFO("I heard: FX[%f] FY[%f] FZ[%f]", last_wrench_msg_.Fx, last_wrench_msg_.Fy, last_wrench_msg_.Fz);
+
+}
 int main(int argc, char **argv) {
     ros::init(argc, argv, "shelf_setup_helper");
     ros::AsyncSpinner spinner(2);
@@ -44,14 +74,17 @@ int main(int argc, char **argv) {
     moveit::planning_interface::MoveGroup::Plan right_plan;
     moveit::planning_interface::MoveItErrorCode error;
     error.val = -1;
+    
+    Subscriber subscriber(nh);
 
     geometry_msgs::Vector3Stamped direction;
     direction.header.frame_id = "world";
-
+    dualArmRobot.setConstraints();
+    dualArmRobot.kinematic_state->enforceBounds();
     ROS_INFO("========== MOVE HOME POSITION =================");
     dualArmRobot.moveHome();
     sleep(1);
-    dualArmRobot.kinematic_state->enforceBounds();
+    
 
     // ROS_INFO("========== TEST IK  -- LEFT =================");
     // geometry_msgs::PoseStamped left_pose = dualArmRobot.left_.getCurrentPose(dualArmRobot.left_.getEndEffectorLink());
@@ -102,8 +135,21 @@ int main(int argc, char **argv) {
     sleep(1);
   
     ROS_INFO("========== MOVE CLOSER =================");
-    dualArmRobot.graspMove(0.015);
-    sleep(6);
+   
+    dualArmRobot.graspMove(0.025, false);
+    double res_force = sqrt(subscriber.last_wrench_msg_.Fx*subscriber.last_wrench_msg_.Fx 
+                            + subscriber.last_wrench_msg_.Fy*subscriber.last_wrench_msg_.Fy
+                            + subscriber.last_wrench_msg_.Fz*subscriber.last_wrench_msg_.Fz);
+                            
+    while (res_force < 30){
+        dualArmRobot.graspMove(0.001);
+        res_force = sqrt(subscriber.last_wrench_msg_.Fx*subscriber.last_wrench_msg_.Fx 
+                            + subscriber.last_wrench_msg_.Fy*subscriber.last_wrench_msg_.Fy
+                            + subscriber.last_wrench_msg_.Fz*subscriber.last_wrench_msg_.Fz);
+    }
+    ROS_INFO("I heard: Force [%f]  FX[%f] FY[%f] FZ[%f]", res_force, subscriber.last_wrench_msg_.Fx, subscriber.last_wrench_msg_.Fy, subscriber.last_wrench_msg_.Fz);
+    
+    sleep(1);
     // ROS_INFO("========== GET OFFSET =================");
     // dualArmRobot.getCurrentOffset();
     // sleep(1);
@@ -115,45 +161,67 @@ int main(int argc, char **argv) {
     // dualArmRobot.linearMoveParallel(direction,"box7", 0.5);
     direction.vector.x = 0;
     direction.vector.y = 0;
-    direction.vector.z = 0.1;
+    direction.vector.z = 0.05;
     dualArmRobot.linearMove(direction, true, true,true);
-    sleep(2);
-    /*
+    // int stepnum = 0;
+    // while(stepnum<6){
+    //     if(res_force >= 60 && res_force <= 70){
+    //         dualArmRobot.linearMove(direction, true, true,true);
+    //     } else if(res_force > 70){
+    //         // direction.vector.y = -0.001;
+    //         dualArmRobot.graspMove(-0.001);
+    //         dualArmRobot.linearMove(direction, true, true,true);
+    //     }
+    //     dualArmRobot.linearMove(direction, true, true,true);
+    //     res_force = sqrt(subscriber.last_wrench_msg_.Fx*subscriber.last_wrench_msg_.Fx 
+    //                         + subscriber.last_wrench_msg_.Fy*subscriber.last_wrench_msg_.Fy
+    //                         + subscriber.last_wrench_msg_.Fz*subscriber.last_wrench_msg_.Fz);
+    // }
+    // while (res_force >= 60 && res_force < 90){
+    //     dualArmRobot.linearMove(direction, true, true,true);
+    //     res_force = sqrt(subscriber.last_wrench_msg_.Fx*subscriber.last_wrench_msg_.Fx 
+    //                         + subscriber.last_wrench_msg_.Fy*subscriber.last_wrench_msg_.Fy
+    //                         + subscriber.last_wrench_msg_.Fz*subscriber.last_wrench_msg_.Fz);
+    // }
+    // dualArmRobot.linearMoveParallel(direction,"box7", 0.5);
+    
+    sleep(1);
+    
     ROS_INFO("========== MOVE LEFT =================");
     direction.vector.x = 0;
-    direction.vector.y = -0.1;
+    direction.vector.y = -0.05;
     direction.vector.z = 0;
     dualArmRobot.linearMove(direction, true, true,true);
-    sleep(2);
-    // ROS_INFO("========== MOVE FORWARD =================");
-    // direction.vector.x = -0.1;
-    // direction.vector.y = 0;
-    // direction.vector.z = 0;
-    // dualArmRobot.linearMove(direction, true, true,true);
-    // sleep(2);
+    // sleep(1);
+    ROS_INFO("========== MOVE FORWARD =================");
+    direction.vector.x = -0.05;
+    direction.vector.y = 0;
+    direction.vector.z = 0;
+    dualArmRobot.linearMove(direction, true, true,true);
+    // sleep(1);
     ROS_INFO("========== MOVE RIGHT =================");
     direction.vector.x = 0;
-    direction.vector.y = 0.1;
+    direction.vector.y = 0.05;
     direction.vector.z = 0;
     dualArmRobot.linearMove(direction, true, true,true);
-    sleep(2);
+    // sleep(1);
     // ROS_INFO("========== MOVE BACK =================");
-    // direction.vector.x = 0.1;
+    // direction.vector.x = 0.05;
     // direction.vector.y = 0;
     // direction.vector.z = 0;
     // dualArmRobot.linearMove(direction, true, true,true);
-    // sleep(2);
-    */
+    // sleep(1);
+    
     ROS_INFO("========== PUT BOX DOWN =================");
     direction.vector.x = 0;
     direction.vector.y = 0;
-    direction.vector.z = -0.1;
+    direction.vector.z = -0.05;
     // dualArmRobot.linearMoveParallel(direction,"box7", 0.5);
     dualArmRobot.linearMove(direction, true, true,true);
-    sleep(2);
-    ROS_INFO("========== MOVE AWAY =================");
-    dualArmRobot.graspMove(-0.02);
     sleep(1);
+    ROS_INFO("========== MOVE AWAY =================");
+    dualArmRobot.graspMove(-0.01, false);
+    // sleep(1);
     ROS_INFO("========== MOVE HOME POSITION =================");
     dualArmRobot.moveHome();
 

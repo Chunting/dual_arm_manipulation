@@ -89,7 +89,7 @@
 	<link name="table">
 		<visual>
 			<geometry>
-				<box size="1 1.2 0.92" />
+				<box size="1 1.2 0.97" />
 			</geometry>
 			<material name="orange_transparent"/>
 		</visual>
@@ -103,7 +103,7 @@
   <joint name="table_joint" type="fixed" >
     <parent link="world" />
     <child link="table" />
-    <origin xyz="-1 0 0.46" rpy="0 0 0" />
+    <origin xyz="-1 0 0.485" rpy="0 0 0" />
 </joint>
 
   <!-- End of stand macros-->
