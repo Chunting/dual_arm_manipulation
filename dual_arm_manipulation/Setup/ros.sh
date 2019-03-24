@@ -52,7 +52,7 @@ if [ "$DISTRIB_RELEASE" = "14.04" ]; then
     sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
     sudo apt-key adv --keyserver hkp://ha.pool.sks-keyservers.net:80 --recv-key 421C365BD9FF1F717815A3895523BAEEB01FA116
     sudo apt-get update
-    sudo apt-get install ros-indigo-desktop-full
+    sudo apt-get install ros-kinetic-desktop-full
     sudo apt-get install python-rosinstall
     if [ ! -d /etc/ros/rosdep/ ]
     then
@@ -70,12 +70,12 @@ if [ "$DISTRIB_RELEASE" = "14.04" ]; then
     #
 
     # Add ros setup to zshrc if it isn't already present
-    # LINE="source /opt/ros/indigo/setup.zsh"
+    # LINE="source /opt/ros/kinetic/setup.zsh"
     # FILE=~/.zshrc
     # grep -q "$LINE" "$FILE" || echo "$LINE" >> "$FILE"
     
     # Install universal-robot, part of ROS-Industrial
-    sudo apt-get install ros-indigo-universal-robot
+    sudo apt-get install ros-kinetic-universal-robot
     cd ~
     if [ ! -d `pwd`/catkin_ws ] ; then
     	mkdir catkin_ws;
@@ -87,12 +87,12 @@ if [ "$DISTRIB_RELEASE" = "14.04" ]; then
     fi
  
     # retrieve the sources (replace '$DISTRO' with the ROS version you are using)
-    git clone -b indigo-devel https://github.com/ros-industrial/universal_robot.git
+    git clone -b kinetic-devel https://github.com/ros-industrial/universal_robot.git
 
     cd ~/catkin_ws
 
     # checking dependencies (replace '$DISTRO' with the ROS version you are using)
-    rosdep install --from-paths src --ignore-src --rosdistro indigo
+    rosdep install --from-paths src --ignore-src --rosdistro kinetic
 
     # building
     catkin_make

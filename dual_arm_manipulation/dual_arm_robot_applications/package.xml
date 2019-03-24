@@ -6,16 +6,24 @@
       Applications for the dual arm robot
   </description>
 
-  <author email="Chunting.hoeltgen@rub.de">Chunting Hoeltgen</author>
-  <maintainer email="Chunting.hoeltgen@rub.de">Chunting Hoeltgen</maintainer>
+  <author email="jiaochunting@gmail.com">Chunting Jiao</author>
+  <maintainer email="jiaochunting@gmail.com">Chunting Jiao</maintainer>
 
   <license>BSD</license>
 
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>tf</build_depend>
+  <build_depend>robotiq_ft_sensor</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>message_generation</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>ur_msgs</build_depend>
+  <build_depend>trajectory_msgs</build_depend>
+  
   <run_depend>roscpp</run_depend>
   <run_depend>tf</run_depend>
+  <run_depend>robotiq_ft_sensor</run_depend>
   <run_depend>rospy</run_depend>
   <run_depend>actionlib</run_depend>
   <run_depend>control_msgs</run_depend>
@@ -23,4 +31,5 @@
   <run_depend>trajectory_msgs</run_depend>
   <run_depend>ur_msgs</run_depend>
   <run_depend>python-lxml</run_depend>
+
 </package>

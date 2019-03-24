@@ -8,7 +8,7 @@
 
 // MoveIt!
 #include <moveit_msgs/PlanningScene.h>
-#include <moveit/move_group_interface/move_group.h>
+#include <moveit/move_group_interface/move_group_interface.h>
 #include <moveit_msgs/GetStateValidity.h>
 #include <moveit_msgs/DisplayRobotState.h>
 
@@ -55,8 +55,8 @@ int main(int argc, char **argv) {
     ur_logger.start(100);
 
     // plan variables
-    moveit::planning_interface::MoveGroup::Plan left_plan;
-    moveit::planning_interface::MoveGroup::Plan right_plan;
+    moveit::planning_interface::MoveGroupInterface::Plan left_plan;
+    moveit::planning_interface::MoveGroupInterface::Plan right_plan;
     moveit::planning_interface::MoveItErrorCode error;
     error.val = -1;
 

@@ -16,7 +16,7 @@ rosrun moveit_ikfast create_ikfast_moveit_plugin.py dual_arm_robot right_manipul
 
 
 WEBSITE:
-http://docs.ros.org/indigo/api/moveit_tutorials/html/doc/ikfast_tutorial.html?highlight=fast
+http://docs.ros.org/kinetic/api/moveit_tutorials/html/doc/ikfast_tutorial.html?highlight=fast
 
 TO UPDATE CHANGES EASILY:
 update_ikfast_plugin.sh

@@ -16,7 +16,7 @@
 
 // MoveIt!
 #include <moveit_msgs/PlanningScene.h>
-#include <moveit/move_group_interface/move_group.h>
+#include <moveit/move_group_interface/move_group_interface.h>
 #include <moveit/planning_scene_interface/planning_scene_interface.h>
 #include <moveit_msgs/AttachedCollisionObject.h>
 #include <moveit_msgs/GetStateValidity.h>
@@ -61,10 +61,10 @@ namespace dual_arm_toolbox {
         static void scaleTrajectorySpeed(moveit_msgs::RobotTrajectory &trajectory, double scale);
 
         static bool
-        computeVelocities(moveit_msgs::RobotTrajectory &trajectory, moveit::planning_interface::MoveGroup &moveGroup);
+        computeVelocities(moveit_msgs::RobotTrajectory &trajectory, moveit::planning_interface::MoveGroupInterface &moveGroup);
 
-        static void visualizePlan(moveit::planning_interface::MoveGroup::Plan &plan, unsigned int sec);
-        static void publishPlanTrajectory(moveit::planning_interface::MoveGroup::Plan& plan, unsigned int sec);
+        static void visualizePlan(moveit::planning_interface::MoveGroupInterface::Plan &plan, unsigned int sec);
+        static void publishPlanTrajectory(moveit::planning_interface::MoveGroupInterface::Plan& plan, unsigned int sec);
     };
 }//namespace
 #endif //PROJECT_TRAJECTORYPROCESSOR_H

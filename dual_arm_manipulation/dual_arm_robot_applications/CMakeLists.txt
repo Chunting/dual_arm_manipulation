@@ -12,10 +12,11 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   roscpp
   tf
+  robotiq_ft_sensor
   moveit_ros_planning_interface
 )
 
-#find_package(Eigen3 REQUIRED)
+find_package(Eigen3 REQUIRED)
 #include_directories(SYSTEM ${Boost_INCLUDE_DIR} ${EIGEN_INCLUDE_DIRS})
 
 ##find_package(catkin REQUIRED COMPONENTS moveit_ros_planning_interface)
@@ -216,6 +217,7 @@ add_executable(left_force_hold_exp
               src/ur_logging/Stopwatch.cpp 
               src/ur_logging/UrMessageListener.cpp
               src/dual_arm_demonstrator_iml/DualArmRobot.cpp
+              src/dual_arm_demonstrator_iml/FTSensorSubscriber.cpp
               src/dual_arm_toolbox/TrajectoryProcessor.cpp 
               src/dual_arm_toolbox/Transform.cpp
               src/dual_arm_demonstrator_iml/SceneManager.cpp  )
@@ -236,7 +238,11 @@ add_executable(dual_arm_robot_demonstration
               src/dual_arm_toolbox/TrajectoryProcessor.cpp 
               src/dual_arm_toolbox/Transform.cpp 
               src/dual_arm_demonstrator_iml/DualArmRobot.cpp 
-              src/dual_arm_demonstrator_iml/SceneManager.cpp)
+              src/dual_arm_demonstrator_iml/SceneManager.cpp
+              src/dual_arm_demonstrator_iml/FTSensorSubscriber.cpp
+              src/ur_logging/UrLogger.cpp 
+              src/ur_logging/Stopwatch.cpp 
+              src/ur_logging/UrMessageListener.cpp)
 target_link_libraries(dual_arm_robot_demonstration ${catkin_LIBRARIES})
 
 add_executable(dual_arm_robot_lift_experiment_planning 
@@ -245,6 +251,7 @@ add_executable(dual_arm_robot_lift_experiment_planning
               src/dual_arm_toolbox/Transform.cpp 
               src/dual_arm_demonstrator_iml/DualArmRobot.cpp 
               src/dual_arm_demonstrator_iml/SceneManager.cpp
+              src/dual_arm_demonstrator_iml/FTSensorSubscriber.cpp
               src/ur_logging/UrLogger.cpp 
               src/ur_logging/Stopwatch.cpp
               src/ur_logging/UrMessageListener.cpp )
@@ -288,7 +295,23 @@ add_executable(demonstration_setup_helper
               src/dual_arm_toolbox/Transform.cpp 
               src/dual_arm_demonstrator_iml/DualArmRobot.cpp 
               src/dual_arm_demonstrator_iml/SceneManager.cpp
+              src/dual_arm_demonstrator_iml/FTSensorSubscriber.cpp
+              src/ur_logging/UrLogger.cpp 
+              src/ur_logging/Stopwatch.cpp 
+              src/ur_logging/UrMessageListener.cpp
+              
+              )
+target_link_libraries(demonstration_setup_helper ${catkin_LIBRARIES})
+
+
+add_executable(ur5_joint_speed src/ur5_joint_speed.cpp)
+target_link_libraries(ur5_joint_speed   ${catkin_LIBRARIES})
+
+add_executable(ur5_jacobian 
+              src/ur5_jacobian.cpp
+              src/dual_arm_toolbox/TrajectoryProcessor.cpp 
+              src/dual_arm_toolbox/Transform.cpp
               src/ur_logging/UrLogger.cpp 
               src/ur_logging/Stopwatch.cpp 
               src/ur_logging/UrMessageListener.cpp)
-target_link_libraries(demonstration_setup_helper ${catkin_LIBRARIES})
+target_link_libraries(ur5_jacobian ${catkin_LIBRARIES})

@@ -30,3 +30,7 @@
 dataLog/
 
 \.vscode/settings\.json
+
+*.bin
+
+*.ipch

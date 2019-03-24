@@ -15,7 +15,7 @@
 #include <controller_manager_msgs/SwitchControllerResponse.h>
 
 // MoveIt!
-#include <moveit/move_group_interface/move_group.h>
+#include <moveit/move_group_interface/move_group_interface.h>
 #include <controller_manager_msgs/SwitchController.h>
 #include <moveit/planning_scene_interface/planning_scene_interface.h>
 #include <moveit/planning_scene/planning_scene.h>

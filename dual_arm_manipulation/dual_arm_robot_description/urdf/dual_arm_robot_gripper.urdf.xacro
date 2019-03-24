@@ -14,7 +14,7 @@
   <!-- robotiq 2 finger gripper -->
   <xacro:include filename="$(find robotiq_2f_c2_gripper_visualization)/urdf/robotiq_c2_model_macro.xacro"/>
   <!-- ft300 -->
-	<xacro:include filename="$(find robotiq_force_torque_sensor)/urdf/robotiq_fts300.urdf.xacro" />
+	<xacro:include filename="$(find robotiq_ft_sensor)/urdf/robotiq_fts300.urdf.xacro" />
 
 	  <!-- the robotiq 3 fingersf gripper macro -->
   <xacro:include filename="$(find robotiq_3f_gripper_visualization)/cfg/robotiq-3f-gripper_articulated_macro.xacro"/>

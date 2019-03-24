@@ -1,7 +1,7 @@
 {
     "python.autoComplete.extraPaths": [
         "/home/chunting/catkin_ws/devel/lib/python2.7/dist-packages",
-        "/opt/ros/indigo/lib/python2.7/dist-packages"
+        "/opt/ros/kinetic/lib/python2.7/dist-packages"
     ],
     "files.associations": {
         "cctype": "cpp",
@@ -23,6 +23,10 @@
         "ratio": "cpp",
         "thread": "cpp",
         "cinttypes": "cpp",
-        "typeindex": "cpp"
-    }
+        "typeindex": "cpp",
+        "core": "cpp",
+        "*.tcc": "cpp",
+        "geometry": "cpp"
+    },
+    "C_Cpp.intelliSenseEngineFallback": "Disabled"
 }

@@ -1,6 +1,0 @@
-{
-    "python.autoComplete.extraPaths": [
-        "/home/chunting/catkin_ws/devel/lib/python2.7/dist-packages",
-        "/opt/ros/indigo/lib/python2.7/dist-packages"
-    ]
-}

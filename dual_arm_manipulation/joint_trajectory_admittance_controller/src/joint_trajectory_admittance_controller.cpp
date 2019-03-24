@@ -35,37 +35,37 @@
 
 namespace position_controllers
 {
-  /**
+/**
    * \brief Joint trajectory controller that represents trajectory segments as <b>quintic splines</b> and sends
    * commands to a \b position interface.
    */
-  typedef joint_trajectory_admittance_controller::JointTrajectoryAdmittanceController<trajectory_interface::QuinticSplineSegment<double>,
-                                                                 hardware_interface::PositionJointInterface>
-          JointTrajectoryAdmittanceController;
-}
+typedef joint_trajectory_admittance_controller::JointTrajectoryAdmittanceController<trajectory_interface::QuinticSplineSegment<double>,
+																					hardware_interface::PositionJointInterface>
+	JointTrajectoryAdmittanceController;
+} // namespace position_controllers
 
 namespace velocity_controllers
 {
-  /**
+/**
    * \brief Joint trajectory controller that represents trajectory segments as <b>quintic splines</b> and sends
    * commands to a \b velocity interface.
    */
-  typedef joint_trajectory_admittance_controller::JointTrajectoryAdmittanceController<trajectory_interface::QuinticSplineSegment<double>,
-                                                                 hardware_interface::VelocityJointInterface>
-          JointTrajectoryAdmittanceController;
-}
+typedef joint_trajectory_admittance_controller::JointTrajectoryAdmittanceController<trajectory_interface::QuinticSplineSegment<double>,
+																					hardware_interface::VelocityJointInterface>
+	JointTrajectoryAdmittanceController;
+} // namespace velocity_controllers
 
 namespace effort_controllers
 {
-  /**
+/**
    * \brief Joint trajectory controller that represents trajectory segments as <b>quintic splines</b> and sends
    * commands to an \b effort interface.
    */
-  typedef joint_trajectory_admittance_controller::JointTrajectoryAdmittanceController<trajectory_interface::QuinticSplineSegment<double>,
-                                                                 hardware_interface::EffortJointInterface>
-          JointTrajectoryAdmittanceController;
-}
+typedef joint_trajectory_admittance_controller::JointTrajectoryAdmittanceController<trajectory_interface::QuinticSplineSegment<double>,
+																					hardware_interface::EffortJointInterface>
+	JointTrajectoryAdmittanceController;
+} // namespace effort_controllers
 
 PLUGINLIB_EXPORT_CLASS(position_controllers::JointTrajectoryAdmittanceController, controller_interface::ControllerBase)
 PLUGINLIB_EXPORT_CLASS(velocity_controllers::JointTrajectoryAdmittanceController, controller_interface::ControllerBase)
-PLUGINLIB_EXPORT_CLASS(effort_controllers::JointTrajectoryAdmittanceController,   controller_interface::ControllerBase)
+PLUGINLIB_EXPORT_CLASS(effort_controllers::JointTrajectoryAdmittanceController, controller_interface::ControllerBase)

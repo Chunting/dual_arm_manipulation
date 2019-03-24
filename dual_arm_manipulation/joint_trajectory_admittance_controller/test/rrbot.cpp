@@ -40,88 +40,92 @@
 
 class RRbot : public hardware_interface::RobotHW
 {
-public:
-  RRbot()
-  {
-    // Intialize raw data
-    pos_[0] = 0.0; pos_[1] = 0.0;
-    vel_[0] = 0.0; vel_[1] = 0.0;
-    eff_[0] = 0.0; eff_[1] = 0.0;
-    cmd_[0] = 0.0; cmd_[1] = 0.0;
+  public:
+	RRbot()
+	{
+		// Intialize raw data
+		pos_[0] = 0.0;
+		pos_[1] = 0.0;
+		vel_[0] = 0.0;
+		vel_[1] = 0.0;
+		eff_[0] = 0.0;
+		eff_[1] = 0.0;
+		cmd_[0] = 0.0;
+		cmd_[1] = 0.0;
 
-    // Connect and register the joint state interface
-    hardware_interface::JointStateHandle state_handle_1("joint1", &pos_[0], &vel_[0], &eff_[0]);
-    jnt_state_interface_.registerHandle(state_handle_1);
+		// Connect and register the joint state interface
+		hardware_interface::JointStateHandle state_handle_1("joint1", &pos_[0], &vel_[0], &eff_[0]);
+		jnt_state_interface_.registerHandle(state_handle_1);
 
-    hardware_interface::JointStateHandle state_handle_2("joint2", &pos_[1], &vel_[1], &eff_[1]);
-    jnt_state_interface_.registerHandle(state_handle_2);
+		hardware_interface::JointStateHandle state_handle_2("joint2", &pos_[1], &vel_[1], &eff_[1]);
+		jnt_state_interface_.registerHandle(state_handle_2);
 
-    registerInterface(&jnt_state_interface_);
+		registerInterface(&jnt_state_interface_);
 
-    // Connect and register the joint position interface
-    hardware_interface::JointHandle pos_handle_1(jnt_state_interface_.getHandle("joint1"), &cmd_[0]);
-    jnt_pos_interface_.registerHandle(pos_handle_1);
+		// Connect and register the joint position interface
+		hardware_interface::JointHandle pos_handle_1(jnt_state_interface_.getHandle("joint1"), &cmd_[0]);
+		jnt_pos_interface_.registerHandle(pos_handle_1);
 
-    hardware_interface::JointHandle pos_handle_2(jnt_state_interface_.getHandle("joint2"), &cmd_[1]);
-    jnt_pos_interface_.registerHandle(pos_handle_2);
+		hardware_interface::JointHandle pos_handle_2(jnt_state_interface_.getHandle("joint2"), &cmd_[1]);
+		jnt_pos_interface_.registerHandle(pos_handle_2);
 
-    registerInterface(&jnt_pos_interface_);
+		registerInterface(&jnt_pos_interface_);
 
-    // Smoothing subscriber
-    smoothing_sub_ = ros::NodeHandle().subscribe("smoothing", 1, &RRbot::smoothingCB, this);
-    smoothing_.initRT(0.0);
-  }
+		// Smoothing subscriber
+		smoothing_sub_ = ros::NodeHandle().subscribe("smoothing", 1, &RRbot::smoothingCB, this);
+		smoothing_.initRT(0.0);
+	}
 
-  ros::Time getTime() const {return ros::Time::now();}
-  ros::Duration getPeriod() const {return ros::Duration(0.01);}
+	ros::Time getTime() const { return ros::Time::now(); }
+	ros::Duration getPeriod() const { return ros::Duration(0.01); }
 
-  void read() {}
+	void read() {}
 
-  void write()
-  {
-    const double smoothing = *(smoothing_.readFromRT());
-    for (unsigned int i = 0; i < 2; ++i)
-    {
-      vel_[i] = (cmd_[i] - pos_[i]) / getPeriod().toSec();
+	void write()
+	{
+		const double smoothing = *(smoothing_.readFromRT());
+		for (unsigned int i = 0; i < 2; ++i)
+		{
+			vel_[i] = (cmd_[i] - pos_[i]) / getPeriod().toSec();
 
-      const double next_pos = smoothing * pos_[i] +  (1.0 - smoothing) * cmd_[i];
-      pos_[i] = next_pos;
-    }
-  }
+			const double next_pos = smoothing * pos_[i] + (1.0 - smoothing) * cmd_[i];
+			pos_[i] = next_pos;
+		}
+	}
 
-private:
-  hardware_interface::JointStateInterface    jnt_state_interface_;
-  hardware_interface::PositionJointInterface jnt_pos_interface_;
-  double cmd_[2];
-  double pos_[2];
-  double vel_[2];
-  double eff_[2];
+  private:
+	hardware_interface::JointStateInterface jnt_state_interface_;
+	hardware_interface::PositionJointInterface jnt_pos_interface_;
+	double cmd_[2];
+	double pos_[2];
+	double vel_[2];
+	double eff_[2];
 
-  realtime_tools::RealtimeBuffer<double> smoothing_;
-  void smoothingCB(const std_msgs::Float64& smoothing) {smoothing_.writeFromNonRT(smoothing.data);}
+	realtime_tools::RealtimeBuffer<double> smoothing_;
+	void smoothingCB(const std_msgs::Float64 &smoothing) { smoothing_.writeFromNonRT(smoothing.data); }
 
-  ros::Subscriber smoothing_sub_;
+	ros::Subscriber smoothing_sub_;
 };
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "rrbot");
-  ros::NodeHandle nh;
+	ros::init(argc, argv, "rrbot");
+	ros::NodeHandle nh;
 
-  RRbot robot;
-  controller_manager::ControllerManager cm(&robot, nh);
+	RRbot robot;
+	controller_manager::ControllerManager cm(&robot, nh);
 
-  ros::Rate rate(1.0 / robot.getPeriod().toSec());
-  ros::AsyncSpinner spinner(1);
-  spinner.start();
-  while (ros::ok())
-  {
-    robot.read();
-    cm.update(robot.getTime(), robot.getPeriod());
-    robot.write();
-    rate.sleep();
-  }
-  spinner.stop();
+	ros::Rate rate(1.0 / robot.getPeriod().toSec());
+	ros::AsyncSpinner spinner(1);
+	spinner.start();
+	while (ros::ok())
+	{
+		robot.read();
+		cm.update(robot.getTime(), robot.getPeriod());
+		robot.write();
+		rate.sleep();
+	}
+	spinner.stop();
 
-  return 0;
+	return 0;
 }

@@ -37,6 +37,8 @@
 
   <build_depend>orocos_kdl</build_depend>
 
+  <build_depend>eigen</build_depend>
+  <build_depend>robotiq_ft_sensor</build_depend>
 
   <run_depend>actionlib</run_depend>
   <run_depend>angles</run_depend>
@@ -59,6 +61,9 @@
   <run_depend>pluginlib</run_depend>
 
   <run_depend>orocos_kdl</run_depend>
+
+  <run_depend>eigen</run_depend>
+  <run_depend>robotiq_ft_sensor</run_depend>
 
   <export>
     <controller_interface plugin="${prefix}/controller_plugins.xml" />

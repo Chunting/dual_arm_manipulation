@@ -136,7 +136,7 @@ void TrajectoryProcessor::scaleTrajectorySpeed(moveit_msgs::RobotTrajectory& tra
     }
 }
 
-bool TrajectoryProcessor::computeVelocities(moveit_msgs::RobotTrajectory& trajectory, moveit::planning_interface::MoveGroup& moveGroup){
+bool TrajectoryProcessor::computeVelocities(moveit_msgs::RobotTrajectory& trajectory, moveit::planning_interface::MoveGroupInterface& moveGroup){
     dual_arm_toolbox::TrajectoryProcessor::computeTimeFromStart(trajectory, 0.4); // 400ms
     // Maintain a sequence of waypoints and the time durations between these waypoints.
     robot_trajectory::RobotTrajectory rt(moveGroup.getCurrentState()->getRobotModel(), "arms");
@@ -152,7 +152,7 @@ bool TrajectoryProcessor::computeVelocities(moveit_msgs::RobotTrajectory& trajec
     return true;
 }
 
-void TrajectoryProcessor::visualizePlan(moveit::planning_interface::MoveGroup::Plan& plan, unsigned int sec){
+void TrajectoryProcessor::visualizePlan(moveit::planning_interface::MoveGroupInterface::Plan& plan, unsigned int sec){
     ros::NodeHandle nh;
     ros::Publisher display_publisher = nh.advertise<moveit_msgs::DisplayTrajectory>("/move_group/display_planned_path", 1, true);
     moveit_msgs::DisplayTrajectory display_trajectory;
@@ -163,7 +163,7 @@ void TrajectoryProcessor::visualizePlan(moveit::planning_interface::MoveGroup::P
     sleep(sec);
 }
 
-void TrajectoryProcessor::publishPlanTrajectory(moveit::planning_interface::MoveGroup::Plan& plan, unsigned int sec){
+void TrajectoryProcessor::publishPlanTrajectory(moveit::planning_interface::MoveGroupInterface::Plan& plan, unsigned int sec){
     ros::NodeHandle nh;
     ros::Publisher execTrajectoryPub_ = nh.advertise<moveit_msgs::RobotTrajectory>("/execute_my_trajectory", 1, true);
     moveit_msgs::RobotTrajectory trajectory_ = plan.trajectory_;

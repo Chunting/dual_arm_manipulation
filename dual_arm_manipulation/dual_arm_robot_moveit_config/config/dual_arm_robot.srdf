@@ -222,4 +222,8 @@
 
     <disable_collisions link1="right_shoulder_link" link2="stand2" reason="Adjacent" />
     <disable_collisions link1="left_shoulder_link" link2="stand2" reason="Adjacent" />
+    <disable_collisions link1="left_upper_arm_link" link2="stand2" reason="Never" />
+    <disable_collisions link1="right_upper_arm_link" link2="stand2" reason="Never" />
+    <disable_collisions link1="left_upper_arm_link" link2="stand1" reason="Never" />
+    <disable_collisions link1="right_upper_arm_link" link2="stand1" reason="Never" />
 </robot>

@@ -67,7 +67,7 @@ right_vel_based_admittance_traj_controller:
    contact_force: 30 #[N]
    max_velocity: 0.2
    max_shift: 0.15
-   wrench_topic: /right/wrench
+   wrench_topic: /right/robotiq_force_torque_wrench
    wrench_tolerance: 0 #5
    admittance_pid:
       p: 0.0005

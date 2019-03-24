@@ -64,11 +64,14 @@ left_vel_based_admittance_traj_controller:
    type: velocity_controllers/JointTrajectoryAdmittanceController
    root_name: left_base_link
    tip_name: left_ee_link
-   contact_force: 30 #[N]
-   max_velocity: 0.2
-   max_shift: 0.15
-   wrench_topic: /left/wrench
-   wrench_tolerance: 0 #5
+   contact_force: 20 #[N]
+   max_velocity: 0.1
+   max_shift: 0.0015
+   wrench_topic: /left/robotiq_force_torque_wrench
+   wrench_tolerance: 5 #5
+   force_dead_zone_thres: 2 
+   torque_dead_zone_thres: 0.5
+   wrench_filter_factor: 0.1
    admittance_pid:
       p: 0.0005
       i: 0.0000

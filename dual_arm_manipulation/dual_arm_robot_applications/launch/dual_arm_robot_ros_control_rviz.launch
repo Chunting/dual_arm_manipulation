@@ -33,7 +33,7 @@
     <arg name="config" value="$(arg config)"/>
   </include>
 
-  <node name="ft_sensor" pkg="robotiq_force_torque_sensor" type="rq_sensor" respawn="true" output="screen">
+  <node name="ft_sensor" pkg="robotiq_ft_sensor" type="rq_sensor" respawn="true" output="screen">
 	
   </node>
 

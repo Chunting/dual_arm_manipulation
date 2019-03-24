@@ -46,7 +46,7 @@
     <param name="max_safe_path_cost" value="$(arg max_safe_path_cost)"/>
     <param name="jiggle_fraction" value="$(arg jiggle_fraction)" />
 
-    <!-- load these non-default MoveGroup capabilities -->
+    <!-- load these non-default MoveGroupInterface capabilities -->
     <!--
     <param name="capabilities" value="
                   a_package/AwsomeMotionPlanningCapability
@@ -54,7 +54,7 @@
                   " />
     -->
 
-    <!-- inhibit these default MoveGroup capabilities -->
+    <!-- inhibit these default MoveGroupInterface capabilities -->
     <!--
     <param name="disable_capabilities" value="
                   move_group/MoveGroupKinematicsService

@@ -14,7 +14,7 @@
   <xacro:include filename="$(find dual_arm_robot_description)/urdf/ur5.urdf.xacro"/> 
 
   <!-- ft300 -->
-	<xacro:include filename="$(find robotiq_force_torque_sensor)/urdf/robotiq_fts300.urdf.xacro" />
+	<xacro:include filename="$(find robotiq_ft_sensor)/urdf/robotiq_fts300.urdf.xacro" />
 
   <!-- endeffector -->
   <xacro:include filename="$(find dual_arm_robot_description)/urdf/endeffector.urdf.xacro"/>

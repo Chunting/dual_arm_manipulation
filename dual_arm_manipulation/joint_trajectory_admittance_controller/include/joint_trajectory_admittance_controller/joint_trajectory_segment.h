@@ -69,20 +69,20 @@ namespace joint_trajectory_admittance_controller
 template <class Segment>
 class JointTrajectorySegment : public Segment
 {
-public:
-  typedef typename Segment::Scalar Scalar;
-  typedef typename Segment::Time   Time;
+  public:
+	typedef typename Segment::Scalar Scalar;
+	typedef typename Segment::Time Time;
 
-  typedef realtime_tools::RealtimeServerGoalHandle<control_msgs::FollowJointTrajectoryAction> RealtimeGoalHandle;
-  typedef boost::shared_ptr<RealtimeGoalHandle>                                               RealtimeGoalHandlePtr;
+	typedef realtime_tools::RealtimeServerGoalHandle<control_msgs::FollowJointTrajectoryAction> RealtimeGoalHandle;
+	typedef boost::shared_ptr<RealtimeGoalHandle> RealtimeGoalHandlePtr;
 
-  struct State : public Segment::State
-  {
-    typedef typename Segment::State::Scalar Scalar;
-    State() : Segment::State() {}
-    State(unsigned int size) : Segment::State(size) {}
+	struct State : public Segment::State
+	{
+		typedef typename Segment::State::Scalar Scalar;
+		State() : Segment::State() {}
+		State(unsigned int size) : Segment::State(size) {}
 
-    /**
+		/**
      * \param point Trajectory point.
      *
      * \param permutation Permutation vector for mapping the joint order of a \p point to a desired order.
@@ -101,64 +101,82 @@ public:
      * \note The offsets in \p position_offsets correspond to joints not ordered according to \p point, but to joints
      * in the expected order, that is \p point with \p permutation applied to it.
      */
-    State(const trajectory_msgs::JointTrajectoryPoint& point,
-          const std::vector<unsigned int>&             permutation     = std::vector<unsigned int>(),
-          const std::vector<Scalar>&                   position_offset = std::vector<Scalar>())
-    {
-      init(point, permutation, position_offset);
-    }
+		State(const trajectory_msgs::JointTrajectoryPoint &point,
+			  const std::vector<unsigned int> &permutation = std::vector<unsigned int>(),
+			  const std::vector<Scalar> &position_offset = std::vector<Scalar>())
+		{
+			init(point, permutation, position_offset);
+		}
 
-    void init(const trajectory_msgs::JointTrajectoryPoint& point,
-              const std::vector<unsigned int>&             permutation     = std::vector<unsigned int>(),
-              const std::vector<Scalar>&                   position_offset = std::vector<Scalar>())
-    {
-      using std::invalid_argument;
+		void init(const trajectory_msgs::JointTrajectoryPoint &point,
+				  const std::vector<unsigned int> &permutation = std::vector<unsigned int>(),
+				  const std::vector<Scalar> &position_offset = std::vector<Scalar>())
+		{
+			using std::invalid_argument;
 
-      const unsigned int joint_dim = point.positions.size();
+			const unsigned int joint_dim = point.positions.size();
 
-      // Preconditions
-      if (!isValid(point, joint_dim))
-      {
-        throw(invalid_argument("Size mismatch in trajectory point position, velocity or acceleration data."));
-      }
-      if (!permutation.empty() && joint_dim != permutation.size())
-      {
-        throw(invalid_argument("Size mismatch between trajectory point and permutation vector."));
-      }
-      for (unsigned int i = 0; i < permutation.size(); ++i)
-      {
-        if (permutation[i] >= joint_dim)
-        {
-          throw(invalid_argument("Permutation vector contains out-of-range indices."));
-        }
-      }
-      if (!position_offset.empty() && joint_dim != position_offset.size())
-      {
-        throw(invalid_argument("Size mismatch between trajectory point "
-                               "and vector specifying whether joints wrap around."));
-      }
+			// Preconditions
+			if (!isValid(point, joint_dim))
+			{
+				throw(invalid_argument("Size mismatch in trajectory point position, velocity or acceleration data."));
+			}
+			if (!permutation.empty() && joint_dim != permutation.size())
+			{
+				throw(invalid_argument("Size mismatch between trajectory point and permutation vector."));
+			}
+			for (unsigned int i = 0; i < permutation.size(); ++i)
+			{
+				if (permutation[i] >= joint_dim)
+				{
+					throw(invalid_argument("Permutation vector contains out-of-range indices."));
+				}
+			}
+			if (!position_offset.empty() && joint_dim != position_offset.size())
+			{
+				throw(invalid_argument("Size mismatch between trajectory point "
+									   "and vector specifying whether joints wrap around."));
+			}
 
-      // Initialize state
-      if (!point.positions.empty())     {this->position.resize(joint_dim);}
-      if (!point.velocities.empty())    {this->velocity.resize(joint_dim);}
-      if (!point.accelerations.empty()) {this->acceleration.resize(joint_dim);}
+			// Initialize state
+			if (!point.positions.empty())
+			{
+				this->position.resize(joint_dim);
+			}
+			if (!point.velocities.empty())
+			{
+				this->velocity.resize(joint_dim);
+			}
+			if (!point.accelerations.empty())
+			{
+				this->acceleration.resize(joint_dim);
+			}
 
-      for (unsigned int i = 0; i < joint_dim; ++i)
-      {
-        // Apply permutation only if it was specified, otherwise preserve original message order
-        const unsigned int id = permutation.empty() ? i : permutation[i];
+			for (unsigned int i = 0; i < joint_dim; ++i)
+			{
+				// Apply permutation only if it was specified, otherwise preserve original message order
+				const unsigned int id = permutation.empty() ? i : permutation[i];
 
-        // Apply position offset only if it was specified
-        const Scalar offset = position_offset.empty() ? 0.0 : position_offset[i];
+				// Apply position offset only if it was specified
+				const Scalar offset = position_offset.empty() ? 0.0 : position_offset[i];
 
-        if (!point.positions.empty())     {this->position[i]     = point.positions[id] + offset;}
-        if (!point.velocities.empty())    {this->velocity[i]     = point.velocities[id];}
-        if (!point.accelerations.empty()) {this->acceleration[i] = point.accelerations[id];}
-      }
-    }
-  };
+				if (!point.positions.empty())
+				{
+					this->position[i] = point.positions[id] + offset;
+				}
+				if (!point.velocities.empty())
+				{
+					this->velocity[i] = point.velocities[id];
+				}
+				if (!point.accelerations.empty())
+				{
+					this->acceleration[i] = point.accelerations[id];
+				}
+			}
+		}
+	};
 
-  /**
+	/**
    * \brief Construct segment from start and end states (boundary conditions).
    *
    * \param start_time Time at which the segment state equals \p start_state.
@@ -166,17 +184,17 @@ public:
    * \param end_time Time at which the segment state equals \p end_state.
    * \param end_state State at time \p end_time.
    */
-  JointTrajectorySegment(const Time&  start_time,
-                         const State& start_state,
-                         const Time&  end_time,
-                         const State& end_state)
-    : rt_goal_handle_(),
-      tolerances_(start_state.position.size())
-  {
-    Segment::init(start_time, start_state, end_time, end_state);
-  }
+	JointTrajectorySegment(const Time &start_time,
+						   const State &start_state,
+						   const Time &end_time,
+						   const State &end_state)
+		: rt_goal_handle_(),
+		  tolerances_(start_state.position.size())
+	{
+		Segment::init(start_time, start_state, end_time, end_state);
+	}
 
-  /**
+	/**
    * \brief Construct a segment from start and end points (boundary conditions) specified in ROS message format.
    *
    * \param traj_start_time Time at which the trajectory containing the segment starts. Note that this is \e not the
@@ -188,53 +206,53 @@ public:
    *
    * \throw std::invalid_argument If input parameters are inconsistent and a valid segment can't be constructed.
    */
-  JointTrajectorySegment(const ros::Time&                             traj_start_time,
-                         const trajectory_msgs::JointTrajectoryPoint& start_point,
-                         const trajectory_msgs::JointTrajectoryPoint& end_point,
-                         const std::vector<unsigned int>&             permutation     = std::vector<unsigned int>(),
-                         const std::vector<Scalar>&                   position_offset = std::vector<Scalar>())
-    : rt_goal_handle_(),
-      tolerances_(start_point.positions.size())
-  {
-    if (start_point.positions.size() != end_point.positions.size())
-    {
-      throw(std::invalid_argument("Can't construct segment from ROS message: "
-                                  "Start/end points data size mismatch."));
-    }
+	JointTrajectorySegment(const ros::Time &traj_start_time,
+						   const trajectory_msgs::JointTrajectoryPoint &start_point,
+						   const trajectory_msgs::JointTrajectoryPoint &end_point,
+						   const std::vector<unsigned int> &permutation = std::vector<unsigned int>(),
+						   const std::vector<Scalar> &position_offset = std::vector<Scalar>())
+		: rt_goal_handle_(),
+		  tolerances_(start_point.positions.size())
+	{
+		if (start_point.positions.size() != end_point.positions.size())
+		{
+			throw(std::invalid_argument("Can't construct segment from ROS message: "
+										"Start/end points data size mismatch."));
+		}
 
-    const Time start_time = (traj_start_time + start_point.time_from_start).toSec();
-    const Time end_time   = (traj_start_time + end_point.time_from_start).toSec();
+		const Time start_time = (traj_start_time + start_point.time_from_start).toSec();
+		const Time end_time = (traj_start_time + end_point.time_from_start).toSec();
 
-    try
-    {
-      const State start_state(start_point, permutation, position_offset);
-      const State end_state(end_point,     permutation, position_offset);
+		try
+		{
+			const State start_state(start_point, permutation, position_offset);
+			const State end_state(end_point, permutation, position_offset);
 
-      this->init(start_time, start_state,
-                 end_time,   end_state);
-    }
-    catch(const std::invalid_argument& ex)
-    {
-      std::string msg = "Can't construct segment from ROS message: " + std::string(ex.what());
-      throw(std::invalid_argument(msg));
-    }
-  }
+			this->init(start_time, start_state,
+					   end_time, end_state);
+		}
+		catch (const std::invalid_argument &ex)
+		{
+			std::string msg = "Can't construct segment from ROS message: " + std::string(ex.what());
+			throw(std::invalid_argument(msg));
+		}
+	}
 
-  /** \return Pointer to (realtime) goal handle associated to this segment. */
-  RealtimeGoalHandlePtr getGoalHandle() const {return rt_goal_handle_;}
+	/** \return Pointer to (realtime) goal handle associated to this segment. */
+	RealtimeGoalHandlePtr getGoalHandle() const { return rt_goal_handle_; }
 
-  /** \brief Set the (realtime) goal handle associated to this segment. */
-  void setGoalHandle(RealtimeGoalHandlePtr rt_goal_handle) {rt_goal_handle_ = rt_goal_handle;}
+	/** \brief Set the (realtime) goal handle associated to this segment. */
+	void setGoalHandle(RealtimeGoalHandlePtr rt_goal_handle) { rt_goal_handle_ = rt_goal_handle; }
 
-  /** \return Tolerances this segment is associated to. */
-  const SegmentTolerances<Scalar>& getTolerances() const {return tolerances_;}
+	/** \return Tolerances this segment is associated to. */
+	const SegmentTolerances<Scalar> &getTolerances() const { return tolerances_; }
 
-  /** \brief Set the tolerances this segment is associated to. */
-  void setTolerances(const SegmentTolerances<Scalar>& tolerances) {tolerances_ = tolerances;}
+	/** \brief Set the tolerances this segment is associated to. */
+	void setTolerances(const SegmentTolerances<Scalar> &tolerances) { tolerances_ = tolerances; }
 
-private:
-  RealtimeGoalHandlePtr     rt_goal_handle_;
-  SegmentTolerances<Scalar> tolerances_;
+  private:
+	RealtimeGoalHandlePtr rt_goal_handle_;
+	SegmentTolerances<Scalar> tolerances_;
 };
 
 /**
@@ -247,34 +265,37 @@ private:
  * \tparam Scalar Scalar type.
  */
 template <class Scalar>
-std::vector<Scalar> wraparoundOffset(const std::vector<Scalar>& prev_position,
-                                     const std::vector<Scalar>& next_position,
-                                     const std::vector<bool>&   angle_wraparound)
+std::vector<Scalar> wraparoundOffset(const std::vector<Scalar> &prev_position,
+									 const std::vector<Scalar> &next_position,
+									 const std::vector<bool> &angle_wraparound)
 {
-  // Preconditions
-  const unsigned int n_joints = angle_wraparound.size();
-  if (n_joints != prev_position.size() || n_joints != next_position.size()) {return std::vector<Scalar>();}
+	// Preconditions
+	const unsigned int n_joints = angle_wraparound.size();
+	if (n_joints != prev_position.size() || n_joints != next_position.size())
+	{
+		return std::vector<Scalar>();
+	}
 
-  // Return value
-  std::vector<Scalar> pos_offset(n_joints, 0.0);
+	// Return value
+	std::vector<Scalar> pos_offset(n_joints, 0.0);
 
-  for (unsigned int i = 0; i < angle_wraparound.size(); ++i)
-  {
-    if (angle_wraparound[i])
-    {
-      Scalar dist = angles::shortest_angular_distance(prev_position[i], next_position[i]);
+	for (unsigned int i = 0; i < angle_wraparound.size(); ++i)
+	{
+		if (angle_wraparound[i])
+		{
+			Scalar dist = angles::shortest_angular_distance(prev_position[i], next_position[i]);
 
-      // Deal with singularity at M_PI shortest distance
-      if (std::abs(dist) - M_PI < 1e-9)
-      {
-        dist = next_position[i] > prev_position[i] ? std::abs(dist) : -std::abs(dist);
-      }
-      pos_offset[i] = (prev_position[i] + dist) - next_position[i];
-    }
-  }
-  return pos_offset;
+			// Deal with singularity at M_PI shortest distance
+			if (std::abs(dist) - M_PI < 1e-9)
+			{
+				dist = next_position[i] > prev_position[i] ? std::abs(dist) : -std::abs(dist);
+			}
+			pos_offset[i] = (prev_position[i] + dist) - next_position[i];
+		}
+	}
+	return pos_offset;
 }
 
-} // namespace
+} // namespace joint_trajectory_admittance_controller
 
 #endif // header guard
