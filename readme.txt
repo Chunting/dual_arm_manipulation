@@ -81,7 +81,7 @@ The status listener node can be run (in another terminal) using the following co
 "rosrun robotiq_2f_gripper_control Robotiq2FGripperStatusListener.py".
 
 
-
+sudo usermod -a -G dialout $USER
 
 ----------------------------------------------------------------------------------------------------------------------------------------------
 

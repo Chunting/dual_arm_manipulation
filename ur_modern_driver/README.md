@@ -99,8 +99,8 @@ sudo apt install ros-<distro>-ur-description
 
 Where <distro> is the ROS distribution your machine is running on. You may want to run MoveIt to plan and execute actions on the arm. You can do so by simply entering the following commands after launching ```ur_modern_driver```:
 ```
-roslaunch urXX_moveit_config ur5_moveit_planning_execution.launch
-roslaunch urXX_moveit_config moveit_rviz.launch config:=true
+roslaunch ur5_moveit_config ur5_moveit_planning_execution.launch
+roslaunch ur5_moveit_config moveit_rviz.launch config:=true
 ```
 ---
 If you would like to use the ros\_control-based approach, use the launch file urXX\_ros\_control.launch instead of urXX\_bringup.launch, where XX is '5' or '10' depending on your robot.
