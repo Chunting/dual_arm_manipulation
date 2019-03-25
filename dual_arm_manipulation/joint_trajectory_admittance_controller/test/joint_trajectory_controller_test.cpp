@@ -432,7 +432,7 @@ TEST_F(JointTrajectoryControllerTest, jointWraparound)
 	// Trajectory goals that trigger wrapping. Between the first and second goals:
 	// - First joint command has a wraparound of -2 loops
 	// - Second joint command has a wraparound of +1 loop
-	// - Both joints should end up doing an angular displacement of |pi/4| for the second goal
+	// - Both joints should end up doing an angular displacement of |PI/4| for the second goal
 	trajectory_msgs::JointTrajectoryPoint point;
 	point.positions.resize(n_joints, 0.0);
 	point.velocities.resize(n_joints, 0.0);
@@ -482,9 +482,9 @@ TEST_F(JointTrajectoryControllerTest, jointWraparoundPiSingularity)
 	ASSERT_TRUE(waitForState(action_client, SimpleClientGoalState::SUCCEEDED, long_timeout));
 
 	// Trajectory goals that trigger wrapping.
-	// When moving a wrapping joint pi radians (eg. from -pi/2 to pi/2), numeric errors can make the controller think
+	// When moving a wrapping joint PI radians (eg. from -PI/2 to PI/2), numeric errors can make the controller think
 	// that it has to wrap when in fact it doesn't. This comes from a call to angles::shortest_angular_distance, which
-	// sometimes wields pi, and sometimes -pi.
+	// sometimes wields PI, and sometimes -PI.
 	trajectory_msgs::JointTrajectoryPoint point;
 	point.positions.resize(n_joints, 0.0);
 	point.velocities.resize(n_joints, 0.0);

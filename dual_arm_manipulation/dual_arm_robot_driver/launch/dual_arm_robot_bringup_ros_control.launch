@@ -36,21 +36,20 @@
 	<arg name="shutdown_on_disconnect" default="true" />
 
 	<!-- dual_arm_robot model -->
-	<include file="$(find dual_arm_robot_description)/launch/dual_arm_robot_upload.launch">
+	<include file="$(find ur_description)/launch/ur5_upload.launch">
 		<arg name="limited" value="$(arg limited)"/>
-		<arg name="prefix_left" value="$(arg prefix_left)"/>
-		<arg name="prefix_right" value="$(arg prefix_right)"/>
+		<arg name="prefix" value="$(arg prefix_left)"/>
 	</include>
 
-	<!-- ur common -->
+	<!-- ur common 
 	<group ns="$(arg controller_name_left)">
-		<remap from="joint_states" to="/joint_states"/>
+		<remap from="joint_states" to="/joint_states"/> -->
 		<include file="$(find ur_modern_driver)/launch/ur_common.launch">
 			<arg name="robot_ip" value="$(arg robot_ip_left)"/>
 			<arg name="reverse_port" value="$(arg left_reverse_port)"/>
 			<arg name="min_payload" value="$(arg min_payload)"/>
 			<arg name="max_payload" value="$(arg max_payload)"/>
-			<arg name="prefix" value="$(arg prefix_left)" />
+			
 			<arg name="use_lowbandwidth_trajectory_follower" value="$(arg use_lowbandwidth_trajectory_follower)"/>
 			<arg name="time_interval" value="$(arg time_interval)"/>
 			<arg name="servoj_time" value="$(arg servoj_time)" />
@@ -64,20 +63,17 @@
 			<arg name="shutdown_on_disconnect" value="$(arg shutdown_on_disconnect)"/>
 		</include>
 
-		<!-- Load controller settings -->
-		<rosparam file="$(find dual_arm_robot_driver)/config/left_controllers.yaml" command="load"/>
 
-		<!-- spawn controller manager -->
+		<rosparam file="$(find ur_modern_driver)/config/ur5_controllers.yaml" command="load"/>
+
+
 		<node name="ros_control_controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="$(arg left_controllers)" />
 
-		<!-- load other controller -->
 		<node name="ros_control_controller_manager" pkg="controller_manager" type="controller_manager" respawn="false" output="screen" args="load $(arg left_stopped_controllers)" />
-	    <!--It's been published in ur_common.launch -->
-		<!-- left Convert joint states to /tf tranforms 
-    	<node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
-		-->
-	</group>
-
+	
+	
+<!--
+</group>
 	<group ns="$(arg controller_name_right)">
 		<remap from="joint_states" to="/joint_states"/>
 		<include file="$(find ur_modern_driver)/launch/ur_common.launch">
@@ -105,5 +101,5 @@
 	
 		<node name="ros_control_controller_manager" pkg="controller_manager" type="controller_manager" respawn="false" output="screen" args="load $(arg right_stopped_controllers)" />
 	</group>
-
+-->
 </launch>

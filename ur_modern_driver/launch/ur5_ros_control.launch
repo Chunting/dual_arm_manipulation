@@ -16,11 +16,13 @@
   <arg name="base_frame" default="$(arg prefix)base" />
   <arg name="tool_frame" default="$(arg prefix)tool0_controller" />
   <arg name="shutdown_on_disconnect" default="true" />
-  <arg name="controllers" default="joint_state_controller force_torque_sensor_controller vel_based_pos_traj_controller"/>
-  <arg name="stopped_controllers" default="pos_based_pos_traj_controller joint_group_vel_controller"/>
+  <arg name="controllers" default="joint_state_controller  vel_based_pos_traj_controller"/>
+  <arg name="stopped_controllers" default="pos_based_pos_traj_controller"/>
+  <arg name="config" default="true"/>
   <!-- robot model -->
   <include file="$(find ur_description)/launch/ur5_upload.launch">
     <arg name="limited" value="$(arg limited)"/>
+    <arg name="prefix" value="$(arg prefix)"/>
   </include>
 
 
@@ -52,5 +54,14 @@
 
   <!-- Convert joint states to /tf tranforms -->
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+
+	<include file="$(find ur5_moveit_config)/launch/ur5_moveit_planning_execution.launch"/> 
+	<!-- <param name="move_group/trajectory_execution/allowed_start_tolerance" value="0.5" /> -->
+
+	<include file="$(find ur5_moveit_config)/launch/moveit_rviz.launch">
+		<arg name="config" value="$(arg config)"/>
+	</include>
+
+	<node name="ft_sensor" pkg="robotiq_ft_sensor" type="rq_sensor" respawn="true" output="screen"/>
 
 </launch>

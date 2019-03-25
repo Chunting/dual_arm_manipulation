@@ -1,7 +1,7 @@
 <?xml version="1.0"?> <!--this tag must be in the first line of the xml files-->
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="dual_arm_robot">
+<robot xmlns:xacro="http://wiki.ros.org/xacro" name="dual_arm_robot">
 <!-- rosrun xacro xacro.py dual_arm_robot.urdf.xacro >  dual_arm_robot.urdf -->
-  <xacro:property name="pi" value="3.1415926535897931"/>
+  <xacro:property name="PI" value="3.1415926535897931"/>
   <xacro:arg name="prefix_left" default="left_"/>
   <xacro:arg name="prefix_right" default="right_"/>
   <xacro:arg name="limited" default="true"/>
@@ -205,7 +205,7 @@
   <joint name="stand2_to_left_arm" type="fixed">
     <parent link="stand2"/>
     <child link ="$(arg prefix_left)base_link"/>
-   <origin xyz="0 0 ${(robot_horizontal_stand_width/2)}" rpy="${pi/4.0} 0 0"/>
+   <origin xyz="0 0 ${(robot_horizontal_stand_width/2)}" rpy="${PI/4.0} 0 0"/>
   </joint>
 
   <!-- place robotiq_fts300 to left arm -->
@@ -251,14 +251,14 @@
 	  <joint name="robotiq_joint" type="fixed">
     <parent link="flange" />
     <child link = "palm" />
-    <origin xyz="0.0 0 0.06" rpy="${pi/2} 0 0" />  
+    <origin xyz="0.0 0 0.06" rpy="${PI/2} 0 0" />  
   	</joint>
 		
 <!--
   <joint name="$(arg prefix_left)ee_mount" type="fixed">
     <parent link="$(arg prefix_left)tool0"/>
     <child link ="$(arg prefix_left)ee_frame"/>
-    <origin xyz="0 0 0" rpy="0 0 ${pi}" />
+    <origin xyz="0 0 0" rpy="0 0 ${PI}" />
   </joint>
 -->
   <!-- place ur5 right arm  -->
@@ -266,7 +266,7 @@
   <joint name="stand2_to_right_arm" type="fixed">
     <parent link="stand2"/>
     <child link ="$(arg prefix_right)base_link"/>
-    <origin xyz="0 0 -${(robot_horizontal_stand_width/2)}" rpy="${pi/4.0} ${pi} 0"/>
+    <origin xyz="0 0 -${(robot_horizontal_stand_width/2)}" rpy="${PI/4.0} ${PI} 0"/>
   </joint>
 
   <!-- place 2 finger gripper on right arm -->
@@ -282,7 +282,7 @@
   <joint name="$(arg prefix_right)ee_mount" type="fixed">
     <parent link="$(arg prefix_right)tool0"/>
     <child link ="$(arg prefix_right)ee_frame"/>
-    <origin xyz="0 0 0" rpy="0 0 ${pi}" />
+    <origin xyz="0 0 0" rpy="0 0 ${PI}" />
   </joint>
 -->
 </robot>

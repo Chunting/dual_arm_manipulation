@@ -1,35 +1,36 @@
 <?xml version="1.0"?>
-<package>
+<?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="2">
   <name>dual_arm_robot_applications</name>
   <version>1.0.0</version>
-  <description>
-      Applications for the dual arm robot
-  </description>
+  <description> Applications for the dual arm robot </description>
 
-  <author email="jiaochunting@gmail.com">Chunting Jiao</author>
-  <maintainer email="jiaochunting@gmail.com">Chunting Jiao</maintainer>
-
-  <license>BSD</license>
+  <author>Chunting Jiao</author>
+  <maintainer email="jiaochunting@gmail.com">Tsinghua University</maintainer>
+  <license>Apache 2.0</license>
 
   <buildtool_depend>catkin</buildtool_depend>
-  <build_depend>roscpp</build_depend>
-  <build_depend>tf</build_depend>
-  <build_depend>robotiq_ft_sensor</build_depend>
-  <build_depend>std_msgs</build_depend>
-  <build_depend>message_generation</build_depend>
-  <build_depend>sensor_msgs</build_depend>
-  <build_depend>ur_msgs</build_depend>
-  <build_depend>trajectory_msgs</build_depend>
-  
-  <run_depend>roscpp</run_depend>
-  <run_depend>tf</run_depend>
-  <run_depend>robotiq_ft_sensor</run_depend>
-  <run_depend>rospy</run_depend>
-  <run_depend>actionlib</run_depend>
-  <run_depend>control_msgs</run_depend>
-  <run_depend>sensor_msgs</run_depend>
-  <run_depend>trajectory_msgs</run_depend>
-  <run_depend>ur_msgs</run_depend>
-  <run_depend>python-lxml</run_depend>
+
+  <depend>hardware_interface</depend>
+  <depend>controller_manager</depend>
+  <depend>actionlib</depend>
+  <depend>control_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>industrial_msgs</depend>
+  <depend>roscpp</depend>
+  <depend>sensor_msgs</depend>
+  <depend>trajectory_msgs</depend>
+  <depend>ur_msgs</depend>
+  <depend>tf</depend>
+  <depend>std_srvs</depend>
+  <depend>robotiq_ft_sensor</depend>
+
+  <exec_depend>force_torque_sensor_controller</exec_depend>
+  <exec_depend>joint_state_controller</exec_depend>
+  <exec_depend>joint_trajectory_controller</exec_depend>
+  <exec_depend>ur_description</exec_depend>
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>velocity_controllers</exec_depend>
+
 
 </package>
