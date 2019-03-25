@@ -74,15 +74,16 @@ int main(int argc, char **argv)
 
     ROS_INFO("========== MOVE CLOSER =================");
 
-    dualArmRobot.graspMove(0.06, false);
+    dualArmRobot.graspMove(0.062, false);
     double res_force = sqrt(FTsubscriber.last_wrench_msg_.wrench.force.x * FTsubscriber.last_wrench_msg_.wrench.force.x + FTsubscriber.last_wrench_msg_.wrench.force.y * FTsubscriber.last_wrench_msg_.wrench.force.y + FTsubscriber.last_wrench_msg_.wrench.force.z * FTsubscriber.last_wrench_msg_.wrench.force.z);
 
-    while (res_force < 20)
+    while (res_force < 10)
     {
         dualArmRobot.graspMove(0.001);
         res_force = sqrt(FTsubscriber.last_wrench_msg_.wrench.force.x * FTsubscriber.last_wrench_msg_.wrench.force.x + FTsubscriber.last_wrench_msg_.wrench.force.y * FTsubscriber.last_wrench_msg_.wrench.force.y + FTsubscriber.last_wrench_msg_.wrench.force.z * FTsubscriber.last_wrench_msg_.wrench.force.z);
+        ROS_INFO("I heard: Force [%f]  FX[%f] FY[%f] FZ[%f]", res_force, FTsubscriber.last_wrench_msg_.wrench.force.x, FTsubscriber.last_wrench_msg_.wrench.force.y, FTsubscriber.last_wrench_msg_.wrench.force.z);
     }
-    ROS_INFO("I heard: Force [%f]  FX[%f] FY[%f] FZ[%f]", res_force, FTsubscriber.last_wrench_msg_.wrench.force.x, FTsubscriber.last_wrench_msg_.wrench.force.y, FTsubscriber.last_wrench_msg_.wrench.force.z);
+    
     ros::Publisher offset_desired_pub = nh.advertise<geometry_msgs::PointStamped>("/desired_offset_point", 1);
     // Publish the desired offset between two EEs, described in right EE coordinate system
     KDL::Frame desired_offset = dualArmRobot.getCurrentOffset().Inverse();  // w.r.t right_ee_link coordinate system
@@ -127,18 +128,18 @@ int main(int argc, char **argv)
     left_rot.GetEulerZYX(alfa, beta, gamma);
     ROS_INFO("Before alfa = %f\tbeta = %f\t gamma = %f", alfa, beta, gamma);
 
-    left_rot.DoRotX(-3.14 / 6);
+    left_rot.DoRotX(-3.14 /12);
     left_rot.GetQuaternion(box7_goal_pose_stamped.pose.orientation.x, box7_goal_pose_stamped.pose.orientation.y, box7_goal_pose_stamped.pose.orientation.z,
                            box7_goal_pose_stamped.pose.orientation.w);
     dualArmRobot.moveObject("box7", box7_goal_pose_stamped, 0.1);
 
     sleep(1);
-    left_rot.DoRotX(3.14 / 6);
+    left_rot.DoRotX(3.14 /12);
     left_rot.GetQuaternion(box7_goal_pose_stamped.pose.orientation.x, box7_goal_pose_stamped.pose.orientation.y, box7_goal_pose_stamped.pose.orientation.z,
                            box7_goal_pose_stamped.pose.orientation.w);
     dualArmRobot.moveObject("box7", box7_goal_pose_stamped, 0.1);
     sleep(1);
-    left_rot.DoRotY(3.14 / 6);
+    left_rot.DoRotY(3.14 /12);
     left_rot.GetQuaternion(box7_goal_pose_stamped.pose.orientation.x, box7_goal_pose_stamped.pose.orientation.y, box7_goal_pose_stamped.pose.orientation.z,
                            box7_goal_pose_stamped.pose.orientation.w);
 
@@ -147,7 +148,7 @@ int main(int argc, char **argv)
     dualArmRobot.moveObject("box7", box7_goal_pose_stamped, 0.1);
     sleep(1);
 
-    left_rot.DoRotY(-3.14 / 6);
+    left_rot.DoRotY(-3.14 /12);
     left_rot.GetQuaternion(box7_goal_pose_stamped.pose.orientation.x, box7_goal_pose_stamped.pose.orientation.y, box7_goal_pose_stamped.pose.orientation.z,
                            box7_goal_pose_stamped.pose.orientation.w);
     dualArmRobot.moveObject("box7", box7_goal_pose_stamped, 0.1);

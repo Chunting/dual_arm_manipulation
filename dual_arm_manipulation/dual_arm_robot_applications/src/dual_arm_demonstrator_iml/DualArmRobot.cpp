@@ -486,8 +486,6 @@ bool DualArmRobot::try_again_question()
 
 bool DualArmRobot::pickBox(std::string object_id, geometry_msgs::Vector3Stamped lift_direction)
 {
-
-    ROS_INFO("\nStarting Pick %s", object_id.c_str());
     bool try_step;
     moveit::planning_interface::MoveItErrorCode error;
     // move both arms to grasping position with respect to object frame

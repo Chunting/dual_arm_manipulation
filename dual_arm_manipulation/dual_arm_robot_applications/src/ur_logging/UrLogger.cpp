@@ -106,21 +106,21 @@ std::string UR_Logger::headline(UR_Message_Listener &ur_listener)
 
     // append time
     ss << "time";
-
+ 
     // append position state
-    std::string m_joint_pos_prefix = "m_joint_pos_";
+    std::string m_joint_pos_prefix = "m_joint_pos_" + ur_listener.ur_namespace_ + "_";
     //std::string state_pos_suffix = " [rad]";
     for (int i = 0; i < 6; i++)
     {
-        ss << delimiter_ << m_joint_pos_prefix << ur_listener.last_joint_state_msg_.name[i]; // << state_pos_suffix;
+        ss << delimiter_ << m_joint_pos_prefix << joint_names[i]; // << state_pos_suffix;
     }
 
     // append state velocity
-    std::string m_joint_vel_prefix = "m_joint_vel_";
+    std::string m_joint_vel_prefix = "m_joint_vel_" + ur_listener.ur_namespace_ + "_";
     //std::string state_vel_suffix = " [rad/s]";
     for (int i = 0; i < 6; i++)
     {
-        ss << delimiter_ << m_joint_vel_prefix << ur_listener.last_joint_state_msg_.name[i]; // << state_vel_suffix;
+        ss << delimiter_ << m_joint_vel_prefix << joint_names[i]; // << state_vel_suffix;
     }
 
     // append Cartesian state position
@@ -151,7 +151,8 @@ std::string UR_Logger::headline(UR_Message_Listener &ur_listener)
     //std::string wrench_force_suffix = " [N]";
     ss << delimiter_ << tcp_force_prefix << "x"
        << delimiter_ << tcp_force_prefix << "y"
-       << delimiter_ << tcp_force_prefix << "z";
+       << delimiter_ << tcp_force_prefix << "z"
+       << delimiter_ << tcp_force_prefix << "s";
     std::string tcp_torque_prefix = ur_listener.ur_namespace_ + "_tcp_torque_";
     //std::string wrench_torque_suffix = " [Nm]";
     ss << delimiter_ << tcp_torque_prefix << "x"
@@ -228,6 +229,7 @@ std::string UR_Logger::data_line(UR_Message_Listener &ur_listener)
         for (int i = 0; i < 6; i++)
         {
             converter << delimiter_ << ur_listener.last_joint_state_msg_.velocity[i] * rot2deg;
+           
         }
     }
     else
@@ -256,7 +258,8 @@ std::string UR_Logger::data_line(UR_Message_Listener &ur_listener)
     // // append tcp wrench force
     converter << delimiter_ << ur_listener.last_wrench_msg_.wrench.force.x
               << delimiter_ << ur_listener.last_wrench_msg_.wrench.force.y
-              << delimiter_ << ur_listener.last_wrench_msg_.wrench.force.z;
+              << delimiter_ << ur_listener.last_wrench_msg_.wrench.force.z
+              << delimiter_<< sqrt(ur_listener.last_wrench_msg_.wrench.force.x * ur_listener.last_wrench_msg_.wrench.force.x + ur_listener.last_wrench_msg_.wrench.force.y * ur_listener.last_wrench_msg_.wrench.force.y + ur_listener.last_wrench_msg_.wrench.force.z * ur_listener.last_wrench_msg_.wrench.force.z);
     // tcp wrench torque
     converter << delimiter_ << ur_listener.last_wrench_msg_.wrench.torque.x
               << delimiter_ << ur_listener.last_wrench_msg_.wrench.torque.y
@@ -304,14 +307,14 @@ std::string UR_Logger::headline_command(UR_Message_Listener &ur_listener)
     // ss << "PC_time" << delimiter_ << "head_time";
 
     // append position command
-    std::string command_pos_prefix = "c_joint_pos_";
+    std::string command_pos_prefix = "c_joint_pos_" + ur_listener.ur_namespace_ + "_";
     for (int i = 0; i < ur_listener.last_joint_state_msg_.name.size(); i++)
     {
         ss << delimiter_ << command_pos_prefix << joint_names[i];
     }
 
     // append command velocity
-    std::string command_vel_prefix = "c_joint_vel_";
+    std::string command_vel_prefix = "c_joint_vel_" + ur_listener.ur_namespace_ + "_";
     for (int i = 0; i < ur_listener.last_joint_state_msg_.name.size(); i++)
     {
         ss << delimiter_ << command_vel_prefix << joint_names[i];
