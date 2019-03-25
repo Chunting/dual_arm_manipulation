@@ -12,21 +12,21 @@
                 "/home/chunting/catkin_ws/src/dual_arm_manipulation/dual_arm_manipulation/joint_trajectory_admittance_controller/include",
                 "/home/chunting/catkin_ws/src/dual_arm_manipulation/dual_arm_manipulation/my_cart_controller_pkg/include",
                 "/home/chunting/catkin_ws/src/dual_arm_manipulation/dual_arm_manipulation/my_controller_pkg/include",
-                "/home/chunting/catkin_ws/src/dual_arm_manipulation/robotiq/robotiq_action_server/include",
-                "/home/chunting/catkin_ws/src/dual_arm_manipulation/robotiq/robotiq_c_model_control/include",
+                "/home/chunting/catkin_ws/src/dual_arm_manipulation/robotiq/robotiq_2f_gripper_action_server/include",
+                "/home/chunting/catkin_ws/src/dual_arm_manipulation/robotiq/robotiq_2f_gripper_control/include",
+                "/home/chunting/catkin_ws/src/dual_arm_manipulation/robotiq/robotiq_3f_gripper_articulated_gazebo_plugins/include",
+                "/home/chunting/catkin_ws/src/dual_arm_manipulation/robotiq/robotiq_3f_gripper_control/include",
                 "/home/chunting/catkin_ws/src/dual_arm_manipulation/robotiq/robotiq_ethercat/include",
                 "/home/chunting/catkin_ws/src/dual_arm_manipulation/robotiq/robotiq_ft_sensor/include",
-                "/home/chunting/catkin_ws/src/dual_arm_manipulation/robotiq/robotiq_s_model_articulated_gazebo_plugins/include",
-                "/home/chunting/catkin_ws/src/dual_arm_manipulation/robotiq/robotiq_s_model_control/include",
-                "/home/chunting/catkin_ws/src/dual_arm_manipulation/universal_robot/universal_robot/ur_kinematics/include",
+                "/home/chunting/catkin_ws/src/dual_arm_manipulation/universal_robot/ur_kinematics/include",
                 "/home/chunting/catkin_ws/src/dual_arm_manipulation/ur_modern_driver/include",
-                "/home/chunting/catkin_ws/devel/include",
-                "/usr/include",
-                "/usr/include/eigen3",
-                "/usr/include/c++/5/tr1"
+                "/usr/include"
             ],
             "name": "Linux",
-            "intelliSenseMode": "gcc-x64"
+            "intelliSenseMode": "gcc-x64",
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c11",
+            "cppStandard": "c++17"
         }
     ],
     "version": 4

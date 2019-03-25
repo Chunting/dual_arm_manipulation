@@ -320,6 +320,13 @@ bool URKinematicsPlugin::initialize(const std::string &robot_description,
   epsilon_ = epsilon;
 
   lookupParam("arm_prefix", arm_prefix_, std::string(""));
+  if(arm_prefix_.empty()){
+	arm_prefix_ = "left_";
+	if(group_name.compare(0, arm_prefix_.size(), arm_prefix_) != 0){
+	    arm_prefix_ = "right_";
+	}
+
+  }
 
   ur_joint_names_.push_back(arm_prefix_ + "shoulder_pan_joint");
   ur_joint_names_.push_back(arm_prefix_ + "shoulder_lift_joint");

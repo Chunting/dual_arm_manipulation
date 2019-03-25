@@ -3,7 +3,7 @@
        name="dual_arm_robot">
 <!-- rosrun xacro xacro.py dual_arm_robot.urdf.xacro >  dual_arm_robot.urdf -->
   <xacro:property name="pi" value="3.1415926535897931"/>
-  <xacro:arg name="prefix_left" default="left_"/>
+  <xacro:arg name="prefix_left" default=""/>
   <xacro:arg name="prefix_right" default="right_"/>
   <xacro:arg name="limited" default="true"/>
 

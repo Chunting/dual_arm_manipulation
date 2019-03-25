@@ -1,0 +1,28 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "",
+        "limitSymbolsToIncludedHeaders": true
+      },
+      "includePath": [
+        "/home/chunting/catkin_ws/devel/include",
+        "/opt/ros/kinetic/include",
+        "/home/chunting/catkin_ws/src/dual_arm_manipulation/dual_arm_manipulation/dual_arm_robot_applications/include",
+        "/home/chunting/catkin_ws/src/dual_arm_manipulation/dual_arm_manipulation/joint_trajectory_admittance_controller/include",
+        "/home/chunting/catkin_ws/src/dual_arm_manipulation/dual_arm_manipulation/my_cart_controller_pkg/include",
+        "/home/chunting/catkin_ws/src/dual_arm_manipulation/dual_arm_manipulation/my_controller_pkg/include",
+        "/home/chunting/catkin_ws/src/dual_arm_manipulation/robotiq/robotiq_2f_gripper_action_server/include",
+        "/home/chunting/catkin_ws/src/dual_arm_manipulation/robotiq/robotiq_2f_gripper_control/include",
+        "/home/chunting/catkin_ws/src/dual_arm_manipulation/robotiq/robotiq_3f_gripper_articulated_gazebo_plugins/include",
+        "/home/chunting/catkin_ws/src/dual_arm_manipulation/robotiq/robotiq_3f_gripper_control/include",
+        "/home/chunting/catkin_ws/src/dual_arm_manipulation/robotiq/robotiq_ethercat/include",
+        "/home/chunting/catkin_ws/src/dual_arm_manipulation/robotiq/robotiq_ft_sensor/include",
+        "/home/chunting/catkin_ws/src/dual_arm_manipulation/universal_robot/ur_kinematics/include",
+        "/home/chunting/catkin_ws/src/dual_arm_manipulation/ur_modern_driver/include",
+        "/usr/include"
+      ],
+      "name": "Linux"
+    }
+  ]
+}
