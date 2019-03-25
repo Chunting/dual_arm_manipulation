@@ -10,7 +10,7 @@
 	<arg name="limited" default="true"/>
 	<arg name="min_payload" default="0.0"/>
 	<arg name="max_payload" default="5.0"/>
-	<arg name="prefix_left" default="left_"/>
+	<arg name="prefix_left" default=""/>
 	<arg name="prefix_right" default="right_"/>
 	<arg name="config" default="true"/>
 
