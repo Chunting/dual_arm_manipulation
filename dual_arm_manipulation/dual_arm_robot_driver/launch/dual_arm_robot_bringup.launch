@@ -2,8 +2,8 @@
 
 <launch>
 
-  <arg name="ip_left" default="192.168.1.101"/>
-  <arg name="ip_right" default="192.168.1.102"/>
+  <arg name="robot_ip_left" default="192.168.1.101"/>
+  <arg name="robot_ip_right" default="192.168.1.102"/>
   <arg name="limited" default="false"/>
   <arg name="min_payload"  default="0.0"/>
   <arg name="max_payload"  default="5.0"/>
@@ -24,7 +24,7 @@
     <remap from="joint_states" to="/joint_states"/>
     <include file="$(find ur_modern_driver)/launch/ur_common.launch">
       <arg name="prefix"  value="$(arg prefix_left)" />
-      <arg name="robot_ip" value="$(arg ip_left)"/>
+      <arg name="robot_ip" value="$(arg robot_ip_left)"/>
       <arg name="min_payload"  value="$(arg min_payload)"/>
       <arg name="max_payload"  value="$(arg max_payload)"/>
     </include>
@@ -36,7 +36,7 @@
     <remap from="joint_states" to="/joint_states"/>
     <include file="$(find ur_modern_driver)/launch/ur_common.launch">
       <arg name="prefix"  value="$(arg prefix_right)" />
-      <arg name="robot_ip" value="$(arg ip_right)"/>
+      <arg name="robot_ip" value="$(arg robot_ip_right)"/>
       <arg name="min_payload"  value="$(arg min_payload)"/>
       <arg name="max_payload"  value="$(arg max_payload)"/>
     </include>

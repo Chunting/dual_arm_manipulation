@@ -148,13 +148,6 @@
 	</joint>
 
 
-	<!--
-  <joint name="$(arg prefix_left)ee_mount" type="fixed">
-    <parent link="$(arg prefix_left)tool0"/>
-    <child link ="$(arg prefix_left)ee_frame"/>
-    <origin xyz="0 0 0" rpy="0 0 ${PI}" />
-  </joint>
--->
 	<!-- place ur5 right arm  -->
 	<xacro:ur5_robot prefix="$(arg prefix_right)" joint_limited="$(arg limited)"/>
 	<joint name="stand2_to_right_arm" type="fixed">
