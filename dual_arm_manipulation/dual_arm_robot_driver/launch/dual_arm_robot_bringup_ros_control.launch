@@ -2,7 +2,7 @@
 <launch>
 	<!-- left arm -->
 	<arg name="prefix_left" default="left_"/>
-	<arg name="controller_name_left" default="left_controller"/>
+	<arg name="controller_name_left" default="left"/>
 	<arg name="robot_ip_left" default="192.168.1.101"/>
 	<arg name="left_reverse_port" default="50001"/>
 	<arg name="left_base_frame" default="$(arg prefix_left)base" />
@@ -12,7 +12,7 @@
 	
 	<!-- right arm -->
 	<arg name="prefix_right" default="right_"/>
-	<arg name="controller_name_right" default="right_controller"/>
+	<arg name="controller_name_right" default="right"/>
 	<arg name="robot_ip_right" default="192.168.1.102"/>
 	<arg name="right_reverse_port" default="50002"/>
 	<arg name="right_base_frame" default="$(arg prefix_right)base" />

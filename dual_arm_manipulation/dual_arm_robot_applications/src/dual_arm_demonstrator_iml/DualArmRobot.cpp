@@ -66,8 +66,9 @@ DualArmRobot::DualArmRobot(ros::NodeHandle &nh) : left_("left_manipulator"),
     right_.allowReplanning(true);
 
     // Controller Interface
-    left_controller_ = "left_controller";
-    right_controller_ = "right_controller";
+    // It has to be consistent with group ns and names in controllers.yaml
+    left_controller_ = "left";
+    right_controller_ = "right";
     //subscribe to the data topic of interest
     pose_publish_thread_ = new std::thread(boost::bind(&DualArmRobot::publishPoseMsg, this));
 

@@ -9,9 +9,9 @@ FTSensorSubscriber::FTSensorSubscriber(ros::NodeHandle &nh, std::string ur_names
     wrench_filter_factor_ = 0.1;
     force_dead_zone_thres_ = 3;
     torque_dead_zone_thres_ = 0.5;
-    sub_wrench_external_ = nh_.subscribe("/robotiq_force_torque_wrench", 1, &FTSensorSubscriber::wrenchCallback, this);
-    filtered_wrench_pub_ = nh_.advertise<geometry_msgs::WrenchStamped>(ur_namespace_ + "/robotiq_force_torque_wrench", 1);
-    ros::ServiceClient client = nh_.serviceClient<robotiq_ft_sensor::sensor_accessor>("robotiq_force_torque_sensor_acc");
+    sub_wrench_external_ = nh_.subscribe("/robotiq_ft_wrench", 1, &FTSensorSubscriber::wrenchCallback, this);
+    filtered_wrench_pub_ = nh_.advertise<geometry_msgs::WrenchStamped>(ur_namespace_ + "/robotiq_ft_wrench", 1);
+    ros::ServiceClient client = nh_.serviceClient<robotiq_ft_sensor::sensor_accessor>("robotiq_ft_sensor_acc");
     robotiq_ft_sensor::sensor_accessor srv;
 
     if (ros::ok())
@@ -56,7 +56,7 @@ void FTSensorSubscriber::wrenchCallback(const geometry_msgs::WrenchStamped::Ptr 
     last_wrench_msg_.wrench.torque.y = wrench_external_(4);
     last_wrench_msg_.wrench.torque.z = wrench_external_(5);
     filtered_wrench_pub_.publish(last_wrench_msg_);
-    // std::string topic = ur_namespace_ + "/robotiq_force_torque_wrench";
+    // std::string topic = ur_namespace_ + "/robotiq_ft_wrench";
     // ROS_INFO("I publish last_wrench_msg_ to [%s]: Frame_id [%s] Time [%f] FX[%f] FY[%f] FZ[%f] MX[%f] MY[%f] MZ[%f]",
     //     topic.c_str(),
     //     last_wrench_msg_.header.frame_id.c_str(),   // robotiq_force_torque_frame_id

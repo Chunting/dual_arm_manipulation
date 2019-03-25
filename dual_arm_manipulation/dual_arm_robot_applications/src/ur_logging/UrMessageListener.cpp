@@ -13,7 +13,7 @@ UR_Message_Listener::UR_Message_Listener(ros::NodeHandle &nh, std::string ur_nam
 
     pose_sub_ = nh_.subscribe<geometry_msgs::PoseStamped>(ur_namespace_ + "/pose", 10, &UR_Message_Listener::m_tcp_pose_Callback, this);
 
-    sub_wrench_external_ = nh_.subscribe<geometry_msgs::WrenchStamped>(ur_namespace_ + "/robotiq_force_torque_wrench", 1, &UR_Message_Listener::FT_wrench_Callback, this);
+    sub_wrench_external_ = nh_.subscribe<geometry_msgs::WrenchStamped>(ur_namespace_ + "/robotiq_ft_wrench", 1, &UR_Message_Listener::FT_wrench_Callback, this);
     // Measured tcp velocity
     m_tcp_speed_sub_ = nh_.subscribe<geometry_msgs::TwistStamped>(ur_namespace + "/m_tool_velocity", 10, &UR_Message_Listener::m_tcp_speedCallback, this);
 
@@ -28,7 +28,7 @@ UR_Message_Listener::UR_Message_Listener(ros::NodeHandle &nh, std::string ur_nam
     
     newTrajectory = false;
 
-    ros::ServiceClient client = nh_.serviceClient<robotiq_ft_sensor::sensor_accessor>("robotiq_force_torque_sensor_acc");
+    ros::ServiceClient client = nh_.serviceClient<robotiq_ft_sensor::sensor_accessor>("robotiq_ft_sensor_acc");
 
     robotiq_ft_sensor::sensor_accessor srv;
 
@@ -62,7 +62,7 @@ void UR_Message_Listener::joint_state_Callback(const sensor_msgs::JointState::Pt
 void UR_Message_Listener::FT_wrench_Callback(const geometry_msgs::WrenchStamped::ConstPtr &msg)
 {
     last_wrench_msg_ = *msg;
-    std::string topic = ur_namespace_ + "/robotiq_force_torque_wrench";
+    std::string topic = ur_namespace_ + "/robotiq_ft_wrench";
     // ROS_INFO("I received last_wrench_msg_ to [%s]: Frame_id [%s] Time [%f] FX[%f] FY[%f] FZ[%f] MX[%f] MY[%f] MZ[%f]",
     //     topic.c_str(),
     //     last_wrench_msg_.header.frame_id.c_str(),   // robotiq_force_torque_frame_id

@@ -6,7 +6,7 @@
                 "limitSymbolsToIncludedHeaders": true,
                 "path": [
                     "/home/chunting/catkin_ws/devel/include",
-                    "/opt/ros/indigo/include",
+                    "/opt/ros/kinetic/include",
                     "/home/chunting/catkin_ws/src/dual_arm_manipulation/dual_arm_manipulation/dual_arm_robot_applications/include",
                     "/home/chunting/catkin_ws/src/dual_arm_manipulation/dual_arm_manipulation/joint_trajectory_admittance_controller/include",
                     "/home/chunting/catkin_ws/src/dual_arm_manipulation/dual_arm_manipulation/my_cart_controller_pkg/include",
@@ -15,11 +15,12 @@
                     "/home/chunting/catkin_ws/src/dual_arm_manipulation/universal_robot/ur_kinematics/include",
                     "/home/chunting/catkin_ws/src/dual_arm_manipulation/ur_modern_driver/include",
                     "/usr/include"
+
                 ]
             },
             "includePath": [
                 "/home/chunting/catkin_ws/devel/include",
-                "/opt/ros/indigo/include",
+                "/opt/ros/kinetic/include",
                 "/home/chunting/catkin_ws/src/dual_arm_manipulation/dual_arm_manipulation/dual_arm_robot_applications/include",
                 "/home/chunting/catkin_ws/src/dual_arm_manipulation/dual_arm_manipulation/joint_trajectory_admittance_controller/include",
                 "/home/chunting/catkin_ws/src/dual_arm_manipulation/dual_arm_manipulation/my_cart_controller_pkg/include",

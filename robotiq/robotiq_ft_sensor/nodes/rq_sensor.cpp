@@ -191,7 +191,7 @@ static robotiq_ft_sensor::ft_sensor get_data(void)
 
 int main(int argc, char **argv)
 {
-        ros::init(argc, argv, "robotiq_ft_sensor");
+    ros::init(argc, argv, "robotiq_ft_sensor");
 	ros::NodeHandle n;
 	ros::param::param<int>("~max_retries", max_retries_, 100);
     ros::param::get("~serial_id", ftdi_id);

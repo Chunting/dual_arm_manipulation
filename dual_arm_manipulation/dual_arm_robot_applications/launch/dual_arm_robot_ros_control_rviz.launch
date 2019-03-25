@@ -24,7 +24,6 @@
 		<arg name="prefix_right" default="$(arg prefix_right)"/>
 	</include>
 
-	<!-- MoveIt! Setup -->
 
 	<!-- MoveIt! Setup -->
 	<!-- dual arm robot planning execution -->
@@ -36,6 +35,7 @@
 		<arg name="config" value="$(arg config)"/>
 	</include>
 
+	<!-- Start force/torque sensor -->
 	<node name="ft_sensor" pkg="robotiq_ft_sensor" type="rq_sensor" respawn="true" output="screen"/>
 
 </launch>
