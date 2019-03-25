@@ -10,18 +10,10 @@
 	<arg name="limited" default="true"/>
 	<arg name="min_payload" default="0.0"/>
 	<arg name="max_payload" default="5.0"/>
-	<arg name="prefix_left" default=""/>
+	<arg name="prefix_left" default="left_"/>
 	<arg name="prefix_right" default="right_"/>
 	<arg name="config" default="true"/>
-	<arg name="use_lowbandwidth_trajectory_follower" default="false"/>
-	<arg name="time_interval" default="0.008"/>
-	<arg name="servoj_time" default="0.008" />
-	<arg name="servoj_time_waiting" default="0.001" />
-	<arg name="max_waiting_time" default="2.0" />
-	<arg name="servoj_gain" default="100." />
-	<arg name="servoj_lookahead_time" default="1." />
-	<arg name="max_joint_difference" default="0.01" />
-	<arg name="shutdown_on_disconnect" default="true" />
+
 
 
 	<!-- dual_arm_robot bringup. including ros controllers -->
@@ -29,31 +21,20 @@
 		<arg name="ip_left" value="$(arg ip_left)"/>
 		<arg name="ip_right" value="$(arg ip_right)"/>
 		<arg name="limited" value="$(arg limited)"/>
-		<arg name="min_payload" value="$(arg min_payload)"/>
-		<arg name="max_payload" value="$(arg max_payload)"/>
-		<arg name="prefix_left" value="$(arg prefix_left)"/>
-		<arg name="prefix_right" value="$(arg prefix_right)"/>
-		<arg name="use_lowbandwidth_trajectory_follower" default="false"/>
-		<arg name="time_interval" default="0.008"/>
-		<arg name="servoj_time" default="0.008" />
-		<arg name="servoj_time_waiting" default="0.001" />
-		<arg name="max_waiting_time" default="2.0" />
-		<arg name="servoj_gain" default="100." />
-		<arg name="servoj_lookahead_time" default="1." />
-		<arg name="max_joint_difference" default="0.01" />
-		<arg name="shutdown_on_disconnect" default="true" />
+		<arg name="prefix_left" default="$(arg prefix_left)"/>
+		<arg name="prefix_right" default="$(arg prefix_right)"/>
 	</include>
 
 	<!-- MoveIt! Setup -->
-	<!-- dual arm robot planning execution 
-	<include file="$(find dual_arm_robot_moveit_config)/launch/dual_arm_robot_moveit_planning_execution.launch"/>
-	<param name="move_group/trajectory_execution/allowed_start_tolerance" value="0.5" />
--->
-	<!-- dual arm robot rviz moveit 
-	<include file="$(find dual_arm_robot_moveit_config)/launch/moveit_rviz.launch">
+	<!-- dual arm robot planning execution -->
+	<include file="$(find ur5_moveit_config)/launch/ur5_moveit_planning_execution.launch"/> 
+	<!-- <param name="move_group/trajectory_execution/allowed_start_tolerance" value="0.5" /> -->
+
+	<!-- dual arm robot rviz moveit -->
+	<include file="$(find ur5_moveit_config)/launch/moveit_rviz.launch">
 		<arg name="config" value="$(arg config)"/>
 	</include>
 
 	<node name="ft_sensor" pkg="robotiq_ft_sensor" type="rq_sensor" respawn="true" output="screen"/>
--->
+
 </launch>
