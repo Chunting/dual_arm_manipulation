@@ -45,7 +45,8 @@
 		<arg name="prefix_left" value="$(arg left_prefix)"/>
 		<arg name="prefix_right" value="$(arg right_prefix)"/>
 	</include>
-
+<!-- The argument prefix must be null, since the prefix of the links and joints has been defined in URDF.
+	If redefining prefix, errors will come up as left_left_..._joint/link -->
 	<group ns="$(arg controller_name_right)">
 		<remap from="joint_states" to="/joint_states"/> 
 		<node name="ur_hardware_interface" pkg="ur_modern_driver" type="ur_driver" output="log" launch-prefix="$(arg launch_prefix)">
