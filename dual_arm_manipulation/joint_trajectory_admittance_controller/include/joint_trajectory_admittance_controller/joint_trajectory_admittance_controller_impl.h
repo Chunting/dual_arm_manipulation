@@ -317,7 +317,7 @@ bool JointTrajectoryAdmittanceController<SegmentImpl, HardwareInterface>::init(H
 		}
 		catch (...)
 		{
-			ROS_ERROR_STREAM_NAMED(name_, "Could not find joint '" << joint_names_[i] << "' in '" << this->getHardwareInterfaceType() << "'.");
+			ROS_ERROR_STREAM_NAMED(name_, "Could not find joint joint_trajectory_admittance'" << joint_names_[i] << "' in '" << this->getHardwareInterfaceType() << "'.");
 			return false;
 		}
 

@@ -14,6 +14,15 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   robotiq_ft_sensor
   moveit_ros_planning_interface
+  actionlib
+  control_msgs
+  controller_manager
+  hardware_interface
+  industrial_msgs
+  sensor_msgs
+  std_srvs
+  trajectory_msgs
+  ur_msgs
 )
 
 find_package(Eigen3 REQUIRED)
@@ -111,10 +120,21 @@ find_package(Eigen3 REQUIRED)
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-  INCLUDE_DIRS include
-#  LIBRARIES dual_arm_robot
-  CATKIN_DEPENDS roscpp tf
-#  DEPENDS system_lib
+  INCLUDE_DIRS 
+    include
+  LIBRARIES
+    ur_hardware_interface
+  CATKIN_DEPENDS
+    actionlib
+    control_msgs
+    controller_manager
+    geometry_msgs
+    hardware_interface
+    industrial_msgs
+    roscpp
+    sensor_msgs
+    trajectory_msgs
+    ur_msgs
 )
 
 ###########

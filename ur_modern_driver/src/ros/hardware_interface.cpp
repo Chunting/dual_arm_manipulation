@@ -35,6 +35,7 @@ VelocityInterface::VelocityInterface(URCommander &commander, hardware_interface:
 {
   for (size_t i = 0; i < 6; i++)
   {
+    ROS_INFO("JOINT NAMES IN hardware_interface::VelocityJointInterface %s", joint_names[i].c_str());
     registerHandle(JointHandle(js_interface.getHandle(joint_names[i]), &velocity_cmd_[i]));
   }
 }

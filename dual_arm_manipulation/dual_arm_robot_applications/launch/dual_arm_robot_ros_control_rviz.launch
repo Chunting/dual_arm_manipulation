@@ -9,8 +9,8 @@
 	<arg name="limited" default="true"/>
 	<arg name="min_payload" default="0.0"/>
 	<arg name="max_payload" default="5.0"/>
-	<arg name="left_prefix" default="left_"/>
-	<arg name="right_prefix" default="right_"/>
+	<arg name="left_prefix" default=""/>
+	<arg name="right_prefix" default=""/>
 	<arg name="config" default="true"/>
 
 

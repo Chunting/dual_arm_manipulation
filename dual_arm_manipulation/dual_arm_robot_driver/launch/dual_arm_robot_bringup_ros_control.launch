@@ -12,8 +12,8 @@
 	<arg name="left_reverse_port" default="50001"/>
 	<arg name="left_base_frame" default="$(arg left_prefix)base" />
 	<arg name="left_tool_frame" default="$(arg left_prefix)tool0_controller" />
-	<arg name="left_controllers" default="joint_state_controller force_torque_sensor_controller vel_based_pos_traj_controller"/>
-	<arg name="left_stopped_controllers" default="pos_based_pos_traj_controller joint_group_vel_controller"/>
+	<arg name="left_controllers" default="left_vel_based_pos_traj_controller"/>
+	<arg name="left_stopped_controllers" default="left_vel_based_admittance_traj_controller"/>
 
 	<!-- right arm -->
 	<arg name="right_prefix" default=""/>
@@ -38,77 +38,36 @@
 	<arg name="servoj_lookahead_time" default="1." />
 	<arg name="max_joint_difference" default="0.01" />
 	<arg name="shutdown_on_disconnect" default="true" />
+	<arg name="config" default="true"/>
 
-<!--
 	<include file="$(find dual_arm_robot_description)/launch/dual_arm_robot_upload.launch">
 		<arg name="limited" value="$(arg limited)"/>
-		<arg name="left_prefix" value="$(arg left_prefix)"/>
-		<arg name="right_prefix" value="$(arg right_prefix)"/>
+		<arg name="prefix_left" value="$(arg left_prefix)"/>
+		<arg name="prefix_right" value="$(arg right_prefix)"/>
 	</include>
-
-
-	<group ns="$(arg controller_name_left)">
-		<remap from="joint_states" to="/joint_states"/>
-		<include file="$(find ur_modern_driver)/launch/ur_common.launch">
-			<arg name="robot_ip" value="$(arg left_robot_ip)"/>
-			<arg name="reverse_port" value="$(arg left_reverse_port)"/>
-			<arg name="min_payload" value="$(arg min_payload)"/>
-			<arg name="max_payload" value="$(arg max_payload)"/>
-			<arg name="prefix" value="$(arg left_prefix)" />
-			<arg name="use_lowbandwidth_trajectory_follower" value="$(arg use_lowbandwidth_trajectory_follower)"/>
-			<arg name="time_interval" value="$(arg time_interval)"/>
-			<arg name="servoj_time" value="$(arg servoj_time)" />
-			<arg name="servoj_time_waiting" default="$(arg servoj_time_waiting)" />
-			<arg name="max_waiting_time" value="$(arg max_waiting_time)" />
-			<arg name="servoj_gain" value="$(arg servoj_gain)" />
-			<arg name="servoj_lookahead_time" value="$(arg servoj_lookahead_time)" />
-			<arg name="max_joint_difference" value="$(arg max_joint_difference)" />
-			<arg name="base_frame" value="$(arg left_base_frame)" />
-			<arg name="tool_frame" value="$(arg left_tool_frame)" />
-			<arg name="shutdown_on_disconnect" value="$(arg shutdown_on_disconnect)"/>
-		</include>
-		<rosparam file="$(find dual_arm_robot_driver)/config/left_controllers.yaml" command="load"/>
-		<node name="ros_control_controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args=" left_joint_state_controller left_vel_based_pos_traj_controller" />
-		<node name="ros_control_controller_manager" pkg="controller_manager" type="controller_manager" respawn="false" output="screen" args="load left_vel_based_admittance_traj_controller" />
-	</group>
-
-	
 
 	<group ns="$(arg controller_name_right)">
-		<remap from="joint_states" to="/joint_states"/>
-		<include file="$(find ur_modern_driver)/launch/ur_common.launch">
-			<arg name="robot_ip" value="$(arg right_robot_ip)"/>
-			<arg name="reverse_port" value="$(arg right_reverse_port)"/>
-			<arg name="min_payload" value="$(arg min_payload)"/>
-			<arg name="max_payload" value="$(arg max_payload)"/>
-			<arg name="prefix" value="$(arg right_prefix)" />
-			<arg name="use_lowbandwidth_trajectory_follower" value="$(arg use_lowbandwidth_trajectory_follower)"/>
-			<arg name="time_interval" value="$(arg time_interval)"/>
-			<arg name="servoj_time" value="$(arg servoj_time)" />
-			<arg name="servoj_time_waiting" default="$(arg servoj_time_waiting)" />
-			<arg name="max_waiting_time" value="$(arg max_waiting_time)" />
-			<arg name="servoj_gain" value="$(arg servoj_gain)" />
-			<arg name="servoj_lookahead_time" value="$(arg servoj_lookahead_time)" />
-			<arg name="max_joint_difference" value="$(arg max_joint_difference)" />
-			<arg name="base_frame" value="$(arg right_base_frame)" />
-			<arg name="tool_frame" value="$(arg right_tool_frame)" />
-			<arg name="shutdown_on_disconnect" value="$(arg shutdown_on_disconnect)"/>
-		</include>
+		<remap from="joint_states" to="/joint_states"/> 
+		<node name="ur_hardware_interface" pkg="ur_modern_driver" type="ur_driver" output="log" launch-prefix="$(arg launch_prefix)">
+			<param name="robot_ip_address" type="str" value="$(arg right_robot_ip)"/>
+			<param name="reverse_port" type="int" value="$(arg right_reverse_port)" />
+			<param name="min_payload" type="double" value="$(arg min_payload)"/>
+			<param name="max_payload" type="double" value="$(arg max_payload)"/>
+			<param name="max_velocity" type="double" value="$(arg max_velocity)"/>
+			<param name="use_ros_control" type="bool" value="True"/>
+			<param name="servoj_gain" type="double" value="750" />
+			<param name="prefix" value="$(arg right_prefix)" />
+			<param name="base_frame" type="str" value="$(arg right_base_frame)"/>
+			<param name="tool_frame" type="str" value="$(arg right_tool_frame)"/>
+			<param name="shutdown_on_disconnect" type="bool" value="$(arg shutdown_on_disconnect)"/>
+		</node>
 		<rosparam file="$(find dual_arm_robot_driver)/config/right_controllers.yaml" command="load"/>
-		<node name="ros_control_controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="right_joint_state_controller right_vel_based_pos_traj_controller" />
-		<node name="ros_control_controller_manager" pkg="controller_manager" type="controller_manager" respawn="false" output="screen" args="load right_vel_based_admittance_traj_controller" />
-	</group>
--->
-
-
-	<arg name="controllers" default="left_vel_based_pos_traj_controller"/>
-	<arg name="stopped_controllers" default="left_vel_based_admittance_traj_controller"/>
-	<arg name="config" default="true"/>
-	<include file="$(find dual_arm_robot_description)/launch/ur5_prefix_upload.launch">
-		<arg name="limited" value="$(arg limited)"/>
-	</include>
-
-	<group ns="ur5">
+		<node name="ros_control_controller_spawner" pkg="controller_manager" type="spawner" 
+				respawn="false" output="screen" args="$(arg right_controllers)" />
+		<node name="ros_control_controller_manager" pkg="controller_manager" type="controller_manager" respawn="false" output="screen" args="load $(arg right_stopped_controllers)" />
+		<node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+	</group> 
+	<group ns="$(arg controller_name_left)">
 		<remap from="joint_states" to="/joint_states"/> 
 		<node name="ur_hardware_interface" pkg="ur_modern_driver" type="ur_driver" output="log" launch-prefix="$(arg launch_prefix)">
 			<param name="robot_ip_address" type="str" value="$(arg left_robot_ip)"/>
@@ -125,14 +84,8 @@
 		</node>
 		<rosparam file="$(find dual_arm_robot_driver)/config/left_controllers.yaml" command="load"/>
 		<node name="ros_control_controller_spawner" pkg="controller_manager" type="spawner" 
-				respawn="false" output="screen" args="$(arg controllers)" />
-		<node name="ros_control_controller_manager" pkg="controller_manager" type="controller_manager" respawn="false" output="screen" args="load $(arg stopped_controllers)" />
+				respawn="false" output="screen" args="$(arg left_controllers)" />
+		<node name="ros_control_controller_manager" pkg="controller_manager" type="controller_manager" respawn="false" output="screen" args="load $(arg left_stopped_controllers)" />
 		<node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
-		<include file="$(find ur5_moveit_config)/launch/ur5_moveit_planning_execution.launch"/>
-		<include file="$(find ur5_moveit_config)/launch/moveit_rviz.launch">
-			<arg name="config" value="$(arg config)"/>
-		</include>
-	
 	</group> 
-
 </launch>

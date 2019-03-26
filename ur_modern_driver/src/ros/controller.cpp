@@ -59,7 +59,7 @@ void ROSController::doSwitch(const std::list<hardware_interface::ControllerInfo>
   }
 
   if (start_list.size() > 0)
-    LOG_WARN("Failed to start interface!");
+    LOG_WARN("Failed to start interfacein doSwitch!");
 }
 
 bool ROSController::write()

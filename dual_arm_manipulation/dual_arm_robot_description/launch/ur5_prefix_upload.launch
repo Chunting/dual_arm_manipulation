@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="limited" default="true"/>
+  <arg name="prefix_left" default="left_"/>
+
+
+  <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find dual_arm_robot_description)/urdf/ur5_robot_prefix.urdf.xacro' prefix_left:=$(arg prefix_left) limited:=$(arg limited)"/>
+</launch>

@@ -5,70 +5,80 @@ hardware_control_loop:
 # Settings for ros_control hardware interface
 hardware_interface:
    joints:
-     - shoulder_pan_joint
-     - shoulder_lift_joint
-     - elbow_joint
-     - wrist_1_joint
-     - wrist_2_joint
-     - wrist_3_joint
+     - right_shoulder_pan_joint
+     - right_shoulder_lift_joint
+     - right_elbow_joint
+     - right_wrist_1_joint
+     - right_wrist_2_joint
+     - right_wrist_3_joint
 
 # Publish all joint states ----------------------------------
-joint_state_controller:
+right_joint_state_controller:
    type:         joint_state_controller/JointStateController
    publish_rate: 100
 
 # Publish wrench ----------------------------------
-force_torque_sensor_controller:
+right_force_torque_sensor_controller:
    type:         force_torque_sensor_controller/ForceTorqueSensorController
    publish_rate: 100
-   
+
 # Joint Trajectory Controller - velocity based -------------------------------
 # For detailed explanations of parameter see http://wiki.ros.org/
-vel_based_pos_traj_controller:
+right_vel_based_pos_traj_controller:
    type: velocity_controllers/JointTrajectoryController
    joints:
-     - shoulder_pan_joint
-     - shoulder_lift_joint
-     - elbow_joint
-     - wrist_1_joint
-     - wrist_2_joint
-     - wrist_3_joint
+     - right_shoulder_pan_joint
+     - right_shoulder_lift_joint
+     - right_elbow_joint
+     - right_wrist_1_joint
+     - right_wrist_2_joint
+     - right_wrist_3_joint
    constraints:
       goal_time: 0.6
       stopped_velocity_tolerance: 0.05
-      shoulder_pan_joint: {trajectory: 0.1, goal: 0.1}
-      shoulder_lift_joint: {trajectory: 0.1, goal: 0.1}
-      elbow_joint: {trajectory: 0.1, goal: 0.1}
-      wrist_1_joint: {trajectory: 0.1, goal: 0.1}
-      wrist_2_joint: {trajectory: 0.1, goal: 0.1}
-      wrist_3_joint: {trajectory: 0.1, goal: 0.1}
+      right_shoulder_pan_joint: {trajectory: 0.1, goal: 0.1}
+      right_shoulder_lift_joint: {trajectory: 0.1, goal: 0.1}
+      right_elbow_joint: {trajectory: 0.1, goal: 0.1}
+      right_wrist_1_joint: {trajectory: 0.1, goal: 0.1}
+      right_wrist_2_joint: {trajectory: 0.1, goal: 0.1}
+      right_wrist_3_joint: {trajectory: 0.1, goal: 0.1}
    stop_trajectory_duration: 0.5
    state_publish_rate:  100
    action_monitor_rate: 10
    gains:
       #!!These values are useable, but maybe not optimal, default: p:1.2
-      shoulder_pan_joint: {p: 20,  i: 0.0, d: 0.1, i_clamp: 1}
-      shoulder_lift_joint: {p: 20,  i: 0.0, d: 0.1, i_clamp: 1}
-      elbow_joint: {p: 20,  i: 0.0, d: 0.1, i_clamp: 1}
-      wrist_1_joint: {p: 20,  i: 0.0, d: 0.1, i_clamp: 1}
-      wrist_2_joint: {p: 20,  i: 0.0, d: 0.1, i_clamp: 1}
-      wrist_3_joint: {p: 20,  i: 0.0, d: 0.1, i_clamp: 1}
-
+      right_shoulder_pan_joint: {p: 20,  i: 0.0, d: 0.1, i_clamp: 1}
+      right_shoulder_lift_joint: {p: 20,  i: 0.0, d: 0.1, i_clamp: 1}
+      right_elbow_joint: {p: 20,  i: 0.0, d: 0.1, i_clamp: 1}
+      right_wrist_1_joint: {p: 20,  i: 0.0, d: 0.1, i_clamp: 1}
+      right_wrist_2_joint: {p: 20,  i: 0.0, d: 0.1, i_clamp: 1}
+      right_wrist_3_joint: {p: 20,  i: 0.0, d: 0.1, i_clamp: 1}
+   # Use a feedforward term to reduce the size of PID gains
+   velocity_ff:
+      right_shoulder_pan_joint: 1.0
+      right_shoulder_lift_joint: 1.0
+      right_elbow_joint: 1.0
+      right_wrist_1_joint: 1.0
+      right_wrist_2_joint: 1.0
+      right_wrist_3_joint: 1.0
    # state_publish_rate:  50 # Defaults to 50
    # action_monitor_rate: 20 # Defaults to 20
    #hold_trajectory_duration: 0 # Defaults to 0.5
 
 # Joint Trajectory Controller -------------------------------
 # For detailed explanations of parameter see http://wiki.ros.org/
-vel_based_admittance_traj_controller:
+right_vel_based_admittance_traj_controller:
    type: velocity_controllers/JointTrajectoryAdmittanceController
-   root_name: base_link
-   tip_name: ee_link
-   contact_force: 30 #[N]
-   max_velocity: 0.2
-   max_shift: 0.15
-   wrench_topic: /right/robotiq_ft_wrench
-   wrench_tolerance: 0 #5
+   root_name: right_base_link
+   tip_name: right_ee_link
+   contact_force: 20 #[N]
+   max_velocity: 0.1
+   max_shift: 0.0015
+   wrench_topic: /left/robotiq_ft_wrench
+   wrench_tolerance: 5 #5
+   force_dead_zone_thres: 2 
+   torque_dead_zone_thres: 0.5
+   wrench_filter_factor: 0.1
    admittance_pid:
       p: 0.0005
       i: 0.0000
@@ -76,33 +86,70 @@ vel_based_admittance_traj_controller:
       i_clamp_min: -0.0001
       i_clamp_max: 0.0001
    joints:
-     - shoulder_pan_joint
-     - shoulder_lift_joint
-     - elbow_joint
-     - wrist_1_joint
-     - wrist_2_joint
-     - wrist_3_joint
+     - right_shoulder_pan_joint
+     - right_shoulder_lift_joint
+     - right_elbow_joint
+     - right_wrist_1_joint
+     - right_wrist_2_joint
+     - right_wrist_3_joint
    constraints:
       goal_time: 0.6
       stopped_velocity_tolerance: 0.05
-      shoulder_pan_joint: {trajectory: 0.1, goal: 0.1}
-      shoulder_lift_joint: {trajectory: 0.1, goal: 0.1}
-      elbow_joint: {trajectory: 0.1, goal: 0.1}
-      wrist_1_joint: {trajectory: 0.1, goal: 0.1}
-      wrist_2_joint: {trajectory: 0.1, goal: 0.1}
-      wrist_3_joint: {trajectory: 0.1, goal: 0.1}
+      right_shoulder_pan_joint: {trajectory: 0.1, goal: 0.1}
+      right_shoulder_lift_joint: {trajectory: 0.1, goal: 0.1}
+      right_elbow_joint: {trajectory: 0.1, goal: 0.1}
+      right_wrist_1_joint: {trajectory: 0.1, goal: 0.1}
+      right_wrist_2_joint: {trajectory: 0.1, goal: 0.1}
+      right_wrist_3_joint: {trajectory: 0.1, goal: 0.1}
    stop_trajectory_duration: 0.5
    state_publish_rate:  100
    action_monitor_rate: 10
    gains:
       #!!These values are useable, but maybe not optimal, default: p:1.2
-      shoulder_pan_joint: {p: 20,  i: 0.0, d: 0.1, i_clamp: 1}
-      shoulder_lift_joint: {p: 20,  i: 0.0, d: 0.1, i_clamp: 1}
-      elbow_joint: {p: 20,  i: 0.0, d: 0.1, i_clamp: 1}
-      wrist_1_joint: {p: 20,  i: 0.0, d: 0.1, i_clamp: 1}
-      wrist_2_joint: {p: 20,  i: 0.0, d: 0.1, i_clamp: 1}
-      wrist_3_joint: {p: 20,  i: 0.0, d: 0.1, i_clamp: 1}
+      right_shoulder_pan_joint: {p: 20,  i: 0.0, d: 0.1, i_clamp: 1}
+      right_shoulder_lift_joint: {p: 20,  i: 0.0, d: 0.1, i_clamp: 1}
+      right_elbow_joint: {p: 20,  i: 0.0, d: 0.1, i_clamp: 1}
+      right_wrist_1_joint: {p: 20,  i: 0.0, d: 0.1, i_clamp: 1}
+      right_wrist_2_joint: {p: 20,  i: 0.0, d: 0.1, i_clamp: 1}
+      right_wrist_3_joint: {p: 20,  i: 0.0, d: 0.1, i_clamp: 1}
 
    # state_publish_rate:  50 # Defaults to 50
    # action_monitor_rate: 20 # Defaults to 20
    #hold_trajectory_duration: 0 # Defaults to 0.5
+# Joint Trajectory Controller - position based -------------------------------
+# For detailed explanations of parameter see http://wiki.ros.org/joint_trajectory_controller
+right_pos_based_pos_traj_controller:
+   type: position_controllers/JointTrajectoryController
+   joints:
+     - right_shoulder_pan_joint
+     - right_shoulder_lift_joint
+     - right_elbow_joint
+     - right_wrist_1_joint
+     - right_wrist_2_joint
+     - right_wrist_3_joint
+   constraints:
+      goal_time: 0.6
+      stopped_velocity_tolerance: 0.05
+      right_shoulder_pan_joint: {trajectory: 0.1, goal: 0.1}
+      right_shoulder_lift_joint: {trajectory: 0.1, goal: 0.1}
+      right_elbow_joint: {trajectory: 0.1, goal: 0.1}
+      right_wrist_1_joint: {trajectory: 0.1, goal: 0.1}
+      right_wrist_2_joint: {trajectory: 0.1, goal: 0.1}
+      right_wrist_3_joint: {trajectory: 0.1, goal: 0.1}
+   stop_trajectory_duration: 0.5
+   state_publish_rate:  125
+   action_monitor_rate: 10
+
+   # state_publish_rate:  50 # Defaults to 50
+   # action_monitor_rate: 20 # Defaults to 20
+   #stop_trajectory_duration: 0 # Defaults to 0.0
+   # Pass an array of joint velocities directly to the joints
+right_joint_group_vel_controller:
+   type: velocity_controllers/JointGroupVelocityController
+   joints:
+     - right_shoulder_pan_joint
+     - right_shoulder_lift_joint
+     - right_elbow_joint
+     - right_wrist_1_joint
+     - right_wrist_2_joint
+     - right_wrist_3_joint

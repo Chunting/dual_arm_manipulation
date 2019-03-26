@@ -1,0 +1,214 @@
+<?xml version="1.0"?><!--this tag must be in the first line of the xml files-->
+<robot xmlns:xacro="http://wiki.ros.org/xacro" name="dual_arm_robot">
+	<!-- rosrun xacro xacro.py dual_arm_robot.urdf.xacro >  dual_arm_robot.urdf -->
+	<!--Processing Order: Classicly Xacro first loads all includes, 
+	    then processes all property and macro definitions and finally instantiates macros and evaluates expressions. --> 
+	
+	<!-- common stuff -->
+	<xacro:include filename="$(find ur_description)/urdf/common.gazebo.xacro"/>
+
+	<!-- ur5 -->
+	<xacro:include filename="$(find dual_arm_robot_description)/urdf/ur5.urdf.xacro"/>
+
+	<!-- ft300 -->
+	<xacro:include filename="$(find robotiq_ft_sensor)/urdf/robotiq_fts300.urdf.xacro" />
+
+	<!-- endeffector -->
+	<xacro:include filename="$(find dual_arm_robot_description)/urdf/endeffector.urdf.xacro"/>
+ 	<xacro:property name="PI" value="3.14159265" />
+	<xacro:property name="robot_horizontal_stand_width" value="0.5"/>
+	<xacro:property name="robot_vertical_stand_height" value="1.2"/>
+
+	<xacro:arg name="prefix_left" default=""/>
+	<xacro:arg name="prefix_right" default=""/>
+	<xacro:arg name="limited" default="true"/>
+
+	<!-- color macros -->
+	<xacro:macro name="material_orange_transparent">
+		<material name="orange_transparent">
+			<color rgba="1 0.5 0 0.4"/>
+		</material>
+	</xacro:macro>
+	<xacro:macro name="material_blue_transparent">
+		<material name="blue_transparent">
+			<color rgba="0 0.8 1 0.4"/>
+		</material>
+	</xacro:macro>
+
+	<xacro:material_orange_transparent />
+	<xacro:material_blue_transparent />
+
+	<!-- end of color macros -->
+	<!-- Stand macros -->
+
+	<link name="world"/>
+	<link name="stand_Base">
+		<visual>
+			<geometry>
+				<cylinder radius="0.5" length="0.7"/>
+			</geometry>
+			<material name="orange_transparent"/>
+		</visual>
+		<collision>
+			<geometry>
+				<cylinder radius="0.5" length="0.7"/>
+			</geometry>
+			<material name="blue_transparent"/>
+		</collision>
+	</link>
+	<!-- place world reference -->
+	<joint name="world_to_stand_Base" type="fixed">
+		<parent link="world"/>
+		<child link="stand_Base"/>
+		<origin xyz="0 0 0.35" rpy="0 0 0"/>
+	</joint>
+
+	<link name="stand1">
+		<visual>
+			<geometry>
+				<cylinder radius="0.08" length="0.8"/>
+			</geometry>
+			<material name="orange_transparent"/>
+		</visual>
+		<collision>
+			<geometry>
+				<cylinder radius="0.08" length="0.8"/>
+			</geometry>
+			<material name="blue_transparent"/>
+		</collision>
+	</link>
+
+	<joint name="Base_to_stand1" type="fixed">
+		<parent link="stand_Base"/>
+		<child link="stand1"/>
+		<origin xyz="0 0 0.6" rpy="0 0 0"/>
+	</joint>
+
+	<link name="stand2">
+		<visual>
+			<geometry>
+				<cylinder radius="0.08" length="${robot_horizontal_stand_width}"/>
+			</geometry>
+			<material name="orange_transparent"/>
+		</visual>
+		<collision>
+			<geometry>
+				<cylinder radius="0.08" length="${robot_horizontal_stand_width}"/>
+			</geometry>
+			<material name="blue_transparent"/>
+		</collision>
+	</link>
+
+
+	<joint name="stand1_to_stand2" type="fixed">
+		<parent link="stand1"/>
+		<child link="stand2"/>
+		<origin xyz="0 0 0.25" rpy="1.57 1.57 0"/>
+	</joint>
+
+	<link name="table">
+		<visual>
+			<geometry>
+				<box size="1 1.2 0.97" />
+			</geometry>
+			<material name="orange_transparent"/>
+		</visual>
+		<collision>
+			<geometry>
+				<box size="1 1.2 0.92" />
+			</geometry>
+			<material name="blue_transparent"/>
+		</collision>
+	</link>
+	<joint name="table_joint" type="fixed">
+		<parent link="world" />
+		<child link="table" />
+		<origin xyz="-1 0 0.485" rpy="0 0 0" />
+	</joint>
+
+	<!-- End of stand macros-->
+	<!-- place ur5 left arm    -->
+	<xacro:ur5_robot prefix="$(arg prefix_left)" joint_limited="$(arg limited)"/>
+	<joint name="stand2_to_left_arm" type="fixed">
+		<parent link="stand2"/>
+		<child link ="$(arg prefix_left)base_link"/>
+		<origin xyz="0 0 ${(robot_horizontal_stand_width/2)}" rpy="${PI/4.0} 0 0"/>
+	</joint>
+
+
+	<!-- place robotiq_fts300 to left arm -->
+	<xacro:robotiq_fts300 prefix="" parent="$(arg prefix_left)ee_link"/>
+
+	<!-- place ur5 endeffector  -->
+	<xacro:endeffector prefix="$(arg prefix_left)"/>
+	<joint name="$(arg prefix_left)ee_mount" type="fixed">
+		<parent link="fts_toolside" />
+		<child link = "$(arg prefix_left)ee_frame" />
+		<origin xyz="0.0 0.0 0.0" rpy="0 0 0 " />
+	</joint>
+
+
+	
+
+	<link name="wall">
+		<visual>
+			<geometry>
+				<box size="1 1 3" />
+			</geometry>
+			<material name="blue_transparent"/>
+		</visual>
+		<collision>
+			<geometry>
+				<box size="1 1 3" />
+			</geometry>
+			<material name="blue_transparent"/>
+		</collision>
+	</link>
+	<joint name="wall_joint" type="fixed">
+		<parent link="world" />
+		<child link="wall" />
+		<origin xyz="-1.6 -1.55 1.5" rpy="0 0 0" />
+	</joint>
+
+	<link name="wall1">
+		<visual>
+			<geometry>
+				<box size="0.01 2 3" />
+			</geometry>
+			<material name="blue_transparent"/>
+		</visual>
+		<collision>
+			<geometry>
+				<box size="0.01 2 3" />
+			</geometry>
+			<material name="blue_transparent"/>
+		</collision>
+	</link>
+	<joint name="wall_joint1" type="fixed">
+		<parent link="world" />
+		<child link="wall1" />
+		<origin xyz="0.5 0 1.5" rpy="0 0 0" />
+	</joint>
+
+	<link name="wall2">
+		<visual>
+			<geometry>
+				<box size="2 0.01 3" />
+			</geometry>
+			<material name="blue_transparent"/>
+		</visual>
+		<collision>
+			<geometry>
+				<box size="2 0.01 3" />
+			</geometry>
+			<material name="blue_transparent"/>
+		</collision>
+	</link>
+	<joint name="wall_joint2" type="fixed">
+		<parent link="world" />
+		<child link="wall2" />
+		<origin xyz="-1 1.4 1.5" rpy="0 0 0" />
+	</joint>
+	
+
+</robot>
