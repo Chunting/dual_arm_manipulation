@@ -1,6 +1,6 @@
 ### ros-control settings:
 controller_list:
-  - name: left #/left_vel_based_pos_traj_controller or pos_based_pos_traj_controller
+  - name: left/left_vel_based_pos_traj_controller #or pos_based_pos_traj_controller
     action_ns: follow_joint_trajectory
     type: FollowJointTrajectory
     joints:
@@ -11,7 +11,7 @@ controller_list:
       - left_wrist_2_joint
       - left_wrist_3_joint
 
-  - name: right #/right_vel_based_pos_traj_controller #or pos_based_pos_traj_controller
+  - name: right/right_vel_based_pos_traj_controller #or pos_based_pos_traj_controller
     action_ns: follow_joint_trajectory
     type: FollowJointTrajectory
     joints:

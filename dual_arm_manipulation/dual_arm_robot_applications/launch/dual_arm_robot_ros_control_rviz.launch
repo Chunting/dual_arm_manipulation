@@ -26,15 +26,15 @@
 
 
 	<!-- MoveIt! Setup -->
-	<!-- dual arm robot planning execution 
+
 	<include file="$(find dual_arm_robot_moveit_config)/launch/dual_arm_robot_moveit_planning_execution.launch"/>
 	<param name="move_group/trajectory_execution/allowed_start_tolerance" value="0.5" />
--->
-	<!-- dual arm robot rviz moveit 
+
+
 	<include file="$(find dual_arm_robot_moveit_config)/launch/moveit_rviz.launch">
 		<arg name="config" value="$(arg config)"/>
 	</include>
--->
+
 	<!-- Start force/torque sensor 
 	<node name="ft_sensor" pkg="robotiq_ft_sensor" type="rq_sensor" respawn="true" output="screen"/>
 -->
