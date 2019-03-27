@@ -165,3 +165,19 @@ Add distro "melodic"
 updated cache in /home/chunting/.ros/rosdep/sources.cache
 chunting@UR-Robot:~/catkin_ws$ rosdep update
 
+
+sudo apt-get install ros-kinetic-soem
+sudo apt-get install ros-kinetic-ros-canopen
+sudo apt-get install ros-kinetic-universal-robot
+sudo apt-get install ros-kinetic-industrial*
+sudo apt-get install ros-kinetic-controller-manager
+
+6. Change move_group header file
+ #include <moveit/move_group_interface/move_group_interface.h> 
+
+It manages to compile.
+
+
+
+
+

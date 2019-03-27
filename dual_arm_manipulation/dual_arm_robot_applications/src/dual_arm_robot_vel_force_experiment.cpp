@@ -37,7 +37,7 @@ void run_experiment(ros::NodeHandle &nh, ros::Publisher &c_joint_speed_pub,
     geometry_msgs::PoseStamped current_pose = left_.getCurrentPose();
     std::cout << "x: " << current_pose.pose.position.x << "\ty: " << current_pose.pose.position.y << "\tz:  " << current_pose.pose.position.z << std::endl;
     double radius = sqrt(current_pose.pose.position.x * current_pose.pose.position.x + current_pose.pose.position.y * current_pose.pose.position.y);
-    double omega = 0.5;//velocity / radius;                //velocity/radius;
+    double omega = velocity / radius;                //velocity/radius;
     double moving_time = moving_distance / velocity; //move 3cm, obstacle is around 1-2 cm away.
     std::cout << "RADIUS: " << radius << "\t omega: " << omega << "\tmoving_time: " << moving_time << std::endl;
     // Output Message Speed = const

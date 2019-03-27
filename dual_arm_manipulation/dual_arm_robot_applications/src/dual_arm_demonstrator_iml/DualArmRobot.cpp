@@ -67,8 +67,8 @@ DualArmRobot::DualArmRobot(ros::NodeHandle &nh) : left_("left_manipulator"),
 
     // Controller Interface
     // It has to be consistent with group ns and names in controllers.yaml
-    left_controller_ = "left";
-    right_controller_ = "right";
+    left_controller_ = "left/left_vel_based_pos_traj_controller";
+    right_controller_ = "right/right_vel_based_pos_traj_controller";
     //subscribe to the data topic of interest
     pose_publish_thread_ = new std::thread(boost::bind(&DualArmRobot::publishPoseMsg, this));
 

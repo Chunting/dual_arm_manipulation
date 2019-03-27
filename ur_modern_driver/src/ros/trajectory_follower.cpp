@@ -128,8 +128,8 @@ bool TrajectoryFollower::execute(std::array<double, 6> &positions, bool keep_ali
   if (!running_)
     return false;
 
-  //  LOG_INFO("servoj([%f,%f,%f,%f,%f,%f])", positions[0], positions[1], positions[2], positions[3], positions[4],
-  //  positions[5]);
+   LOG_INFO("servoj([%f,%f,%f,%f,%f,%f])", positions[0], positions[1], positions[2], positions[3], positions[4],
+   positions[5]);
 
   last_positions_ = positions;
 
