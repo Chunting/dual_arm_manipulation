@@ -90,6 +90,7 @@ TrajectoryFollower::TrajectoryFollower(URCommander &commander, std::string &reve
   res.replace(res.find(SERVER_IP_REPLACE), SERVER_IP_REPLACE.length(), reverse_ip);
   res.replace(res.find(SERVER_PORT_REPLACE), SERVER_PORT_REPLACE.length(), std::to_string(reverse_port));
   program_ = res;
+  LOG_INFO("TrajectoryFollower %s", program_);
 
   if (!server_.bind())
   {

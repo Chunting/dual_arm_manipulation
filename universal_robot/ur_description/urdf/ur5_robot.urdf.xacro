@@ -1,22 +1,38 @@
 <?xml version="1.0"?>
-<robot xmlns:xacro="http://wiki.ros.org/xacro"
-       name="ur5" >
+<robot xmlns:xacro="http://wiki.ros.org/xacro" name="ur5" >
 
   <!-- common stuff -->
   <xacro:include filename="$(find ur_description)/urdf/common.gazebo.xacro" />
 
   <!-- ur5 -->
   <xacro:include filename="$(find ur_description)/urdf/ur5.urdf.xacro" />
+  <!-- ft300 -->
+  <xacro:include filename="$(find robotiq_ft_sensor)/urdf/robotiq_fts300.urdf.xacro" />
 
+ <!-- endeffector -->
+  <xacro:include filename="$(find dual_arm_robot_description)/urdf/endeffector.urdf.xacro"/>
+
+  <xacro:arg name="prefix" default=""/>
   <!-- arm -->
-  <xacro:ur5_robot prefix="" joint_limited="false"/>
+  <xacro:ur5_robot prefix="$(arg prefix)" joint_limited="false"/>
 
   <link name="world" />
 
   <joint name="world_joint" type="fixed">
     <parent link="world" />
-    <child link = "base_link" />
+    <child link = "$(arg prefix)base_link" />
     <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+  </joint>
+
+
+  <!-- place robotiq_fts300 to left arm -->
+  <xacro:robotiq_fts300 prefix="$(arg prefix)" parent="$(arg prefix)ee_link"/>
+  <!-- place ur5 endeffector  -->
+  <xacro:endeffector prefix="$(arg prefix)"/>
+  <joint name="$(arg prefix)ee_mount" type="fixed">
+		<parent link="fts_toolside" />
+		<child link = "$(arg prefix)ee_frame" />
+		<origin xyz="0.0 0.0 0.0" rpy="0 0 0 " />
   </joint>
 
 </robot>

@@ -105,6 +105,11 @@ bool parse_args(ProgArgs &args)
   ros::param::param(TCP_LINK_ARG, args.tcp_link, args.prefix + "tool0");
   ros::param::param(JOINT_NAMES_PARAM, args.joint_names, DEFAULT_JOINTS);
   ros::param::param(SHUTDOWN_ON_DISCONNECT_ARG, args.shutdown_on_disconnect, true);
+
+  ROS_INFO("args.max_vel_change = %f", args.max_vel_change);
+  ROS_INFO("args.max_velocity = %f", args.max_velocity);
+  ROS_INFO("%s = %s", PREFIX_ARG.c_str(), args.prefix.c_str());
+  ROS_INFO("%s = %s", TOOL_FRAME_ARG.c_str(), args.tool_frame.c_str());
   return true;
 }
 
@@ -127,7 +132,9 @@ int main(int argc, char **argv)
   // Add prefix to joint names
   std::transform(args.joint_names.begin(), args.joint_names.end(), args.joint_names.begin(),
                  [&args](std::string name) { return args.prefix + name; });
-
+  printf("Prefix: %s\n Joint names: %s\t%s\t%s\t%s\t%s\t%s\n", args.prefix.c_str(),
+        args.joint_names[0].c_str(),args.joint_names[1].c_str(),args.joint_names[2].c_str(),
+        args.joint_names[3].c_str(),args.joint_names[4].c_str(),args.joint_names[5].c_str());
   std::string local_ip(getLocalIPAccessibleFromHost(args.host));
 
   URFactory factory(args.host);
@@ -168,6 +175,7 @@ int main(int argc, char **argv)
       LOG_INFO("Use standard trajectory follower");
       traj_follower = new TrajectoryFollower(*rt_commander, local_ip, args.reverse_port, factory.isVersion3());
     }
+    
     action_server = new ActionServer(*traj_follower, args.joint_names, args.max_velocity);
     rt_vec.push_back(action_server);
     services.push_back(action_server);

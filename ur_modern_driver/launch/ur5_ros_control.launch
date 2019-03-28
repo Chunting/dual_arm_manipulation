@@ -16,8 +16,12 @@
   <arg name="base_frame" default="$(arg prefix)base" />
   <arg name="tool_frame" default="$(arg prefix)tool0_controller" />
   <arg name="shutdown_on_disconnect" default="true" />
-  <arg name="controllers" default="joint_state_controller  vel_based_pos_traj_controller"/>
-  <arg name="stopped_controllers" default="pos_based_pos_traj_controller"/>
+
+<!-- The two parameters are reset for ur_compliance project-->
+<!-- https://github.com/UTNuclearRobotics/ros_controllers/tree/kinetic-compliance/compliance_controller --> 
+  <arg name="controllers" default="joint_state_controller  compliance_controller"/>
+  <arg name="stopped_controllers" default="pos_based_pos_traj_controller joint_group_vel_controller vel_based_pos_traj_controller"/>
+
   <arg name="config" default="true"/>
   <!-- robot model -->
   <include file="$(find ur_description)/launch/ur5_upload.launch">

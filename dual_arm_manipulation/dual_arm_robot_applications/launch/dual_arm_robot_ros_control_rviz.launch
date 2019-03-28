@@ -7,7 +7,7 @@
 	<arg if="$(arg debug)" name="launch_prefix" value="xterm -e gdb --args" />
 	<!-- left arm -->
 	<arg name="left_prefix" default=""/>
-	<arg name="controller_name_left" default="left"/>
+	<arg name="left_controller_name" default="left"/>
 	<arg name="left_robot_ip" default="192.168.1.101"/>
 	<arg name="left_reverse_port" default="50001"/>
 	<arg name="left_base_frame" default="left_base" />
@@ -17,7 +17,7 @@
 
 	<!-- right arm -->
 	<arg name="right_prefix" default=""/>
-	<arg name="controller_name_right" default="right"/>
+	<arg name="right_controller_name" default="right"/>
 	<arg name="right_robot_ip" default="192.168.1.102"/>
 	<arg name="right_reverse_port" default="50002"/>
 	<arg name="right_base_frame" default="right_base" />

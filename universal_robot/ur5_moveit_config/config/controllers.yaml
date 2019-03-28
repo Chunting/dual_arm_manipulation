@@ -1,5 +1,5 @@
 controller_list:
-  - name: ""
+  - name: "compliance_controller"  # This name is set particular for ur_complicance, if you do not work on this project, please reset it back to empty.
     action_ns: follow_joint_trajectory
     type: FollowJointTrajectory
     joints:
