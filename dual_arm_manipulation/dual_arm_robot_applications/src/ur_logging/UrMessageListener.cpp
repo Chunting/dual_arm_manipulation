@@ -65,7 +65,7 @@ void UR_Message_Listener::FT_wrench_Callback(const geometry_msgs::WrenchStamped:
     std::string topic = ur_namespace_ + "/robotiq_ft_wrench";
     // ROS_INFO("I received last_wrench_msg_ to [%s]: Frame_id [%s] Time [%f] FX[%f] FY[%f] FZ[%f] MX[%f] MY[%f] MZ[%f]",
     //     topic.c_str(),
-    //     last_wrench_msg_.header.frame_id.c_str(),   // robotiq_force_torque_frame_id
+    //     last_wrench_msg_.header.frame_id.c_str(),   // robotiq_ft_frame_id
     //     last_wrench_msg_.header.stamp.toSec(),
     //     last_wrench_msg_.wrench.force.x, last_wrench_msg_.wrench.force.y, last_wrench_msg_.wrench.force.z,
     //     last_wrench_msg_.wrench.torque.x, last_wrench_msg_.wrench.torque.y, last_wrench_msg_.wrench.torque.z);

@@ -84,7 +84,7 @@ class AdmittanceControl
     double wrench_filter_factor_;
     double force_dead_zone_thres_;
     double torque_dead_zone_thres_;
-    // external wrench (force/torque sensor) in "robotiq_force_torque_frame_id" frame
+    // external wrench (force/torque sensor) in "robotiq_ft_frame_id" frame
     Vector6d wrench_external_;
     // receiving a new equilibrium from a topic
     Vector3d offset_new_;
@@ -119,7 +119,7 @@ void AdmittanceControl::wrenchCallback(const geometry_msgs::WrenchStamped::Const
 { // wrench in coordinate system of base
     geometry_msgs::WrenchStamped wrench_msg = *msg;
     Vector6d wrench_ft_frame;
-    // Reading the FT-sensor in its own frame (robotiq_force_torque_frame_id)
+    // Reading the FT-sensor in its own frame (robotiq_ft_frame_id)
     wrench_ft_frame << msg->wrench.force.x, msg->wrench.force.y, msg->wrench.force.z, msg->wrench.torque.x, msg->wrench.torque.y, msg->wrench.torque.z;
 
     for (int i = 0; i < 3; i++)

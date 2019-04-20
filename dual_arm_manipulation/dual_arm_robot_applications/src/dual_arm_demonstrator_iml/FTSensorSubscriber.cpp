@@ -27,7 +27,7 @@ FTSensorSubscriber::FTSensorSubscriber(ros::NodeHandle &nh, std::string ur_names
 void FTSensorSubscriber::wrenchCallback(const geometry_msgs::WrenchStamped::Ptr &msg)
 {
     Vector6d wrench_ft_frame;
-    // Reading the FT-sensor in its own frame (robotiq_force_torque_frame_id)
+    // Reading the FT-sensor in its own frame (robotiq_ft_frame_id)
     wrench_ft_frame << msg->wrench.force.x, msg->wrench.force.y,
         msg->wrench.force.z, msg->wrench.torque.x,
         msg->wrench.torque.y, msg->wrench.torque.z;
@@ -59,7 +59,7 @@ void FTSensorSubscriber::wrenchCallback(const geometry_msgs::WrenchStamped::Ptr 
     // std::string topic = ur_namespace_ + "/robotiq_ft_wrench";
     // ROS_INFO("I publish last_wrench_msg_ to [%s]: Frame_id [%s] Time [%f] FX[%f] FY[%f] FZ[%f] MX[%f] MY[%f] MZ[%f]",
     //     topic.c_str(),
-    //     last_wrench_msg_.header.frame_id.c_str(),   // robotiq_force_torque_frame_id
+    //     last_wrench_msg_.header.frame_id.c_str(),   // robotiq_ft_frame_id
     //     last_wrench_msg_.header.stamp.toSec(),
     //     last_wrench_msg_.wrench.force.x, last_wrench_msg_.wrench.force.y, last_wrench_msg_.wrench.force.z,
     //     last_wrench_msg_.wrench.torque.x, last_wrench_msg_.wrench.torque.y, last_wrench_msg_.wrench.torque.z);

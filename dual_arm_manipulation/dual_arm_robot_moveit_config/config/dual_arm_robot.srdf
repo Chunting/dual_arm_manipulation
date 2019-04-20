@@ -20,19 +20,22 @@
         <group name="right_manipulator" />
     </group>
     <group name="left_ee">
-        <link name="fts_robotside" />
-        <link name="robotiq_force_torque_frame_id" />
-        <link name="fts_toolside" />
+        <link name="left_fts_robotside" />
+        <link name="left_robotiq_ft_frame_id" />
+        <link name="left_fts_toolside" />
         <link name="left_ee_frame" />
         <link name="left_ee_spring" />
         <link name="left_ee_0" />
-        <chain base_link="fts_robotside" tip_link="left_ee_0" />
+        <chain base_link="left_fts_robotside" tip_link="left_ee_0" />
     </group>
     <group name="right_ee">
         <link name="right_ee_frame" />
         <link name="right_ee_spring" />
         <link name="right_ee_0" />
-        <chain base_link="right_ee_frame" tip_link="right_ee_0" />
+        <link name="right_fts_robotside" />
+        <link name="right_robotiq_ft_frame_id" />
+        <link name="right_fts_toolside" />
+        <chain base_link="right_fts_robotside" tip_link="right_ee_0" />
     </group>
     <!--GROUP STATES: Purpose: Define a named state for a particular group, in terms of joint values. This is useful to define states like 'folded arms'-->
     <group_state name="left_up" group="left_manipulator">
@@ -85,15 +88,6 @@
     <!--VIRTUAL JOINT: Purpose: this element defines a virtual joint between a robot link and an external frame of reference (considered fixed with respect to the robot)-->
     <virtual_joint name="virtual_joint" type="fixed" parent_frame="stand1" child_link="world" />
     <!--DISABLE COLLISIONS: By default it is assumed that any link of the robot could potentially come into collision with any other link in the robot. This tag disables collision checking between a specified pair of links. -->
-    <disable_collisions link1="fts_robotside" link2="left_ee_frame" reason="Adjacent" />
-    <disable_collisions link1="fts_robotside" link2="left_ee_link" reason="Adjacent" />
-    <disable_collisions link1="fts_robotside" link2="left_ee_spring" reason="Never" />
-    <disable_collisions link1="fts_robotside" link2="left_wrist_1_link" reason="Never" />
-    <disable_collisions link1="fts_robotside" link2="left_wrist_2_link" reason="Never" />
-    <disable_collisions link1="fts_robotside" link2="left_wrist_3_link" reason="Never" />
-    <disable_collisions link1="fts_robotside" link2="stand_Base" reason="Default" />
-    <disable_collisions link1="fts_robotside" link2="wall" reason="Never" />
-    <disable_collisions link1="fts_robotside" link2="wall2" reason="Never" />
     <disable_collisions link1="left_base_link" link2="left_shoulder_link" reason="Adjacent" />
     <disable_collisions link1="left_base_link" link2="right_base_link" reason="Never" />
     <disable_collisions link1="left_base_link" link2="right_shoulder_link" reason="Never" />
@@ -106,38 +100,41 @@
     <disable_collisions link1="left_base_link" link2="wall2" reason="Never" />
     <disable_collisions link1="left_ee_frame" link2="left_ee_link" reason="Never" />
     <disable_collisions link1="left_ee_frame" link2="left_ee_spring" reason="Adjacent" />
+    <disable_collisions link1="left_ee_frame" link2="left_fts_robotside" reason="Adjacent" />
     <disable_collisions link1="left_ee_frame" link2="left_wrist_1_link" reason="Never" />
     <disable_collisions link1="left_ee_frame" link2="left_wrist_2_link" reason="Never" />
     <disable_collisions link1="left_ee_frame" link2="left_wrist_3_link" reason="Never" />
-    <disable_collisions link1="left_ee_frame" link2="stand_Base" reason="Default" />
     <disable_collisions link1="left_ee_frame" link2="wall" reason="Never" />
     <disable_collisions link1="left_ee_frame" link2="wall2" reason="Never" />
     <disable_collisions link1="left_ee_link" link2="left_ee_spring" reason="Never" />
+    <disable_collisions link1="left_ee_link" link2="left_fts_robotside" reason="Adjacent" />
     <disable_collisions link1="left_ee_link" link2="left_wrist_1_link" reason="Never" />
     <disable_collisions link1="left_ee_link" link2="left_wrist_2_link" reason="Never" />
     <disable_collisions link1="left_ee_link" link2="left_wrist_3_link" reason="Adjacent" />
     <disable_collisions link1="left_ee_link" link2="right_ee_link" reason="Never" />
-    <disable_collisions link1="left_ee_link" link2="stand_Base" reason="Default" />
     <disable_collisions link1="left_ee_link" link2="wall" reason="Never" />
     <disable_collisions link1="left_ee_link" link2="wall2" reason="Never" />
+    <disable_collisions link1="left_ee_spring" link2="left_fts_robotside" reason="Never" />
     <disable_collisions link1="left_ee_spring" link2="left_wrist_1_link" reason="Never" />
     <disable_collisions link1="left_ee_spring" link2="left_wrist_2_link" reason="Never" />
     <disable_collisions link1="left_ee_spring" link2="left_wrist_3_link" reason="Never" />
-    <disable_collisions link1="left_ee_spring" link2="stand_Base" reason="Default" />
     <disable_collisions link1="left_ee_spring" link2="wall" reason="Never" />
     <disable_collisions link1="left_ee_spring" link2="wall2" reason="Never" />
     <disable_collisions link1="left_forearm_link" link2="left_upper_arm_link" reason="Adjacent" />
     <disable_collisions link1="left_forearm_link" link2="left_wrist_1_link" reason="Adjacent" />
-    <disable_collisions link1="left_forearm_link" link2="stand_Base" reason="Default" />
     <disable_collisions link1="left_forearm_link" link2="wall" reason="Never" />
     <disable_collisions link1="left_forearm_link" link2="wall2" reason="Never" />
+    <disable_collisions link1="left_fts_robotside" link2="left_wrist_1_link" reason="Never" />
+    <disable_collisions link1="left_fts_robotside" link2="left_wrist_2_link" reason="Never" />
+    <disable_collisions link1="left_fts_robotside" link2="left_wrist_3_link" reason="Never" />
+    <disable_collisions link1="left_fts_robotside" link2="wall" reason="Never" />
+    <disable_collisions link1="left_fts_robotside" link2="wall2" reason="Never" />
     <disable_collisions link1="left_shoulder_link" link2="left_upper_arm_link" reason="Adjacent" />
     <disable_collisions link1="left_shoulder_link" link2="right_base_link" reason="Never" />
     <disable_collisions link1="left_shoulder_link" link2="right_shoulder_link" reason="Never" />
     <disable_collisions link1="left_shoulder_link" link2="right_upper_arm_link" reason="Never" />
     <disable_collisions link1="left_shoulder_link" link2="stand1" reason="Never" />
     <disable_collisions link1="left_shoulder_link" link2="stand2" reason="Default" />
-    <disable_collisions link1="left_shoulder_link" link2="stand_Base" reason="Never" />
     <disable_collisions link1="left_shoulder_link" link2="table" reason="Never" />
     <disable_collisions link1="left_shoulder_link" link2="wall" reason="Never" />
     <disable_collisions link1="left_shoulder_link" link2="wall1" reason="Never" />
@@ -146,7 +143,6 @@
     <disable_collisions link1="left_upper_arm_link" link2="wall" reason="Never" />
     <disable_collisions link1="left_upper_arm_link" link2="wall1" reason="Never" />
     <disable_collisions link1="left_upper_arm_link" link2="wall2" reason="Never" />
-    <disable_collisions link1="left_upper_arm_link" link2="stand2" reason="Never" />
     <disable_collisions link1="left_wrist_1_link" link2="left_wrist_2_link" reason="Adjacent" />
     <disable_collisions link1="left_wrist_1_link" link2="left_wrist_3_link" reason="Never" />
     <disable_collisions link1="left_wrist_1_link" link2="stand_Base" reason="Default" />
@@ -167,19 +163,22 @@
     <disable_collisions link1="right_base_link" link2="wall" reason="Never" />
     <disable_collisions link1="right_base_link" link2="wall1" reason="Never" />
     <disable_collisions link1="right_base_link" link2="wall2" reason="Never" />
-    <disable_collisions link1="right_ee_frame" link2="right_ee_link" reason="Adjacent" />
+    <disable_collisions link1="right_ee_frame" link2="right_ee_link" reason="Never" />
     <disable_collisions link1="right_ee_frame" link2="right_ee_spring" reason="Adjacent" />
+    <disable_collisions link1="right_ee_frame" link2="right_fts_robotside" reason="Adjacent" />
     <disable_collisions link1="right_ee_frame" link2="right_wrist_1_link" reason="Never" />
     <disable_collisions link1="right_ee_frame" link2="right_wrist_2_link" reason="Never" />
-    <disable_collisions link1="right_ee_frame" link2="right_wrist_3_link" reason="Default" />
+    <disable_collisions link1="right_ee_frame" link2="right_wrist_3_link" reason="Never" />
     <disable_collisions link1="right_ee_frame" link2="wall" reason="Never" />
     <disable_collisions link1="right_ee_frame" link2="wall2" reason="Never" />
     <disable_collisions link1="right_ee_link" link2="right_ee_spring" reason="Never" />
+    <disable_collisions link1="right_ee_link" link2="right_fts_robotside" reason="Adjacent" />
     <disable_collisions link1="right_ee_link" link2="right_wrist_1_link" reason="Never" />
     <disable_collisions link1="right_ee_link" link2="right_wrist_2_link" reason="Never" />
     <disable_collisions link1="right_ee_link" link2="right_wrist_3_link" reason="Adjacent" />
     <disable_collisions link1="right_ee_link" link2="wall" reason="Never" />
     <disable_collisions link1="right_ee_link" link2="wall2" reason="Never" />
+    <disable_collisions link1="right_ee_spring" link2="right_fts_robotside" reason="Never" />
     <disable_collisions link1="right_ee_spring" link2="right_wrist_1_link" reason="Never" />
     <disable_collisions link1="right_ee_spring" link2="right_wrist_2_link" reason="Never" />
     <disable_collisions link1="right_ee_spring" link2="right_wrist_3_link" reason="Never" />
@@ -189,6 +188,11 @@
     <disable_collisions link1="right_forearm_link" link2="right_wrist_1_link" reason="Adjacent" />
     <disable_collisions link1="right_forearm_link" link2="wall" reason="Never" />
     <disable_collisions link1="right_forearm_link" link2="wall2" reason="Never" />
+    <disable_collisions link1="right_fts_robotside" link2="right_wrist_1_link" reason="Never" />
+    <disable_collisions link1="right_fts_robotside" link2="right_wrist_2_link" reason="Never" />
+    <disable_collisions link1="right_fts_robotside" link2="right_wrist_3_link" reason="Never" />
+    <disable_collisions link1="right_fts_robotside" link2="wall" reason="Never" />
+    <disable_collisions link1="right_fts_robotside" link2="wall2" reason="Never" />
     <disable_collisions link1="right_shoulder_link" link2="right_upper_arm_link" reason="Adjacent" />
     <disable_collisions link1="right_shoulder_link" link2="stand1" reason="Never" />
     <disable_collisions link1="right_shoulder_link" link2="stand2" reason="Default" />
@@ -200,7 +204,6 @@
     <disable_collisions link1="right_upper_arm_link" link2="wall" reason="Never" />
     <disable_collisions link1="right_upper_arm_link" link2="wall1" reason="Never" />
     <disable_collisions link1="right_upper_arm_link" link2="wall2" reason="Never" />
-    <disable_collisions link1="right_upper_arm_link" link2="stand2" reason="Never" />
     <disable_collisions link1="right_wrist_1_link" link2="right_wrist_2_link" reason="Adjacent" />
     <disable_collisions link1="right_wrist_1_link" link2="right_wrist_3_link" reason="Never" />
     <disable_collisions link1="right_wrist_1_link" link2="wall" reason="Never" />

@@ -21,7 +21,7 @@
     </group>
     <group name="left_ee">
         <link name="fts_robotside" />
-        <link name="robotiq_force_torque_frame_id" />
+        <link name="robotiq_ft_frame_id" />
         <link name="fts_toolside" />
         <link name="left_ee_frame" />
         <link name="left_ee_spring" />

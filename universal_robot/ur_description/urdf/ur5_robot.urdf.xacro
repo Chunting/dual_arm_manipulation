@@ -30,7 +30,7 @@
   <!-- place ur5 endeffector  -->
   <xacro:endeffector prefix="$(arg prefix)"/>
   <joint name="$(arg prefix)ee_mount" type="fixed">
-		<parent link="fts_toolside" />
+		<parent link="$(arg prefix)fts_toolside" />
 		<child link = "$(arg prefix)ee_frame" />
 		<origin xyz="0.0 0.0 0.0" rpy="0 0 0 " />
   </joint>

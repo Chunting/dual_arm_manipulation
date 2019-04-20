@@ -63,7 +63,7 @@ Visualization Manager:
           Expand Link Details: false
           Expand Tree: false
           Link Tree Style: Links in Alphabetic Order
-          fts_robotside:
+          left_fts_robotside:
             Alpha: 1
             Show Axes: false
             Show Trail: false
@@ -196,7 +196,7 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
             Value: true
-          robotiq_force_torque_frame_id:
+          left_robotiq_ft_frame_id:
             Alpha: 1
             Show Axes: true
             Show Trail: false
@@ -284,7 +284,7 @@ Visualization Manager:
           Expand Link Details: false
           Expand Tree: false
           Link Tree Style: Links in Alphabetic Order
-          fts_robotside:
+          left_fts_robotside:
             Alpha: 1
             Show Axes: false
             Show Trail: false
@@ -417,7 +417,7 @@ Visualization Manager:
             Show Axes: false
             Show Trail: false
             Value: true
-          robotiq_force_torque_frame_id:
+          left_robotiq_ft_frame_id:
             Alpha: 1
             Show Axes: false
             Show Trail: false
