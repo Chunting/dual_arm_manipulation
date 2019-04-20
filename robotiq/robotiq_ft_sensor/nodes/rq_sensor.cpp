@@ -195,6 +195,9 @@ int main(int argc, char **argv)
 	ros::NodeHandle n;
 	ros::param::param<int>("~max_retries", max_retries_, 100);
     ros::param::get("~serial_id", ftdi_id);
+	std::string prefix;
+	ros::param::get("~prefix", prefix);
+	
     if (!ftdi_id.empty())
     {
         ROS_INFO("Trying to connect to a sensor at /dev/%s", ftdi_id.c_str());
@@ -229,15 +232,16 @@ int main(int argc, char **argv)
 		wait_for_other_connection();
 	}
 
-        ros::Publisher sensor_pub = n.advertise<robotiq_ft_sensor::ft_sensor>("robotiq_ft_sensor", 512);
-        ros::Publisher wrench_pub = n.advertise<geometry_msgs::WrenchStamped>("robotiq_ft_wrench", 512);
-        ros::ServiceServer service = n.advertiseService("robotiq_ft_sensor_acc", receiverCallback);
+        ros::Publisher sensor_pub = n.advertise<robotiq_ft_sensor::ft_sensor>(prefix+"_robotiq_ft_sensor", 512);
+        ros::Publisher wrench_pub = n.advertise<geometry_msgs::WrenchStamped>(prefix+"_robotiq_ft_wrench", 512);
+        ros::ServiceServer service = n.advertiseService(prefix+"_robotiq_ft_sensor_acc", receiverCallback);
 
 	//std_msgs::String msg;
 	geometry_msgs::WrenchStamped wrenchMsg;
-        ros::param::param<std::string>("~frame_id", wrenchMsg.header.frame_id, "robotiq_ft_frame_id");
+    ros::param::param<std::string>("~frame_id", wrenchMsg.header.frame_id, "robotiq_ft_frame_id");
 
-	ROS_INFO("Starting Sensor");
+	ROS_INFO("Starting Sensor   wrenchMsg.header.frame_id: %s", wrenchMsg.header.frame_id.c_str());
+	ROS_INFO("Trying to connect to group prefix = %s", prefix.c_str());
 	while(ros::ok())
 	{
         ret = sensor_state_machine();

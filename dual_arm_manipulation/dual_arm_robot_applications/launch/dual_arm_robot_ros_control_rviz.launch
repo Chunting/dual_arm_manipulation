@@ -61,8 +61,8 @@
 		<arg name="config" value="$(arg config)"/>
 	</include>
 
-	<!-- Start force/torque sensor -->
+	<!-- Start force/torque sensor 
 	<node name="ft_sensor" pkg="robotiq_ft_sensor" type="rq_sensor" respawn="true" output="screen"/>
-
+-->
 
 </launch>
