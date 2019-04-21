@@ -1387,7 +1387,19 @@ bool DualArmRobot::execute(moveit::planning_interface::MoveGroupInterface::Plan 
         ROS_INFO("Trajectory sent to left arm");
         dual_arm_toolbox::TrajectoryProcessor::visualizePlan(plan_left, 0);
         // In sendTrajectory, the action client calls the sendGoal function. The goal trajectory is plan_left.trajectory
-        success_left = handle_left.sendTrajectory(plan_left.trajectory_);
+        moveit_msgs::RobotTrajectory trajectory_;
+        trajectory_.joint_trajectory.header = plan_left.trajectory_.header;
+        trajectory_.joint_trajectory.joint_names = plan_left.trajectory_.joint_names;
+        for(int i=0; i<plan_left.trajectory_.points.size(); i++){
+            for (unsigned int a = 0; a < plan_left.trajectory_.joint_trajectory.points[i].positions.size(); a++){
+                trajectory_.joint_trajectory.points[0].time_from_start =  plan_left.trajectory_.joint_trajectory.points[0].time_from_start;
+                trajectory_.joint_trajectory.points[0].positions[a] = plan_left.trajectory_.joint_trajectory.points[i].positions[a];
+                trajectory_.joint_trajectory.points[0].velocities[a]= = plan_left.trajectory_.joint_trajectory.points[i].velocities[a];
+            }
+            success_left = handle_left.sendTrajectory(trajectory_);
+            ros::Duration(0.01)
+        }
+        // success_left = handle_left.sendTrajectory(plan_left.trajectory_);
     }
 
     if (plan_right.trajectory_.joint_trajectory.joint_names.size() > 0)
@@ -1395,6 +1407,7 @@ bool DualArmRobot::execute(moveit::planning_interface::MoveGroupInterface::Plan 
         ROS_INFO("Trajectory sent to right arm");
         dual_arm_toolbox::TrajectoryProcessor::visualizePlan(plan_right, 0);
         success_right = handle_right.sendTrajectory(plan_right.trajectory_);
+
     }
 
     if (plan_left.trajectory_.joint_trajectory.joint_names.size() > 0)
