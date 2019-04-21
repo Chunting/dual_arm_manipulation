@@ -28,7 +28,7 @@ UR_Message_Listener::UR_Message_Listener(ros::NodeHandle &nh, std::string ur_nam
     
     newTrajectory = false;
 
-    ros::ServiceClient client = nh_.serviceClient<robotiq_ft_sensor::sensor_accessor>("robotiq_ft_sensor_acc");
+    ros::ServiceClient client = nh_.serviceClient<robotiq_ft_sensor::sensor_accessor>(ur_namespace +"/robotiq_ft_sensor_acc");
 
     robotiq_ft_sensor::sensor_accessor srv;
 

@@ -68,9 +68,9 @@
 		<node name="ros_control_controller_manager" pkg="controller_manager" type="controller_manager" respawn="false" output="screen" args="load $(arg right_stopped_controllers)" />
 		<node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
 		<!-- Start force/torque sensor --> 
-		<node name="ft_sensor" pkg="robotiq_ft_sensor" type="rq_sensor" respawn="true" output="screen" ns="right">
+		<node name="ft_sensor" pkg="robotiq_ft_sensor" type="rq_sensor" respawn="true" output="screen">
 			<param name="prefix" type="str" value="$(arg right_controller_name)" />
-			<param name="frame_id" type="str" value="right_robotiq_ft_frame_id" />
+			<param name="frame_id" type="str" value="$(arg right_controller_name)_robotiq_ft_frame_id" />
 		</node>
 	</group> 
 	<group ns="$(arg left_controller_name)">
@@ -96,7 +96,7 @@
 		<!-- Start force/torque sensor --> 
 		<node name="ft_sensor" pkg="robotiq_ft_sensor" type="rq_sensor" respawn="true" output="screen">
 			<param name="prefix" type="str" value="$(arg left_controller_name)" />
-			<param name="frame_id" type="str" value="left_robotiq_ft_frame_id" />
+			<param name="frame_id" type="str" value="$(arg left_controller_name)_robotiq_ft_frame_id" />
 		</node>
 	</group> 
 </launch>

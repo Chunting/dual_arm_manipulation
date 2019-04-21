@@ -232,9 +232,9 @@ int main(int argc, char **argv)
 		wait_for_other_connection();
 	}
 
-        ros::Publisher sensor_pub = n.advertise<robotiq_ft_sensor::ft_sensor>(prefix+"_robotiq_ft_sensor", 512);
-        ros::Publisher wrench_pub = n.advertise<geometry_msgs::WrenchStamped>(prefix+"_robotiq_ft_wrench", 512);
-        ros::ServiceServer service = n.advertiseService(prefix+"_robotiq_ft_sensor_acc", receiverCallback);
+        ros::Publisher sensor_pub = n.advertise<robotiq_ft_sensor::ft_sensor>("robotiq_ft_sensor", 512);
+        ros::Publisher wrench_pub = n.advertise<geometry_msgs::WrenchStamped>("robotiq_ft_wrench", 512);
+        ros::ServiceServer service = n.advertiseService("robotiq_ft_sensor_acc", receiverCallback);
 
 	//std_msgs::String msg;
 	geometry_msgs::WrenchStamped wrenchMsg;

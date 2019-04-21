@@ -48,6 +48,8 @@ void UR_Logger::start(int log_rate)
         }
         logfile_ << std::endl;
         ROS_INFO("Writing log at %iHz to %s. Press Ctrl-C to stop.", log_rate, logfile_name_.c_str());
+    }else{
+        ROS_ERROR("UrLogger failed! log file %s", logfile_name_.c_str());
     }
 
     logfile_command_.open(logfile_name_command_.c_str(), std::ofstream::out | std::ofstream::trunc); //generate new file from beginning

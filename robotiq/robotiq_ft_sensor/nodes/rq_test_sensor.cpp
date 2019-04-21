@@ -68,8 +68,8 @@ int main(int argc, char **argv)
 
 	ros::NodeHandle n;
 
-        ros::ServiceClient client = n.serviceClient<robotiq_ft_sensor::sensor_accessor>("robotiq_ft_sensor_acc");
-        ros::Subscriber sub1 = n.subscribe("robotiq_ft_sensor",100,reCallback);
+        ros::ServiceClient client = n.serviceClient<robotiq_ft_sensor::sensor_accessor>("left_robotiq_ft_sensor_acc");
+        ros::Subscriber sub1 = n.subscribe("left_robotiq_ft_sensor",100,reCallback);
 
         robotiq_ft_sensor::sensor_accessor srv;
 
