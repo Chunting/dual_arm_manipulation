@@ -360,7 +360,7 @@ bool DualArmRobot::switch_controller(std::string stop_name, std::string start_na
 
 bool DualArmRobot::graspMove(double distance, bool avoid_collisions, bool use_left, bool use_right)
 {
-    bool try_step;
+    bool try_step = false;
     double fraction;
 
     // move closer with right and left by using cartesian path
@@ -370,7 +370,7 @@ bool DualArmRobot::graspMove(double distance, bool avoid_collisions, bool use_le
         ROS_INFO("Moving away from object");
 
     // right
-    /*
+    
     if (use_right) try_step = true;
     while (try_step && ros::ok()) {
         right_.setStartStateToCurrentState();
@@ -408,7 +408,7 @@ bool DualArmRobot::graspMove(double distance, bool avoid_collisions, bool use_le
         }
     }
     sleep(1);
-    */
+    
     if (use_left)
         try_step = true;
     while (try_step && ros::ok())
@@ -1387,19 +1387,19 @@ bool DualArmRobot::execute(moveit::planning_interface::MoveGroupInterface::Plan 
         ROS_INFO("Trajectory sent to left arm");
         dual_arm_toolbox::TrajectoryProcessor::visualizePlan(plan_left, 0);
         // In sendTrajectory, the action client calls the sendGoal function. The goal trajectory is plan_left.trajectory
-        moveit_msgs::RobotTrajectory trajectory_;
-        trajectory_.joint_trajectory.header = plan_left.trajectory_.header;
-        trajectory_.joint_trajectory.joint_names = plan_left.trajectory_.joint_names;
-        for(int i=0; i<plan_left.trajectory_.points.size(); i++){
-            for (unsigned int a = 0; a < plan_left.trajectory_.joint_trajectory.points[i].positions.size(); a++){
-                trajectory_.joint_trajectory.points[0].time_from_start =  plan_left.trajectory_.joint_trajectory.points[0].time_from_start;
-                trajectory_.joint_trajectory.points[0].positions[a] = plan_left.trajectory_.joint_trajectory.points[i].positions[a];
-                trajectory_.joint_trajectory.points[0].velocities[a]= = plan_left.trajectory_.joint_trajectory.points[i].velocities[a];
-            }
-            success_left = handle_left.sendTrajectory(trajectory_);
-            ros::Duration(0.01)
-        }
-        // success_left = handle_left.sendTrajectory(plan_left.trajectory_);
+        // moveit_msgs::RobotTrajectory trajectory_;
+        // trajectory_.joint_trajectory.header = plan_left.trajectory_.header;
+        // trajectory_.joint_trajectory.joint_names = plan_left.trajectory_.joint_names;
+        // for(int i=0; i<plan_left.trajectory_.points.size(); i++){
+        //     for (unsigned int a = 0; a < plan_left.trajectory_.joint_trajectory.points[i].positions.size(); a++){
+        //         trajectory_.joint_trajectory.points[0].time_from_start =  plan_left.trajectory_.joint_trajectory.points[0].time_from_start;
+        //         trajectory_.joint_trajectory.points[0].positions[a] = plan_left.trajectory_.joint_trajectory.points[i].positions[a];
+        //         trajectory_.joint_trajectory.points[0].velocities[a]= = plan_left.trajectory_.joint_trajectory.points[i].velocities[a];
+        //     }
+        //     success_left = handle_left.sendTrajectory(trajectory_);
+        //     ros::Duration(0.01)
+        // }
+        success_left = handle_left.sendTrajectory(plan_left.trajectory_);
     }
 
     if (plan_right.trajectory_.joint_trajectory.joint_names.size() > 0)

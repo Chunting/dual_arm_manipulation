@@ -71,6 +71,7 @@
 		<node name="ft_sensor" pkg="robotiq_ft_sensor" type="rq_sensor" respawn="true" output="screen">
 			<param name="prefix" type="str" value="$(arg right_controller_name)" />
 			<param name="frame_id" type="str" value="$(arg right_controller_name)_robotiq_ft_frame_id" />
+			<param name="serial_id" type="str" value="ttyUSB0" />
 		</node>
 	</group> 
 	<group ns="$(arg left_controller_name)">
@@ -97,6 +98,7 @@
 		<node name="ft_sensor" pkg="robotiq_ft_sensor" type="rq_sensor" respawn="true" output="screen">
 			<param name="prefix" type="str" value="$(arg left_controller_name)" />
 			<param name="frame_id" type="str" value="$(arg left_controller_name)_robotiq_ft_frame_id" />
+			<param name="serial_id" type="str" value="ttyUSB1" />
 		</node>
 	</group> 
 </launch>

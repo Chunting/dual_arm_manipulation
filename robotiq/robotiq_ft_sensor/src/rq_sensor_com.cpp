@@ -1194,7 +1194,7 @@ static UINT_8 rq_com_identify_device(INT_8 const * const d_name)
 				return 1;
 			}
 		}
-
+		printf("----port_com = %s\n", port_com);
 		//The device is identified, close the connection
 		close(fd_connexion);
 	}

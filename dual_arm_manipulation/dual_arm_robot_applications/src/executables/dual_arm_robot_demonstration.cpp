@@ -79,7 +79,7 @@ int main(int argc, char **argv)
 
     while (res_force < 10)
     {
-        dualArmRobot.graspMove(0.001);
+        dualArmRobot.graspMove(0.001, false, true, false); // true : left arm; false: right arm
         res_force = sqrt(FTsubscriber.last_wrench_msg_.wrench.force.x * FTsubscriber.last_wrench_msg_.wrench.force.x + FTsubscriber.last_wrench_msg_.wrench.force.y * FTsubscriber.last_wrench_msg_.wrench.force.y + FTsubscriber.last_wrench_msg_.wrench.force.z * FTsubscriber.last_wrench_msg_.wrench.force.z);
         ROS_INFO("I heard: Force [%f]  FX[%f] FY[%f] FZ[%f]", res_force, FTsubscriber.last_wrench_msg_.wrench.force.x, FTsubscriber.last_wrench_msg_.wrench.force.y, FTsubscriber.last_wrench_msg_.wrench.force.z);
     }

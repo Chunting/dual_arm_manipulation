@@ -52,7 +52,7 @@
         <joint name="right_shoulder_pan_joint" value="1.57" />
         <joint name="right_wrist_1_joint" value="-1.57" />
         <joint name="right_wrist_2_joint" value="1.57" />
-        <joint name="right_wrist_3_joint" value="-1.57" />
+        <joint name="right_wrist_3_joint" value="1.57" />
     </group_state>
     <group_state name="arms_up" group="arms">
         <joint name="left_elbow_joint" value="0.785" />
@@ -66,9 +66,24 @@
         <joint name="right_shoulder_pan_joint" value="1.57" />
         <joint name="right_wrist_1_joint" value="-1.57" />
         <joint name="right_wrist_2_joint" value="1.57" />
-        <joint name="right_wrist_3_joint" value="-1.57" />
+        <joint name="right_wrist_3_joint" value="1.57" />
     </group_state>
     <group_state name="grasp_position" group="arms">
+        <joint name="left_shoulder_pan_joint" value="-1.309" />
+         <joint name="left_shoulder_lift_joint" value="-1.396" />
+        <joint name="left_elbow_joint" value="1.658" />
+        <joint name="left_wrist_1_joint" value="-2.618" />
+        <joint name="left_wrist_2_joint" value="-1.745" />
+        <joint name="left_wrist_3_joint" value="1.57" />
+        
+        <joint name="right_shoulder_pan_joint" value="1.309" />
+        <joint name="right_shoulder_lift_joint" value="-1.745" />
+        <joint name="right_elbow_joint" value="-1.658" />
+        <joint name="right_wrist_1_joint" value="-0.524" />
+        <joint name="right_wrist_2_joint" value="1.745" />
+        <joint name="right_wrist_3_joint" value="1.57" />
+    </group_state>
+    <group_state name="grasp_position_1" group="arms">
         <joint name="left_elbow_joint" value="1.798" />
         <joint name="left_shoulder_lift_joint" value="-1.514" />
         <joint name="left_shoulder_pan_joint" value="-1.57" />
@@ -234,4 +249,11 @@
     <disable_collisions link1="wall" link2="wall1" reason="Adjacent" />
     <disable_collisions link1="wall" link2="wall2" reason="Adjacent" />
     <disable_collisions link1="wall1" link2="wall2" reason="Adjacent" />
+    
+    <disable_collisions link1="table" link2="right_fts_robotside" reason="Never" />
+    <disable_collisions link1="table" link2="right_fts_toolside" reason="Never" />
+    <disable_collisions link1="table" link2="right_robotiq_ft_frame_id" reason="Never" />
+    <disable_collisions link1="table" link2="left_fts_robotside" reason="Never" />
+    <disable_collisions link1="table" link2="left_fts_toolside" reason="Never" />
+    <disable_collisions link1="table" link2="left_robotiq_ft_frame_id" reason="Never" />
 </robot>

@@ -239,9 +239,6 @@ int main(int argc, char **argv)
 	//std_msgs::String msg;
 	geometry_msgs::WrenchStamped wrenchMsg;
     ros::param::param<std::string>("~frame_id", wrenchMsg.header.frame_id, "robotiq_ft_frame_id");
-
-	ROS_INFO("Starting Sensor   wrenchMsg.header.frame_id: %s", wrenchMsg.header.frame_id.c_str());
-	ROS_INFO("Trying to connect to group prefix = %s", prefix.c_str());
 	while(ros::ok())
 	{
         ret = sensor_state_machine();
