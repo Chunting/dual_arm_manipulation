@@ -144,7 +144,7 @@ class DualArmRobot
 
     bool switch_controller(std::string stop_name, std::string start_name, std::string ur_namespace);
 
-    bool graspMove(double distance, bool avoid_collisions = true, bool use_left = true, bool use_right = true); //both arms will be moved closer together
+    bool graspMove(double distance, bool avoid_collisions = true, bool use_left = true, bool use_right = false); //both arms will be moved closer together
 
     bool linearMove(geometry_msgs::Vector3Stamped direction, bool avoid_collisions = true, bool use_left = true, bool use_right = true);
 
