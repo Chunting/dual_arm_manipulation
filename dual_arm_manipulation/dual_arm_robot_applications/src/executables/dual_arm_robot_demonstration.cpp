@@ -74,7 +74,7 @@ int main(int argc, char **argv)
 
     ROS_INFO("========== MOVE CLOSER =================");
 
-    dualArmRobot.graspMove(0.062, false);
+    dualArmRobot.graspMove(0.03, false, false, true);
     double res_force = sqrt(FTsubscriber.last_wrench_msg_.wrench.force.x * FTsubscriber.last_wrench_msg_.wrench.force.x + FTsubscriber.last_wrench_msg_.wrench.force.y * FTsubscriber.last_wrench_msg_.wrench.force.y + FTsubscriber.last_wrench_msg_.wrench.force.z * FTsubscriber.last_wrench_msg_.wrench.force.z);
 
     while (res_force < 10)
