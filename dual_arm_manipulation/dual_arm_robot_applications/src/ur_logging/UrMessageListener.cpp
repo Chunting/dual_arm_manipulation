@@ -25,10 +25,10 @@ UR_Message_Listener::UR_Message_Listener(ros::NodeHandle &nh, std::string ur_nam
     execTrajectorySub_ = nh_.subscribe<moveit_msgs::RobotTrajectory>("/execute_my_trajectory", 10, &UR_Message_Listener::trajectoryCallback, this);
 
     offset_sub_ = nh_.subscribe("/offset_point", 1, &UR_Message_Listener::offset_Callback, this);
-    
+
     newTrajectory = false;
 
-    ros::ServiceClient client = nh_.serviceClient<robotiq_ft_sensor::sensor_accessor>(ur_namespace +"/robotiq_ft_sensor_acc");
+    ros::ServiceClient client = nh_.serviceClient<robotiq_ft_sensor::sensor_accessor>(ur_namespace + "/robotiq_ft_sensor_acc");
 
     robotiq_ft_sensor::sensor_accessor srv;
 
@@ -42,6 +42,9 @@ UR_Message_Listener::UR_Message_Listener(ros::NodeHandle &nh, std::string ur_nam
         }
     }
     wrench_external_.setZero();
+    wrench_filter_factor_ = 0.1;
+    force_dead_zone_thres_ = 5;
+    torque_dead_zone_thres_ = 0.5;
 }
 
 void UR_Message_Listener::c_joint_vel_Callback(const trajectory_msgs::JointTrajectory::ConstPtr &msg)
@@ -63,8 +66,6 @@ void UR_Message_Listener::joint_state_Callback(const sensor_msgs::JointState::Pt
 void UR_Message_Listener::FT_wrench_Callback(const geometry_msgs::WrenchStamped::ConstPtr &msg)
 {
     // last_wrench_msg_ = *msg;
-
-
     Vector6d wrench_ft_frame;
     // Reading the FT-sensor in its own frame (robotiq_ft_frame_id)
     wrench_ft_frame << msg->wrench.force.x, msg->wrench.force.y,
@@ -94,18 +95,6 @@ void UR_Message_Listener::FT_wrench_Callback(const geometry_msgs::WrenchStamped:
     last_wrench_msg_.wrench.torque.x = wrench_external_(3);
     last_wrench_msg_.wrench.torque.y = wrench_external_(4);
     last_wrench_msg_.wrench.torque.z = wrench_external_(5);
-
-
-
-
-
-    // std::string topic = ur_namespace_ + "/robotiq_ft_wrench";
-    // ROS_INFO("I received last_wrench_msg_ to [%s]: Frame_id [%s] Time [%f] FX[%f] FY[%f] FZ[%f] MX[%f] MY[%f] MZ[%f]",
-    //     topic.c_str(),
-    //     last_wrench_msg_.header.frame_id.c_str(),   // robotiq_ft_frame_id
-    //     last_wrench_msg_.header.stamp.toSec(),
-    //     last_wrench_msg_.wrench.force.x, last_wrench_msg_.wrench.force.y, last_wrench_msg_.wrench.force.z,
-    //     last_wrench_msg_.wrench.torque.x, last_wrench_msg_.wrench.torque.y, last_wrench_msg_.wrench.torque.z);
 }
 void UR_Message_Listener::m_tcp_pose_Callback(const geometry_msgs::PoseStamped::ConstPtr &msg)
 {

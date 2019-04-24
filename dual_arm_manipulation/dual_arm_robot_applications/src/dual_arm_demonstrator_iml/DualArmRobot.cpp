@@ -595,8 +595,6 @@ bool DualArmRobot::pickBox(std::string object_id, geometry_msgs::Vector3Stamped 
 
     // visualize plan
     dual_arm_toolbox::TrajectoryProcessor::visualizePlan(both_arms_plan, 5);
-  
-    ROS_INFO("executing plan");
     execute(both_arms_plan);
     return true;
 }
@@ -801,7 +799,6 @@ bool DualArmRobot::pushPlaceBox(std::string object_id, geometry_msgs::PoseStampe
     left_rot.GetQuaternion(left_target_pose.pose.orientation.x, left_target_pose.pose.orientation.y, left_target_pose.pose.orientation.z, left_target_pose.pose.orientation.w);
 
     // left target position for placing
-    ROS_INFO("moving object with both arms");
     if (!moveObject(object_id, left_target_pose, 0.1))
         return false;
 
@@ -953,7 +950,6 @@ bool DualArmRobot::pushPlaceBox(std::string object_id, geometry_msgs::PoseStampe
 // Move the object from the current position to the target position defined by left_pose in the air (before placing it down)
 bool DualArmRobot::moveObject(std::string object_id, geometry_msgs::PoseStamped left_pose, double scale)
 {
-    ROS_INFO("Moving object with both arms");
     bool try_step;
     moveit::planning_interface::MoveItErrorCode error;
     moveit_msgs::RobotTrajectory both_arms_trajectory;
@@ -1314,7 +1310,6 @@ bool DualArmRobot::linearMove(geometry_msgs::Vector3Stamped direction,
 
 bool DualArmRobot::execute(moveit::planning_interface::MoveGroupInterface::Plan plan)
 {
-    ROS_INFO("executing trajectory");
 #ifndef OFFLINE
     moveit::planning_interface::MoveGroupInterface::Plan plan_left;
     moveit::planning_interface::MoveGroupInterface::Plan plan_right;
@@ -1345,34 +1340,17 @@ bool DualArmRobot::execute(moveit::planning_interface::MoveGroupInterface::Plan 
             ROS_ERROR("Path is invalid. Execution aborted");
             return false;
         }
-        else
-            ROS_INFO("Checked path. Path is valid. Executing...");
     }
     /// Print out the joint trajectory infomation
     dual_arm_toolbox::TrajectoryProcessor::publishPlanTrajectory(plan, 1);
     if (plan_left.trajectory_.joint_trajectory.joint_names.size() > 0)
     {
-        ROS_INFO("Trajectory sent to left arm");
         dual_arm_toolbox::TrajectoryProcessor::visualizePlan(plan_left, 0);
-        // In sendTrajectory, the action client calls the sendGoal function. The goal trajectory is plan_left.trajectory
-        // moveit_msgs::RobotTrajectory trajectory_;
-        // trajectory_.joint_trajectory.header = plan_left.trajectory_.header;
-        // trajectory_.joint_trajectory.joint_names = plan_left.trajectory_.joint_names;
-        // for(int i=0; i<plan_left.trajectory_.points.size(); i++){
-        //     for (unsigned int a = 0; a < plan_left.trajectory_.joint_trajectory.points[i].positions.size(); a++){
-        //         trajectory_.joint_trajectory.points[0].time_from_start =  plan_left.trajectory_.joint_trajectory.points[0].time_from_start;
-        //         trajectory_.joint_trajectory.points[0].positions[a] = plan_left.trajectory_.joint_trajectory.points[i].positions[a];
-        //         trajectory_.joint_trajectory.points[0].velocities[a]= = plan_left.trajectory_.joint_trajectory.points[i].velocities[a];
-        //     }
-        //     success_left = handle_left.sendTrajectory(trajectory_);
-        //     ros::Duration(0.01)
-        // }
         success_left = handle_left.sendTrajectory(plan_left.trajectory_);
     }
 
     if (plan_right.trajectory_.joint_trajectory.joint_names.size() > 0)
     {
-        ROS_INFO("Trajectory sent to right arm");
         dual_arm_toolbox::TrajectoryProcessor::visualizePlan(plan_right, 0);
         success_right = handle_right.sendTrajectory(plan_right.trajectory_);
 
@@ -1433,16 +1411,11 @@ bool DualArmRobot::execute(moveit::planning_interface::MoveGroupInterface::Plan 
 // groupName: "left_manipulator" "right_manipulator" "arms"
 std::vector<double> DualArmRobot::getJointAngles(std::string groupName)
 {
-    ROS_INFO("-------- Get Joint Angles-------------------------");
     planning_scene::PlanningScene planningScene(kinematic_model);
     const robot_state::JointModelGroup *joint_model_group = kinematic_model->getJointModelGroup(groupName);
     const std::vector<std::string> &joint_names = joint_model_group->getJointModelNames();
     std::vector<double> joint_values;
     kinematic_state->copyJointGroupPositions(joint_model_group, joint_values);
-    for (std::size_t i = 0; i < joint_names.size(); ++i)
-    {
-        ROS_INFO("Joint %s: %f", joint_names[i].c_str(), joint_values[i]);
-    }
     return joint_values;
 }
 /* Move the robot to its home position defined in SRDF file */
@@ -1461,9 +1434,6 @@ bool DualArmRobot::moveHome()
         std::vector<std::string> joint_names;
         joint_names = arms_.getJointNames();
         home_rs.copyJointGroupPositions(joint_model_group, home);
-        // for(int i=0; i<joint_names.size(); i++){
-        //     ROS_INFO("%s : desired position  %f", joint_names[i].c_str(), home[i]);
-        // }
         moveit::planning_interface::MoveGroupInterface::Plan arms_plan;
         error = arms_.plan(arms_plan);
         if (error.val != 1)
@@ -1475,12 +1445,10 @@ bool DualArmRobot::moveHome()
         }
         else
         {
-            ROS_INFO("Moving arms into home position");
             dual_arm_toolbox::TrajectoryProcessor::clean(arms_plan.trajectory_);
             dual_arm_toolbox::TrajectoryProcessor::scaleTrajectorySpeed(arms_plan.trajectory_, 0.4);
             execute(arms_plan);
             try_step = false;
-            ROS_INFO("Already in the home position");
         }
     }
     return true;
@@ -1489,7 +1457,6 @@ bool DualArmRobot::moveHome()
 /* Move the robot to its home position defined in SRDF file */
 bool DualArmRobot::moveGraspPosition()
 {
-    ROS_INFO("Moving arms to grasp position");
     bool try_step;
     moveit::planning_interface::MoveItErrorCode error;
 
@@ -1527,7 +1494,6 @@ bool DualArmRobot::moveGraspPosition()
             dual_arm_toolbox::TrajectoryProcessor::scaleTrajectorySpeed(arms_plan.trajectory_, 0.4);
             execute(arms_plan);
             try_step = false;
-            ROS_INFO("Already in the grasp position\n");
             /* Update the robot state */
             last_dual_arm_goal_state_ = getCurrentRobotStateMsg();
         }

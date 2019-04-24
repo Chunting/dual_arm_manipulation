@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://wiki.ros.org/xacro" name="ur5" >
-
+  
+  <xacro:arg name="prefix" default=""/>
   <!-- common stuff -->
   <xacro:include filename="$(find ur_description)/urdf/common.gazebo.xacro" />
 
@@ -12,7 +13,7 @@
  <!-- endeffector -->
   <xacro:include filename="$(find dual_arm_robot_description)/urdf/endeffector.urdf.xacro"/>
 
-  <xacro:arg name="prefix" default=""/>
+ 
   <!-- arm -->
   <xacro:ur5_robot prefix="$(arg prefix)" joint_limited="false"/>
 

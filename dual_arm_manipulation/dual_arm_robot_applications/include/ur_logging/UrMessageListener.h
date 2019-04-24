@@ -58,9 +58,9 @@ class UR_Message_Listener
     std::string ur_prefix_;
     int count = 0;
 
-    float wrench_filter_factor_ = 0.1;
-    float force_dead_zone_thres_ = 3;
-    float torque_dead_zone_thres_ = 0.5;
+    float wrench_filter_factor_;
+    float force_dead_zone_thres_;
+    float torque_dead_zone_thres_;
     Vector6d wrench_external_;
 
   private:

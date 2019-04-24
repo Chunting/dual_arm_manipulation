@@ -92,7 +92,9 @@
 		<rosparam file="$(find dual_arm_robot_driver)/config/left_controllers.yaml" command="load"/>
 		<node name="ros_control_controller_spawner" pkg="controller_manager" type="spawner" 
 				respawn="false" output="screen" args="$(arg left_controllers)" />
-		<node name="ros_control_controller_manager" pkg="controller_manager" type="controller_manager" respawn="false" output="screen" args="load $(arg left_stopped_controllers)" />
+				
+		<node name="ros_control_controller_manager" pkg="controller_manager" type="controller_manager" 
+		      respawn="false" output="screen" args="load $(arg left_stopped_controllers)" />
 		<node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
 		<!-- Start force/torque sensor --> 
 		<node name="ft_sensor" pkg="robotiq_ft_sensor" type="rq_sensor" respawn="true" output="screen">

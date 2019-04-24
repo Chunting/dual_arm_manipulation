@@ -64,7 +64,7 @@ int main(int argc, char **argv)
     direction.header.frame_id = "world";
     dualArmRobot.setConstraints();
     dualArmRobot.kinematic_state->enforceBounds();
-    
+
     ROS_INFO("========== MOVE HOME POSITION =================");
     dualArmRobot.moveHome();
     sleep(1);
@@ -74,19 +74,19 @@ int main(int argc, char **argv)
 
     ROS_INFO("========== MOVE CLOSER =================");
 
-    dualArmRobot.graspMove(0.06, false, true,false );
+    dualArmRobot.graspMove(0.03, false, true, false);
     double res_force = sqrt(FTsubscriber.last_wrench_msg_.wrench.force.x * FTsubscriber.last_wrench_msg_.wrench.force.x + FTsubscriber.last_wrench_msg_.wrench.force.y * FTsubscriber.last_wrench_msg_.wrench.force.y + FTsubscriber.last_wrench_msg_.wrench.force.z * FTsubscriber.last_wrench_msg_.wrench.force.z);
 
-    while (res_force < 10)
+    while (res_force < 15)
     {
         dualArmRobot.graspMove(0.001, false, true, false); // true : left arm; false: right arm
         res_force = sqrt(FTsubscriber.last_wrench_msg_.wrench.force.x * FTsubscriber.last_wrench_msg_.wrench.force.x + FTsubscriber.last_wrench_msg_.wrench.force.y * FTsubscriber.last_wrench_msg_.wrench.force.y + FTsubscriber.last_wrench_msg_.wrench.force.z * FTsubscriber.last_wrench_msg_.wrench.force.z);
         ROS_INFO("I heard: Force [%f]  FX[%f] FY[%f] FZ[%f]", res_force, FTsubscriber.last_wrench_msg_.wrench.force.x, FTsubscriber.last_wrench_msg_.wrench.force.y, FTsubscriber.last_wrench_msg_.wrench.force.z);
     }
-    
+
     ros::Publisher offset_desired_pub = nh.advertise<geometry_msgs::PointStamped>("/desired_offset_point", 1);
     // Publish the desired offset between two EEs, described in right EE coordinate system
-    KDL::Frame desired_offset = dualArmRobot.getCurrentOffset().Inverse();  // w.r.t right_ee_link coordinate system
+    KDL::Frame desired_offset = dualArmRobot.getCurrentOffset(); // w.r.t left_ee_link coordinate system
     geometry_msgs::PointStamped offset_point_temp_;
     offset_point_temp_.header.frame_id = dualArmRobot.right_.getEndEffectorLink();
     offset_point_temp_.point.x = desired_offset.p.x();
@@ -122,48 +122,87 @@ int main(int argc, char **argv)
     KDL::Frame left_frame_eef; // endeffector frame
     dual_arm_toolbox::Transform::transformPoseToKDL(dualArmRobot.left_current_pose_.pose, left_frame_eef);
     KDL::Rotation left_rot = left_frame_eef.M;
-    double alfa = 0;
-    double beta = 0;
-    double gamma = 0;
-    left_rot.GetEulerZYX(alfa, beta, gamma);
-    ROS_INFO("Before alfa = %f\tbeta = %f\t gamma = %f", alfa, beta, gamma);
+    // KDL::Rotation rotationAgnle = KDL::Rotation::Identity();
+    double yaw = 0;   // Z-axis
+    double pitch = 0; // Y-axis
+    double roll = 0;  // X-axis
+    double angle = 0;
+    left_rot.GetEulerZYX(yaw, pitch, roll);
+    ROS_INFO("Before roll = %f\tpitch = %f\t yaw = %f", roll, pitch, yaw);
+    angle = 3.14/12;
+    roll += angle;
+    left_rot = KDL::Rotation::RPY(roll, pitch, yaw);
 
-    left_rot.DoRotX(-3.14 /12);
-    left_rot.GetQuaternion(box7_goal_pose_stamped.pose.orientation.x, box7_goal_pose_stamped.pose.orientation.y, box7_goal_pose_stamped.pose.orientation.z,
+    left_rot.GetEulerZYX(yaw, pitch, roll);
+    left_rot.GetQuaternion(box7_goal_pose_stamped.pose.orientation.x,
+                           box7_goal_pose_stamped.pose.orientation.y,
+                           box7_goal_pose_stamped.pose.orientation.z,
                            box7_goal_pose_stamped.pose.orientation.w);
+    ROS_INFO("After roll = %f\tpitch = %f\t yaw = %f", roll, pitch, yaw);
     dualArmRobot.moveObject("box7", box7_goal_pose_stamped, 0.1);
+    sleep(5);
 
-    sleep(1);
-    left_rot.DoRotX(3.14 /12);
-    left_rot.GetQuaternion(box7_goal_pose_stamped.pose.orientation.x, box7_goal_pose_stamped.pose.orientation.y, box7_goal_pose_stamped.pose.orientation.z,
-                           box7_goal_pose_stamped.pose.orientation.w);
-    dualArmRobot.moveObject("box7", box7_goal_pose_stamped, 0.1);
-    sleep(1);
-    left_rot.DoRotY(3.14 /12);
-    left_rot.GetQuaternion(box7_goal_pose_stamped.pose.orientation.x, box7_goal_pose_stamped.pose.orientation.y, box7_goal_pose_stamped.pose.orientation.z,
-                           box7_goal_pose_stamped.pose.orientation.w);
+    roll -= angle;
+    left_rot = KDL::Rotation::RPY(roll, pitch, yaw);
+    left_rot.GetEulerZYX(yaw, pitch, roll);
+    ROS_INFO("After roll = %f\tpitch = %f\t yaw = %f", roll, pitch, yaw);
 
-    left_rot.GetEulerZYX(alfa, beta, gamma);
-    ROS_INFO("After alfa = %f\tbeta = %f\t gamma = %f", alfa, beta, gamma);
+    left_rot.GetQuaternion(box7_goal_pose_stamped.pose.orientation.x,
+                           box7_goal_pose_stamped.pose.orientation.y,
+                           box7_goal_pose_stamped.pose.orientation.z,
+                           box7_goal_pose_stamped.pose.orientation.w);
     dualArmRobot.moveObject("box7", box7_goal_pose_stamped, 0.1);
     sleep(1);
 
-    left_rot.DoRotY(-3.14 /12);
-    left_rot.GetQuaternion(box7_goal_pose_stamped.pose.orientation.x, box7_goal_pose_stamped.pose.orientation.y, box7_goal_pose_stamped.pose.orientation.z,
-                           box7_goal_pose_stamped.pose.orientation.w);
-    dualArmRobot.moveObject("box7", box7_goal_pose_stamped, 0.1);
-    sleep(1);
-    left_rot.DoRotZ(-3.14 / 18);
-    left_rot.GetQuaternion(box7_goal_pose_stamped.pose.orientation.x, box7_goal_pose_stamped.pose.orientation.y, box7_goal_pose_stamped.pose.orientation.z,
-                           box7_goal_pose_stamped.pose.orientation.w);
-    dualArmRobot.moveObject("box7", box7_goal_pose_stamped, 0.1);
+    // angle = 3.14/18;
+    // pitch += angle;
+    // left_rot = KDL::Rotation::RPY(roll, pitch, yaw);
 
-    sleep(1);
-    left_rot.DoRotZ(3.14 / 18);
-    left_rot.GetQuaternion(box7_goal_pose_stamped.pose.orientation.x, box7_goal_pose_stamped.pose.orientation.y, box7_goal_pose_stamped.pose.orientation.z,
-                           box7_goal_pose_stamped.pose.orientation.w);
-    dualArmRobot.moveObject("box7", box7_goal_pose_stamped, 0.1);
-    sleep(1);
+    // left_rot.GetEulerZYX(yaw, pitch, roll);
+    // left_rot.GetQuaternion(box7_goal_pose_stamped.pose.orientation.x,
+    //                        box7_goal_pose_stamped.pose.orientation.y,
+    //                        box7_goal_pose_stamped.pose.orientation.z,
+    //                        box7_goal_pose_stamped.pose.orientation.w);
+    // ROS_INFO("After roll = %f\tpitch = %f\t yaw = %f", roll, pitch, yaw);
+    // dualArmRobot.moveObject("box7", box7_goal_pose_stamped, 0.1);
+    // sleep(1);
+
+    // pitch -= angle;
+    // left_rot = KDL::Rotation::RPY(roll, pitch, yaw);
+    // left_rot.GetEulerZYX(yaw, pitch, roll);
+    // ROS_INFO("After roll = %f\tpitch = %f\t yaw = %f", roll, pitch, yaw);
+
+    // left_rot.GetQuaternion(box7_goal_pose_stamped.pose.orientation.x,
+    //                        box7_goal_pose_stamped.pose.orientation.y,
+    //                        box7_goal_pose_stamped.pose.orientation.z,
+    //                        box7_goal_pose_stamped.pose.orientation.w);
+    // dualArmRobot.moveObject("box7", box7_goal_pose_stamped, 0.1);
+    // sleep(1);
+
+    // angle = -3.14 / 6;
+    // yaw += angle;
+    // left_rot = KDL::Rotation::RPY(roll, pitch, yaw);
+
+    // left_rot.GetEulerZYX(yaw, pitch, roll);
+    // left_rot.GetQuaternion(box7_goal_pose_stamped.pose.orientation.x,
+    //                        box7_goal_pose_stamped.pose.orientation.y,
+    //                        box7_goal_pose_stamped.pose.orientation.z,
+    //                        box7_goal_pose_stamped.pose.orientation.w);
+    // ROS_INFO("After roll = %f\tpitch = %f\t yaw = %f", roll, pitch, yaw);
+    // dualArmRobot.moveObject("box7", box7_goal_pose_stamped, 0.1);
+    // sleep(1);
+
+    // yaw -= angle;
+    // left_rot = KDL::Rotation::RPY(roll, pitch, yaw);
+    // left_rot.GetEulerZYX(yaw, pitch, roll);
+    // ROS_INFO("After roll = %f\tpitch = %f\t yaw = %f", roll, pitch, yaw);
+
+    // left_rot.GetQuaternion(box7_goal_pose_stamped.pose.orientation.x,
+    //                        box7_goal_pose_stamped.pose.orientation.y,
+    //                        box7_goal_pose_stamped.pose.orientation.z,
+    //                        box7_goal_pose_stamped.pose.orientation.w);
+    // dualArmRobot.moveObject("box7", box7_goal_pose_stamped, 0.1);
+    // sleep(1);
 
     // // Create an desired frame
     // KDL::Frame desired_end_effector_pose(

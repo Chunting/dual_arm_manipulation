@@ -37,8 +37,6 @@
 #include <eigen3/Eigen/Geometry>
 #include <eigen3/Eigen/Dense>
 
-
-
 using namespace Eigen;
 
 typedef Matrix<double, 7, 1> Vector7d;
@@ -63,12 +61,12 @@ class AdmittanceControl
     // Subscriber for the ft sensor at the endeffector
     ros::Subscriber sub_wrench_external_;
     // Subscriber for the offset of the attractor
-    ros::Subscriber sub_offset_desired_;   // Should be a Service
+    ros::Subscriber sub_offset_desired_; // Should be a Service
 
     void wrenchCallback(const geometry_msgs::WrenchStamped::ConstPtr &msg);
     void offsetCallback(const geometry_msgs::PointStamped::ConstPtr &msg);
     void desiredOffsetCallback(const geometry_msgs::PointStamped::ConstPtr &msg);
-    
+
     // runtime variables
     double d_;             // distance
     KDL::JntArray q_last_; // last joint state
@@ -96,6 +94,7 @@ class AdmittanceControl
 
     std::string wrench_topic;
     std::string offset_topic;
+
   public:
     AdmittanceControl();
     ~AdmittanceControl();
@@ -116,7 +115,7 @@ AdmittanceControl::~AdmittanceControl()
 }
 // Read from force torqued sensor
 void AdmittanceControl::wrenchCallback(const geometry_msgs::WrenchStamped::ConstPtr &msg)
-{ // wrench in coordinate system of base
+{ // wrench in FT sensor frame
     geometry_msgs::WrenchStamped wrench_msg = *msg;
     Vector6d wrench_ft_frame;
     // Reading the FT-sensor in its own frame (robotiq_ft_frame_id)
@@ -142,12 +141,12 @@ void AdmittanceControl::wrenchCallback(const geometry_msgs::WrenchStamped::Const
 }
 
 void AdmittanceControl::offsetCallback(const geometry_msgs::PointStamped::ConstPtr &msg)
-{ 
+{
     offset_new_ << msg->point.x, msg->point.y, msg->point.z;
 }
 
 void AdmittanceControl::desiredOffsetCallback(const geometry_msgs::PointStamped::ConstPtr &msg)
-{ 
+{
     offset_desired_ << msg->point.x, msg->point.y, msg->point.z;
     ROS_INFO_STREAM("I heared the desired offset " << offset_desired_);
 }
@@ -208,7 +207,7 @@ void AdmittanceControl::init(ros::NodeHandle &nh)
     pid_controller_.reset();
 
     // wrench
-   
+
     nh.param("wrench_tolerance", wrench_tolerance_, double());
     nh.param("wrench_topic", wrench_topic, std::string());
     // nh.param("offset_topic", offset_topic, std::string());
@@ -258,13 +257,13 @@ void AdmittanceControl::update_admittance_state(std::vector<double> &position, c
     }
 
     // wrench at eef frame
-    KDL::Vector wrench_eef;                  // wrench in destination Frame eef
-    ros::spinOnce();                         // receive wrench msg
+    KDL::Vector wrench_eef; // wrench in destination Frame eef
+    ros::spinOnce();        // receive wrench msg
     // wrench_eef = p_eef.M.Inverse() * force_; // Rotate to get Force in coordinate system of the eef
     wrench_eef = force_; // Force in force torque coordinate system
     // distance is described along X-axis in right ee coordinated system.
     // If d_ >0, robot looses the object, grip more tightly otherwise.
-    d_ = offset_new_(0) - offset_desired_(0);  
+    d_ = offset_new_(0) - offset_desired_(0);
 
     // PID
     if (std::abs(wrench_eef.z() - contact_F) > wrench_tolerance_)
