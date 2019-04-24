@@ -17,6 +17,14 @@
 #include "robotiq_ft_sensor/sensor_accessor.h"
 #include <sstream>
 
+// Eigen
+#include <eigen3/Eigen/Core>
+#include <eigen3/Eigen/Geometry>
+#include <eigen3/Eigen/Dense>
+
+using namespace Eigen;
+typedef Matrix<double, 6, 1> Vector6d;
+
 class UR_Message_Listener
 { //handles callbacks and saves last received messages
   protected:
@@ -49,6 +57,11 @@ class UR_Message_Listener
     bool newTrajectory = false;
     std::string ur_prefix_;
     int count = 0;
+
+    float wrench_filter_factor_ = 0.1;
+    float force_dead_zone_thres_ = 3;
+    float torque_dead_zone_thres_ = 0.5;
+    Vector6d wrench_external_;
 
   private:
     void FT_wrench_Callback(const geometry_msgs::WrenchStamped::ConstPtr &msg);
