@@ -268,7 +268,7 @@ bool DualArmRobot::adaptTrajectory(moveit_msgs::RobotTrajectory left_trajectory,
 
         // write results into trajectory msg
 
-        // Check response position size, it seems strange to that sometimes it is 12, but sometimes it is 6
+        // Check response position size, it seems strange that sometimes it is 12, but sometimes it is 6
         int response_size = ik_msg.response.solution.joint_state.position.size();
         // @TODO NO hard code 6 or 12!!!
         if (response_size == 6)
@@ -292,18 +292,6 @@ bool DualArmRobot::adaptTrajectory(moveit_msgs::RobotTrajectory left_trajectory,
         // use result as seed for next calculation
         ik_msg.request.ik_request.robot_state = ik_msg.response.solution;
     }
-    // ROS_INFO("--------------------=====================");
-    // int both_size = both_arms_trajectory.joint_trajectory.points[0].positions.size();
-    // ROS_INFO("Both_arm_trajectory information [%d]", both_size);
-    // ROS_INFO("Verify both_arms_trajectory");
-    // for (unsigned int i = 0; i < both_arms_trajectory.joint_trajectory.points.size(); i++){
-    //     for (unsigned int a = 0; a < both_arms_trajectory.joint_trajectory.points[i].positions.size(); a++){
-    //         ROS_INFO("%s:\tpos %.2f",
-    //             both_arms_trajectory.joint_trajectory.joint_names[a].c_str(),
-    //             both_arms_trajectory.joint_trajectory.points[i].positions[a]);
-    //             // both_arms_plan.trajectory_.joint_trajectory.points[i].velocities[a]);
-    //     }
-    // }
     // execution speed
     dual_arm_toolbox::TrajectoryProcessor::computeTimeFromStart(both_arms_trajectory, 0.4);
 
@@ -579,57 +567,37 @@ bool DualArmRobot::pickBox(std::string object_id, geometry_msgs::Vector3Stamped 
         else
             try_step = false;
     }
-    // ROS_INFO("\nLeft arm trajectory\n");
-    // ROS_INFO("Trajectory Header: seq %d \t frame_id %s \t time stamp %0.3f ",
-    //         left_trajectory.joint_trajectory.header.seq,
-    //         left_trajectory.joint_trajectory.header.frame_id.c_str(),
-    //         left_trajectory.joint_trajectory.header.stamp.toSec());
-
-    // for (unsigned int j=0; j < left_trajectory.joint_trajectory.joint_names.size(); j++){
-    //     ROS_INFO("Joint %s ", left_trajectory.joint_trajectory.joint_names[j].c_str());
-    // }
-
-    // for (unsigned int j=0; j < left_trajectory.joint_trajectory.points.size(); j++){
-    //     ROS_INFO("---------\tPoint %d \t Time: %0.3f --------------- ", j,  left_trajectory.joint_trajectory.points[j].time_from_start.toSec());
-    //     for (unsigned int i=0; i < left_trajectory.joint_trajectory.joint_names.size(); i++){
-    //         ROS_INFO("Positin: %f\t Velocity: %f \t Acc: %f \t Eff: %f \n",
-    //         left_trajectory.joint_trajectory.points[j].positions[i],
-    //         left_trajectory.joint_trajectory.points[j].velocities[i],
-    //         left_trajectory.joint_trajectory.points[j].accelerations[i],
-    //         left_trajectory.joint_trajectory.points[j].effort[i]);
-
-    //     }
-
-    // }
     // get both arms trajectory
     arms_offset_ = getCurrentOffset();
     moveit_msgs::RobotTrajectory both_arms_trajectory;
-    if (adaptTrajectory(left_trajectory, arms_offset_, both_arms_trajectory))
+    // 0.001m 400ms =>0.0025m/s
+    if (adaptTrajectory(left_trajectory, arms_offset_, both_arms_trajectory)){
+        dual_arm_toolbox::TrajectoryProcessor::clean(both_arms_trajectory);
+        dual_arm_toolbox:: TrajectoryProcessor::scaleTrajectorySpeed(both_arms_trajectory, 0.5);
         ROS_INFO("successfully calculated trajectory for both arms\n");
+    }
     else
     {
         ROS_WARN("Problem adapting trajectory");
         allowedArmCollision(false, object_id);
         return false;
     }
-    dual_arm_toolbox::TrajectoryProcessor::clean(both_arms_trajectory);
+    
     // allowedArmCollision(false, object_id);
-
     // get plan from trajectory
     moveit::planning_interface::MoveGroupInterface::Plan both_arms_plan;
     both_arms_plan.trajectory_ = both_arms_trajectory;
     both_arms_plan.start_state_.attached_collision_objects = getCurrentRobotStateMsg().attached_collision_objects;
-
+    
     // Grasp by switching controller and wait for contact while visualizing plan
     // if (!switch_controller("left_vel_based_pos_traj_controller", "left_vel_based_admittance_traj_controller", "left"))
     //     ROS_WARN("failed switching controller");
 
     // visualize plan
     dual_arm_toolbox::TrajectoryProcessor::visualizePlan(both_arms_plan, 5);
-
+  
     ROS_INFO("executing plan");
     execute(both_arms_plan);
-
     return true;
 }
 
