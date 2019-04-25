@@ -1,0 +1,142 @@
+<?xml version="1.0" ?>
+<launch>
+
+	<!-- GDB functionality -->
+	<arg name="debug" default="false" />
+	<arg unless="$(arg debug)" name="launch_prefix" value="" />
+	<arg if="$(arg debug)" name="launch_prefix" value="xterm -e gdb --args" />
+	<arg name="use_sim_time" default="true" />
+	<arg name="paused" default="true" />
+	<arg name="headless" default="false" />
+	<arg name="world_name" default="$(find cpr_bringup)/worlds/empty.world" />
+	<!-- left arm -->
+	<arg name="left_prefix" default=""/>
+	<arg name="left_controller_name" default="left"/>
+	<arg name="left_robot_ip" default="192.168.1.101"/>
+	<arg name="left_reverse_port" default="50001"/>
+	<arg name="left_base_frame" default="left_base" />
+	<arg name="left_tool_frame" default="left_ee_link" />
+	<!--Load and start -->
+	<arg name="left_controllers" default="joint_state_controller vel_based_pos_traj_controller force_torque_sensor_controller "/>
+	<!-- Only load but do not start -->
+	<arg name="left_stopped_controllers" default="left_vel_based_admittance_traj_controller pos_based_pos_traj_controller left_joint_group_vel_controller"/>
+
+	<!-- right arm -->
+	<arg name="right_prefix" default=""/>
+	<arg name="right_controller_name" default="right"/>
+	<arg name="right_robot_ip" default="192.168.1.102"/>
+	<arg name="right_reverse_port" default="50002"/>
+	<arg name="right_base_frame" default="right_base" />
+	<arg name="right_tool_frame" default="right_ee_link" />
+	<arg name="right_controllers" default="joint_state_controller right_force_torque_sensor_controller  ur5_cartesian_velocity_controller"/>
+	<arg name="right_stopped_controllers" default="right_vel_based_admittance_traj_controller pos_based_pos_traj_controller right_joint_group_vel_controller"/>
+
+	<arg name="limited" default="false"/>
+	<arg name="min_payload" default="0.0"/>
+	<arg name="max_payload" default="5.0"/>
+	<arg name="max_velocity" default="10.0"/>
+	<arg name="use_lowbandwidth_trajectory_follower" default="false"/>
+	<arg name="time_interval" default="0.008"/>
+	<arg name="servoj_time" default="0.008" />
+	<arg name="servoj_time_waiting" default="0.001" />
+	<arg name="max_waiting_time" default="2.0" />
+	<arg name="servoj_gain" default="100." />
+	<arg name="servoj_lookahead_time" default="1." />
+	<arg name="max_joint_difference" default="0.01" />
+	<arg name="shutdown_on_disconnect" default="true" />
+	<arg name="config" default="true"/>
+	<!-- REAL ROBOT -->
+	<!-- robot model -->
+	<include file="$(find dual_arm_robot_description)/launch/dual_arm_robot_upload.launch">
+		<arg name="limited" value="$(arg limited)"/>
+		<arg name="prefix_left" value="$(arg left_prefix)"/>
+		<arg name="prefix_right" value="$(arg right_prefix)"/>
+	</include>
+	<!-- F/T sensor -->
+	<!-- URDF update for FT 
+	<node pkg="tf" type="static_transform_publisher" name="FT300_static" args="0.0 0.0 0.0 -1.57 0.0 0.0 $(arg prefix)ee_link robotiq_ft_frame_id 5" />
+     -->
+
+	<!-- UR5 ARM -->
+	<group ns="left">
+		<remap from="joint_states" to="/joint_states"/>
+		<!-- Hardware interface for rso control-->
+		<node name="ur_hardware_interface" pkg="ur_modern_driver" type="ur_driver" output="screen">
+			<param name="robot_ip_address" type="str" value="192.168.1.101"/>
+			<param name="min_payload" type="double" value="$(arg min_payload)"/>
+			<param name="max_payload" type="double" value="$(arg max_payload)"/>
+			<param name="max_velocity" type="double" value="$(arg max_velocity)"/>
+			<param name="use_ros_control" type="bool" value="True"/>
+			<param name="servoj_gain" type="double" value="2000" />
+			<param name="prefix" value="" />
+			<param name="base_frame" type="str" value="$(arg left_base_frame)"/>
+			<param name="tool_frame" type="str" value="$(arg left_tool_frame)"/>
+		</node>
+
+		<!-- ROS control controllers -->
+		<!-- Load controller configurations from YAML file to parameter server -->
+		<rosparam file="$(find dual_arm_robot_driver)/config/left_controllers.yaml" command="load"/>
+		<!-- spawn controller manager -->
+		<node name="ros_control_controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" 
+		        args="joint_state_controller  ur5_cartesian_velocity_controller" />
+
+		<!-- load other controller -->
+		<node name="ros_control_controller_manager" pkg="controller_manager" type="controller_manager" respawn="false" output="screen" 
+				args="load pos_based_pos_traj_controller vel_based_pos_traj_controller" />
+
+		<!-- Convert joint states to /tf tranforms -->
+		<node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
+			<rosparam param="publish_frequency">125</rosparam>
+		</node>
+			<!-- Start force/torque sensor --> 
+		<node name="ft_sensor" pkg="robotiq_ft_sensor" type="rq_sensor" respawn="true" output="screen">
+			<param name="prefix" type="str" value="$(arg left_controller_name)" />
+			<param name="frame_id" type="str" value="$(arg left_controller_name)_robotiq_ft_frame_id" />
+			<param name="serial_id" type="str" value="ttyUSB1" />
+		</node>
+		<!-- Bias the F/T sensor at startup -->
+	    <node pkg="rosservice" type="rosservice" name="ft_sensor_biaser" args="call --wait /right/robotiq_ft_sensor_acc &quot;command: 'SET_ZRO'&quot; " />
+	</group>
+
+
+	<!-- The argument prefix must be null, since the prefix of the links and joints has been defined in URDF.
+	If redefining prefix, errors will come up as left_left_..._joint/link -->
+	<group ns="$(arg right_controller_name)">
+		<remap from="joint_states" to="/joint_states"/>
+		<node name="ur_hardware_interface" pkg="ur_modern_driver" type="ur_driver" output="log" launch-prefix="$(arg launch_prefix)">
+			<param name="robot_ip_address" type="str" value="192.168.1.102"/>
+			<param name="min_payload" type="double" value="$(arg min_payload)"/>
+			<param name="max_payload" type="double" value="$(arg max_payload)"/>
+			<param name="max_velocity" type="double" value="$(arg max_velocity)"/>
+			<param name="use_ros_control" type="bool" value="True"/>
+			<param name="servoj_gain" type="double" value="2000" />
+			<param name="prefix" value="" />
+			<param name="base_frame" type="str" value="$(arg right_base_frame)"/>
+			<param name="tool_frame" type="str" value="$(arg right_tool_frame)"/>
+		</node>
+		<rosparam file="$(find dual_arm_robot_driver)/config/right_controllers.yaml" command="load"/>
+		<node name="ros_control_controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" 
+		    args="$(arg right_controllers)" />
+		<node name="ros_control_controller_manager" pkg="controller_manager" type="controller_manager" respawn="false" output="screen" args="load $(arg right_stopped_controllers)" />
+		<node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+		<!-- Start force/torque sensor -->
+		<node name="ft_sensor" pkg="robotiq_ft_sensor" type="rq_sensor" respawn="true" output="screen">
+			<param name="prefix" type="str" value="$(arg right_controller_name)" />
+			<param name="frame_id" type="str" value="$(arg right_controller_name)_robotiq_ft_frame_id" />
+			<param name="serial_id" type="str" value="ttyUSB0" />
+		</node>
+		<!-- Bias the F/T sensor at startup -->
+		<node pkg="rosservice" type="rosservice" name="ft_sensor_biaser" args="call --wait /right/robotiq_ft_sensor_acc &quot;command: 'SET_ZRO'&quot; " />
+	</group>
+	<!-- MoveIt! Setup -->
+	<include file="$(find dual_arm_robot_moveit_config)/launch/dual_arm_robot_moveit_planning_execution.launch"/>
+	<param name="move_group/trajectory_execution/allowed_start_tolerance" value="0.5" />
+
+	<!-- rviz Setup -->
+	<include file="$(find dual_arm_robot_moveit_config)/launch/moveit_rviz.launch">
+		<arg name="config" value="$(arg config)"/>
+	</include>
+
+
+</launch>
+

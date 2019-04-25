@@ -47,4 +47,21 @@
     <disable_collisions link1="wrist_1_link" link2="wrist_2_link" reason="Adjacent" />
     <disable_collisions link1="wrist_1_link" link2="wrist_3_link" reason="Never" />
     <disable_collisions link1="wrist_2_link" link2="wrist_3_link" reason="Adjacent" />
+    <disable_collisions link1="stand1" link2="stand2" reason="Adjacent" />
+    <disable_collisions link1="stand1" link2="stand_Base" reason="Adjacent" />
+    <disable_collisions link1="base_link" link2="stand2" reason="Adjacent" />
+    <disable_collisions link1="shoulder_link" link2="stand2" reason="Default" />
+     <disable_collisions link1="wrist_1_link" link2="wrist_2_link" reason="Adjacent" />
+    <disable_collisions link1="wrist_1_link" link2="wrist_3_link" reason="Never" />
+    <disable_collisions link1="wrist_1_link" link2="stand_Base" reason="Default" />
+    <disable_collisions link1="ee_link" link2="ee_spring" reason="Never" />
+    <disable_collisions link1="ee_link" link2="fts_robotside" reason="Adjacent" />
+    <disable_collisions link1="ee_link" link2="wrist_1_link" reason="Never" />
+    <disable_collisions link1="ee_link" link2="wrist_2_link" reason="Never" />
+    <disable_collisions link1="ee_link" link2="wrist_3_link" reason="Adjacent" />
+    <disable_collisions link1="ee_spring" link2="fts_robotside" reason="Never" />
+    <disable_collisions link1="ee_spring" link2="wrist_1_link" reason="Never" />
+    <disable_collisions link1="ee_spring" link2="wrist_2_link" reason="Never" />
+    <disable_collisions link1="ee_spring" link2="wrist_3_link" reason="Never" />
+    
 </robot>

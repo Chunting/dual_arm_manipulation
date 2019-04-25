@@ -11,19 +11,6 @@ FTSensorSubscriber::FTSensorSubscriber(ros::NodeHandle &nh, std::string ur_names
     torque_dead_zone_thres_ = 0.5;
     sub_wrench_external_ = nh_.subscribe(ur_namespace_ + "/robotiq_ft_wrench", 1, &FTSensorSubscriber::wrenchCallback, this);
     // filtered_wrench_pub_ = nh_.advertise<geometry_msgs::WrenchStamped>(ur_namespace_ + "/robotiq_ft_wrench", 1);
-    ros::ServiceClient client = nh_.serviceClient<robotiq_ft_sensor::sensor_accessor>(ur_namespace_ + "/robotiq_ft_sensor_acc");
-    robotiq_ft_sensor::sensor_accessor srv;
-
-    if (ros::ok())
-    {
-        srv.request.command = "SET ZRO";
-        if (client.call(srv))
-        {
-            ROS_INFO("---------------------ret: %s", srv.response.res.c_str());
-        } else {
-            ROS_ERROR("Failed SET ZRO");
-        }
-    }
 }
 
 void FTSensorSubscriber::wrenchCallback(const geometry_msgs::WrenchStamped::Ptr &msg)

@@ -67,8 +67,8 @@ DualArmRobot::DualArmRobot(ros::NodeHandle &nh) : left_("left_manipulator"),
 
     // Controller Interface
     // It has to be consistent with group ns and names in controllers.yaml
-    left_controller_ = "left/left_vel_based_pos_traj_controller";
-    right_controller_ = "right/right_vel_based_pos_traj_controller";
+    left_controller_ = "left/vel_based_pos_traj_controller";
+    right_controller_ = "right/vel_based_pos_traj_controller";
     //subscribe to the data topic of interest
     pose_publish_thread_ = new std::thread(boost::bind(&DualArmRobot::publishPoseMsg, this));
 
@@ -590,7 +590,7 @@ bool DualArmRobot::pickBox(std::string object_id, geometry_msgs::Vector3Stamped 
     both_arms_plan.start_state_.attached_collision_objects = getCurrentRobotStateMsg().attached_collision_objects;
     
     // Grasp by switching controller and wait for contact while visualizing plan
-    // if (!switch_controller("left_vel_based_pos_traj_controller", "left_vel_based_admittance_traj_controller", "left"))
+    // if (!switch_controller("vel_based_pos_traj_controller", "left_vel_based_admittance_traj_controller", "left"))
     //     ROS_WARN("failed switching controller");
 
     // visualize plan
@@ -752,7 +752,7 @@ bool DualArmRobot::placeBox(std::string object_id, geometry_msgs::PoseStamped bo
 
     // release clamp
     // switch controller
-    // if (!switch_controller("left_vel_based_admittance_traj_controller", "left_vel_based_pos_traj_controller", "left"))
+    // if (!switch_controller("left_vel_based_admittance_traj_controller", "vel_based_pos_traj_controller", "left"))
     //     ROS_WARN("failed switching controller");
     sleep(0.5); // to be sure robot is at goal position
 
@@ -804,7 +804,7 @@ bool DualArmRobot::pushPlaceBox(std::string object_id, geometry_msgs::PoseStampe
 
     // release clamp
     // switch controller
-    if (!switch_controller("left_vel_based_admittance_traj_controller", "left_vel_based_pos_traj_controller", "left"))
+    if (!switch_controller("left_vel_based_admittance_traj_controller", "vel_based_pos_traj_controller", "left"))
         ROS_WARN("failed switching controller");
     sleep(0.5); // to be sure robot is at goal position
 

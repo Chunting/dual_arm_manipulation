@@ -13,7 +13,7 @@ hardware_interface:
      - right_wrist_3_joint
 
 # Publish all joint states ----------------------------------
-right_joint_state_controller:
+joint_state_controller:
    type:         joint_state_controller/JointStateController
    publish_rate: 100
 
@@ -24,7 +24,7 @@ right_force_torque_sensor_controller:
 
 # Joint Trajectory Controller - velocity based -------------------------------
 # For detailed explanations of parameter see http://wiki.ros.org/
-right_vel_based_pos_traj_controller:
+vel_based_pos_traj_controller:
    type: velocity_controllers/JointTrajectoryController
    joints:
      - right_shoulder_pan_joint
@@ -118,7 +118,7 @@ right_vel_based_admittance_traj_controller:
    #hold_trajectory_duration: 0 # Defaults to 0.5
 # Joint Trajectory Controller - position based -------------------------------
 # For detailed explanations of parameter see http://wiki.ros.org/joint_trajectory_controller
-right_pos_based_pos_traj_controller:
+pos_based_pos_traj_controller:
    type: position_controllers/JointTrajectoryController
    joints:
      - right_shoulder_pan_joint
@@ -153,3 +153,15 @@ right_joint_group_vel_controller:
      - right_wrist_1_joint
      - right_wrist_2_joint
      - right_wrist_3_joint
+
+ur5_cartesian_velocity_controller:
+  type: cartesian_controller/CartesianVelocityController
+  publish_rate: 125
+  root_name: right_base_link
+  tip_name: right_ee_link
+
+ur5_cartesian_state_controller:
+    type: cartesian_controller/CartesianStateController
+    publish_rate: 125
+    root_name: right_base_link
+    tip_name: right_ee_link

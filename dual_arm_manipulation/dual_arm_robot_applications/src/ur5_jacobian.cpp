@@ -79,7 +79,7 @@ int main(int argc, char **argv)
     ros::ServiceClient left_srv_switch_controller = nh.serviceClient<controller_manager_msgs::SwitchController>("/left/controller_manager/switch_controller");
     controller_manager_msgs::SwitchController srv_req;
     srv_req.request.strictness = controller_manager_msgs::SwitchController::Request::BEST_EFFORT;
-    srv_req.request.stop_controllers.push_back("/left/left_vel_based_pos_traj_controller");
+    srv_req.request.stop_controllers.push_back("/left/vel_based_pos_traj_controller");
     bool success = left_srv_switch_controller.call(srv_req);
     ROS_INFO("Stopping controller %s", success ? "SUCCEDED" : "FAILED");
     if (!success)
@@ -121,7 +121,7 @@ int main(int argc, char **argv)
     // Allow replanning
     left_.allowReplanning(true);
     // Controller Interface
-    std::string left_controller_ = "left/left_vel_based_pos_traj_controller";
+    std::string left_controller_ = "left/vel_based_pos_traj_controller";
 
     // const std::vector<std::string> &joint_names = joint_model_group->getJointModelNames();
     // Get Joint Values

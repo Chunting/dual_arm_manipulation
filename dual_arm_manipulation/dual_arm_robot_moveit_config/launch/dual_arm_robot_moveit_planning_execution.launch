@@ -3,8 +3,8 @@
   <arg name="debug" default="false" />
     
   <!-- Remap follow_joint_trajectory -->
-  <remap if="$(arg sim)" from="left/left_vel_based_pos_traj_controller/follow_joint_trajectory" to="fake_left_manipulator_controller/follow_joint_trajectory"/>
-  <remap if="$(arg sim)" from="right/right_vel_based_pos_traj_controller/follow_joint_trajectory" to="fake_right_manipulator_controller/follow_joint_trajectory"/>
+  <remap if="$(arg sim)" from="left/vel_based_pos_traj_controller/follow_joint_trajectory" to="fake_left_manipulator_controller/follow_joint_trajectory"/>
+  <remap if="$(arg sim)" from="right/vel_based_pos_traj_controller/follow_joint_trajectory" to="fake_right_manipulator_controller/follow_joint_trajectory"/>
 
   <!-- Launch moveit -->
   <include file="$(find dual_arm_robot_moveit_config)/launch/move_group.launch">

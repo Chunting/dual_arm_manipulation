@@ -13,18 +13,18 @@ hardware_interface:
      - left_wrist_3_joint
 
 # Publish all joint states ----------------------------------
-left_joint_state_controller:
+joint_state_controller:
    type:         joint_state_controller/JointStateController
    publish_rate: 100
 
 # Publish wrench ----------------------------------
-left_force_torque_sensor_controller:
+force_torque_sensor_controller:
    type:         force_torque_sensor_controller/ForceTorqueSensorController
    publish_rate: 100
 
 # Joint Trajectory Controller - velocity based -------------------------------
 # For detailed explanations of parameter see http://wiki.ros.org/
-left_vel_based_pos_traj_controller:
+vel_based_pos_traj_controller:
    type: velocity_controllers/JointTrajectoryController
    joints:
      - left_shoulder_pan_joint
@@ -118,7 +118,7 @@ left_vel_based_admittance_traj_controller:
    #hold_trajectory_duration: 0 # Defaults to 0.5
 # Joint Trajectory Controller - position based -------------------------------
 # For detailed explanations of parameter see http://wiki.ros.org/joint_trajectory_controller
-left_pos_based_pos_traj_controller:
+pos_based_pos_traj_controller:
    type: position_controllers/JointTrajectoryController
    joints:
      - left_shoulder_pan_joint
@@ -153,3 +153,15 @@ left_joint_group_vel_controller:
      - left_wrist_1_joint
      - left_wrist_2_joint
      - left_wrist_3_joint
+
+ur5_cartesian_velocity_controller:
+  type: cartesian_controller/CartesianVelocityController
+  publish_rate: 125
+  root_name: left_base_link
+  tip_name: left_ee_link
+
+ur5_cartesian_state_controller:
+    type: cartesian_controller/CartesianStateController
+    publish_rate: 125
+    root_name: left_base_link
+    tip_name: left_ee_link

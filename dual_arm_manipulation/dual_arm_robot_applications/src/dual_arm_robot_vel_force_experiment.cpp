@@ -29,7 +29,7 @@ void run_experiment(ros::NodeHandle &nh, ros::Publisher &c_joint_speed_pub,
     ros::ServiceClient left_srv_switch_controller = nh.serviceClient<controller_manager_msgs::SwitchController>("/left/controller_manager/switch_controller");
     controller_manager_msgs::SwitchController srv_req;
     srv_req.request.strictness = controller_manager_msgs::SwitchController::Request::BEST_EFFORT;
-    srv_req.request.stop_controllers.push_back("/left/left_vel_based_pos_traj_controller");
+    srv_req.request.stop_controllers.push_back("/left/vel_based_pos_traj_controller");
     bool success = left_srv_switch_controller.call(srv_req);
     ROS_INFO("Stopping controller %s", success ? "SUCCEDED" : "FAILED");
     srv_req.request.stop_controllers.clear();
@@ -105,7 +105,7 @@ void run_experiment(ros::NodeHandle &nh, ros::Publisher &c_joint_speed_pub,
 
     // restart controller
     srv_req.request.BEST_EFFORT;
-    srv_req.request.start_controllers.push_back("/left/left_vel_based_pos_traj_controller");
+    srv_req.request.start_controllers.push_back("/left/vel_based_pos_traj_controller");
     success = left_srv_switch_controller.call(srv_req);
     ROS_INFO("Starting controller %s", success ? "SUCCEDED" : "FAILED");
     srv_req.request.start_controllers.clear();

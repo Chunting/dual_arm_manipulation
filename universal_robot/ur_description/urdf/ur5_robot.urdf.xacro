@@ -1,39 +1,120 @@
 <?xml version="1.0"?>
-<robot xmlns:xacro="http://wiki.ros.org/xacro" name="ur5" >
-  
-  <xacro:arg name="prefix" default=""/>
-  <!-- common stuff -->
-  <xacro:include filename="$(find ur_description)/urdf/common.gazebo.xacro" />
+<robot xmlns:xacro="http://wiki.ros.org/xacro" name="ur5">
 
-  <!-- ur5 -->
-  <xacro:include filename="$(find ur_description)/urdf/ur5.urdf.xacro" />
-  <!-- ft300 -->
-  <xacro:include filename="$(find robotiq_ft_sensor)/urdf/robotiq_fts300.urdf.xacro" />
+	<xacro:arg name="prefix" default=""/>
+	<!-- common stuff -->
+	<xacro:include filename="$(find ur_description)/urdf/common.gazebo.xacro" />
 
- <!-- endeffector -->
-  <xacro:include filename="$(find dual_arm_robot_description)/urdf/endeffector.urdf.xacro"/>
+	<!-- ur5 -->
+	<xacro:include filename="$(find ur_description)/urdf/ur5.urdf.xacro" />
+	<!-- ft300 -->
+	<xacro:include filename="$(find robotiq_ft_sensor)/urdf/robotiq_fts300.urdf.xacro" />
 
- 
-  <!-- arm -->
-  <xacro:ur5_robot prefix="$(arg prefix)" joint_limited="false"/>
+	<!-- endeffector -->
+	<xacro:include filename="$(find dual_arm_robot_description)/urdf/endeffector.urdf.xacro"/>
 
-  <link name="world" />
+	<xacro:property name="PI" value="3.14159265" />
+	<xacro:property name="robot_horizontal_stand_width" value="0.5"/>
+	<xacro:property name="robot_vertical_stand_height" value="1.2"/>
 
-  <joint name="world_joint" type="fixed">
-    <parent link="world" />
-    <child link = "$(arg prefix)base_link" />
-    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
-  </joint>
+	<!-- color macros -->
+	<xacro:macro name="material_orange_transparent">
+		<material name="orange_transparent">
+			<color rgba="1 0.5 0 0.4"/>
+		</material>
+	</xacro:macro>
+	<xacro:macro name="material_blue_transparent">
+		<material name="blue_transparent">
+			<color rgba="0 0.8 1 0.4"/>
+		</material>
+	</xacro:macro>
+	<xacro:material_orange_transparent />
+	<xacro:material_blue_transparent />
+	<!-- end of color macros -->
+	<!-- Stand macros -->
+
+	<link name="world"/>
+	<link name="stand_Base">
+		<visual>
+			<geometry>
+				<cylinder radius="0.5" length="0.7"/>
+			</geometry>
+			<material name="orange_transparent"/>
+		</visual>
+		<collision>
+			<geometry>
+				<cylinder radius="0.5" length="0.7"/>
+			</geometry>
+			<material name="blue_transparent"/>
+		</collision>
+	</link>
+	<!-- place world reference -->
+	<joint name="world_to_stand_Base" type="fixed">
+		<parent link="world"/>
+		<child link="stand_Base"/>
+		<origin xyz="0 0 0.35" rpy="0 0 0"/>
+	</joint>
+
+	<link name="stand1">
+		<visual>
+			<geometry>
+				<cylinder radius="0.08" length="0.8"/>
+			</geometry>
+			<material name="orange_transparent"/>
+		</visual>
+		<collision>
+			<geometry>
+				<cylinder radius="0.08" length="0.8"/>
+			</geometry>
+			<material name="blue_transparent"/>
+		</collision>
+	</link>
+
+	<joint name="Base_to_stand1" type="fixed">
+		<parent link="stand_Base"/>
+		<child link="stand1"/>
+		<origin xyz="0 0 0.6" rpy="0 0 0"/>
+	</joint>
+
+	<link name="stand2">
+		<visual>
+			<geometry>
+				<cylinder radius="0.08" length="${robot_horizontal_stand_width}"/>
+			</geometry>
+			<material name="orange_transparent"/>
+		</visual>
+		<collision>
+			<geometry>
+				<cylinder radius="0.08" length="${robot_horizontal_stand_width}"/>
+			</geometry>
+			<material name="blue_transparent"/>
+		</collision>
+	</link>
 
 
-  <!-- place robotiq_fts300 to left arm -->
-  <xacro:robotiq_fts300 prefix="$(arg prefix)" parent="$(arg prefix)ee_link"/>
-  <!-- place ur5 endeffector  -->
-  <xacro:endeffector prefix="$(arg prefix)"/>
-  <joint name="$(arg prefix)ee_mount" type="fixed">
+	<joint name="stand1_to_stand2" type="fixed">
+		<parent link="stand1"/>
+		<child link="stand2"/>
+		<origin xyz="0 0 0.25" rpy="1.57 1.57 0"/>
+	</joint>
+
+	<!-- arm -->
+	<xacro:ur5_robot prefix="$(arg prefix)" joint_limited="false"/>
+	<joint name="stand2_to_left_arm" type="fixed">
+		<parent link="stand2"/>
+		<child link ="$(arg prefix)base_link"/>
+		<origin xyz="0 0 ${(robot_horizontal_stand_width/2)}" rpy="${PI/4.0} 0 0"/>
+	</joint>
+
+
+	<!-- place robotiq_fts300 to left arm -->
+	<xacro:robotiq_fts300 prefix="$(arg prefix)" parent="$(arg prefix)ee_link"/>
+	<!-- place ur5 endeffector  -->
+	<xacro:endeffector prefix="$(arg prefix)"/>
+	<joint name="$(arg prefix)ee_mount" type="fixed">
 		<parent link="$(arg prefix)fts_toolside" />
 		<child link = "$(arg prefix)ee_frame" />
 		<origin xyz="0.0 0.0 0.0" rpy="0 0 0 " />
-  </joint>
+	</joint>
 
 </robot>

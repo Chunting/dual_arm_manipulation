@@ -27,20 +27,6 @@ UR_Message_Listener::UR_Message_Listener(ros::NodeHandle &nh, std::string ur_nam
     offset_sub_ = nh_.subscribe("/offset_point", 1, &UR_Message_Listener::offset_Callback, this);
 
     newTrajectory = false;
-
-    ros::ServiceClient client = nh_.serviceClient<robotiq_ft_sensor::sensor_accessor>(ur_namespace + "/robotiq_ft_sensor_acc");
-
-    robotiq_ft_sensor::sensor_accessor srv;
-
-    int count = 0;
-    if (ros::ok())
-    {
-        srv.request.command = "SET ZRO";
-        if (client.call(srv))
-        {
-            ROS_INFO("ret: %s", srv.response.res.c_str());
-        }
-    }
     wrench_external_.setZero();
     wrench_filter_factor_ = 0.1;
     force_dead_zone_thres_ = 5;
