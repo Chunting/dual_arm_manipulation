@@ -17,14 +17,24 @@ int main(int argc, char **argv)
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// stop controller
 	ros::ServiceClient left_srv_switch_controller = nh.serviceClient<controller_manager_msgs::SwitchController>("/left/controller_manager/switch_controller");
-	controller_manager_msgs::SwitchController srv_req;
-	srv_req.request.strictness = controller_manager_msgs::SwitchController::Request::BEST_EFFORT;
-	srv_req.request.stop_controllers.push_back("/left/vel_based_pos_traj_controller");
-	bool success = left_srv_switch_controller.call(srv_req);
+	controller_manager_msgs::SwitchController switch_controller;
+	switch_controller.request.strictness = controller_manager_msgs::SwitchController::Request::BEST_EFFORT;
+	switch_controller.request.stop_controllers.push_back("/left/vel_based_pos_traj_controller");
+	bool success = left_srv_switch_controller.call(switch_controller);
 	ROS_INFO("Stopping controller %s", success ? "SUCCEDED" : "FAILED");
-	if (!success)
-		return 0;
-	srv_req.request.stop_controllers.clear();
+	if (!success) return 0;
+	switch_controller.request.stop_controllers.clear();
+
+    // clear
+    switch_controller.request.stop_controllers.clear();
+
+    // start admittance controller
+    switch_controller.request.BEST_EFFORT;
+    switch_controller.request.start_controllers.push_back("/left/ur5_cartesian_state_controller");
+	switch_controller.request.start_controllers.push_back("/left/ur5_cartesian_velocity_controller");
+    bool success_start = left_srv_switch_controller.call(switch_controller);
+    ROS_INFO("Starting controller %s", success_start ? "SUCCEDED" : "FAILED");
+    switch_controller.request.start_controllers.clear();
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	sleep(0.5);

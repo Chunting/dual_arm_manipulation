@@ -1,0 +1,71 @@
+# Admittance parameters for two mass damper systems 
+# (the arm) with params (mass_arm, damping_arm) 
+# and  respectively, connected by a 
+# spring-damper with parameters (damping_coupling, stiffness_coupling, 
+# equilibrium_point_spring)
+mass_arm: [6,0,0,0,0,0,
+           0,6,0,0,0,0,
+           0,0,6,0,0,0,
+           0,0,0,1,0,0,
+           0,0,0,0,1,0,
+           0,0,0,0,0,.5]
+damping_coupling: [20,0,0,0,0,0,
+                   0,20,0,0,0,0,
+                   0,0,0,0,0,0,
+                   0,0,0,0,0,0,
+                   0,0,0,0,0,0,
+                   0,0,0,0,0,10]
+damping_arm: [60,0,0,0,0,0,
+  0,60,0,0,0,0,
+  0,0,60,0,0,0,
+  0,0,0,15,0,0,
+  0,0,0,0,15,0,
+  0,0,0,0,0,15]
+stiffness_coupling: [0,0,0,0,0,0,
+                     0,0,0,0,0,0,
+                     0,0,0,0,0,0,
+                     0,0,0,10,0,0,
+                     0,0,0,0,10,0,
+                     0,0,0,0,0,10]
+# stiffness_coupling: [150,0,0,0,0,0,
+#                      0,150,0,0,0,0,
+#                      0,0,150,0,0,0,
+#                      0,0,0,5,0,0,
+#                      0,0,0,0,5,0,
+#                      0,0,0,0,0,5]
+#equilibrium_point_spring: [0.0478,0.3477,0.5611,0.7527, 0.6979, 0.01073, -0.033988]
+
+
+
+# [position (x, y, z)  orientation (x, y, z, w)]
+#equilibrium_point_spring: [0.1,0.4,0.5,-0.593599, -0.566706, -0.369419, 0.435908]
+
+
+# this equilibrium point is derived from setting all joints to -90 degree
+equilibrium_point_spring: [0.110,-0.403,0.800,  0.654, -0.270, -0.653, 0.271]
+
+
+
+# pose: 
+#   position: 
+#     x: 0.109568559391
+#     y: -0.402785987528
+#     z: 0.800044329823
+#   orientation: 
+#     x: 0.65370162884
+#     y: -0.269576763313
+#     z: -0.653140049017
+#     w: 0.270943952697
+
+# not that position is defined in "base_link"
+# with x pointing right
+#      y pointing forward
+#      z pointing up
+
+
+# this will limit the workspace ([x_min x_max y_min y_max z_min z_max])
+#workspace_limits: [-0.30, 0.30, 0.35, 0.55, 0.20, 0.75] # conservative choice
+workspace_limits: [-0.50, 0.50, 0.25, 0.80, 0.30, 0.75]
+
+arm_max_vel: 1.5
+arm_max_acc: 1.0
