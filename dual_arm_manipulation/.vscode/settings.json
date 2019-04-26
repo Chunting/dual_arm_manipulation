@@ -29,7 +29,8 @@
         "geometry": "cpp",
         "atomic": "cpp",
         "mutex": "cpp",
-        "system_error": "cpp"
+        "system_error": "cpp",
+        "ostream": "cpp"
     },
     "C_Cpp.intelliSenseEngineFallback": "Disabled",
     "C_Cpp.errorSquiggles": "Disabled"

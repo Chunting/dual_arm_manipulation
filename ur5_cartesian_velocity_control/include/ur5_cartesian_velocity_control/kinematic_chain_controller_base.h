@@ -55,8 +55,8 @@ bool KinematicChainControllerBase<JI>::init(JI *robot, ros::NodeHandle &n)
 
 	std::string name_space = n.getNamespace();
 	std::size_t first = name_space.find_first_of("/");
-    std::size_t last = name_space.find_last_of("/");
-	std::string prefix = name_space.substr(first+1, last-first-1)+"_";
+	std::size_t last = name_space.find_last_of("/");
+	std::string prefix = name_space.substr(first + 1, last - first - 1) + "_";
 	std::cout << "--------------------> name_space:  " << name_space << std::endl;
 
 	if (!ros::param::search(name_space, "robot_description", robot_description))

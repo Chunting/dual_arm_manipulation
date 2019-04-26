@@ -13,6 +13,11 @@ bool CartesianVelocityControllerBase<T>::init( T *robot, ros::NodeHandle &n)
 {
 	// KDL
 	KinematicChainControllerBase<T>::init(robot, n);
+	/*
+	 * KDL::ChainIkSolverVel_pinv_givens:
+	 * A inverse velocity kinematics algorithm based on the generalize pseudo inverse to calculate the velocity transformation 
+	 * from Cartesian to joint space of a general KDL::Chain. It uses a svd-calculation based on householders rotations. 
+	*/
 	ik_vel_solver_.reset(new KDL::ChainIkSolverVel_pinv_givens(this->kdl_chain_));
 	fk_vel_solver_.reset(new KDL::ChainFkSolverVel_recursive(this->kdl_chain_));
 	fk_pos_solver_.reset(new KDL::ChainFkSolverPos_recursive(this->kdl_chain_));
@@ -71,6 +76,7 @@ void CartesianVelocityControllerBase<T>::update(const ros::Time &time,
 	{
 		this->joint_msr_.q(i) = this->joint_handles_[i].getPosition();
 		this->joint_msr_.qdot(i) = this->joint_handles_[i].getVelocity();
+		ROS_INFO("JOINT %f, %f", this->joint_msr_.q(i), this->joint_msr_.qdot(i));
 	}
 
 	// Compute inverse kinematics velocity solver

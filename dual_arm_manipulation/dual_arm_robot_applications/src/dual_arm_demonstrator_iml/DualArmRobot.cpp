@@ -590,8 +590,10 @@ bool DualArmRobot::pickBox(std::string object_id, geometry_msgs::Vector3Stamped 
     both_arms_plan.start_state_.attached_collision_objects = getCurrentRobotStateMsg().attached_collision_objects;
     
     // Grasp by switching controller and wait for contact while visualizing plan
-    // if (!switch_controller("vel_based_pos_traj_controller", "left_vel_based_admittance_traj_controller", "left"))
-    //     ROS_WARN("failed switching controller");
+    if (!switch_controller("vel_based_pos_traj_controller", "ur5_cartesian_velocity_controller", "left")){
+        ROS_WARN("Failed switching controller");
+    }
+        
 
     // visualize plan
     dual_arm_toolbox::TrajectoryProcessor::visualizePlan(both_arms_plan, 5);

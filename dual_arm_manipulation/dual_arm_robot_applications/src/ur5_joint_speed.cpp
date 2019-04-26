@@ -38,7 +38,40 @@ void state_arm_callback(
 	arm_real_twist_ << msg->twist.linear.x, msg->twist.linear.y,
 		msg->twist.linear.z, msg->twist.angular.x, msg->twist.angular.y,
 		msg->twist.angular.z;
-	std::cout << arm_real_position_ << std::endl;
+	std::cout << "arm_real_position_" << std::endl
+			  << arm_real_position_ << std::endl
+			  << "arm_real_orientation_" << std::endl
+			  << arm_real_orientation_.coeffs() << std::endl
+			  << "arm_real_twist_" << std::endl
+			  << arm_real_twist_ << std::endl;
+}
+bool switch_controller(ros::NodeHandle &nh_, std::string stop_name, std::string start_name, std::string ur_namespace)
+{
+	ROS_INFO("Switching controllers");
+	// setup
+	ros::ServiceClient srv_switch_controller = nh_.serviceClient<controller_manager_msgs::SwitchController>(ur_namespace + "/controller_manager/switch_controller");
+	controller_manager_msgs::SwitchController switchController;
+	switchController.request.strictness = controller_manager_msgs::SwitchController::Request::BEST_EFFORT;
+	sleep(2);
+
+	// stop
+	switchController.request.stop_controllers.push_back(stop_name);
+	bool success_stop = srv_switch_controller.call(switchController);
+	ROS_INFO("Stopping controller %s", success_stop ? "SUCCEDED" : "FAILED");
+	if (!success_stop)
+		return false;
+
+	// clear
+	switchController.request.stop_controllers.clear();
+
+	// start admittance controller
+	switchController.request.BEST_EFFORT;
+	switchController.request.start_controllers.push_back(start_name);
+	bool success_start = srv_switch_controller.call(switchController);
+	ROS_INFO("Starting controller %s", success_start ? "SUCCEDED" : "FAILED");
+	switchController.request.start_controllers.clear();
+
+	return success_start;
 }
 int main(int argc, char **argv)
 {
@@ -54,34 +87,20 @@ int main(int argc, char **argv)
 
 	ros::Rate loop_rate(100);
 
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	// // stop controller
-	// ros::ServiceClient left_srv_switch_controller = nh_.serviceClient<controller_manager_msgs::SwitchController>("/left/controller_manager/switch_controller");
-	// controller_manager_msgs::SwitchController switch_controller;
-	// switch_controller.request.strictness = controller_manager_msgs::SwitchController::Request::BEST_EFFORT;
-	// switch_controller.request.stop_controllers.push_back("/left/vel_based_pos_traj_controller");
-	// bool success = left_srv_switch_controller.call(switch_controller);
-	// ROS_INFO("Stopping controller %s", success ? "SUCCEDED" : "FAILED");
-	// if (!success)
-	// 	return 0;
-	// switch_controller.request.stop_controllers.clear();
-
-	// // clear
-	// switch_controller.request.stop_controllers.clear();
-
-	// // start admittance controller
-	// switch_controller.request.BEST_EFFORT;
-	// switch_controller.request.start_controllers.push_back("/left/ur5_cartesian_velocity_controller");
-	// bool success_start = left_srv_switch_controller.call(switch_controller);
-	// ROS_INFO("Starting controller %s", success_start ? "SUCCEDED" : "FAILED");
 	// switch_controller.request.start_controllers.clear();
+	if (!switch_controller(nh_, "vel_based_pos_traj_controller", "ur5_cartesian_velocity_controller", "left"))
+	{
+		ROS_WARN("Failed switching controller");
+	}
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // for the arm
+	// for the arm
 	geometry_msgs::Twist arm_twist_cmd;
+	int direction = 1;
+	double cart_speed = 0.01;
 	while (nh_.ok())
 	{
-		arm_twist_cmd.linear.x = -0.1;
+		arm_twist_cmd.linear.x = 0.01;
 		arm_twist_cmd.linear.y = 0;
 		arm_twist_cmd.linear.z = 0;
 		arm_twist_cmd.angular.x = 0;
@@ -90,5 +109,7 @@ int main(int argc, char **argv)
 		pub_arm_cmd_.publish(arm_twist_cmd);
 		ros::spinOnce();
 		loop_rate.sleep();
+
+		direction = -direction;
 	}
 }
