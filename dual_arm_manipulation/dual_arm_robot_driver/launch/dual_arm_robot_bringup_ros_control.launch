@@ -13,9 +13,9 @@
 	<arg name="left_base_frame" default="left_base" />
 	<arg name="left_tool_frame" default="left_ee_link" />
 	<!--Load and start -->
-	<arg name="left_controllers" default="joint_state_controller vel_based_pos_traj_controller force_torque_sensor_controller "/>
+	<arg name="controllers" default="joint_state_controller vel_based_pos_traj_controller force_torque_sensor_controller "/>
 	<!-- Only load but do not start -->
-	<arg name="left_stopped_controllers" default="left_vel_based_admittance_traj_controller pos_based_pos_traj_controller left_joint_group_vel_controller"/>
+	<arg name="stopped_controllers" default="vel_based_admittance_traj_controller pos_based_pos_traj_controller joint_group_vel_controller"/>
 
 	<!-- right arm -->
 	<arg name="right_prefix" default=""/>
@@ -24,8 +24,8 @@
 	<arg name="right_reverse_port" default="50002"/>
 	<arg name="right_base_frame" default="right_base" />
 	<arg name="right_tool_frame" default="right_ee_link" />
-	<arg name="right_controllers" default="joint_state_controller right_force_torque_sensor_controller vel_based_pos_traj_controller "/>
-	<arg name="right_stopped_controllers" default="right_vel_based_admittance_traj_controller pos_based_pos_traj_controller right_joint_group_vel_controller"/>
+	<arg name="right_controllers" default="right_joint_state_controller right_force_torque_sensor_controller right_vel_based_pos_traj_controller "/>
+	<arg name="right_stopped_controllers" default="right_vel_based_admittance_traj_controller right_pos_based_pos_traj_controller right_joint_group_vel_controller"/>
 
 	<arg name="limited" default="false"/>
 	<arg name="min_payload" default="0.0"/>
@@ -66,8 +66,9 @@
 		</node>
 		<rosparam file="$(find dual_arm_robot_driver)/config/right_controllers.yaml" command="load"/>
 		<node name="ros_control_controller_spawner" pkg="controller_manager" type="spawner" 
-				respawn="false" output="screen" args="$(arg right_controllers)" />
-		<node name="ros_control_controller_manager" pkg="controller_manager" type="controller_manager" respawn="false" output="screen" args="load $(arg right_stopped_controllers)" />
+				respawn="false" output="screen" args="$(arg controllers)" />
+		<node name="ros_control_controller_manager" pkg="controller_manager" type="controller_manager" respawn="false" 
+		      output="screen" args="load $(arg stopped_controllers)" />
 		<node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
 		<!-- Start force/torque sensor --> 
 		<node name="ft_sensor" pkg="robotiq_ft_sensor" type="rq_sensor" respawn="true" output="screen">
@@ -95,10 +96,10 @@
 		</node>
 		<rosparam file="$(find dual_arm_robot_driver)/config/left_controllers.yaml" command="load"/>
 		<node name="ros_control_controller_spawner" pkg="controller_manager" type="spawner" 
-				respawn="false" output="screen" args="$(arg left_controllers)" />
+				respawn="false" output="screen" args="$(arg controllers)" />
 
 		<node name="ros_control_controller_manager" pkg="controller_manager" type="controller_manager" 
-		      respawn="false" output="screen" args="load $(arg left_stopped_controllers)" />
+		      respawn="false" output="screen" args="load $(arg stopped_controllers)" />
 		<node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
 		<!-- Start force/torque sensor --> 
 		<node name="ft_sensor" pkg="robotiq_ft_sensor" type="rq_sensor" respawn="true" output="screen">

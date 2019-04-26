@@ -26,7 +26,10 @@
         "typeindex": "cpp",
         "core": "cpp",
         "*.tcc": "cpp",
-        "geometry": "cpp"
+        "geometry": "cpp",
+        "atomic": "cpp",
+        "mutex": "cpp",
+        "system_error": "cpp"
     },
     "C_Cpp.intelliSenseEngineFallback": "Disabled",
     "C_Cpp.errorSquiggles": "Disabled"

@@ -110,7 +110,7 @@ std::vector<UrdfJointConstPtr> getUrdfJoints(const urdf::Model &urdf, const std:
 		}
 		else
 		{
-			ROS_ERROR_STREAM("joint_trajectory_admittance_controller Could not find joint '" << joint_names[i] << "' in URDF model.");
+			ROS_ERROR_STREAM("joint_trajectory_admittance_controller Could not find joint in getUrdfJoints()'" << joint_names[i] << "' in URDF model.");
 			return std::vector<UrdfJointConstPtr>();
 		}
 	}

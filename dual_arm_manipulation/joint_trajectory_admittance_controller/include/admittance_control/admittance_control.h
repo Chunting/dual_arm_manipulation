@@ -150,6 +150,14 @@ void AdmittanceControl::desiredOffsetCallback(const geometry_msgs::PointStamped:
     offset_desired_ << msg->point.x, msg->point.y, msg->point.z;
     ROS_INFO_STREAM("I heared the desired offset " << offset_desired_);
 }
+// std::string getprefix(const ros::NodeHandle &nh)
+// {
+// 	const std::string complete_ns = nh.getNamespace();
+// 	std::size_t first = complete_ns.find_first_of("/");
+//     std::size_t last = complete_ns.find_last_of("/");
+// 	std::string prefix = complete_ns.substr(first+1, last-first-1);
+//     return prefix+"_";
+// }
 
 void AdmittanceControl::init(ros::NodeHandle &nh)
 {
@@ -164,6 +172,9 @@ void AdmittanceControl::init(ros::NodeHandle &nh)
     std::string robot_desc_string;
     std::string root_name;
     std::string tip_name;
+    std::string name_space = nh.getNamespace(); // /right/vel_based_admittance_traj_controller
+    // std::string prefix = getprefix(nh);  // Get prefix from name_space, i.e., left_ or right_
+    std::cout << "--------------------> name_space:  " << name_space << std::endl;
 
     // initializing the class variables
     wrench_external_.setZero();
@@ -173,21 +184,22 @@ void AdmittanceControl::init(ros::NodeHandle &nh)
     nh.param("/robot_description", robot_desc_string, std::string());
     if (!kdl_parser::treeFromString(robot_desc_string, kdl_tree))
     {
-        ROS_ERROR("Failed to construct kdl tree in namespace: %s", nh.getNamespace().c_str());
+        ROS_ERROR("Failed to construct kdl tree in namespace: %s", name_space.c_str());
     }
     else
-        ROS_INFO("got kdl tree");
+        ROS_INFO("Got kdl tree for joint admittance controller");
 
     nh.param("root_name", root_name, std::string());
     nh.param("tip_name", tip_name, std::string());
-
+    // root_name = prefix + root_name;
+    // tip_name = prefix + tip_name;
     std::cout << "root name " << root_name << "\ttip name  " << tip_name << std::endl;
-    std::cout << "Namespace: " << nh.getNamespace() << std::endl;
+    std::cout << "Namespace: " << name_space << std::endl;
 
     if (!kdl_tree.getChain(root_name, tip_name, kdl_chain_))
-        ROS_ERROR("Failed to construct kdl chain with root: %s and tip: %s", root_name.c_str(), tip_name.c_str());
+        ROS_ERROR("Failed to construct kdl chain with root: %s and tip: %s in namespace %s", root_name.c_str(), tip_name.c_str(), name_space.c_str());
     else
-        ROS_INFO("got kdl chain");
+        ROS_INFO("Got kdl chain for joint admittance controller");
 
     // Settings
     nh.param("max_velocity", max_vel_, double());
