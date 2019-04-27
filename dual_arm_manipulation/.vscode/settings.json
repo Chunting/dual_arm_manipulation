@@ -30,7 +30,8 @@
         "atomic": "cpp",
         "mutex": "cpp",
         "system_error": "cpp",
-        "ostream": "cpp"
+        "ostream": "cpp",
+        "sstream": "cpp"
     },
     "C_Cpp.intelliSenseEngineFallback": "Disabled",
     "C_Cpp.errorSquiggles": "Disabled"

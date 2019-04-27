@@ -5,17 +5,19 @@
 	<arg name="debug" default="false" />
 	<arg unless="$(arg debug)" name="launch_prefix" value="" />
 	<arg if="$(arg debug)" name="launch_prefix" value="xterm -e gdb --args" />
+	<arg name="use_sim_time" default="true" />
+	<arg name="paused" default="true" />
 	<!-- left arm -->
 	<arg name="left_prefix" default=""/>
 	<arg name="left_controller_name" default="left"/>
 	<arg name="left_robot_ip" default="192.168.1.101"/>
 	<arg name="left_reverse_port" default="50001"/>
 	<arg name="left_base_frame" default="left_base" />
-	<arg name="left_tool_frame" default="left_ee_link" />
+	<arg name="left_tool_frame" default="left_tool0" />
 	<!--Load and start -->
-	<arg name="controllers" default="joint_state_controller force_torque_sensor_controller vel_based_pos_traj_controller"/>
+	<arg name="controllers" default="joint_state_controller force_torque_sensor_controller ur5_cartesian_velocity_controller"/>
 	<!-- Only load but do not start -->
-	<arg name="stopped_controllers" default="vel_based_admittance_traj_controller joint_group_vel_controller  ur5_cartesian_velocity_controller"/>
+	<arg name="stopped_controllers" default="vel_based_admittance_traj_controller joint_group_vel_controller vel_based_pos_traj_controller "/>
 
 	<!-- right arm -->
 	<arg name="right_prefix" default=""/>
@@ -23,7 +25,7 @@
 	<arg name="right_robot_ip" default="192.168.1.102"/>
 	<arg name="right_reverse_port" default="50002"/>
 	<arg name="right_base_frame" default="right_base" />
-	<arg name="right_tool_frame" default="right_ee_link" />
+	<arg name="right_tool_frame" default="right_tool0" />
 	<arg name="limited" default="false"/>
 	<arg name="min_payload" default="0.0"/>
 	<arg name="max_payload" default="5.0"/>
@@ -102,9 +104,12 @@
 		<node name="ft_sensor" pkg="robotiq_ft_sensor" type="rq_sensor" respawn="true" output="screen">
 			<param name="prefix" type="str" value="$(arg left_controller_name)" />
 			<param name="frame_id" type="str" value="$(arg left_controller_name)_robotiq_ft_frame_id" />
-			<param name="serial_id" type="str" value="ttyUSB1" />
+			<param name="serial_id" type="str" value="ttyUSB0" />
 		</node>
 		<!-- Bias the F/T sensor at startup -->
 	    <node pkg="rosservice" type="rosservice" name="ft_sensor_biaser" args="call --wait /left/robotiq_ft_sensor_acc &quot;command: 'SET_ZRO'&quot; " />
 	</group> 
+
+	<node name="dual_arm_robot_logger" pkg="dual_arm_robot_applications" type="dual_arm_robot_logger"/>
+			
 </launch>

@@ -91,7 +91,7 @@ void UR_Logger::generate_logfile_name()
 
     strftime(buffer, 20, "%Y_%m_%d_%H_%M%S", timeinfo);
     std::string log_suffix = buffer;
-    logfile_name_ = "./src/dual_arm_manipulation/dataLog/ur_log_" + log_suffix + ".csv";
+    logfile_name_ = "/home/chunting/catkin_ws/src/dual_arm_manipulation/dataLog/ur_log_" + log_suffix + ".csv";
     logfile_name_command_ = "./src/dual_arm_manipulation/dataLog/ur_command_" + log_suffix + ".csv";
 }
 
@@ -423,23 +423,23 @@ void UR_Logger::logCallback(const ros::TimerEvent &)
     //}
 }
 
-/* Simple Log-Node
-int main(int argc, char **argv){
-    ros::init(argc, argv, "ur_logger");
-    ros::NodeHandle nh;
+// /* Simple Log-Node */
+// int main(int argc, char **argv){
+//     ros::init(argc, argv, "ur_logger");
+//     ros::NodeHandle nh;
+//     ros::AsyncSpinner asyncSpinner(2);
+//     asyncSpinner.start();
+//     ros::Rate loop_rate_(100);
+//     std::vector<std::string> ur_namespaces;
+//     ur_namespaces.push_back("left");
+//     ur_namespaces.push_back("right");
+//     UrLogger ur_logger(nh, ur_namespaces);
+//     ur_logger.start(100);
 
-    ros::AsyncSpinner asyncSpinner(1);
-    asyncSpinner.start();
+//     ros::waitForShutdown();
+//     ur_logger.stop();
 
-    std::vector<std::string> ur_namespaces;
-    ur_namespaces.push_back("");
-    UrLogger ur_logger(nh, ur_namespaces);
+//     ros::shutdown();
+//     return 0;
+// }
 
-    ur_logger.start(4);
-    ros::Duration(3).sleep();
-    ur_logger.stop();
-
-    ros::shutdown();
-    return 0;
-}
-*/

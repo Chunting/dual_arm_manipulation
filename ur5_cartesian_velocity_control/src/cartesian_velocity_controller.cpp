@@ -9,7 +9,7 @@ namespace controller_interface
  *
  */
 template <typename T>
-bool CartesianVelocityControllerBase<T>::init( T *robot, ros::NodeHandle &n)
+bool CartesianVelocityControllerBase<T>::init(T *robot, ros::NodeHandle &n)
 {
 	// KDL
 	KinematicChainControllerBase<T>::init(robot, n);
@@ -72,15 +72,22 @@ void CartesianVelocityControllerBase<T>::update(const ros::Time &time,
 {
 
 	// Get joint positions
+	// It contains all the 12 joints, both right arm and left arm.
+	//
 	for (std::size_t i = 0; i < this->joint_handles_.size(); i++)
 	{
-		this->joint_msr_.q(i) = this->joint_handles_[i].getPosition();
-		this->joint_msr_.qdot(i) = this->joint_handles_[i].getVelocity();
-		ROS_INFO("JOINT %f, %f", this->joint_msr_.q(i), this->joint_msr_.qdot(i));
+		std::size_t found = this->joint_handles_[i].getName().find("left");
+		if (found!=std::string::npos)
+		{
+			this->joint_msr_.q(i) = this->joint_handles_[i].getPosition();
+			this->joint_msr_.qdot(i) = this->joint_handles_[i].getVelocity();
+			// ROS_ERROR("%s %f, %f\n", this->joint_handles_[i].getName().c_str(), this->joint_msr_.q(i), this->joint_msr_.qdot(i));
+		}
 	}
 
 	// Compute inverse kinematics velocity solver
 	ik_vel_solver_->CartToJnt(this->joint_msr_.q, x_dt_des_, q_dt_cmd_);
+
 	writeVelocityCommands(period);
 
 	// Forward kinematics
@@ -99,6 +106,8 @@ void CartesianVelocityControllerBase<T>::update(const ros::Time &time,
 
 			// populate message
 			realtime_pub_->msg_.header.stamp = time;
+			realtime_pub_->msg_.header.frame_id = this->root_name;
+			realtime_pub_->msg_.child_frame_id = this->tip_name;
 			tf::poseKDLToMsg(x_, realtime_pub_->msg_.pose);
 			tf::twistKDLToMsg(x_dot_.GetTwist(), realtime_pub_->msg_.twist);
 

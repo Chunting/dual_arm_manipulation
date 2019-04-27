@@ -3,27 +3,24 @@
 # and  respectively, connected by a 
 # spring-damper with parameters (damping_coupling, stiffness_coupling, 
 # equilibrium_point_spring)
+## "mass_arm", M_a
 mass_arm: [6,0,0,0,0,0,
            0,6,0,0,0,0,
            0,0,6,0,0,0,
            0,0,0,1,0,0,
            0,0,0,0,1,0,
            0,0,0,0,0,.5]
-damping_coupling: [20,0,0,0,0,0,
-                   0,20,0,0,0,0,
-                   0,0,0,0,0,0,
-                   0,0,0,0,0,0,
-                   0,0,0,0,0,0,
-                   0,0,0,0,0,10]
+## "damping_arm", D_a
 damping_arm: [60,0,0,0,0,0,
   0,60,0,0,0,0,
   0,0,60,0,0,0,
   0,0,0,15,0,0,
   0,0,0,0,15,0,
   0,0,0,0,0,15]
-stiffness_coupling: [0,0,0,0,0,0,
-                     0,0,0,0,0,0,
-                     0,0,0,0,0,0,
+  ## "stiffness_coupling", K
+stiffness_coupling: [150,0,0,0,0,0,
+                     0,150,0,0,0,0,
+                     0,0,150,0,0,0,
                      0,0,0,10,0,0,
                      0,0,0,0,10,0,
                      0,0,0,0,0,10]
@@ -42,8 +39,21 @@ stiffness_coupling: [0,0,0,0,0,0,
 
 
 # this equilibrium point is derived from setting all joints to -90 degree
-equilibrium_point_spring: [0.110,-0.403,0.800,  0.654, -0.270, -0.653, 0.271]
+equilibrium_point_spring: [0.109, -0.346, 0.890, 0.035, -0.396, 0.917, -0.021]
 
+# rosrun tf tf_echo left_base_link left_wrist_3_link
+# At time 0.000
+# Translation: [0.109, -0.346, 0.890]
+# - Rotation: in Quaternion [0.035, -0.396, 0.917, -0.021]
+#            in RPY (radian) [-0.817, -0.048, -3.075]
+#            in RPY (degree) [-46.836, -2.751, -176.175]
+
+
+# rosrun tf tf_echo world left_wrist_3_link
+# Translation: [-0.850, -0.532, 1.087]
+# Rotation: in Quaternion [-0.707, -0.002, -0.002, 0.707]
+#              in RPY (radian) [-1.571, -0.005, -0.000]
+#             in RPY (degree) [-90.035, -0.293, -0.015]
 
 
 # pose: 
@@ -65,7 +75,7 @@ equilibrium_point_spring: [0.110,-0.403,0.800,  0.654, -0.270, -0.653, 0.271]
 
 # this will limit the workspace ([x_min x_max y_min y_max z_min z_max])
 #workspace_limits: [-0.30, 0.30, 0.35, 0.55, 0.20, 0.75] # conservative choice
-workspace_limits: [-0.50, 0.50, 0.25, 0.80, 0.30, 0.75]
+workspace_limits: [-0.20, -1.50, -1.25, -0.05, 1, 1.5]
 
-arm_max_vel: 1.5
+arm_max_vel: 0.1  #1.5
 arm_max_acc: 1.0

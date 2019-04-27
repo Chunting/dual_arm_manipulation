@@ -36,18 +36,13 @@ int main(int argc, char **argv)
     // Scene Setup
     dual_arm_demonstrator_iml::SceneManager sceneManager(nh);
     sceneManager.setupScene();
-    std::vector<std::string> ur_namespaces;
-    ur_namespaces.push_back("left");
-    ur_namespaces.push_back("right");
-    UR_Logger ur_logger(nh, ur_namespaces);
-    ur_logger.start(100);
     // variables
     moveit::planning_interface::MoveGroupInterface::Plan left_plan;
     moveit::planning_interface::MoveGroupInterface::Plan right_plan;
     moveit::planning_interface::MoveItErrorCode error;
     error.val = -1;
-
-    FTSensorSubscriber FTsubscriber(nh, ur_namespaces[0]);
+    
+    FTSensorSubscriber FTsubscriber(nh, "left");
 
     geometry_msgs::Vector3Stamped direction;
     direction.header.frame_id = "world";
@@ -192,7 +187,6 @@ int main(int argc, char **argv)
     dualArmRobot.moveHome();
 
     sleep(1);
-    ur_logger.stop();
     // END
     ros::shutdown();
     return 0;

@@ -64,10 +64,13 @@ int main(int argc, char **argv)
     direction.header.frame_id = "world";
     dualArmRobot.setConstraints();
     dualArmRobot.kinematic_state->enforceBounds();
-
+    if (!dualArmRobot.switch_controller("ur5_cartesian_velocity_controller", "vel_based_pos_traj_controller", "left"))
+        ROS_WARN("failed switching controller");
     ROS_INFO("========== MOVE HOME POSITION =================");
     dualArmRobot.moveHome();
     sleep(1);
+    if (!dualArmRobot.switch_controller("vel_based_pos_traj_controller", "ur5_cartesian_velocity_controller", "left"))
+        ROS_WARN("failed switching controller");
     ROS_INFO("========== MOVE GRASP POSITION =================");
     dualArmRobot.moveGraspPosition();
     sleep(1);

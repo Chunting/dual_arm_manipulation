@@ -14,7 +14,7 @@ int main(int argc, char **argv){
     ros::init(argc, argv, "dual_arm_robot_logger");
     ros::NodeHandle nh;
 
-    ros::AsyncSpinner asyncSpinner(1);
+    ros::AsyncSpinner asyncSpinner(2);
     asyncSpinner.start();
 
     std::vector<std::string> ur_namespaces;
@@ -24,7 +24,7 @@ int main(int argc, char **argv){
     // sampling rate, hz
     ur_logger.start(20);
     // sampling time, second
-    ros::Duration(60).sleep();
+    ros::waitForShutdown();
     ur_logger.stop();
 
     ros::shutdown();

@@ -69,7 +69,7 @@ vel_based_pos_traj_controller:
 # For detailed explanations of parameter see http://wiki.ros.org/
 vel_based_admittance_traj_controller:
    type: velocity_controllers/JointTrajectoryAdmittanceController
-   root_name: world #left_base_link
+   root_name: left_base_link
    tip_name: left_ee_link
    contact_force: 20 #[N]
    max_velocity: 0.1
@@ -157,11 +157,11 @@ joint_group_vel_controller:
 ur5_cartesian_velocity_controller:
   type: cartesian_controller/CartesianVelocityController
   publish_rate: 125
-  root_name: world #left_base_link
-  tip_name: left_ee_link
+  root_name: left_base_link
+  tip_name: left_wrist_3_link
 
 ur5_cartesian_state_controller:
     type: cartesian_controller/CartesianStateController
     publish_rate: 125
-    root_name: world #left_base_link
-    tip_name: left_ee_link
+    root_name: left_base
+    tip_name: left_wrist_3_link

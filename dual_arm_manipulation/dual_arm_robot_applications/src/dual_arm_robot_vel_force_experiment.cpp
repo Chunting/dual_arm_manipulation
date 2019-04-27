@@ -125,13 +125,6 @@ int main(int argc, char **argv)
     ros::AsyncSpinner asyncSpinner(2);
     asyncSpinner.start();
 
-    // create ur_logger. Use this namespace
-    std::vector<std::string> ur_namespaces;
-    ur_namespaces.push_back("left");
-    UR_Logger ur_logger(nh, ur_namespaces);
-    // start logging
-    ur_logger.start(50);
-
     // MoveGroupInterface
     moveit::planning_interface::MoveGroupInterface left_("left_manipulator");
     moveit::planning_interface::MoveGroupInterface::Plan plan;
@@ -206,8 +199,6 @@ int main(int argc, char **argv)
     // left_.execute(plan);
     sleep(1);
     ROS_INFO("finished. shutting down.");
-    // stop logging
-    ur_logger.stop();
     ros::shutdown();
     return 0;
 }

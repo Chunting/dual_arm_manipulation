@@ -10,14 +10,14 @@
   <!-- TOPICS FROM THE LOWER-LEVE CONTROLLER -->
 
   <!-- Communication with the arm, reading the state of the arm and commanding velocities -->
-  <arg name="TOPIC_ARM_STATE"   default="/ur5/ur5_cartesian_velocity_controller/ee_state"         />
-  <arg name="TOPIC_ARM_COMMAND" default="/ur5/ur5_cartesian_velocity_controller/command_cart_vel" />
+  <arg name="TOPIC_ARM_STATE"   default="/left/ur5_cartesian_velocity_controller/ee_state"         />
+  <arg name="TOPIC_ARM_COMMAND" default="/left/ur5_cartesian_velocity_controller/command_cart_vel" />
 
   <!-- TOPICS AND SETTINGS FOR ADMITTANCE CONTROLLER -->
 
   <!-- Communication with the Force/Torque sensor, reading the force/torque -->
   <!-- The wrench is specified in robotiq_ft_frame_id -->
-  <arg name="TOPIC_EXTERNAL_WRENCH"  default="/admittance_control/wrench" />
+  <arg name="TOPIC_EXTERNAL_WRENCH"  default="/left/robotiq_ft_wrench" />
   <arg name="WRENCH_FILTER_FACTOR"   default="0.1" />
   <arg name="FORCE_DEAD_ZONE_THRES"  default="5.0" />
   <arg name="TORQUE_DEAD_ZONE_THRES" default="0.5" />
@@ -72,8 +72,7 @@
 
     <rosparam file="$(arg ADMITTANCE_PARAMS_FILE)" command="load"/>
 
-    <node name="admittance_controller" pkg="admittance_control" 
-    type="admittance_controller_node" output="screen"/>
+    <node name="admittance_controller" pkg="admittance_control" type="admittance_controller_node" output="screen"/>
 
 </group>
 

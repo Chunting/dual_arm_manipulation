@@ -181,7 +181,7 @@ int main(int argc, char **argv)
     topic_equilibrium_desired,
     topic_equilibrium_real,
     topic_ds_velocity,
-    M_a, D, D_a, K, d_e,
+    M_a, D_a, K, d_e,
     workspace_limits,
     arm_max_vel, arm_max_acc,
     wrench_filter_factor,

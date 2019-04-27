@@ -52,49 +52,46 @@
 	ROS_INFO("I heard: [%s]", msg->data.c_str());
 }*/
 
-void reCallback(const robotiq_ft_sensor::ft_sensor& msg)
+void reCallback(const robotiq_ft_sensor::ft_sensor &msg)
 {
-	ROS_INFO("I heard: FX[%f] FY[%f] FZ[%f] MX[%f] MY[%f] MZ[%f]", msg.Fx,msg.Fy,msg.Fz,msg.Mx,msg.My,msg.Mz);
+    ROS_INFO("I heard: FX[%f] FY[%f] FZ[%f] MX[%f] MY[%f] MZ[%f]", msg.Fx, msg.Fy, msg.Fz, msg.Mx, msg.My, msg.Mz);
 }
-
 /**
  * This tutorial demonstrates simple sending of messages over the ROS system.
  */
 int main(int argc, char **argv)
 {
 
-	ros::init(argc, argv, "rq_test_sensor");
+    ros::init(argc, argv, "rq_test_sensor");
 
+    ros::NodeHandle n;
 
-	ros::NodeHandle n;
+    ros::ServiceClient client = n.serviceClient<robotiq_ft_sensor::sensor_accessor>("left_robotiq_ft_sensor_acc");
+    ros::Subscriber sub1 = n.subscribe("left_robotiq_ft_sensor", 100, reCallback);
+    robotiq_ft_sensor::sensor_accessor srv;
+    int count = 0;
+    while (ros::ok())
+    {
+        if (count == 10000000)
+        {
 
-        ros::ServiceClient client = n.serviceClient<robotiq_ft_sensor::sensor_accessor>("left_robotiq_ft_sensor_acc");
-        ros::Subscriber sub1 = n.subscribe("left_robotiq_ft_sensor",100,reCallback);
+            /// Deprecated Interface
+            // srv.request.command = "SET ZRO";
 
-        robotiq_ft_sensor::sensor_accessor srv;
+            /// New Interface with numerical commands
+            srv.request.command_id = srv.request.COMMAND_SET_ZERO;
 
-	int count = 0;
-	while (ros::ok())
-	{
-	if(count == 10000000){
+            if (client.call(srv))
+            {
+                ROS_INFO("ret: %s", srv.response.res.c_str());
+            }
+            count = 0;
+        }
 
-		/// Deprecated Interface
-		// srv.request.command = "SET ZRO";
+        ros::spinOnce();
 
-		/// New Interface with numerical commands
-		srv.request.command_id = srv.request.COMMAND_SET_ZERO;
+        ++count;
+    }
 
-		if(client.call(srv)){
-			ROS_INFO("ret: %s", srv.response.res.c_str());
-		}
-		count = 0;
-	}
-
-		ros::spinOnce();
-
-		++count;
-	}
-
-
-	return 0;
+    return 0;
 }
