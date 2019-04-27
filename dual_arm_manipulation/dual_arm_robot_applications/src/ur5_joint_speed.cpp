@@ -96,20 +96,23 @@ int main(int argc, char **argv)
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// for the arm
 	geometry_msgs::Twist arm_twist_cmd;
-	int direction = 1;
+	int direction = -1;
 	double cart_speed = 0.01;
 	while (nh_.ok())
 	{
-		arm_twist_cmd.linear.x = 0.01;
-		arm_twist_cmd.linear.y = 0;
-		arm_twist_cmd.linear.z = 0;
-		arm_twist_cmd.angular.x = 0;
-		arm_twist_cmd.angular.y = 0;
-		arm_twist_cmd.angular.z = 0;
-		pub_arm_cmd_.publish(arm_twist_cmd);
-		ros::spinOnce();
-		loop_rate.sleep();
 
+		for (int i = 0; i < 1000; ++i)
+		{
+			arm_twist_cmd.linear.x = 0;
+			arm_twist_cmd.linear.y = cart_speed * direction;
+			arm_twist_cmd.linear.z = 0;
+			arm_twist_cmd.angular.x = 0;
+			arm_twist_cmd.angular.y = 0;
+			arm_twist_cmd.angular.z = 0;
+			pub_arm_cmd_.publish(arm_twist_cmd);
+			ros::spinOnce();
+			loop_rate.sleep();
+		}
 		direction = -direction;
 	}
 }

@@ -46,10 +46,10 @@
 		<arg name="prefix_left" value="$(arg left_prefix)"/>
 		<arg name="prefix_right" value="$(arg right_prefix)"/>
 	</include>
-<!-- The argument prefix must be null, since the prefix of the links and joints has been defined in URDF.
+	<!-- The argument prefix must be null, since the prefix of the links and joints has been defined in URDF.
 	If redefining prefix, errors will come up as left_left_..._joint/link -->
 	<group ns="$(arg right_controller_name)">
-		<remap from="joint_states" to="/joint_states"/> 
+		<remap from="joint_states" to="/joint_states"/>
 		<node name="ur_hardware_interface" pkg="ur_modern_driver" type="ur_driver" output="log" launch-prefix="$(arg launch_prefix)">
 			<param name="robot_ip_address" type="str" value="$(arg right_robot_ip)"/>
 			<param name="reverse_port" type="int" value="$(arg right_reverse_port)" />
@@ -64,22 +64,25 @@
 			<param name="shutdown_on_disconnect" type="bool" value="$(arg shutdown_on_disconnect)"/>
 		</node>
 		<rosparam file="$(find dual_arm_robot_driver)/config/right_controllers.yaml" command="load"/>
-		<node name="ros_control_controller_spawner" pkg="controller_manager" type="spawner" 
-				respawn="false" output="screen" args="$(arg controllers)" />
-		<node name="ros_control_controller_manager" pkg="controller_manager" type="controller_manager" respawn="false" 
-		      output="screen" args="load $(arg stopped_controllers)" />
+		<node name="ros_control_controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="$(arg controllers)" />
+		<node name="ros_control_controller_manager" pkg="controller_manager" type="controller_manager" respawn="false" output="screen" args="load $(arg stopped_controllers)" />
 		<node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
-		<!-- Start force/torque sensor --> 
+
+		<!-- Start force/torque sensor -->
 		<node name="ft_sensor" pkg="robotiq_ft_sensor" type="rq_sensor" respawn="true" output="screen">
 			<param name="prefix" type="str" value="$(arg right_controller_name)" />
 			<param name="frame_id" type="str" value="$(arg right_controller_name)_robotiq_ft_frame_id" />
 			<param name="serial_id" type="str" value="ttyUSB0" />
 		</node>
 		<!-- Bias the F/T sensor at startup -->
-	    <node pkg="rosservice" type="rosservice" name="ft_sensor_biaser" args="call --wait /right/robotiq_ft_sensor_acc &quot;command: 'SET_ZRO'&quot; " />
-	</group> 
+		<node pkg="rosservice" type="rosservice" name="ft_sensor_biaser" args="call --wait /right/robotiq_ft_sensor_acc &quot;command: 'SET_ZRO'&quot; " />
+		<!-- State Cartesian admittance controller -->
+		<include file="$(find admittance_control)/launch/admittance_controller_real.launch">
+			<arg name="prefix" value="$(arg right_controller_name)"/>
+		</include>
+	</group>
 	<group ns="$(arg left_controller_name)">
-		<remap from="joint_states" to="/joint_states"/> 
+		<remap from="joint_states" to="/joint_states"/>
 		<node name="ur_hardware_interface" pkg="ur_modern_driver" type="ur_driver" output="log" launch-prefix="$(arg launch_prefix)">
 			<param name="robot_ip_address" type="str" value="$(arg left_robot_ip)"/>
 			<param name="reverse_port" type="int" value="$(arg left_reverse_port)" />
@@ -94,22 +97,27 @@
 			<param name="shutdown_on_disconnect" type="bool" value="$(arg shutdown_on_disconnect)"/>
 		</node>
 		<rosparam file="$(find dual_arm_robot_driver)/config/left_controllers.yaml" command="load"/>
-		<node name="ros_control_controller_spawner" pkg="controller_manager" type="spawner" 
-				respawn="false" output="screen" args="$(arg controllers)" />
+		<node name="ros_control_controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="$(arg controllers)" />
 
-		<node name="ros_control_controller_manager" pkg="controller_manager" type="controller_manager" 
-		      respawn="false" output="screen" args="load $(arg stopped_controllers)" />
+		<node name="ros_control_controller_manager" pkg="controller_manager" type="controller_manager" respawn="false" output="screen" args="load $(arg stopped_controllers)" />
 		<node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
-		<!-- Start force/torque sensor --> 
+
+		<!-- Start force/torque sensor -->
 		<node name="ft_sensor" pkg="robotiq_ft_sensor" type="rq_sensor" respawn="true" output="screen">
 			<param name="prefix" type="str" value="$(arg left_controller_name)" />
 			<param name="frame_id" type="str" value="$(arg left_controller_name)_robotiq_ft_frame_id" />
 			<param name="serial_id" type="str" value="ttyUSB0" />
 		</node>
 		<!-- Bias the F/T sensor at startup -->
-	    <node pkg="rosservice" type="rosservice" name="ft_sensor_biaser" args="call --wait /left/robotiq_ft_sensor_acc &quot;command: 'SET_ZRO'&quot; " />
-	</group> 
+		<node pkg="rosservice" type="rosservice" name="ft_sensor_biaser" args="call --wait /left/robotiq_ft_sensor_acc &quot;command: 'SET_ZRO'&quot; " />
+
+
+		<!-- State Cartesian admittance controller -->
+		<include file="$(find admittance_control)/launch/admittance_controller_real.launch">
+			<arg name="prefix" value="$(arg left_controller_name)"/>
+		</include>
+	</group>
 
 	<node name="dual_arm_robot_logger" pkg="dual_arm_robot_applications" type="dual_arm_robot_logger"/>
-			
+
 </launch>

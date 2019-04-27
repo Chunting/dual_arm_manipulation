@@ -3,36 +3,36 @@
   <!-- Launch file for the admittance controller -->
 
   <!-- Main settings -->
-  <arg name="FLAG_obstacle_avoidance" default="false"/>
+  <arg name="prefix" default=""/>
 
 
 
   <!-- TOPICS FROM THE LOWER-LEVE CONTROLLER -->
 
   <!-- Communication with the arm, reading the state of the arm and commanding velocities -->
-  <arg name="TOPIC_ARM_STATE"   default="/left/ur5_cartesian_velocity_controller/ee_state"         />
-  <arg name="TOPIC_ARM_COMMAND" default="/left/ur5_cartesian_velocity_controller/command_cart_vel" />
+  <arg name="TOPIC_ARM_STATE"   default="/$(arg prefix)/ur5_cartesian_velocity_controller/ee_state"         />
+  <arg name="TOPIC_ARM_COMMAND" default="/$(arg prefix)/ur5_cartesian_velocity_controller/command_cart_vel" />
 
   <!-- TOPICS AND SETTINGS FOR ADMITTANCE CONTROLLER -->
 
   <!-- Communication with the Force/Torque sensor, reading the force/torque -->
   <!-- The wrench is specified in robotiq_ft_frame_id -->
-  <arg name="TOPIC_EXTERNAL_WRENCH"  default="/left/robotiq_ft_wrench" />
+  <arg name="TOPIC_EXTERNAL_WRENCH"  default="/$(arg prefix)/robotiq_ft_wrench" />
   <arg name="WRENCH_FILTER_FACTOR"   default="0.1" />
   <arg name="FORCE_DEAD_ZONE_THRES"  default="5.0" />
   <arg name="TORQUE_DEAD_ZONE_THRES" default="0.5" />
 
   <!-- An input topic that can be used for control (expected to be in base_link)-->
-  <arg name="TOPIC_CONTROL_WRENCH" default="/admittance_control/wrench_control" />
+  <arg name="TOPIC_CONTROL_WRENCH" default="/$(arg prefix)/admittance_control/wrench_control" />
   
   <!-- An input topic that can be used to set the equilibrium point -->
-  <arg name="TOPIC_EQUILIBRIUM_DESIRED" default="/admittance_control/equilibrium_desired" />
+  <arg name="TOPIC_EQUILIBRIUM_DESIRED" default="/$(arg prefix)/admittance_control/equilibrium_desired" />
   
   <!-- An output topic that can be used to visualize equilibrium point (real equilibrium might differ from the desired one)-->
-  <arg name="TOPIC_EQUILIBRIUM_REAL" default="/admittance_control/equilibrium_real" />
+  <arg name="TOPIC_EQUILIBRIUM_REAL" default="/$(arg prefix)/admittance_control/equilibrium_real" />
 
   <!-- An input topic to receive desired velocity from DS only the linear motion-->
-  <arg name="TOPIC_DS_VELOCITY" default="/ds_desired_velocity" />
+  <arg name="TOPIC_DS_VELOCITY" default="/$(arg prefix)/ds_desired_velocity" />
 
 
   <!-- The received wrench by the FT-sensor and the controller will be published for debugging/visualization -->
@@ -45,8 +45,8 @@
 
 
   <!-- The node will publish the position and the velocity of the in the world frame (Not very sure, need to be checked) -->
-  <arg name="TOPIC_ARM_POSE_WORLD"  default="/admittance_control/ee_pose_world"  />
-  <arg name="TOPIC_ARM_TWIST_WORLD" default="/admittance_control/ee_twist_world" />
+  <arg name="TOPIC_ARM_POSE_WORLD"  default="/$(arg prefix)/admittance_control/ee_pose_world"  />
+  <arg name="TOPIC_ARM_TWIST_WORLD" default="/$(arg prefix)/admittance_control/ee_twist_world" />
 
 
   <!-- Loading the admittance parameters from a yaml file -->

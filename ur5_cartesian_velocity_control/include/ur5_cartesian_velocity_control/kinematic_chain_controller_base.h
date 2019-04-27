@@ -144,10 +144,10 @@ bool KinematicChainControllerBase<JI>::init(JI *robot, ros::NodeHandle &n)
 		return false;
 	}
 
-	ROS_ERROR("tip_name:  %s", tip_name.c_str());
-	ROS_ERROR("root_name: %s", root_name.c_str());
-	ROS_ERROR("Number of segments: %d", kdl_chain_.getNrOfSegments());
-	ROS_ERROR("Number of joints in chain: %d", kdl_chain_.getNrOfJoints());
+	ROS_INFO("tip_name:  %s", tip_name.c_str());
+	ROS_INFO("root_name: %s", root_name.c_str());
+	ROS_INFO("Number of segments: %d", kdl_chain_.getNrOfSegments());
+	ROS_INFO("Number of joints in chain: %d", kdl_chain_.getNrOfJoints());
 	for (std::size_t i = 0; i < kdl_chain_.getNrOfSegments(); i++)
 	{
 		ROS_ERROR_STREAM("segment(" << i << "): " << kdl_chain_.getSegment(i).getName());

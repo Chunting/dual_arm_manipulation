@@ -178,10 +178,9 @@ void AdmittanceController::compute_admittance()
 		// Normalize error quaternion
 		quat_rot_err.coeffs() << quat_rot_err.coeffs() / quat_rot_err.coeffs().norm();
 	}
-	auto euler = arm_real_orientation_.toRotationMatrix().eulerAngles(0, 1, 2);
-    std::cout << "Euler from quaternion in roll, pitch, yaw"<< std::endl << euler << std::endl;
-	euler = quat_rot_err.toRotationMatrix().eulerAngles(0, 1, 2);
-    std::cout << "quat_rot_err in roll, pitch, yaw"<< std::endl << euler << std::endl;
+	// auto euler = arm_real_orientation_.toRotationMatrix().eulerAngles(0, 1, 2);
+	// euler = quat_rot_err.toRotationMatrix().eulerAngles(0, 1, 2);
+    // std::cout << "quat_rot_err in roll, pitch, yaw"<< std::endl << euler << std::endl;
 	Eigen::AngleAxisd err_arm_des_orient(quat_rot_err);
 	error.bottomRows(3) << err_arm_des_orient.axis() *
 							   err_arm_des_orient.angle();

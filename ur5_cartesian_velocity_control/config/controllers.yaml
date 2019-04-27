@@ -4,18 +4,18 @@ ur5:
     type: cartesian_controller/CartesianVelocityController
     publish_rate: 125
     root_name: base_link
-    tip_name: ee_link
+    tip_name: wrist_3_link
 
   # Controller for gazebo (velocity interface on top of a position interface)
   cartesian_velocity_controller_sim:
     type: cartesian_controller/CartesianVelocityControllerSim
     publish_rate: 125
     root_name: base_link
-    tip_name: ee_link
+    tip_name: wrist_3_link
 
   # Cartesian state publisher
   cartesian_state_controller:
     type: cartesian_controller/CartesianStateController
     publish_rate: 125
     root_name: base_link
-    tip_name: ee_link
+    tip_name: wrist_3_link
