@@ -76,13 +76,8 @@ void CartesianVelocityControllerBase<T>::update(const ros::Time &time,
 	//
 	for (std::size_t i = 0; i < this->joint_handles_.size(); i++)
 	{
-		std::size_t found = this->joint_handles_[i].getName().find("left");
-		if (found!=std::string::npos)
-		{
-			this->joint_msr_.q(i) = this->joint_handles_[i].getPosition();
-			this->joint_msr_.qdot(i) = this->joint_handles_[i].getVelocity();
-			// ROS_ERROR("%s %f, %f\n", this->joint_handles_[i].getName().c_str(), this->joint_msr_.q(i), this->joint_msr_.qdot(i));
-		}
+		this->joint_msr_.q(i) = this->joint_handles_[i].getPosition();
+		this->joint_msr_.qdot(i) = this->joint_handles_[i].getVelocity();
 	}
 
 	// Compute inverse kinematics velocity solver

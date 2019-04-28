@@ -85,17 +85,19 @@ class AdmittanceController
 	// control wrench (from any controller) expected to be in "base_link" frame
 	Vector6d wrench_control_;
 
-	// FORCE/TORQUE-SENSOR FILTER:
-	// Parameters for the noisy wrench
-	double wrench_filter_factor_;
-	double force_dead_zone_thres_;
-	double torque_dead_zone_thres_;
-	double admittance_ratio_;
-
+	
+    // Arm information
+	std::string prefix_;
+	std::string root_name_;
+	std::string tip_name_;
+	std::string robotiq_ft_frame_;
 	// ADMITTANCE PARAMETERS:
 	// D_ -> Desired damping of the coupling
 	// K_ -> Desired Stiffness of the coupling
 	Matrix6d M_a_, D_a_, K_;
+
+	
+
 	// equilibrium position of the coupling spring
 	Vector3d equilibrium_position_;
 	Vector3d equilibrium_position_seen_by_platform;
@@ -119,7 +121,12 @@ class AdmittanceController
 	Vector6d workspace_limits_;
 	double arm_max_vel_;
 	double arm_max_acc_;
-
+    // FORCE/TORQUE-SENSOR FILTER:
+	// Parameters for the noisy wrench
+	double wrench_filter_factor_;
+	double force_dead_zone_thres_;
+	double torque_dead_zone_thres_;
+	double admittance_ratio_;
 	// STATE VARIABLES:
 
 	// Arm state: position, orientation, and twist (in "base_link")
@@ -142,9 +149,8 @@ class AdmittanceController
 
 	// Guards
 	bool ft_arm_ready_;
-	bool arm_world_ready_;
-	bool base_world_ready_;
-	bool world_arm_ready_;
+	bool world_tip_ready_;
+	bool world_root_ready_;
 
 	// Initialization
 	void wait_for_transformations();
@@ -180,6 +186,7 @@ class AdmittanceController
 	void ds_velocity_callback(const geometry_msgs::TwistStampedPtr msg);
 
   public:
+
 	AdmittanceController(ros::NodeHandle &n,
 						 double frequency,
 						 std::string cmd_topic_arm,
@@ -194,6 +201,9 @@ class AdmittanceController
 						 std::string topic_equilibrium_deisred,
 						 std::string topic_equilibrium_real,
 						 std::string topic_ds_velocity,
+						 std::string prefix,
+						 std::string root_name,
+						 std::string tip_name,
 						 std::vector<double> M_a,
 						 std::vector<double> D_a,
 						 std::vector<double> K,

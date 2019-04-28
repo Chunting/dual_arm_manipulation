@@ -34,3 +34,5 @@ dataLog/
 *.bin
 
 *.ipch
+
+admittance_control/\.vscode/

@@ -39,7 +39,9 @@ stiffness_coupling: [150,0,0,0,0,0,
 
 
 # this equilibrium point is derived from setting all joints to -90 degree
-equilibrium_point_spring: [0.109, -0.345, 0.858, -0.653, -0.272, 0.653, 0.270]
+left_equilibrium_point_spring: [0.109, -0.345, 0.858, -0.653, -0.272, 0.653, 0.270]
+# this equilibrium point is derived from setting all joints to -90 degree
+right_equilibrium_point_spring: [-0.109, -0.347, 0.856, -0.652, -0.273, 0.652, 0.275]
 
 # rosrun tf tf_echo left_base_link left_wrist_3_link
 # At time 0.000
@@ -49,11 +51,13 @@ equilibrium_point_spring: [0.109, -0.345, 0.858, -0.653, -0.272, 0.653, 0.270]
 #            in RPY (degree) [-89.991, 44.933, 90.118]
 
 
-# rosrun tf tf_echo world left_wrist_3_link
-# Translation: [-0.850, -0.532, 1.087]
-# Rotation: in Quaternion [-0.707, -0.002, -0.002, 0.707]
-#              in RPY (radian) [-1.571, -0.005, -0.000]
-#             in RPY (degree) [-90.035, -0.293, -0.015]
+# chunting@chunting-Vostro-3670:~/catkin_ws$ rosrun tf tf_echo right_base_link right_wrist_3_link
+# At time 1556441299.488
+# - Translation: [-0.109, -0.347, 0.856]
+# - Rotation: in Quaternion [-0.652, -0.273, 0.652, 0.275]
+#             in RPY (radian) [-1.568, 0.775, 1.570]
+#            in RPY (degree) [-89.825, 44.428, 89.953]
+
 
 
 # pose: 

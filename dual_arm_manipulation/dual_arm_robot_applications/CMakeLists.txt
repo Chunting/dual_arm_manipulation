@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   roscpp
   tf
+  tf_conversions
   robotiq_ft_sensor
   moveit_ros_planning_interface
   actionlib
@@ -135,6 +136,7 @@ catkin_package(
     sensor_msgs
     trajectory_msgs
     ur_msgs
+    cartesian_state_msgs
 )
 
 ###########

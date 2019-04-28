@@ -13,6 +13,12 @@
 #include "eigen3/Eigen/Core"
 #include "eigen3/Eigen/Geometry"
 #include "eigen3/Eigen/Dense"
+
+#include <tf/transform_datatypes.h>
+#include <tf_conversions/tf_eigen.h>
+#include <tf/transform_listener.h>
+
+
 using namespace Eigen;
 
 typedef Matrix<double, 7, 1> Vector7d;
@@ -23,6 +29,12 @@ typedef Matrix<double, 6, 6> Matrix6d;
 Vector3d arm_real_position_;
 Quaterniond arm_real_orientation_;
 Vector6d arm_real_twist_;
+
+// TF:
+// Listeners
+tf::TransformListener listener_ft_;
+tf::TransformListener listener_control_;
+tf::TransformListener listener_arm_;
 ///////////////////////////////////////////////////////////////
 ////////////////////////// Callbacks //////////////////////////
 ///////////////////////////////////////////////////////////////
@@ -73,6 +85,33 @@ bool switch_controller(ros::NodeHandle &nh_, std::string stop_name, std::string 
 
 	return success_start;
 }
+
+bool get_rotation_matrix(Matrix6d &rotation_matrix,
+						 tf::TransformListener &listener,
+						 std::string from_frame,
+						 std::string to_frame)
+{
+	tf::StampedTransform transform;
+	Matrix3d rotation_from_to;
+	try
+	{
+		listener.lookupTransform(from_frame, to_frame, ros::Time(0), transform);
+		tf::matrixTFToEigen(transform.getBasis(), rotation_from_to);
+		rotation_matrix.setZero();
+		rotation_matrix.topLeftCorner(3, 3) = rotation_from_to;
+		rotation_matrix.bottomRightCorner(3, 3) = rotation_from_to;
+	}
+	catch (tf::TransformException ex)
+	{
+		rotation_matrix.setZero();
+		ROS_WARN_STREAM_THROTTLE(1, "Waiting for TF from: " << from_frame << " to: " << to_frame);
+		return false;
+	}
+
+	return true;
+}
+
+
 int main(int argc, char **argv)
 {
 	bool first = true;
