@@ -20,6 +20,9 @@ private:
 
 	std::string recPath_;
 
+	std::string prefix_;
+	std::string topic_arm_state_;
+
 
 	//real variables from the robot
 	ofstream file_demo_ee_position_;
@@ -31,17 +34,20 @@ private:
 
 
 public:
-	DemoRecorder(ros::NodeHandle &n, double frequency)
-		: nh_(n), loop_rate_(frequency) {
+	DemoRecorder(ros::NodeHandle &n, double frequency, std::string prefix, std::string topic_arm_state)
+		: nh_(n), loop_rate_(frequency), prefix_(prefix), topic_arm_state_(topic_arm_state) {
 
-		ROS_INFO_STREAM("The recorder node is created at: " << nh_.getNamespace() << " with freq: " << frequency << "Hz");
+		ROS_INFO_STREAM("The recorder node is created at: " << nh_.getNamespace() 
+		<< " with freq: " << frequency << "Hz" 
+		<< "prefix: " << prefix_
+		<< "topic_arm_state_: " << topic_arm_state_);
 
 	}
 
 	void Initialize() {
 
 		// Creating a recording directory
-		std::string recPath_ = "/home/mahdi/catkin_ws/Recordings/";
+		std::string recPath_ = "/home/Chunting/catkin_ws/src/dual_arm_manipulation/dataLog/";
 		mkdir(recPath_.c_str(), 0777);
 
 		// Creating a subdirectory for a specific subject
@@ -58,18 +64,18 @@ public:
 		recPath_ += string(buffer);
 		mkdir(recPath_.c_str(), 0777);
 
-		cout << "Recording to :" << recPath_.c_str() << endl;
+		std::cout << "Recording to :" << recPath_.c_str() << endl;
 
-		string recPathFile_demo_positions = recPath_ + "/ee_position.txt";
+		std::string recPathFile_demo_positions = recPath_ + prefix_+ "_ee_position.csv";
 		file_demo_ee_position_.open(recPathFile_demo_positions);
 		file_demo_ee_position_  << "Time" << "\t" << "x" << "\t" << "y" << "\t" << "z"
 		                        << "\t" << "vx" << "\t" << "vy" << "\t" << "vz" << "\n";
 
-		string recPathFile_demo_orientation = recPath_ + "/ee_orientation.txt";
+		string recPathFile_demo_orientation = recPath_ + prefix_ + "_ee_orientation.txt";
 		file_demo_ee_orientation_.open(recPathFile_demo_orientation);
 		file_demo_ee_orientation_  << "Time \t x \t y \t z \t w \t rx \t ry \t rz \n";
-
-		sub_ee_state_ = nh_.subscribe("/ur5/ur5_cartesian_velocity_controller/ee_state" ,
+        
+		sub_ee_state_ = nh_.subscribe(topic_arm_state_ ,
 		                              1000, &DemoRecorder::state_arm_callback, this);
 
 
@@ -121,12 +127,17 @@ int main(int argc, char **argv)
 	//Initiate ROS
 	ros::init(argc, argv, "demonstration_recorder");
 
-
-
 	ros::NodeHandle nh;
 	double frequency = 100.0;
-	DemoRecorder demo_recorder(nh, frequency);
+	std::string prefix = nh.getNamespace();
+	std::string topic_arm_state;
 
+	// std::string nsprefix = name_space+"/prefix";
+
+	ROS_INFO("retrieve the prefix %s in demonstration_recorder_node.", prefix.c_str());
+
+	topic_arm_state = prefix + "/ur5_cartesian_velocity_controller/ee_state";
+	DemoRecorder demo_recorder(nh, frequency, prefix, topic_arm_state);
 	demo_recorder.Initialize();
 
 	demo_recorder.Run();

@@ -61,11 +61,11 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
-	if (!nh.getParam("topic_control_wrench", topic_control_wrench))
-	{
-		ROS_ERROR("Couldn't retrieve the topic name for the control wrench.");
-		return -1;
-	}
+	// if (!nh.getParam("topic_control_wrench", topic_control_wrench))
+	// {
+	// 	ROS_ERROR("Couldn't retrieve the topic name for the control wrench.");
+	// 	return -1;
+	// }
 
 	if (!nh.getParam("topic_equilibrium_desired", topic_equilibrium_desired))
 	{

@@ -59,7 +59,7 @@
     <param name="topic_arm_state" value="$(arg TOPIC_ARM_STATE)" />
     <param name="topic_arm_command" value="$(arg TOPIC_ARM_COMMAND)" />
     <param name="topic_external_wrench" value="$(arg TOPIC_EXTERNAL_WRENCH)" />
-    <param name="topic_control_wrench" value="$(arg TOPIC_CONTROL_WRENCH)" />
+    <!--param name="topic_control_wrench" value="$(arg TOPIC_CONTROL_WRENCH)" /-->
     <param name="topic_equilibrium_desired" value="$(arg TOPIC_EQUILIBRIUM_DESIRED)" />
     <param name="topic_equilibrium_real" value="$(arg TOPIC_EQUILIBRIUM_REAL)" />
     <param name="topic_ds_velocity" value="$(arg TOPIC_DS_VELOCITY)" />

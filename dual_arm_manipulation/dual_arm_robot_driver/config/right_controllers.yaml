@@ -153,11 +153,10 @@ joint_group_vel_controller:
      - right_wrist_1_joint
      - right_wrist_2_joint
      - right_wrist_3_joint
-
 ur5_cartesian_velocity_controller:
   type: cartesian_controller/CartesianVelocityController
   publish_rate: 125
-  root_name: right_base_link
+  root_name: world
   tip_name: right_wrist_3_link
 
 ur5_cartesian_state_controller:

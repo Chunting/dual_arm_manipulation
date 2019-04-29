@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<launch>
+
+
+	
+	<!--Load and start -->
+	<arg name="controllers" value= "ur5_cartesian_velocity_controller"/>
+	<!-- Load but not start -->
+	<arg name="stopped_controllers" value= "vel_based_pos_traj_controller"/>
+
+    <!-- left arm -->
+	<arg name="left_controller_name" default="left"/>
+
+	<!-- right arm -->
+	<arg name="right_controller_name" default="right"/>
+
+
+	<!-- common variables -->
+	<group ns="$(arg right_controller_name)">
+		<rosparam file="$(find dual_arm_robot_driver)/config/right_cartesian_velocity_controller.yaml" command="load"/>
+        <node name="ros_control_controller_manager" pkg="controller_manager" type="controller_manager" respawn="false" output="screen" args="stop $(arg stopped_controllers)" />
+		<node name="ros_control_controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="$(arg controllers)" />
+		
+		<!-- State Cartesian admittance controller -->
+		<include file="$(find admittance_control)/launch/admittance_controller_real.launch">
+			<arg name="prefix" value="$(arg right_controller_name)"/>
+		</include>
+        <node name="cpr_record_demo_node" pkg="admittance_control" type="cpr_record_demo_node">
+            <param name="prefix" value="$(arg right_controller_name)" />
+            <param name="topic_arm_state" value="/$(arg right_controller_name)/ur5_cartesian_velocity_controller/ee_state" />
+        </node>
+	</group>
+	<group ns="$(arg left_controller_name)">
+		<rosparam file="$(find dual_arm_robot_driver)/config/left_cartesian_velocity_controller.yaml" command="load"/>
+        <node name="ros_control_controller_manager" pkg="controller_manager" type="controller_manager" respawn="false" output="screen" args="stop $(arg stopped_controllers)" />
+		<node name="ros_control_controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="$(arg controllers)" />
+		<!-- State Cartesian admittance controller -->
+		<include file="$(find admittance_control)/launch/admittance_controller_real.launch">
+			<arg name="prefix" value="$(arg left_controller_name)"/>
+		</include>
+        <node name="cpr_record_demo_node" pkg="admittance_control" type="cpr_record_demo_node">
+            <param name="prefix" value="$(arg left_controller_name)" />
+            <param name="topic_external_wrench" value="/$(arg left_controller_name)/robotiq_ft_wrench" />
+            <param name="topic_arm_state" value="/$(arg left_controller_name)/ur5_cartesian_velocity_controller/ee_state" />
+        </node>
+	</group>
+
+	
+
+</launch>

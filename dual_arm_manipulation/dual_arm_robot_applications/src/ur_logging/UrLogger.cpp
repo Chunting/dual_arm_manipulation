@@ -92,7 +92,7 @@ void UR_Logger::generate_logfile_name()
     strftime(buffer, 20, "%Y_%m_%d_%H_%M%S", timeinfo);
     std::string log_suffix = buffer;
     logfile_name_ = "/home/chunting/catkin_ws/src/dual_arm_manipulation/dataLog/ur_log_" + log_suffix + ".csv";
-    logfile_name_command_ = "./src/dual_arm_manipulation/dataLog/ur_command_" + log_suffix + ".csv";
+    logfile_name_command_ = "/home/chunting/catkin_ws/src/dual_arm_manipulation/dataLog/ur_command_" + log_suffix + ".csv";
 }
 
 std::string UR_Logger::headline(UR_Message_Listener &ur_listener)

@@ -326,6 +326,9 @@ add_executable(demonstration_setup_helper
 target_link_libraries(demonstration_setup_helper ${catkin_LIBRARIES})
 
 
+add_executable(ur5_cartesian_velocity_controller_test src/ur5_cartesian_velocity_controller_test.cpp)
+target_link_libraries(ur5_cartesian_velocity_controller_test   ${catkin_LIBRARIES})
+
 add_executable(ur5_joint_speed src/ur5_joint_speed.cpp)
 target_link_libraries(ur5_joint_speed   ${catkin_LIBRARIES})
 

@@ -46,9 +46,9 @@ AdmittanceController::AdmittanceController(ros::NodeHandle &n,
 	sub_wrench_external_ = nh_.subscribe(topic_external_wrench, 5,
 										 &AdmittanceController::wrench_callback, this,
 										 ros::TransportHints().reliable().tcpNoDelay());
-	sub_wrench_control_ = nh_.subscribe(topic_control_wrench, 5,
-										&AdmittanceController::wrench_control_callback, this,
-										ros::TransportHints().reliable().tcpNoDelay());
+	// sub_wrench_control_ = nh_.subscribe(topic_control_wrench, 5,
+	// 									&AdmittanceController::wrench_control_callback, this,
+	// 									ros::TransportHints().reliable().tcpNoDelay());
 
 	sub_equilibrium_desired_ = nh_.subscribe(topic_equilibrium_desired, 10,
 											 &AdmittanceController::equilibrium_callback, this,
@@ -72,8 +72,8 @@ AdmittanceController::AdmittanceController(ros::NodeHandle &n,
 
 	pub_wrench_external_ = nh_.advertise<geometry_msgs::WrenchStamped>(
 		topic_external_wrench_arm_frame, 5);
-	pub_wrench_control_ = nh_.advertise<geometry_msgs::WrenchStamped>(
-		topic_control_wrench_arm_frame, 5);
+	// pub_wrench_control_ = nh_.advertise<geometry_msgs::WrenchStamped>(
+	// 	topic_control_wrench_arm_frame, 5);
 
 	pub_equilibrium_real_ = nh_.advertise<geometry_msgs::PointStamped>(
 		topic_equilibrium_real, 5);
@@ -90,7 +90,7 @@ AdmittanceController::AdmittanceController(ros::NodeHandle &n,
 
 	// setting the equilibrium position and orientation
 	Vector7d equilibrium_full(d_e.data());
-	ROS_INFO_STREAM_THROTTLE(1, "Desired pose: " << equilibrium_full);
+	ROS_INFO_STREAM_THROTTLE(1, "Desired pose: \n" << equilibrium_full);
 	equilibrium_position_ << equilibrium_full.topRows(3);
 
 	// Make sure the orientation goal is normalized
@@ -107,7 +107,7 @@ AdmittanceController::AdmittanceController(ros::NodeHandle &n,
 
 	while (nh_.ok() && !arm_real_position_(0))
 	{
-		ROS_WARN_THROTTLE(1, "Waiting for the state of the arm...");
+		ROS_WARN_THROTTLE(1, "Waiting for the state of the arm %s", prefix_.c_str());
 		ros::spinOnce();
 		loop_rate_.sleep();
 	}

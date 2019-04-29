@@ -18,7 +18,7 @@
 #include <tf_conversions/tf_eigen.h>
 #include <tf/transform_listener.h>
 
-
+// rosrun dual_arm_robot_applications ur5_cartesian_velocity_controller_test
 using namespace Eigen;
 
 typedef Matrix<double, 7, 1> Vector7d;
