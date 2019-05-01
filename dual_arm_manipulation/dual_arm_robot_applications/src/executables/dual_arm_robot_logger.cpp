@@ -6,7 +6,6 @@
 #include <ros/ros.h>
 #include <geometry_msgs/Pose.h>
 
-//#include "../../include/ur_logging/UrLogger.h"
 #include "ur_logging/UrLogger.h"
 
 

@@ -19,7 +19,7 @@
 	<!--Load and start -->
 	<arg name="left_controllers" default="joint_state_controller vel_based_pos_traj_controller force_torque_sensor_controller "/>
 	<!-- Only load but do not start -->
-	<arg name="left_stopped_controllers" default="left_vel_based_admittance_traj_controller pos_based_pos_traj_controller left_joint_group_vel_controller"/>
+	<arg name="left_stopped_controllers" default="vel_based_admittance_traj_controller pos_based_pos_traj_controller joint_group_vel_controller"/>
 
 	<!-- right arm -->
 	<arg name="right_prefix" default=""/>
@@ -29,7 +29,7 @@
 	<arg name="right_base_frame" default="right_base" />
 	<arg name="right_tool_frame" default="right_ee_link" />
 	<arg name="right_controllers" default="joint_state_controller right_force_torque_sensor_controller  ur5_cartesian_velocity_controller"/>
-	<arg name="right_stopped_controllers" default="right_vel_based_admittance_traj_controller pos_based_pos_traj_controller right_joint_group_vel_controller"/>
+	<arg name="right_stopped_controllers" default="vel_based_admittance_traj_controller pos_based_pos_traj_controller joint_group_vel_controller"/>
 
 	<arg name="limited" default="false"/>
 	<arg name="min_payload" default="0.0"/>

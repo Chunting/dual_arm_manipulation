@@ -1,6 +1,5 @@
 #include <ros/ros.h>
 #include <std_msgs/String.h>
-#include <sstream>
 
 #include <iostream>
 #include <fstream>

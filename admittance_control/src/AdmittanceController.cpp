@@ -65,18 +65,14 @@ AdmittanceController::AdmittanceController(ros::NodeHandle &n,
 	// Publishers
 	pub_arm_cmd_ = nh_.advertise<geometry_msgs::Twist>(topic_arm_command, 5);
 
-	pub_ee_pose_world_ = nh_.advertise<geometry_msgs::PoseStamped>(
-		topic_arm_pose_world, 5);
-	pub_ee_twist_world_ = nh_.advertise<geometry_msgs::TwistStamped>(
-		topic_arm_twist_world, 5);
+	pub_ee_pose_world_ = nh_.advertise<geometry_msgs::PoseStamped>(topic_arm_pose_world, 5);
+	pub_ee_twist_world_ = nh_.advertise<geometry_msgs::TwistStamped>(topic_arm_twist_world, 5);
 
-	pub_wrench_external_ = nh_.advertise<geometry_msgs::WrenchStamped>(
-		topic_external_wrench_arm_frame, 5);
+	pub_wrench_external_ = nh_.advertise<geometry_msgs::WrenchStamped>(topic_external_wrench_arm_frame, 5);
 	// pub_wrench_control_ = nh_.advertise<geometry_msgs::WrenchStamped>(
 	// 	topic_control_wrench_arm_frame, 5);
 
-	pub_equilibrium_real_ = nh_.advertise<geometry_msgs::PointStamped>(
-		topic_equilibrium_real, 5);
+	// pub_equilibrium_real_ = nh_.advertise<geometry_msgs::PointStamped>(topic_equilibrium_real, 5);
 
 	ROS_INFO_STREAM("Arm max vel:" << arm_max_vel_ << " max acc:" << arm_max_acc_);
 	ROS_INFO_STREAM("Arm prefix:" << prefix_ << "  root_name:" << root_name_ << "  tip_name: " << tip_name_);
@@ -186,8 +182,7 @@ void AdmittanceController::compute_admittance()
 	// euler = quat_rot_err.toRotationMatrix().eulerAngles(0, 1, 2);
 	// std::cout << "quat_rot_err in roll, pitch, yaw"<< std::endl << euler << std::endl;
 	Eigen::AngleAxisd err_arm_des_orient(quat_rot_err);
-	error.bottomRows(3) << err_arm_des_orient.axis() *
-							   err_arm_des_orient.angle();
+	error.bottomRows(3) << err_arm_des_orient.axis() * err_arm_des_orient.angle();
 
 	// Translation error w.r.t. desired equilibrium
 	error.topRows(3) = arm_real_position_ - equilibrium_position_;
@@ -199,8 +194,7 @@ void AdmittanceController::compute_admittance()
 
 	if (a_acc_norm > arm_max_acc_)
 	{
-		ROS_WARN_STREAM_THROTTLE(1, "Admittance generates high arm accelaration!"
-										<< " norm: " << a_acc_norm);
+		ROS_WARN_STREAM_THROTTLE(1, "Admittance generates high arm accelaration!" << " norm: " << a_acc_norm);
 		arm_desired_accelaration.segment(0, 3) *= (arm_max_acc_ / a_acc_norm);
 	}
 
@@ -211,14 +205,10 @@ void AdmittanceController::compute_admittance()
 
 	if (std::abs(wrench_external_(5)) > 0)
 	{
-		ROS_INFO_STREAM_THROTTLE(1, "error: \n"
-										<< error);
-		ROS_INFO_STREAM_THROTTLE(1, "wrench_external_: \n"
-										<< wrench_external_);
-		ROS_INFO_STREAM_THROTTLE(1, "arm_desired_accelaration: \n"
-										<< arm_desired_accelaration);
-		ROS_INFO_STREAM_THROTTLE(1, "arm_desired_twist_adm_: \n"
-										<< arm_desired_twist_adm_);
+		ROS_INFO_STREAM_THROTTLE(1, "error: \n" << error);
+		ROS_INFO_STREAM_THROTTLE(1, "wrench_external_: \n" << wrench_external_);
+		ROS_INFO_STREAM_THROTTLE(1, "arm_desired_accelaration: \n" << arm_desired_accelaration);
+		ROS_INFO_STREAM_THROTTLE(1, "arm_desired_twist_adm_: \n" << arm_desired_twist_adm_);
 	}
 }
 
@@ -597,7 +587,7 @@ void AdmittanceController::publish_debuggings_signals()
 	msg_wrench.wrench.torque.x = wrench_external_(3);
 	msg_wrench.wrench.torque.y = wrench_external_(4);
 	msg_wrench.wrench.torque.z = wrench_external_(5);
-	pub_wrench_external_.publish(msg_wrench);
+	// pub_wrench_external_.publish(msg_wrench);
 
 	msg_wrench.header.stamp = ros::Time::now();
 	msg_wrench.header.frame_id = root_name_;
@@ -607,7 +597,7 @@ void AdmittanceController::publish_debuggings_signals()
 	msg_wrench.wrench.torque.x = wrench_control_(3);
 	msg_wrench.wrench.torque.y = wrench_control_(4);
 	msg_wrench.wrench.torque.z = wrench_control_(5);
-	pub_wrench_control_.publish(msg_wrench);
+	// pub_wrench_control_.publish(msg_wrench);
 
 	geometry_msgs::PointStamped msg_point;
 
@@ -616,5 +606,5 @@ void AdmittanceController::publish_debuggings_signals()
 	msg_point.point.x = equilibrium_position_(0);
 	msg_point.point.y = equilibrium_position_(1);
 	msg_point.point.z = equilibrium_position_(2);
-	pub_equilibrium_real_.publish(msg_point);
+	// pub_equilibrium_real_.publish(msg_point);
 }

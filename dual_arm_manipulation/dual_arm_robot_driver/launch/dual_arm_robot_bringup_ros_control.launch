@@ -5,7 +5,7 @@
 	<arg name="debug" default="false" />
 	<arg unless="$(arg debug)" name="launch_prefix" value="" />
 	<arg if="$(arg debug)" name="launch_prefix" value="xterm -e gdb --args" />
-	<arg name="use_sim_time" default="true" />
+	<arg name="use_sim_time" default="false" />
 	<arg name="paused" default="true" />
 	
 	<!--Load and start -->
@@ -22,14 +22,14 @@
 	<arg name="left_robot_ip" default="192.168.1.101"/>
 	<arg name="left_reverse_port" default="50001"/>
 	<arg name="left_base_frame" default="left_base" />
-	<arg name="left_tool_frame" default="left_tool0" />
+	<arg name="left_tool_frame" default="left_ee_link" />
 	<!-- right arm -->
 	<arg name="right_prefix" default=""/>
 	<arg name="right_controller_name" default="right"/>
 	<arg name="right_robot_ip" default="192.168.1.102"/>
 	<arg name="right_reverse_port" default="50002"/>
 	<arg name="right_base_frame" default="right_base" />
-	<arg name="right_tool_frame" default="right_tool0" />
+	<arg name="right_tool_frame" default="right_ee_link" />
 	<!-- common variables -->
 	<arg name="limited" default="false"/>
 	<arg name="min_payload" default="0.0"/>

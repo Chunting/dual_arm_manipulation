@@ -1,0 +1,12 @@
+<?xml version="1.0" ?>
+<launch>
+    <!-- Main settings -->
+    <arg name="prefix" default=""/>
+        <param name="prefix" value="$(arg prefix)" />
+        <param name="topic_external_wrench" value="/$(arg prefix)/robotiq_ft_wrench" />
+        <param name="topic_arm_state" value="/$(arg prefix)/ur5_cartesian_velocity_controller/ee_state" />
+        <node name="cpr_record_demo_node" pkg="admittance_control" type="cpr_record_demo_node"/>
+
+
+
+</launch>
