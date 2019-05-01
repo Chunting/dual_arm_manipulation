@@ -114,7 +114,6 @@ AdmittanceController::AdmittanceController(ros::NodeHandle &n,
 
 	// Init integrator
 	arm_desired_twist_adm_.setZero();
-	// platform_desired_twist_.setZero();
 
 	arm_desired_twist_ds_.setZero();
 	arm_desired_twist_final_.setZero();
@@ -167,7 +166,6 @@ void AdmittanceController::run()
 void AdmittanceController::compute_admittance()
 {
 
-	// Vector6d platform_desired_acceleration;
 	Vector6d arm_desired_accelaration;
 
 	Vector6d error;
@@ -209,7 +207,6 @@ void AdmittanceController::compute_admittance()
 	// Integrate for velocity based interface
 	ros::Duration duration = loop_rate_.expectedCycleTime();
 
-	// platform_desired_twist_ += platform_desired_acceleration * duration.toSec();
 	arm_desired_twist_adm_ += arm_desired_accelaration * duration.toSec();
 
 	if (std::abs(wrench_external_(5)) > 0)
