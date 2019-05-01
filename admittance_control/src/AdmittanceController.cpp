@@ -459,11 +459,12 @@ void AdmittanceController::wait_for_transformations()
 {
 	tf::TransformListener listener;
 	Matrix6d rot_matrix;
-	rotation_base_.setZero();
+	rotation_world_base_.setZero();
+	rotation_tip_ftsensor_.setZero();
 
 	// Makes sure all TFs exists before enabling all transformations in the callbacks
 
-	while (!get_rotation_matrix(rot_matrix, listener, "world", root_name_))
+	while (!get_rotation_matrix(rotation_world_base_, listener, "world", root_name_))
 	{
 		sleep(1);
 	}
@@ -474,7 +475,7 @@ void AdmittanceController::wait_for_transformations()
 		sleep(1);
 	}
 	world_tip_ready_ = true;
-	while (!get_rotation_matrix(rot_matrix, listener, tip_name_, robotiq_ft_frame_))
+	while (!get_rotation_matrix(rotation_tip_ftsensor_, listener, tip_name_, robotiq_ft_frame_))
 	{
 		sleep(1);
 	}
@@ -514,14 +515,14 @@ bool AdmittanceController::get_rotation_matrix(Matrix6d &rotation_matrix,
 void AdmittanceController::publish_arm_state_in_world()
 {
 	// publishing the cartesian velocity of the EE in the world-frame
-	Matrix6d rotation_a_base_world;
 
 	if (world_tip_ready_ && world_root_ready_)
 	{
-		get_rotation_matrix(rotation_a_base_world, listener_arm_,
+		get_rotation_matrix(rotation_world_base_, listener_arm_,
 							"world", root_name_);
+		
 
-		ee_twist_world_ = rotation_a_base_world * arm_real_twist_;
+		ee_twist_world_ = rotation_world_base_ * arm_real_twist_;
 	}
 
 	geometry_msgs::TwistStamped msg_twist;

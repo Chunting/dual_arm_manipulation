@@ -139,7 +139,9 @@ class AdmittanceController
 	Vector6d ee_twist_world_;
 
 	// Transform from base_link to world
-	Matrix6d rotation_base_;
+	Matrix6d rotation_world_base_;
+	// Transform from robotiq_ft_frame_id to tip_name
+	Matrix6d rotation_tip_ftsensor_;
 
 	// TF:
 	// Listeners

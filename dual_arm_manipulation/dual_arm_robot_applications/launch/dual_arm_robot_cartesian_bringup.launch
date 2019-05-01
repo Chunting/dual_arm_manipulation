@@ -5,7 +5,6 @@
 	<arg name="debug" default="false" />
 	<arg unless="$(arg debug)" name="launch_prefix" value="" />
 	<arg if="$(arg debug)" name="launch_prefix" value="xterm -e gdb --args" />
-	<arg name="use_sim_time" default="true" />
 	<arg name="paused" default="true" />
 	<arg name="headless" default="false" />
 	<arg name="world_name" default="$(find cpr_bringup)/worlds/empty.world" />
