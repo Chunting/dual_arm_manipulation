@@ -5,7 +5,7 @@
  */
 const float rot2deg = 1; //180/3.14159;
 
-UR_Logger::UR_Logger(ros::NodeHandle &nh, std::vector<std::string> ur_namespaces) : nh_(nh)
+UR_Logger::UR_Logger(ros::NodeHandle &nh, std::vector<std::string> &ur_namespaces) : nh_(nh)
 {
     for (int i = 0; i < ur_namespaces.size(); i++)
     {

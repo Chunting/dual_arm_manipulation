@@ -83,8 +83,8 @@ protected:
   std::string left_controller_;
   std::string right_controller_;
   moveit_msgs::RobotState last_dual_arm_goal_state_;  // mounted with force sensor
-  double ee_dist_;									  // distance to object because of endeffector size
-  KDL::Frame arms_offset_;							  // offset between arms
+  double ee_dist_;                                    // distance to object because of endeffector size
+  KDL::Frame arms_offset_;                            // offset between arms
   bool try_again_question();
   // PlanningSceneMonitorPtr is aka std::shared_ptr<planning_scene_monitor::PlanningSceneMonitor>
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
@@ -92,9 +92,9 @@ protected:
   robot_model_loader::RobotModelLoader robotModelLoader;
   robot_model::RobotModelPtr kinematic_model;
   // planning_scene::PlanningScene planningScene;
-	// TF:
-	// Listeners
-  	tf::TransformListener listener_arm_;
+  // TF:
+  // Listeners
+  tf::TransformListener listener_arm_;
 
 public:
   DualArmRobot(ros::NodeHandle &nh);
@@ -117,10 +117,14 @@ public:
   moveit::planning_interface::MoveGroupInterface right_;
   moveit::planning_interface::MoveGroupInterface arms_;
 
-  std::vector<double> left_joint_values;
-  std::vector<double> right_joint_values;
-
   std::thread *pose_publish_thread_;
+
+  	// Transform from base_link to world
+	Matrix6d rotation_world_left_base_;
+	// Transform from robotiq_ft_frame_id to tip_name
+	Matrix6d rotation_tip_left_sensor_;
+	Matrix6d rotation_world_right_base_;
+	Matrix6d rotation_tip_right_sensor_;
 
   void publishPoseMsg();
   // workaround for moveGroup method does not return attached objects correctly (issue)
@@ -129,7 +133,7 @@ public:
 
   // calculates a trajectory for both arms based on the trajectory of one arm
   bool adaptTrajectory(moveit_msgs::RobotTrajectory left_trajectory, KDL::Frame offset,
-					   moveit_msgs::RobotTrajectory &both_arms_trajectory, double jump_threshold = 0.4);
+                       moveit_msgs::RobotTrajectory &both_arms_trajectory, double jump_threshold = 0.4);
 
   // returns the Offset-Vector between both end effectors
   KDL::Frame getCurrentOffset();
@@ -139,11 +143,11 @@ public:
 
   // pace Methods
   bool placeBox(std::string object_id, geometry_msgs::PoseStamped left_place_pose,
-				geometry_msgs::Vector3 close_direction);
+                geometry_msgs::Vector3 close_direction);
   bool pushPlaceBox(std::string object_id, geometry_msgs::PoseStamped box_pose, geometry_msgs::Vector3 direction);
   bool moveObject(std::string object_id, geometry_msgs::PoseStamped left_pose, double scale = 0.2);
   bool planMoveObject(std::string object_id, geometry_msgs::PoseStamped left_pose,
-					  double scale = 0.2);  // Only plan an visualize without executing. For use in validation.
+                      double scale = 0.2);  // Only plan an visualize without executing. For use in validation.
 
   // enable/disable collision check between robot arms
   void allowedArmCollision(bool enable, std::string left_attachedObject);
@@ -153,13 +157,13 @@ public:
   bool switch_controller(std::string stop_name, std::string start_name, std::string ur_namespace);
 
   bool graspMove(double distance, bool avoid_collisions = true, bool use_left = true,
-				 bool use_right = false);  // both arms will be moved closer together
+                 bool use_right = false);  // both arms will be moved closer together
 
   bool linearMove(geometry_msgs::Vector3Stamped direction, bool avoid_collisions = true, bool use_left = true,
-				  bool use_right = true);
+                  bool use_right = true);
 
   bool linearMoveParallel(geometry_msgs::Vector3Stamped direction, std::string object_id, double traj_scale = 1,
-						  bool avoid_collisions = true);
+                          bool avoid_collisions = true);
 
   bool execute(moveit::planning_interface::MoveGroupInterface::Plan plan);
 
@@ -167,26 +171,26 @@ public:
   bool moveGraspPosition();
 
   moveit_msgs::RobotState getPositionIK(std::string &groupName, moveit_msgs::RobotState &seed_robot_state,
-										geometry_msgs::PoseStamped &poseIK);
+                                        geometry_msgs::PoseStamped &poseIK);
   std::vector<double> getPositionIK(const robot_state::JointModelGroup *joint_model_group,
-									const geometry_msgs::Pose &pose);
+                                    const geometry_msgs::Pose &pose);
 
   geometry_msgs::PoseStamped getPositionFK(std::string &endEffectorLink, moveit_msgs::RobotState &seed_robot_state);
   // Eigen::Affine3d& getPositionFK(const robot_state::JointModelGroup* joint_model_group, std::string&
   // endEffectorLink);
 
   Eigen::MatrixXd getJacobian(const robot_state::JointModelGroup *joint_model_group,
-							  Eigen::Vector3d &reference_point_position);
+                              Eigen::Vector3d &reference_point_position);
   void setConstraints();
   void PrintPose(geometry_msgs::Pose &pose);
   void PrintTrajectory(const moveit_msgs::RobotTrajectory &trajectory);
   double radianToDegree(double radian)
   {
-	return (radian * (180 / PI));
+    return (radian * (180 / PI));
   }
   // Util
   bool get_rotation_matrix(Matrix6d &rotation_matrix, tf::TransformListener &listener, std::string from_frame,
-						   std::string to_frame);
+                           std::string to_frame);
 };
 }  // namespace dual_arm_demonstrator_iml
 

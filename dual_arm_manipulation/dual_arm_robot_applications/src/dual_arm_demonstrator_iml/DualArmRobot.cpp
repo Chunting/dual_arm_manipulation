@@ -108,6 +108,33 @@ DualArmRobot::DualArmRobot(ros::NodeHandle &nh) : left_("left_manipulator"),
     {
         ROS_INFO("Joint %s: %f", armsJointNames[i].c_str(), armsJointValues[i]);
     }
+
+    // Makes sure all TFs exists before enabling all transformations in the callbacks
+  	// Transform from base_link to world
+	rotation_world_left_base_.setZero();
+	// Transform from robotiq_ft_frame_id to tip_name
+	rotation_tip_left_sensor_.setZero();
+	rotation_world_right_base_.setZero();
+	rotation_tip_right_sensor_.setZero();
+
+	while (!get_rotation_matrix(rotation_world_left_base_, listener_arm_, "world", "left_base_link"))
+	{
+		sleep(1);
+	}
+	
+	while (!get_rotation_matrix(rotation_world_right_base_, listener_arm_, "world", "right_base_link"))
+	{
+		sleep(1);
+	}
+    while (!get_rotation_matrix(rotation_tip_left_sensor_, listener_arm_, "left_wrist_3_link", "left_robotiq_ft_frame_id"))
+	{
+		sleep(1);
+	}
+	
+	while (!get_rotation_matrix(rotation_tip_right_sensor_, listener_arm_, "right_wrist_3_link", "right_robotiq_ft_frame_id"))
+	{
+		sleep(1);
+	}
 }
 DualArmRobot::~DualArmRobot()
 {
@@ -317,7 +344,6 @@ bool DualArmRobot::switch_controller(std::string stop_name, std::string start_na
 
     // clear
     switchController.request.stop_controllers.clear();
-
     // start admittance controller
     switchController.request.BEST_EFFORT;
     switchController.request.start_controllers.push_back(start_name);
@@ -628,7 +654,6 @@ bool DualArmRobot::linearMoveParallel(geometry_msgs::Vector3Stamped direction,
             try_step = try_again_question();
             if (!try_step)
             {
-                allowedArmCollision(false, object_id);
                 return false;
             }
         }
@@ -646,11 +671,9 @@ bool DualArmRobot::linearMoveParallel(geometry_msgs::Vector3Stamped direction,
     else
     {
         ROS_WARN("Problem adapting trajectory");
-        allowedArmCollision(false, object_id);
         return false;
     }
     dual_arm_toolbox::TrajectoryProcessor::clean(both_arms_trajectory);
-    allowedArmCollision(false, object_id);
 
     // scale trajectory
     dual_arm_toolbox::TrajectoryProcessor::scaleTrajectorySpeed(both_arms_trajectory, traj_scale);
@@ -1805,10 +1828,10 @@ bool DualArmRobot::get_rotation_matrix(Matrix6d &rotation_matrix,
 		rotation_matrix.setZero();
 		rotation_matrix.topLeftCorner(3, 3) = rotation_from_to;
 		rotation_matrix.bottomRightCorner(3, 3) = rotation_from_to;
-		std::cout << "Get TF from" << from_frame << " to: " << to_frame << std::endl
-			  << rotation_from_to << std::endl
-			  << "rotation_from_to" << std::endl
-			  << rotation_from_to << std::endl;
+		// std::cout << "Get TF from " << from_frame << " to: " << to_frame << std::endl
+		// 	  << rotation_from_to << std::endl
+		// 	  << "rotation_from_to " << std::endl
+		// 	  << rotation_from_to << std::endl;
 	}
 	catch (tf::TransformException ex)
 	{

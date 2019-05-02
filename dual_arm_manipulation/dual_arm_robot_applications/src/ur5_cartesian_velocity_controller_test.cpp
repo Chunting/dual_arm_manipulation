@@ -18,6 +18,8 @@
 #include <tf_conversions/tf_eigen.h>
 #include <tf/transform_listener.h>
 
+#include "dual_arm_toolbox/Transform.h"
+
 // rosrun dual_arm_robot_applications ur5_cartesian_velocity_controller_test
 using namespace Eigen;
 
@@ -114,38 +116,44 @@ bool get_rotation_matrix(Matrix6d &rotation_matrix,
 
 int main(int argc, char **argv)
 {
-	ros::init(argc, argv, "joint_speed_talker");
+	ros::init(argc, argv, "cartesian_speed_talker");
 
 	ros::NodeHandle nh_;
-
-	std::string TOPIC_ARM_STATE("/right/ur5_cartesian_velocity_controller/ee_state");
-	std::string TOPIC_ARM_COMMAND("/right/ur5_cartesian_velocity_controller/command_cart_vel");
-	// Subscribers
-	ros::Subscriber sub_arm_state_ = nh_.subscribe(TOPIC_ARM_STATE, 10, &state_arm_callback);
-	// Publishers
-	ros::Publisher pub_arm_cmd_ = nh_.advertise<geometry_msgs::Twist>(TOPIC_ARM_COMMAND, 5);
-
 	ros::Rate loop_rate(100);
-
-	// switch_controller.request.start_controllers.clear();
-	// if (!switch_controller(nh_, "vel_based_pos_traj_controller", "ur5_cartesian_velocity_controller", "left"))
-	// {
-	// 	ROS_WARN("Failed switching controller");
-	// }
-	Matrix6d rotation_a_base_world;
-	Vector6d world_arm_cmd_twist_;
-	Vector6d base_arm_cmd_twist_;
-	world_arm_cmd_twist_ << 0.01,0, 0,  0, 0, 0;
-	// TF:
-	// Listeners
-
 	tf::TransformListener listener_arm_;
-	while (!get_rotation_matrix(rotation_a_base_world, listener_arm_,"left_base_link", "world" ))
+
+
+	std::string topic_right_arm_state("/right/ur5_cartesian_velocity_controller/ee_state");
+	std::string topic_right_arm_cmd("/right/ur5_cartesian_velocity_controller/command_cart_vel");
+	ros::Subscriber sub_right_arm_state_ = nh_.subscribe(topic_right_arm_state, 10, &state_arm_callback);
+	ros::Publisher pub_right_arm_cmd_ = nh_.advertise<geometry_msgs::Twist>(topic_right_arm_cmd, 5);
+
+	Matrix6d rotation_right_base_world;
+	Vector6d world_right_arm_cmd_twist_;
+	Vector6d right_base_arm_cmd_twist_;
+	world_right_arm_cmd_twist_ << 0, 0.01, 0, 0, 0, 0;
+	while (!get_rotation_matrix(rotation_right_base_world, listener_arm_,"right_base_link", "world" ))
 	{
 		sleep(1);
 	}
+	right_base_arm_cmd_twist_ = rotation_right_base_world * world_right_arm_cmd_twist_;
+
+	std::string topic_left_arm_state("/left/ur5_cartesian_velocity_controller/ee_state");
+	std::string topic_left_arm_cmd("/left/ur5_cartesian_velocity_controller/command_cart_vel");
+	ros::Subscriber sub_left_arm_state_ = nh_.subscribe(topic_left_arm_state, 10, &state_arm_callback);
+	ros::Publisher pub_left_arm_cmd_ = nh_.advertise<geometry_msgs::Twist>(topic_left_arm_cmd, 5);
+
+	Vector6d world_left_arm_cmd_twist_;
+	Matrix6d rotation_left_base_world;
+	Vector6d left_base_arm_cmd_twist_;
+	world_left_arm_cmd_twist_ << 0, 0.01, 0, 0, 0, 0;
+	while (!get_rotation_matrix(rotation_left_base_world, listener_arm_,"left_base_link", "world" ))
+	{
+		sleep(1);
+	}
+	left_base_arm_cmd_twist_ = rotation_left_base_world * world_left_arm_cmd_twist_;
 	/*
-	rotation_a_base_world
+	rotation_right_base_world
  	0.000796327  0           -1            
     0.707669    -0.706543  0.000563536
    -0.706543     -0.70767 -0.000562639 
@@ -159,33 +167,32 @@ int main(int argc, char **argv)
             in RPY (degree) [-90.046, 44.954, 89.936]	
 	*/
    
-	base_arm_cmd_twist_ = rotation_a_base_world* world_arm_cmd_twist_;
-	std::cout << "world_arm_cmd_twist_" << std::endl
-			  << world_arm_cmd_twist_ << std::endl
-			  << "base_arm_cmd_twist_" << std::endl
-			  << base_arm_cmd_twist_ << std::endl
-			  << "rotation_a_base_world" << std::endl
-			  << rotation_a_base_world << std::endl;
+	
+	
+	// std::cout << "world_right_arm_cmd_twist_" << std::endl
+	// 		  << world_right_arm_cmd_twist_ << std::endl
+	// 		  << "right_base_arm_cmd_twist_" << std::endl
+	// 		  << right_base_arm_cmd_twist_ << std::endl
+	// 		  << "rotation_right_base_world" << std::endl
+	// 		  << rotation_right_base_world << std::endl;
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// for the arm
-	geometry_msgs::Twist arm_twist_cmd;
+	geometry_msgs::Twist right_arm_twist_cmd;
+	geometry_msgs::Twist left_arm_twist_cmd;
 	int direction = -1;
 	double cart_speed = 0.01;
+	dual_arm_toolbox::Transform::transformVector6dtoTwist(left_base_arm_cmd_twist_, left_arm_twist_cmd);
+	dual_arm_toolbox::Transform::transformVector6dtoTwist(right_base_arm_cmd_twist_, right_arm_twist_cmd);
 	while (nh_.ok())
 	{
-
-		for (int i = 0; i < 1000; ++i)
-		{
-			arm_twist_cmd.linear.x = base_arm_cmd_twist_(0);
-			arm_twist_cmd.linear.y = base_arm_cmd_twist_(1);
-			arm_twist_cmd.linear.z = base_arm_cmd_twist_(2);
-			arm_twist_cmd.angular.x = base_arm_cmd_twist_(3);
-			arm_twist_cmd.angular.y = base_arm_cmd_twist_(4);
-			arm_twist_cmd.angular.z = base_arm_cmd_twist_(5);
-			pub_arm_cmd_.publish(arm_twist_cmd);
-			ros::spinOnce();
-			loop_rate.sleep();
-		}
+			
+		pub_right_arm_cmd_.publish(right_arm_twist_cmd);
+		pub_left_arm_cmd_.publish(left_arm_twist_cmd);
+		ros::spinOnce();
+		loop_rate.sleep();
 		direction = -direction;
 	}
+	ros::shutdown();
+	
+  	return 0;
 }

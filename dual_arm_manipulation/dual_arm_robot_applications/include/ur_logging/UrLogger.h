@@ -19,7 +19,7 @@ protected:
     std::vector<UR_Message_Listener*> ur_listeners_;
 
 public:
-    UR_Logger(ros::NodeHandle& nh, std::vector<std::string> ur_namespaces);
+    UR_Logger(ros::NodeHandle& nh, std::vector<std::string> &ur_namespaces);
     ~UR_Logger();
 
     Stopwatch stopwatch_;
