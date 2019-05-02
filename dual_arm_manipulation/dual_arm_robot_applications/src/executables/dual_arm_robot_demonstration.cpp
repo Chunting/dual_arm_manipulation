@@ -3,14 +3,14 @@
 // rosrun dual_arm_robot_applications dual_arm_robot_demonstration
 
 // ROS
-#include <ros/ros.h>
 #include <geometry_msgs/Pose.h>
+#include <ros/ros.h>
 
 // MoveIt!
-#include <moveit_msgs/PlanningScene.h>
 #include <moveit/move_group_interface/move_group_interface.h>
-#include <moveit_msgs/GetStateValidity.h>
 #include <moveit_msgs/DisplayRobotState.h>
+#include <moveit_msgs/GetStateValidity.h>
+#include <moveit_msgs/PlanningScene.h>
 
 // Rviz
 #include <moveit_msgs/DisplayTrajectory.h>
@@ -30,277 +30,221 @@
 
 int main(int argc, char **argv)
 {
-    ros::init(argc, argv, "dual_arm_robot_demonstration");
-    ros::AsyncSpinner spinner(2);
-    spinner.start();
-    ros::NodeHandle nh;
+  ros::init(argc, argv, "dual_arm_robot_demonstration");
+  ros::AsyncSpinner spinner(4);
+  spinner.start();
+  ros::NodeHandle nh;
 
 #ifdef OFFLINE
-    ROS_WARN("Robot offline");
+  ROS_WARN("Robot offline");
 #endif
 
-    // Dual Arm Robot Setup
-    dual_arm_demonstrator_iml::DualArmRobot dualArmRobot(nh);
+  // Dual Arm Robot Setup
+  dual_arm_demonstrator_iml::DualArmRobot dualArmRobot(nh);
 
-    // Scene Setup
-    dual_arm_demonstrator_iml::SceneManager sceneManager(nh);
-    sceneManager.setupScene();
-    // Start logging data
-    std::vector<std::string> ur_namespaces;
-    ur_namespaces.push_back("left");
-    ur_namespaces.push_back("right");
-    UR_Logger ur_logger(nh, ur_namespaces);
-    ur_logger.start(100);
+  // Scene Setup
+  dual_arm_demonstrator_iml::SceneManager sceneManager(nh);
+  sceneManager.setupScene();
+  // Start logging data
+  std::vector<std::string> ur_namespaces;
+  ur_namespaces.push_back("left");
+  ur_namespaces.push_back("right");
+  UR_Logger ur_logger(nh, ur_namespaces);
+  ur_logger.start(100);
 
-    // variables
-    moveit::planning_interface::MoveGroupInterface::Plan left_plan;
-    moveit::planning_interface::MoveGroupInterface::Plan right_plan;
-    moveit::planning_interface::MoveItErrorCode error;
-    error.val = -1;
+  // variables
+  moveit::planning_interface::MoveGroupInterface::Plan left_plan;
+  moveit::planning_interface::MoveGroupInterface::Plan right_plan;
+  moveit::planning_interface::MoveItErrorCode error;
+  error.val = -1;
 
-    FTSensorSubscriber FTsubscriber(nh, ur_namespaces[0]);
+  FTSensorSubscriber FTsubscriber(nh, ur_namespaces[0]);
 
-    geometry_msgs::Vector3Stamped direction;
-    direction.header.frame_id = "world";
-    dualArmRobot.setConstraints();
-    dualArmRobot.kinematic_state->enforceBounds();
-    if (!dualArmRobot.switch_controller("ur5_cartesian_velocity_controller", "vel_based_pos_traj_controller", "left"))
-        ROS_WARN("failed switching controller");
-    ROS_INFO("========== MOVE HOME POSITION =================");
-    dualArmRobot.moveHome();
-    sleep(1);
-    if (!dualArmRobot.switch_controller("vel_based_pos_traj_controller", "ur5_cartesian_velocity_controller", "left"))
-        ROS_WARN("failed switching controller");
-    ROS_INFO("========== MOVE GRASP POSITION =================");
-    dualArmRobot.moveGraspPosition();
-    sleep(1);
+  geometry_msgs::Vector3Stamped direction;
+  direction.header.frame_id = "world";
+  dualArmRobot.setConstraints();
+  dualArmRobot.kinematic_state->enforceBounds();
+  // if (!dualArmRobot.switch_controller("ur5_cartesian_velocity_controller", "vel_based_pos_traj_controller", "left"))
+  //     ROS_WARN("failed switching controller");
+  ROS_INFO("========== MOVE HOME POSITION =================");
+  dualArmRobot.moveHome();
+  sleep(1);
 
-    ROS_INFO("========== MOVE CLOSER =================");
+  ROS_INFO("========== MOVE GRASP POSITION =================");
+  dualArmRobot.moveGraspPosition();
+  sleep(1);
+  if (!dualArmRobot.switch_controller("vel_based_pos_traj_controller", "ur5_cartesian_velocity_controller", "left"))
+    ROS_WARN("failed switching controller");
+  ROS_INFO("========== MOVE CLOSER =================");
 
-    dualArmRobot.graspMove(0.03, false, true, false);
-    double res_force = sqrt(FTsubscriber.last_wrench_msg_.wrench.force.x * FTsubscriber.last_wrench_msg_.wrench.force.x + FTsubscriber.last_wrench_msg_.wrench.force.y * FTsubscriber.last_wrench_msg_.wrench.force.y + FTsubscriber.last_wrench_msg_.wrench.force.z * FTsubscriber.last_wrench_msg_.wrench.force.z);
+  dualArmRobot.graspMove(0.03, false, true, false);
+  double res_force = sqrt(FTsubscriber.last_wrench_msg_.wrench.force.x * FTsubscriber.last_wrench_msg_.wrench.force.x +
+                          FTsubscriber.last_wrench_msg_.wrench.force.y * FTsubscriber.last_wrench_msg_.wrench.force.y +
+                          FTsubscriber.last_wrench_msg_.wrench.force.z * FTsubscriber.last_wrench_msg_.wrench.force.z);
 
-    while (res_force < 15)
-    {
-        dualArmRobot.graspMove(0.001, false, true, false); // true : left arm; false: right arm
-        res_force = sqrt(FTsubscriber.last_wrench_msg_.wrench.force.x * FTsubscriber.last_wrench_msg_.wrench.force.x + FTsubscriber.last_wrench_msg_.wrench.force.y * FTsubscriber.last_wrench_msg_.wrench.force.y + FTsubscriber.last_wrench_msg_.wrench.force.z * FTsubscriber.last_wrench_msg_.wrench.force.z);
-        ROS_INFO("I heard: Force [%f]  FX[%f] FY[%f] FZ[%f]", res_force, FTsubscriber.last_wrench_msg_.wrench.force.x, FTsubscriber.last_wrench_msg_.wrench.force.y, FTsubscriber.last_wrench_msg_.wrench.force.z);
-    }
+  while (res_force < 15)
+  {
+    dualArmRobot.graspMove(0.001, false, true, false);  // true : left arm; false: right arm
+    res_force = sqrt(FTsubscriber.last_wrench_msg_.wrench.force.x * FTsubscriber.last_wrench_msg_.wrench.force.x +
+                     FTsubscriber.last_wrench_msg_.wrench.force.y * FTsubscriber.last_wrench_msg_.wrench.force.y +
+                     FTsubscriber.last_wrench_msg_.wrench.force.z * FTsubscriber.last_wrench_msg_.wrench.force.z);
+    ROS_INFO("I heard: Force [%f]  FX[%f] FY[%f] FZ[%f]", res_force, FTsubscriber.last_wrench_msg_.wrench.force.x,
+             FTsubscriber.last_wrench_msg_.wrench.force.y, FTsubscriber.last_wrench_msg_.wrench.force.z);
+  }
 
-    ros::Publisher offset_desired_pub = nh.advertise<geometry_msgs::PointStamped>("/desired_offset_point", 1);
-    // Publish the desired offset between two EEs, described in right EE coordinate system
-    KDL::Frame desired_offset = dualArmRobot.getCurrentOffset(); // w.r.t left_ee_link coordinate system
-    geometry_msgs::PointStamped offset_point_temp_;
-    offset_point_temp_.header.frame_id = dualArmRobot.right_.getEndEffectorLink();
-    offset_point_temp_.point.x = desired_offset.p.x();
-    offset_point_temp_.point.y = desired_offset.p.y();
-    offset_point_temp_.point.z = desired_offset.p.z();
-    offset_desired_pub.publish(offset_point_temp_);
-    sleep(1);
-    ROS_INFO("========== PICK UP =================");
-    // Eval
-    ros::Time before_pick_7;
-    ros::Duration manipulation_7;
-    ros::Time after_place_7;
+  ros::Publisher offset_desired_pub = nh.advertise<geometry_msgs::PointStamped>("/desired_offset_point", 1);
+  // Publish the desired offset between two EEs, described in right EE coordinate system
+  KDL::Frame desired_offset = dualArmRobot.getCurrentOffset();  // w.r.t left_ee_link coordinate system
+  geometry_msgs::PointStamped offset_point_temp_;
+  offset_point_temp_.header.frame_id = dualArmRobot.right_.getEndEffectorLink();
+  offset_point_temp_.point.x = desired_offset.p.x();
+  offset_point_temp_.point.y = desired_offset.p.y();
+  offset_point_temp_.point.z = desired_offset.p.z();
+  offset_desired_pub.publish(offset_point_temp_);
+  sleep(1);
+  ROS_INFO("========== PICK UP =================");
+  // Eval
+  ros::Time before_pick_7;
+  ros::Duration manipulation_7;
+  ros::Time after_place_7;
 
-    before_pick_7 = ros::Time::now();
-    // Pick box7 on top
-    direction.header.frame_id = "world";
-    direction.vector.x = 0;
-    direction.vector.y = 0;
-    direction.vector.z = 0.15;
-    if (!dualArmRobot.pickBox("box7", direction))
-    {
-        ROS_WARN("Pick failed");
-        ROS_ERROR("Can't execute demonstration without successful pick. Demonstration aborted.");
-        return 0;
-    }
+  before_pick_7 = ros::Time::now();
+  // Pick box7 on top
+  direction.header.frame_id = "world";
+  direction.vector.x = 0;
+  direction.vector.y = 0;
+  direction.vector.z = 0.15;
+  if (!dualArmRobot.pickBox("box7", direction))
+  {
+    ROS_WARN("Pick failed");
+    ROS_ERROR("Can't execute demonstration without successful pick. Demonstration aborted.");
+    return 0;
+  }
 
-    // box7 goal pose
-    geometry_msgs::PoseStamped box7_goal_pose_stamped;
-    box7_goal_pose_stamped.header = dualArmRobot.left_current_pose_.header;
+  // box7 goal pose
+  geometry_msgs::PoseStamped box7_goal_pose_stamped;
+  box7_goal_pose_stamped.header = dualArmRobot.left_current_pose_.header;
 
-    dualArmRobot.left_current_pose_ = dualArmRobot.left_.getCurrentPose(dualArmRobot.left_.getEndEffectorLink());
-    box7_goal_pose_stamped.pose = dualArmRobot.left_current_pose_.pose;
-    KDL::Frame left_frame_eef; // endeffector frame
-    dual_arm_toolbox::Transform::transformPoseToKDL(dualArmRobot.left_current_pose_.pose, left_frame_eef);
-    KDL::Rotation left_rot = left_frame_eef.M;
-    // KDL::Rotation rotationAgnle = KDL::Rotation::Identity();
-    double yaw = 0;   // Z-axis
-    double pitch = 0; // Y-axis
-    double roll = 0;  // X-axis
-    double angle = 0;
-    left_rot.GetEulerZYX(yaw, pitch, roll);
-    ROS_INFO("Before roll = %f\tpitch = %f\t yaw = %f", roll, pitch, yaw);
-    angle = 3.14/12;
-    roll += angle;
-    left_rot = KDL::Rotation::RPY(roll, pitch, yaw);
+  dualArmRobot.left_current_pose_ = dualArmRobot.left_.getCurrentPose(dualArmRobot.left_.getEndEffectorLink());
+  box7_goal_pose_stamped.pose = dualArmRobot.left_current_pose_.pose;
+  KDL::Frame left_frame_eef;  // endeffector frame
+  dual_arm_toolbox::Transform::transformPoseToKDL(dualArmRobot.left_current_pose_.pose, left_frame_eef);
+  KDL::Rotation left_rot = left_frame_eef.M;
+  // KDL::Rotation rotationAgnle = KDL::Rotation::Identity();
+  double yaw = 0;    // Z-axis
+  double pitch = 0;  // Y-axis
+  double roll = 0;   // X-axis
+  double angle = 0;
+  left_rot.GetEulerZYX(yaw, pitch, roll);
+  ROS_INFO("Before roll = %f\tpitch = %f\t yaw = %f", roll, pitch, yaw);
+  angle = 3.14 / 12;
+  roll += angle;
+  left_rot = KDL::Rotation::RPY(roll, pitch, yaw);
 
-    left_rot.GetEulerZYX(yaw, pitch, roll);
-    left_rot.GetQuaternion(box7_goal_pose_stamped.pose.orientation.x,
-                           box7_goal_pose_stamped.pose.orientation.y,
-                           box7_goal_pose_stamped.pose.orientation.z,
-                           box7_goal_pose_stamped.pose.orientation.w);
-    ROS_INFO("After roll = %f\tpitch = %f\t yaw = %f", roll, pitch, yaw);
-    dualArmRobot.moveObject("box7", box7_goal_pose_stamped, 0.1);
-    sleep(5);
+  left_rot.GetEulerZYX(yaw, pitch, roll);
+  left_rot.GetQuaternion(box7_goal_pose_stamped.pose.orientation.x, box7_goal_pose_stamped.pose.orientation.y,
+                         box7_goal_pose_stamped.pose.orientation.z, box7_goal_pose_stamped.pose.orientation.w);
+  ROS_INFO("After roll = %f\tpitch = %f\t yaw = %f", roll, pitch, yaw);
+  dualArmRobot.moveObject("box7", box7_goal_pose_stamped, 0.1);
+  sleep(5);
 
-    roll -= angle;
-    left_rot = KDL::Rotation::RPY(roll, pitch, yaw);
-    left_rot.GetEulerZYX(yaw, pitch, roll);
-    ROS_INFO("After roll = %f\tpitch = %f\t yaw = %f", roll, pitch, yaw);
+  roll -= angle;
+  left_rot = KDL::Rotation::RPY(roll, pitch, yaw);
+  left_rot.GetEulerZYX(yaw, pitch, roll);
+  ROS_INFO("After roll = %f\tpitch = %f\t yaw = %f", roll, pitch, yaw);
 
-    left_rot.GetQuaternion(box7_goal_pose_stamped.pose.orientation.x,
-                           box7_goal_pose_stamped.pose.orientation.y,
-                           box7_goal_pose_stamped.pose.orientation.z,
-                           box7_goal_pose_stamped.pose.orientation.w);
-    dualArmRobot.moveObject("box7", box7_goal_pose_stamped, 0.1);
-    sleep(1);
+  left_rot.GetQuaternion(box7_goal_pose_stamped.pose.orientation.x, box7_goal_pose_stamped.pose.orientation.y,
+                         box7_goal_pose_stamped.pose.orientation.z, box7_goal_pose_stamped.pose.orientation.w);
+  dualArmRobot.moveObject("box7", box7_goal_pose_stamped, 0.1);
+  sleep(1);
 
-    // angle = 3.14/18;
-    // pitch += angle;
-    // left_rot = KDL::Rotation::RPY(roll, pitch, yaw);
+  // angle = 3.14/18;
+  // pitch += angle;
+  // left_rot = KDL::Rotation::RPY(roll, pitch, yaw);
 
-    // left_rot.GetEulerZYX(yaw, pitch, roll);
-    // left_rot.GetQuaternion(box7_goal_pose_stamped.pose.orientation.x,
-    //                        box7_goal_pose_stamped.pose.orientation.y,
-    //                        box7_goal_pose_stamped.pose.orientation.z,
-    //                        box7_goal_pose_stamped.pose.orientation.w);
-    // ROS_INFO("After roll = %f\tpitch = %f\t yaw = %f", roll, pitch, yaw);
-    // dualArmRobot.moveObject("box7", box7_goal_pose_stamped, 0.1);
-    // sleep(1);
+  // left_rot.GetEulerZYX(yaw, pitch, roll);
+  // left_rot.GetQuaternion(box7_goal_pose_stamped.pose.orientation.x,
+  //                        box7_goal_pose_stamped.pose.orientation.y,
+  //                        box7_goal_pose_stamped.pose.orientation.z,
+  //                        box7_goal_pose_stamped.pose.orientation.w);
+  // ROS_INFO("After roll = %f\tpitch = %f\t yaw = %f", roll, pitch, yaw);
+  // dualArmRobot.moveObject("box7", box7_goal_pose_stamped, 0.1);
+  // sleep(1);
 
-    // pitch -= angle;
-    // left_rot = KDL::Rotation::RPY(roll, pitch, yaw);
-    // left_rot.GetEulerZYX(yaw, pitch, roll);
-    // ROS_INFO("After roll = %f\tpitch = %f\t yaw = %f", roll, pitch, yaw);
+  // pitch -= angle;
+  // left_rot = KDL::Rotation::RPY(roll, pitch, yaw);
+  // left_rot.GetEulerZYX(yaw, pitch, roll);
+  // ROS_INFO("After roll = %f\tpitch = %f\t yaw = %f", roll, pitch, yaw);
 
-    // left_rot.GetQuaternion(box7_goal_pose_stamped.pose.orientation.x,
-    //                        box7_goal_pose_stamped.pose.orientation.y,
-    //                        box7_goal_pose_stamped.pose.orientation.z,
-    //                        box7_goal_pose_stamped.pose.orientation.w);
-    // dualArmRobot.moveObject("box7", box7_goal_pose_stamped, 0.1);
-    // sleep(1);
+  // left_rot.GetQuaternion(box7_goal_pose_stamped.pose.orientation.x,
+  //                        box7_goal_pose_stamped.pose.orientation.y,
+  //                        box7_goal_pose_stamped.pose.orientation.z,
+  //                        box7_goal_pose_stamped.pose.orientation.w);
+  // dualArmRobot.moveObject("box7", box7_goal_pose_stamped, 0.1);
+  // sleep(1);
 
-    // angle = -3.14 / 6;
-    // yaw += angle;
-    // left_rot = KDL::Rotation::RPY(roll, pitch, yaw);
+  // angle = -3.14 / 6;
+  // yaw += angle;
+  // left_rot = KDL::Rotation::RPY(roll, pitch, yaw);
 
-    // left_rot.GetEulerZYX(yaw, pitch, roll);
-    // left_rot.GetQuaternion(box7_goal_pose_stamped.pose.orientation.x,
-    //                        box7_goal_pose_stamped.pose.orientation.y,
-    //                        box7_goal_pose_stamped.pose.orientation.z,
-    //                        box7_goal_pose_stamped.pose.orientation.w);
-    // ROS_INFO("After roll = %f\tpitch = %f\t yaw = %f", roll, pitch, yaw);
-    // dualArmRobot.moveObject("box7", box7_goal_pose_stamped, 0.1);
-    // sleep(1);
+  // left_rot.GetEulerZYX(yaw, pitch, roll);
+  // left_rot.GetQuaternion(box7_goal_pose_stamped.pose.orientation.x,
+  //                        box7_goal_pose_stamped.pose.orientation.y,
+  //                        box7_goal_pose_stamped.pose.orientation.z,
+  //                        box7_goal_pose_stamped.pose.orientation.w);
+  // ROS_INFO("After roll = %f\tpitch = %f\t yaw = %f", roll, pitch, yaw);
+  // dualArmRobot.moveObject("box7", box7_goal_pose_stamped, 0.1);
+  // sleep(1);
 
-    // yaw -= angle;
-    // left_rot = KDL::Rotation::RPY(roll, pitch, yaw);
-    // left_rot.GetEulerZYX(yaw, pitch, roll);
-    // ROS_INFO("After roll = %f\tpitch = %f\t yaw = %f", roll, pitch, yaw);
+  // yaw -= angle;
+  // left_rot = KDL::Rotation::RPY(roll, pitch, yaw);
+  // left_rot.GetEulerZYX(yaw, pitch, roll);
+  // ROS_INFO("After roll = %f\tpitch = %f\t yaw = %f", roll, pitch, yaw);
 
-    // left_rot.GetQuaternion(box7_goal_pose_stamped.pose.orientation.x,
-    //                        box7_goal_pose_stamped.pose.orientation.y,
-    //                        box7_goal_pose_stamped.pose.orientation.z,
-    //                        box7_goal_pose_stamped.pose.orientation.w);
-    // dualArmRobot.moveObject("box7", box7_goal_pose_stamped, 0.1);
-    // sleep(1);
+  // left_rot.GetQuaternion(box7_goal_pose_stamped.pose.orientation.x,
+  //                        box7_goal_pose_stamped.pose.orientation.y,
+  //                        box7_goal_pose_stamped.pose.orientation.z,
+  //                        box7_goal_pose_stamped.pose.orientation.w);
+  // dualArmRobot.moveObject("box7", box7_goal_pose_stamped, 0.1);
+  // sleep(1);
 
-    // // Create an desired frame
-    // KDL::Frame desired_end_effector_pose(
-    // KDL::Rotation::RPY(-1.57,0,1.57), // Rotation rad
-    // KDL::Vector(-0.2,-0.3,0.8));      // Position x,y,z in meters
-    // KDL::Rotation rot = left_frame_eef.R
+  // // Create an desired frame
+  // KDL::Frame desired_end_effector_pose(
+  // KDL::Rotation::RPY(-1.57,0,1.57), // Rotation rad
+  // KDL::Vector(-0.2,-0.3,0.8));      // Position x,y,z in meters
+  // KDL::Rotation rot = left_frame_eef.R
 
-    // // clear constraints of ur5
-    // dualArmRobot.left_.clearPathConstraints();
-    ROS_INFO("========== PLACE DOWN =================");
-    // Place box7
-    geometry_msgs::Vector3 go_down;
-    go_down.x = 0;
-    go_down.y = 0;
-    go_down.z = -0.15;
-    if (!dualArmRobot.placeBox("box7", box7_goal_pose_stamped, go_down))
-    {
-        ROS_WARN("Place Box failed");
-        ROS_ERROR("Demonstration aborted to avoid further problems");
-        return 0;
-    }
+  // // clear constraints of ur5
+  // dualArmRobot.left_.clearPathConstraints();
+  ROS_INFO("========== PLACE DOWN =================");
+  // Place box7
+  geometry_msgs::Vector3 go_down;
+  go_down.x = 0;
+  go_down.y = 0;
+  go_down.z = -0.15;
+  if (!dualArmRobot.placeBox("box7", box7_goal_pose_stamped, go_down))
+  {
+    ROS_WARN("Place Box failed");
+    ROS_ERROR("Demonstration aborted to avoid further problems");
+    return 0;
+  }
 
-    // evaluation
-    after_place_7 = ros::Time::now();
-    manipulation_7 = after_place_7 - before_pick_7;
-    ROS_INFO(":::::: VALUES EVALUATION ::::::");
-    ROS_INFO("manipulation box 7 took: %li nsec", manipulation_7.toNSec());
-    sleep(5);
+  // evaluation
+  after_place_7 = ros::Time::now();
+  manipulation_7 = after_place_7 - before_pick_7;
+  ROS_INFO(":::::: VALUES EVALUATION ::::::");
+  ROS_INFO("manipulation box 7 took: %li nsec", manipulation_7.toNSec());
+  sleep(5);
 
-    dualArmRobot.moveHome();
-    /*
-    // setup constraints
-    // ur5 sometimes blocks itself when moving the box on bottom, this should solve the issue
-    left_constraints.joint_constraints.clear();
-    right_constraints.joint_constraints.clear();
-    both_constraints.joint_constraints.clear();
+  dualArmRobot.moveHome();
 
-    jcm.joint_name="left_wrist_2_joint";
-    jcm.position = 1.5;
-    jcm.tolerance_above = 0.6;
-    jcm.tolerance_below = 0.6;
-    jcm.weight = 1.0;
-    left_constraints.joint_constraints.push_back(jcm);
-    dualArmRobot.left_.setPathConstraints(left_constraints);
-    both_constraints.joint_constraints.push_back(jcm);
+  // Eval
+  ros::Time before_pick_3;
+  ros::Duration manipulation_3;
+  ros::Time after_place_3;
 
-    // ur5 sometimes blocks itself for path adaption when picking the box on bottom, this should solve the issue
-    jcm.joint_name="right_wrist_1_joint";
-    jcm.position = 0.7;
-    jcm.tolerance_above = 1.0;
-    jcm.tolerance_below = 1.0;
-    jcm.weight = 1.0;
-    right_constraints.joint_constraints.push_back(jcm);
-    dualArmRobot.right_.setPathConstraints(right_constraints);
-    both_constraints.joint_constraints.push_back(jcm);
-
-    // when placing box on top ur5 can get blocked because wrist 1 reaches limit
-    jcm.joint_name="left_wrist_1_joint";
-    jcm.position = 0.0;
-    jcm.tolerance_above = 3.0;
-    jcm.tolerance_below = 3.0;
-    jcm.weight = 1.0;
-    left_constraints.joint_constraints.push_back(jcm);
-    dualArmRobot.left_.setPathConstraints(left_constraints);
-    both_constraints.joint_constraints.push_back(jcm);
-
-    jcm.joint_name="left_shoulder_pan_joint";
-    jcm.position = -2.4;
-    jcm.tolerance_above = 2.4;
-    jcm.tolerance_below = 0.7;
-    jcm.weight = 1.0;
-    left_constraints.joint_constraints.push_back(jcm);
-    dualArmRobot.left_.setPathConstraints(left_constraints);
-    both_constraints.joint_constraints.push_back(jcm);
-
-    // ur5 sometimes blocks itself when picking the box on top, this should solve the issue
-    jcm.joint_name="right_wrist_2_joint";
-    jcm.position = 0;
-    jcm.tolerance_above = 2.5;
-    jcm.tolerance_below = 2.5;
-    jcm.weight = 1.0;
-    right_constraints.joint_constraints.push_back(jcm);
-    dualArmRobot.right_.setPathConstraints(right_constraints);
-    both_constraints.joint_constraints.push_back(jcm);
-
-    dualArmRobot.arms_.setPathConstraints(both_constraints);
-
-
-    //Eval
-    ros::Time before_pick_3;
-    ros::Duration manipulation_3;
-    ros::Time after_place_3;
-
-    before_pick_3 = ros::Time::now();
-
+  before_pick_3 = ros::Time::now();
+  /*
     // Pick box3 on bottom
     geometry_msgs::Vector3Stamped direction2;
     direction2.header.frame_id = "world";
@@ -321,7 +265,9 @@ int main(int argc, char **argv)
     box3_goal_pose.position.z = 0.0155+0.52/2+0.0155/2+sceneManager.box_.dimensions[0]/2+0.005;
     KDL::Rotation box3_goal_rot;
     box3_goal_rot.DoRotY(-3.14/2);
-    box3_goal_rot.GetQuaternion(box3_goal_pose.orientation.x, box3_goal_pose.orientation.y, box3_goal_pose.orientation.z, box3_goal_pose.orientation.w);
+    box3_goal_rot.GetQuaternion(box3_goal_pose.orientation.x, box3_goal_pose.orientation.y,
+    box3_goal_pose.orientation.z,
+    box3_goal_pose.orientation.w);
     geometry_msgs::PoseStamped box3_goal_pose_stamped;
     box3_goal_pose_stamped.header.frame_id = "shelf";
     box3_goal_pose_stamped.pose=box3_goal_pose;
@@ -357,16 +303,16 @@ int main(int argc, char **argv)
     ROS_INFO(":::::: VALUES EVALUATION ::::::");
     ROS_INFO("manipulation box 3 took: %li nsec", manipulation_3.toNSec());
     sleep(5);
-    
-    // move robot back into home pose
-    dualArmRobot.right_.clearPathConstraints();
-    dualArmRobot.left_.clearPathConstraints();
-    dualArmRobot.moveHome();
-*/
-    // END
-    ROS_INFO("Finished demonstration");
-    sleep(1);
-    ur_logger.stop();
-    ros::shutdown();
-    return 0;
+    */
+
+  // move robot back into home pose
+  dualArmRobot.right_.clearPathConstraints();
+  dualArmRobot.left_.clearPathConstraints();
+  dualArmRobot.moveHome();
+  // END
+  ROS_INFO("Finished demonstration");
+  sleep(1);
+  ur_logger.stop();
+  ros::shutdown();
+  return 0;
 }

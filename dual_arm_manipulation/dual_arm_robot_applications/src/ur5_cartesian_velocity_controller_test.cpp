@@ -118,8 +118,8 @@ int main(int argc, char **argv)
 
 	ros::NodeHandle nh_;
 
-	std::string TOPIC_ARM_STATE("/left/ur5_cartesian_velocity_controller/ee_state");
-	std::string TOPIC_ARM_COMMAND("/left/ur5_cartesian_velocity_controller/command_cart_vel");
+	std::string TOPIC_ARM_STATE("/right/ur5_cartesian_velocity_controller/ee_state");
+	std::string TOPIC_ARM_COMMAND("/right/ur5_cartesian_velocity_controller/command_cart_vel");
 	// Subscribers
 	ros::Subscriber sub_arm_state_ = nh_.subscribe(TOPIC_ARM_STATE, 10, &state_arm_callback);
 	// Publishers

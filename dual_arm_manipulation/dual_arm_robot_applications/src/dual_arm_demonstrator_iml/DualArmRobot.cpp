@@ -87,7 +87,6 @@ DualArmRobot::DualArmRobot(ros::NodeHandle &nh) : left_("left_manipulator"),
     setConstraints();
     kinematic_state->enforceBounds();
 
-    // left_joint_values = getJointAngles("left_manipulator");
     ROS_INFO("\nleft_current_pose_ frame_id: %s, end_effector: %s\n x=%f, y=%f, z=%f, qx=%f, qy=%f, qz=%f, qw=%f\n",
              left_current_pose_.header.frame_id.c_str(), left_.getEndEffectorLink().c_str(),
              left_current_pose_.pose.position.x, left_current_pose_.pose.position.y, left_current_pose_.pose.position.z,
@@ -1409,17 +1408,6 @@ bool DualArmRobot::execute(moveit::planning_interface::MoveGroupInterface::Plan 
 #endif
 }
 
-// Get the joint angles
-// groupName: "left_manipulator" "right_manipulator" "arms"
-std::vector<double> DualArmRobot::getJointAngles(std::string groupName)
-{
-    planning_scene::PlanningScene planningScene(kinematic_model);
-    const robot_state::JointModelGroup *joint_model_group = kinematic_model->getJointModelGroup(groupName);
-    const std::vector<std::string> &joint_names = joint_model_group->getJointModelNames();
-    std::vector<double> joint_values;
-    kinematic_state->copyJointGroupPositions(joint_model_group, joint_values);
-    return joint_values;
-}
 /* Move the robot to its home position defined in SRDF file */
 bool DualArmRobot::moveHome()
 {
@@ -1651,7 +1639,6 @@ geometry_msgs::PoseStamped DualArmRobot::getPositionFK(std::string &endEffectorL
     }
     poseFK = fk_msg.response.pose_stamped[0];
 
-    // left_joint_values = getJointAngles("left_manipulator");
     ROS_INFO("\nposeFK frame_id: %s, end_effector: %s, x=%f, y=%f, z=%f, qx=%f, qy=%f, qz=%f, qw=%f\n",
              poseFK.header.frame_id.c_str(), endEffectorLink.c_str(), poseFK.pose.position.x, poseFK.pose.position.y, poseFK.pose.position.z, poseFK.pose.orientation.x, poseFK.pose.orientation.y, poseFK.pose.orientation.z, poseFK.pose.orientation.w);
     return poseFK;
@@ -1773,8 +1760,8 @@ void DualArmRobot::setConstraints()
     right_.setPathConstraints(right_constraints);
 
     jcm.joint_name = "right_shoulder_lift_joint";
-    jcm.position = 0.01;
-    jcm.tolerance_above = 3;
+    jcm.position = 0;
+    jcm.tolerance_above = 6;
     jcm.tolerance_below = 3;
     jcm.weight = 1.0;
     right_constraints.joint_constraints.push_back(jcm);
@@ -1800,4 +1787,35 @@ void DualArmRobot::setConstraints()
     right_.setPathConstraints(right_constraints);
 
     arms_.setPathConstraints(both_constraints);
+}
+
+
+
+bool DualArmRobot::get_rotation_matrix(Matrix6d &rotation_matrix,
+						 tf::TransformListener &listener,
+						 std::string from_frame,
+						 std::string to_frame)
+{
+	tf::StampedTransform transform;
+	Matrix3d rotation_from_to;
+	try
+	{
+		listener.lookupTransform(from_frame, to_frame, ros::Time(0), transform);
+		tf::matrixTFToEigen(transform.getBasis(), rotation_from_to);
+		rotation_matrix.setZero();
+		rotation_matrix.topLeftCorner(3, 3) = rotation_from_to;
+		rotation_matrix.bottomRightCorner(3, 3) = rotation_from_to;
+		std::cout << "Get TF from" << from_frame << " to: " << to_frame << std::endl
+			  << rotation_from_to << std::endl
+			  << "rotation_from_to" << std::endl
+			  << rotation_from_to << std::endl;
+	}
+	catch (tf::TransformException ex)
+	{
+		rotation_matrix.setZero();
+		ROS_WARN_STREAM_THROTTLE(1, "Waiting for TF from: " << from_frame << " to: " << to_frame);
+		return false;
+	}
+
+	return true;
 }

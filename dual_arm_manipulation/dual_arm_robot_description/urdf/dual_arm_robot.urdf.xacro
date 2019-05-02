@@ -25,7 +25,7 @@
 
 	<xacro:arg name="prefix_left" default="left_"/>
 	<xacro:arg name="prefix_right" default="right_"/>
-	<xacro:arg name="limited" default="true"/>
+	<xacro:arg name="limited" default="false"/>
 
 	<!-- color macros -->
 	<xacro:macro name="material_orange_transparent">

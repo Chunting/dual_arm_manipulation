@@ -132,7 +132,6 @@ int main(int argc, char **argv)
 
     ROS_INFO("Reference Frame: %s", left_.getPlanningFrame().c_str());
     ROS_INFO("EndEffectorLink: %s", left_.getEndEffectorLink().c_str());
-    // left_joint_values = getJointAngles("left_manipulator");
     geometry_msgs::PoseStamped left_current_pose_ = left_.getCurrentPose(left_.getEndEffectorLink());
     ROS_INFO("\nleft_current_pose_ frame_id: %s, end_effector: %s\n x=%f, y=%f, z=%f\n qx=%f, qy=%f, qz=%f, qw=%f\n",
              left_current_pose_.header.frame_id.c_str(), left_.getEndEffectorLink().c_str(), left_current_pose_.pose.position.x, left_current_pose_.pose.position.y, left_current_pose_.pose.position.z, left_current_pose_.pose.orientation.x, left_current_pose_.pose.orientation.y, left_current_pose_.pose.orientation.z, left_current_pose_.pose.orientation.w);
