@@ -57,7 +57,6 @@ int main(int argc, char **argv)
   FTSensorSubscriber left_robotiq_ft_subscriber(nh, ur_namespaces[0]);
   FTSensorSubscriber right_robotiq_ft_subscriber(nh, ur_namespaces[1]);
 
-
   geometry_msgs::Vector3Stamped direction;
   direction.header.frame_id = "world";
   dualArmRobot.setConstraints();
@@ -76,12 +75,12 @@ int main(int argc, char **argv)
   tf::TransformListener listener_arm_;
   while (!dualArmRobot.get_rotation_matrix(rotation_left_base_world, listener_arm_, "left_base_link", "world"))
   {
-	sleep(1);
+    sleep(1);
   }
   left_base_world_ready_ = true;
   while (!dualArmRobot.get_rotation_matrix(rotation_right_base_world, listener_arm_, "right_base_link", "world"))
   {
-	sleep(1);
+    sleep(1);
   }
   right_base_world_ready_ = true;
   // if (!dualArmRobot.switch_controller("ur5_cartesian_velocity_controller", "vel_based_pos_traj_controller", "left"))
@@ -93,18 +92,18 @@ int main(int argc, char **argv)
   ROS_INFO("========== MOVE GRASP POSITION =================");
   dualArmRobot.moveGraspPosition();
   sleep(1);
-  
+
   ROS_INFO("========== MOVE CLOSER =================");
 
   // dualArmRobot.graspMove(0.01, false, true, false);
   if (!dualArmRobot.switch_controller("vel_based_pos_traj_controller", "ur5_cartesian_velocity_controller", "left"))
-	ROS_WARN("Failed switching left controller");
+    ROS_WARN("Failed switching left controller");
   if (!dualArmRobot.switch_controller("vel_based_pos_traj_controller", "ur5_cartesian_velocity_controller", "right"))
-	ROS_WARN("Failed switching right controller");
-	sleep(3);
+    ROS_WARN("Failed switching right controller");
+  sleep(3);
   double left_force_norm = left_robotiq_ft_subscriber.wrench_external_(2);
   double right_force_norm = right_robotiq_ft_subscriber.wrench_external_(2);
-  double absolute_diff = std::abs(left_force_norm-right_force_norm);
+  double desired_diff_ = std::abs(left_force_norm - right_force_norm);
 
   //   while (left_force_norm < 15)
   //   {
@@ -134,29 +133,31 @@ int main(int argc, char **argv)
   world_left_arm_cmd_twist_ << 0, 0.001, 0, 0, 0, 0;
   world_right_arm_cmd_twist_ << 0, -0.001, 0, 0, 0, 0;
   sleep(3);
-  while ( std::abs(left_force_norm) < 20 || absolute_diff >2 )
+  while (std::abs(left_force_norm) < 20 || desired_diff_ > 0.5)
   {
-	left_base_arm_cmd_twist_ = rotation_left_base_world * world_left_arm_cmd_twist_;
-	right_base_arm_cmd_twist_ = rotation_right_base_world * world_right_arm_cmd_twist_;
+    left_base_arm_cmd_twist_ = rotation_left_base_world * world_left_arm_cmd_twist_;
+    right_base_arm_cmd_twist_ = rotation_right_base_world * world_right_arm_cmd_twist_;
 
-	dual_arm_toolbox::Transform::transformVector6dtoTwist(left_base_arm_cmd_twist_, left_arm_twist_cmd);
-	dual_arm_toolbox::Transform::transformVector6dtoTwist(right_base_arm_cmd_twist_, right_arm_twist_cmd);
-	pub_left_arm_cmd_.publish(left_arm_twist_cmd);
-	pub_right_arm_cmd_.publish(right_arm_twist_cmd);
-	
-	left_force_norm = left_robotiq_ft_subscriber.wrench_external_(2);
-	right_force_norm = right_robotiq_ft_subscriber.wrench_external_(2);
-	absolute_diff = std::abs(left_force_norm-right_force_norm);
-    ROS_INFO_STREAM("left_force_norm = " << left_force_norm << "  right_force_norm = " << right_force_norm << "\nabsolute_diff = " << absolute_diff);
+    dual_arm_toolbox::Transform::transformVector6dtoTwist(left_base_arm_cmd_twist_, left_arm_twist_cmd);
+    dual_arm_toolbox::Transform::transformVector6dtoTwist(right_base_arm_cmd_twist_, right_arm_twist_cmd);
+    pub_left_arm_cmd_.publish(left_arm_twist_cmd);
+    pub_right_arm_cmd_.publish(right_arm_twist_cmd);
+
+    left_force_norm = left_robotiq_ft_subscriber.wrench_external_(2);
+    right_force_norm = right_robotiq_ft_subscriber.wrench_external_(2);
+    desired_diff_ = std::abs(left_force_norm - right_force_norm);
+    ROS_INFO_STREAM("left_force_norm = " << left_force_norm << "  right_force_norm = " << right_force_norm
+                                         << "\ndesired_diff_ = " << desired_diff_);
     ros::spinOnce();
-	loop_rate.sleep();
+    loop_rate.sleep();
   }
+  left_base_arm_cmd_twist_.setZero();
+  right_base_arm_cmd_twist_.setZero();
+  dual_arm_toolbox::Transform::transformVector6dtoTwist(left_base_arm_cmd_twist_, left_arm_twist_cmd);
+  dual_arm_toolbox::Transform::transformVector6dtoTwist(right_base_arm_cmd_twist_, right_arm_twist_cmd);
+  pub_left_arm_cmd_.publish(left_arm_twist_cmd);
+  pub_right_arm_cmd_.publish(right_arm_twist_cmd);
 
-
-  //    if (!dualArmRobot.switch_controller("ur5_cartesian_velocity_controller", "vel_based_pos_traj_controller",
-  //    "left"))
-  // 	ROS_WARN("failed switching controller");
-  // 	sleep(3);
   ros::Publisher offset_desired_pub = nh.advertise<geometry_msgs::PointStamped>("/desired_offset_point", 1);
   // Publish the desired offset between two EEs, described in right EE coordinate system
   KDL::Frame desired_offset = dualArmRobot.getCurrentOffset();  // w.r.t left_ee_link coordinate system
@@ -170,10 +171,10 @@ int main(int argc, char **argv)
   ROS_INFO("========== PICK UP =================");
   // Eval
   ros::Time before_pick_7;
-  ros::Duration manipulation_7;
+  ros::Duration duration(0);
   ros::Time after_place_7;
 
-  before_pick_7 = ros::Time::now();
+  
   // Pick box7 on top
   direction.header.frame_id = "world";
   direction.vector.x = 0;
@@ -185,41 +186,118 @@ int main(int argc, char **argv)
   right_base_arm_cmd_twist_.setZero();
   world_left_arm_cmd_twist_ << 0, 0, 0.01, 0, 0, 0;
   world_right_arm_cmd_twist_ << 0, 0, 0.01, 0, 0, 0;
-  left_base_arm_cmd_twist_ = rotation_left_base_world * world_left_arm_cmd_twist_;
-  right_base_arm_cmd_twist_ = rotation_right_base_world * world_right_arm_cmd_twist_;
-
-  // left_force_norm = left_robotiq_ft_subscriber.wrench_external_.norm();
-  dual_arm_toolbox::Transform::transformVector6dtoTwist(left_base_arm_cmd_twist_, left_arm_twist_cmd);
-  dual_arm_toolbox::Transform::transformVector6dtoTwist(right_base_arm_cmd_twist_, right_arm_twist_cmd);
-
-//   right_arm_twist_cmd.linear.x = right_base_arm_cmd_twist_(0);
-//   right_arm_twist_cmd.linear.y = right_base_arm_cmd_twist_(1);
-//   right_arm_twist_cmd.linear.z = right_base_arm_cmd_twist_(2);
-//   right_arm_twist_cmd.angular.x = right_base_arm_cmd_twist_(3);
-//   right_arm_twist_cmd.angular.y = right_base_arm_cmd_twist_(4);
-//   right_arm_twist_cmd.angular.z = right_base_arm_cmd_twist_(5);
-  while (right_base_world_ready_ && manipulation_7.toNSec() < 15 && nh.ok())
+  
+ 
+  sleep(3);
+  before_pick_7 = ros::Time::now();
+  while (duration.toSec() < 10 && nh.ok())
   {
-	pub_left_arm_cmd_.publish(left_arm_twist_cmd);
-	pub_right_arm_cmd_.publish(right_arm_twist_cmd);
-	ros::spinOnce();
-	loop_rate.sleep();
-	// evaluation
-	after_place_7 = ros::Time::now();
-	manipulation_7 = after_place_7 - before_pick_7;
+    
+    double temp_diff = std::abs(left_robotiq_ft_subscriber.wrench_external_(2) - right_robotiq_ft_subscriber.wrench_external_(2));
+    if(std::abs(desired_diff_ - temp_diff)>0.5){
+        world_right_arm_cmd_twist_(1) = 0.002*(desired_diff_ - temp_diff);
+    }else {
+        world_right_arm_cmd_twist_(1) = 0 ;
+    }
+    left_base_arm_cmd_twist_ = rotation_left_base_world * world_left_arm_cmd_twist_;
+    right_base_arm_cmd_twist_ = rotation_right_base_world * world_right_arm_cmd_twist_;
+    dual_arm_toolbox::Transform::transformVector6dtoTwist(left_base_arm_cmd_twist_, left_arm_twist_cmd);
+    dual_arm_toolbox::Transform::transformVector6dtoTwist(right_base_arm_cmd_twist_, right_arm_twist_cmd);
+    pub_left_arm_cmd_.publish(left_arm_twist_cmd);
+    pub_right_arm_cmd_.publish(right_arm_twist_cmd);
+    ros::spinOnce();
+    loop_rate.sleep();
+    // evaluation
+    after_place_7 = ros::Time::now();
+    duration = after_place_7 - before_pick_7;
+    // ROS_INFO("manipulation box 7 took: %f sec", duration.toSec());
   }
   world_left_arm_cmd_twist_.setZero();
   world_right_arm_cmd_twist_.setZero();
   left_base_arm_cmd_twist_.setZero();
   right_base_arm_cmd_twist_.setZero();
-  //   if (!dualArmRobot.pickBox("box7", direction))
-  //   {
-  // 	ROS_WARN("Pick failed");
-  // 	ROS_ERROR("Can't execute demonstration without successful pick. Demonstration aborted.");
-  // 	return 0;
-  //   }
+
+  dual_arm_toolbox::Transform::transformVector6dtoTwist(left_base_arm_cmd_twist_, left_arm_twist_cmd);
+  dual_arm_toolbox::Transform::transformVector6dtoTwist(right_base_arm_cmd_twist_, right_arm_twist_cmd);
+  pub_left_arm_cmd_.publish(left_arm_twist_cmd);
+  pub_right_arm_cmd_.publish(right_arm_twist_cmd);
+  sleep(3);
+
+
+  world_left_arm_cmd_twist_ << 0, 0, -0.01, 0, 0, 0;
+  world_right_arm_cmd_twist_ << 0, 0, -0.01, 0, 0, 0;
+  
+  before_pick_7 = ros::Time::now();
+  while (duration.toSec() < 10 && nh.ok())
+  {
+    
+    double temp_diff = std::abs(left_robotiq_ft_subscriber.wrench_external_(2) - right_robotiq_ft_subscriber.wrench_external_(2));
+    if(std::abs(desired_diff_ - temp_diff)>1){
+        world_right_arm_cmd_twist_(1) = 0.001*(desired_diff_ - temp_diff);
+    }else {
+        world_right_arm_cmd_twist_(1) = 0 ;
+    }
+    left_base_arm_cmd_twist_ = rotation_left_base_world * world_left_arm_cmd_twist_;
+    right_base_arm_cmd_twist_ = rotation_right_base_world * world_right_arm_cmd_twist_;
+    dual_arm_toolbox::Transform::transformVector6dtoTwist(left_base_arm_cmd_twist_, left_arm_twist_cmd);
+    dual_arm_toolbox::Transform::transformVector6dtoTwist(right_base_arm_cmd_twist_, right_arm_twist_cmd);
+    pub_left_arm_cmd_.publish(left_arm_twist_cmd);
+    pub_right_arm_cmd_.publish(right_arm_twist_cmd);
+    ros::spinOnce();
+    loop_rate.sleep();
+    // evaluation
+    after_place_7 = ros::Time::now();
+    duration = after_place_7 - before_pick_7;
+    // ROS_INFO("manipulation box 7 took: %f sec", duration.toSec());
+  }
+  world_left_arm_cmd_twist_.setZero();
+  world_right_arm_cmd_twist_.setZero();
+  left_base_arm_cmd_twist_.setZero();
+  right_base_arm_cmd_twist_.setZero();
+
+  dual_arm_toolbox::Transform::transformVector6dtoTwist(left_base_arm_cmd_twist_, left_arm_twist_cmd);
+  dual_arm_toolbox::Transform::transformVector6dtoTwist(right_base_arm_cmd_twist_, right_arm_twist_cmd);
+  pub_left_arm_cmd_.publish(left_arm_twist_cmd);
+  pub_right_arm_cmd_.publish(right_arm_twist_cmd);
+  sleep(3);
+//   world_left_arm_cmd_twist_ << 0, 0, 0, 0.01, 0, 0;
+//   world_right_arm_cmd_twist_ << 0, 0, 0, 0.01, 0, 0;
+//   left_base_arm_cmd_twist_ = rotation_left_base_world * world_left_arm_cmd_twist_;
+//   right_base_arm_cmd_twist_ = rotation_right_base_world * world_right_arm_cmd_twist_;
+
+//   // left_force_norm = left_robotiq_ft_subscriber.wrench_external_.norm();
+//   dual_arm_toolbox::Transform::transformVector6dtoTwist(left_base_arm_cmd_twist_, left_arm_twist_cmd);
+//   dual_arm_toolbox::Transform::transformVector6dtoTwist(right_base_arm_cmd_twist_, right_arm_twist_cmd);
+//   duration = ros::Duration(0);
+//   before_pick_7 = ros::Time::now();
+//   while (duration.toSec() < 10 && nh.ok())
+//   {
+//     pub_left_arm_cmd_.publish(left_arm_twist_cmd);
+//     pub_right_arm_cmd_.publish(right_arm_twist_cmd);
+//     ros::spinOnce();
+//     loop_rate.sleep();
+//     // evaluation
+//     after_place_7 = ros::Time::now();
+//     duration = after_place_7 - before_pick_7;
+//     // ROS_INFO("manipulation box 7 took: %f sec", duration.toSec());
+//   }
+//   world_left_arm_cmd_twist_.setZero();
+//   world_right_arm_cmd_twist_.setZero();
+//   left_base_arm_cmd_twist_.setZero();
+//   right_base_arm_cmd_twist_.setZero();
+//   dual_arm_toolbox::Transform::transformVector6dtoTwist(left_base_arm_cmd_twist_, left_arm_twist_cmd);
+//   dual_arm_toolbox::Transform::transformVector6dtoTwist(right_base_arm_cmd_twist_, right_arm_twist_cmd);
+//   pub_left_arm_cmd_.publish(left_arm_twist_cmd);
+//   pub_right_arm_cmd_.publish(right_arm_twist_cmd);
+  // if (!dualArmRobot.pickBox("box7", direction))
+  // {
+  // ROS_WARN("Pick failed");
+  // ROS_ERROR("Can't execute demonstration without successful pick. Demonstration aborted.");
+  // return 0;
+  // }
 
   // box7 goal pose
+  /*
   geometry_msgs::PoseStamped box7_goal_pose_stamped;
   box7_goal_pose_stamped.header = dualArmRobot.left_current_pose_.header;
 
@@ -229,7 +307,7 @@ int main(int argc, char **argv)
   dual_arm_toolbox::Transform::transformPoseToKDL(dualArmRobot.left_current_pose_.pose, left_frame_eef);
   KDL::Rotation left_rot = left_frame_eef.M;
   // KDL::Rotation rotationAgnle = KDL::Rotation::Identity();
-  double yaw = 0;	// Z-axis
+  double yaw = 0;    // Z-axis
   double pitch = 0;  // Y-axis
   double roll = 0;   // X-axis
   double angle = 0;
@@ -241,7 +319,7 @@ int main(int argc, char **argv)
 
   left_rot.GetEulerZYX(yaw, pitch, roll);
   left_rot.GetQuaternion(box7_goal_pose_stamped.pose.orientation.x, box7_goal_pose_stamped.pose.orientation.y,
-						 box7_goal_pose_stamped.pose.orientation.z, box7_goal_pose_stamped.pose.orientation.w);
+                         box7_goal_pose_stamped.pose.orientation.z, box7_goal_pose_stamped.pose.orientation.w);
   ROS_INFO("After roll = %f\tpitch = %f\t yaw = %f", roll, pitch, yaw);
   dualArmRobot.moveObject("box7", box7_goal_pose_stamped, 0.1);
   sleep(5);
@@ -252,7 +330,7 @@ int main(int argc, char **argv)
   ROS_INFO("After roll = %f\tpitch = %f\t yaw = %f", roll, pitch, yaw);
 
   left_rot.GetQuaternion(box7_goal_pose_stamped.pose.orientation.x, box7_goal_pose_stamped.pose.orientation.y,
-						 box7_goal_pose_stamped.pose.orientation.z, box7_goal_pose_stamped.pose.orientation.w);
+                         box7_goal_pose_stamped.pose.orientation.z, box7_goal_pose_stamped.pose.orientation.w);
   dualArmRobot.moveObject("box7", box7_goal_pose_stamped, 0.1);
   sleep(1);
 
@@ -322,16 +400,16 @@ int main(int argc, char **argv)
   go_down.z = -0.15;
   if (!dualArmRobot.placeBox("box7", box7_goal_pose_stamped, go_down))
   {
-	ROS_WARN("Place Box failed");
-	ROS_ERROR("Demonstration aborted to avoid further problems");
-	return 0;
+    ROS_WARN("Place Box failed");
+    ROS_ERROR("Demonstration aborted to avoid further problems");
+    return 0;
   }
 
   // evaluation
   after_place_7 = ros::Time::now();
-  manipulation_7 = after_place_7 - before_pick_7;
+  duration = after_place_7 - before_pick_7;
   ROS_INFO(":::::: VALUES EVALUATION ::::::");
-  ROS_INFO("manipulation box 7 took: %li nsec", manipulation_7.toNSec());
+  ROS_INFO("manipulation box 7 took: %li nsec", duration.toSec());
   sleep(5);
 
   dualArmRobot.moveHome();
@@ -343,66 +421,70 @@ int main(int argc, char **argv)
 
   before_pick_3 = ros::Time::now();
   /*
-	// Pick box3 on bottom
-	geometry_msgs::Vector3Stamped direction2;
-	direction2.header.frame_id = "world";
-	direction2.vector.x = 0.20;
-	direction2.vector.y = 0.20;
-	direction2.vector.z = 0.02;
-	if (!dualArmRobot.pickBox("box3", direction2)) {
-		ROS_WARN("Pick failed");
-		ROS_ERROR("Can't execute demonstration without successful pick. Demonstration aborted.");
-		return 0;
-	}
+    // Pick box3 on bottom
+    geometry_msgs::Vector3Stamped direction2;
+    direction2.header.frame_id = "world";
+    direction2.vector.x = 0.20;
+    direction2.vector.y = 0.20;
+    direction2.vector.z = 0.02;
+    if (!dualArmRobot.pickBox("box3", direction2)) {
+        ROS_WARN("Pick failed");
+        ROS_ERROR("Can't execute demonstration without successful pick. Demonstration aborted.");
+        return 0;
+    }
 
-	// Place box3 by pushing it to its goal position
-	// first, determine box3 goal pose
-	geometry_msgs::Pose box3_goal_pose;
-	box3_goal_pose.position.x = 0.04 + sceneManager.box_.dimensions[1]/2 +0.001; //+ sceneManager.box_.dimensions[1]
-	box3_goal_pose.position.y = 0.04 + sceneManager.box_.dimensions[2]/2 + sceneManager.box_.dimensions[2]+0.001;
-	box3_goal_pose.position.z = 0.0155+0.52/2+0.0155/2+sceneManager.box_.dimensions[0]/2+0.005;
-	KDL::Rotation box3_goal_rot;
-	box3_goal_rot.DoRotY(-3.14/2);
-	box3_goal_rot.GetQuaternion(box3_goal_pose.orientation.x, box3_goal_pose.orientation.y,
-	box3_goal_pose.orientation.z,
-	box3_goal_pose.orientation.w);
-	geometry_msgs::PoseStamped box3_goal_pose_stamped;
-	box3_goal_pose_stamped.header.frame_id = "shelf";
-	box3_goal_pose_stamped.pose=box3_goal_pose;
+    // Place box3 by pushing it to its goal position
+    // first, determine box3 goal pose
+    geometry_msgs::Pose box3_goal_pose;
+    box3_goal_pose.position.x = 0.04 + sceneManager.box_.dimensions[1]/2 +0.001; //+ sceneManager.box_.dimensions[1]
+    box3_goal_pose.position.y = 0.04 + sceneManager.box_.dimensions[2]/2 + sceneManager.box_.dimensions[2]+0.001;
+    box3_goal_pose.position.z = 0.0155+0.52/2+0.0155/2+sceneManager.box_.dimensions[0]/2+0.005;
+    KDL::Rotation box3_goal_rot;
+    box3_goal_rot.DoRotY(-3.14/2);
+    box3_goal_rot.GetQuaternion(box3_goal_pose.orientation.x, box3_goal_pose.orientation.y,
+    box3_goal_pose.orientation.z,
+    box3_goal_pose.orientation.w);
+    geometry_msgs::PoseStamped box3_goal_pose_stamped;
+    box3_goal_pose_stamped.header.frame_id = "shelf";
+    box3_goal_pose_stamped.pose=box3_goal_pose;
 
-	// second, determine direction for pushing box into goal position
-	geometry_msgs::Vector3 direction_push;
-	direction_push.x = 0.0;
-	direction_push.y = - (sceneManager.box_.dimensions[2]+0.005);// + 0.04);
-	direction_push.z = 0.0;
+    // second, determine direction for pushing box into goal position
+    geometry_msgs::Vector3 direction_push;
+    direction_push.x = 0.0;
+    direction_push.y = - (sceneManager.box_.dimensions[2]+0.005);// + 0.04);
+    direction_push.z = 0.0;
 
-	// setup constraints
-	dualArmRobot.left_.clearPathConstraints();
+    // setup constraints
+    dualArmRobot.left_.clearPathConstraints();
 
-	// pre-goal position
-	ROS_INFO("moving closer to target position");
-	geometry_msgs::PoseStamped left_pre_pose = dualArmRobot.left_current_pose_;
-	left_pre_pose.pose.position.z += 0.2;
-	if (!dualArmRobot.moveObject("box3", left_pre_pose, 0.5)){
-		ROS_ERROR("Failed to move box3. Demonstration aborted.");
-		return false;
-	}
+    // pre-goal position
+    ROS_INFO("moving closer to target position");
+    geometry_msgs::PoseStamped left_pre_pose = dualArmRobot.left_current_pose_;
+    left_pre_pose.pose.position.z += 0.2;
+    if (!dualArmRobot.moveObject("box3", left_pre_pose, 0.5)){
+        ROS_ERROR("Failed to move box3. Demonstration aborted.");
+        return false;
+    }
 
-	// start Push Place sequence
-	if (!dualArmRobot.pushPlaceBox("box3", box3_goal_pose_stamped, direction_push)){
-		ROS_WARN("Push Place Box failed");
-		ROS_ERROR("Demonstration aborted to avoid further problems");
-		return  0;
-	}
+    // start Push Place sequence
+    if (!dualArmRobot.pushPlaceBox("box3", box3_goal_pose_stamped, direction_push)){
+        ROS_WARN("Push Place Box failed");
+        ROS_ERROR("Demonstration aborted to avoid further problems");
+        return  0;
+    }
 
-	// evaluation
-	after_place_3 = ros::Time::now();
-	manipulation_3 = after_place_3 - before_pick_3;
-	ROS_INFO(":::::: VALUES EVALUATION ::::::");
-	ROS_INFO("manipulation box 3 took: %li nsec", manipulation_3.toNSec());
-	sleep(5);
-	*/
-
+    // evaluation
+    after_place_3 = ros::Time::now();
+    manipulation_3 = after_place_3 - before_pick_3;
+    ROS_INFO(":::::: VALUES EVALUATION ::::::");
+    ROS_INFO("manipulation box 3 took: %li nsec", manipulation_3.toSec());
+    sleep(5);
+    */
+  if (!dualArmRobot.switch_controller("ur5_cartesian_velocity_controller", "vel_based_pos_traj_controller", "left"))
+    ROS_WARN("failed switching controller");
+  if (!dualArmRobot.switch_controller("ur5_cartesian_velocity_controller", "vel_based_pos_traj_controller", "right"))
+    ROS_WARN("failed switching controller");
+  sleep(3);
   // move robot back into home pose
   dualArmRobot.right_.clearPathConstraints();
   dualArmRobot.left_.clearPathConstraints();
