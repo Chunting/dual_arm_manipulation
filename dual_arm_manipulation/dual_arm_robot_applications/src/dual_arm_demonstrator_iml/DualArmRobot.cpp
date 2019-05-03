@@ -338,7 +338,7 @@ bool DualArmRobot::switch_controller(std::string stop_name, std::string start_na
     // stop
     switchController.request.stop_controllers.push_back(stop_name);
     bool success_stop = srv_switch_controller.call(switchController);
-    ROS_INFO("Stopping controller %s", success_stop ? "SUCCEDED" : "FAILED");
+    ROS_INFO("Stopping controller %s %s", stop_name.c_str(), success_stop ? "SUCCEDED" : "FAILED");
     if (!success_stop)
         return false;
 
@@ -348,7 +348,7 @@ bool DualArmRobot::switch_controller(std::string stop_name, std::string start_na
     switchController.request.BEST_EFFORT;
     switchController.request.start_controllers.push_back(start_name);
     bool success_start = srv_switch_controller.call(switchController);
-    ROS_INFO("Starting controller %s", success_start ? "SUCCEDED" : "FAILED");
+    ROS_INFO("Starting controller %s %s", start_name.c_str(), success_start ? "SUCCEDED" : "FAILED");
     switchController.request.start_controllers.clear();
 
     // Switch controller in moveit-interface

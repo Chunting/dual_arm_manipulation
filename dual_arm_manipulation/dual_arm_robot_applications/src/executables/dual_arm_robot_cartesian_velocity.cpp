@@ -53,15 +53,16 @@ int main(int argc, char **argv)
   moveit::planning_interface::MoveGroupInterface::Plan right_plan;
   moveit::planning_interface::MoveItErrorCode error;
   error.val = -1;
-
+  // Force torque sensor setup
   FTSensorSubscriber left_robotiq_ft_subscriber(nh, ur_namespaces[0]);
   FTSensorSubscriber right_robotiq_ft_subscriber(nh, ur_namespaces[1]);
+
 
   geometry_msgs::Vector3Stamped direction;
   direction.header.frame_id = "world";
   dualArmRobot.setConstraints();
   dualArmRobot.kinematic_state->enforceBounds();
-
+  // Cartesian velocity controller command topic
   std::string topic_left_arm_cmd("/left/ur5_cartesian_velocity_controller/command_cart_vel");
   ros::Publisher pub_left_arm_cmd_ = nh.advertise<geometry_msgs::Twist>(topic_left_arm_cmd, 5);
   std::string topic_right_arm_cmd("/right/ur5_cartesian_velocity_controller/command_cart_vel");
@@ -97,12 +98,12 @@ int main(int argc, char **argv)
 
   // dualArmRobot.graspMove(0.01, false, true, false);
   if (!dualArmRobot.switch_controller("vel_based_pos_traj_controller", "ur5_cartesian_velocity_controller", "left"))
-	ROS_WARN("failed switching left controller");
+	ROS_WARN("Failed switching left controller");
   if (!dualArmRobot.switch_controller("vel_based_pos_traj_controller", "ur5_cartesian_velocity_controller", "right"))
-	ROS_WARN("failed switching right controller");
+	ROS_WARN("Failed switching right controller");
 	sleep(3);
-  double left_force_norm = left_robotiq_ft_subscriber.wrench_external_.norm();
-  double right_force_norm = right_robotiq_ft_subscriber.wrench_external_.norm();
+  double left_force_norm = left_robotiq_ft_subscriber.wrench_external_(2);
+  double right_force_norm = right_robotiq_ft_subscriber.wrench_external_(2);
   double absolute_diff = std::abs(left_force_norm-right_force_norm);
 
   //   while (left_force_norm < 15)
@@ -132,20 +133,23 @@ int main(int argc, char **argv)
   right_base_arm_cmd_twist_.setZero();
   world_left_arm_cmd_twist_ << 0, 0.001, 0, 0, 0, 0;
   world_right_arm_cmd_twist_ << 0, -0.001, 0, 0, 0, 0;
-  while ( left_force_norm < 10 || absolute_diff >1 )
+  sleep(3);
+  while ( std::abs(left_force_norm) < 20 || absolute_diff >2 )
   {
 	left_base_arm_cmd_twist_ = rotation_left_base_world * world_left_arm_cmd_twist_;
-	right_base_arm_cmd_twist_ = rotation_right_base_world * world_left_arm_cmd_twist_;
+	right_base_arm_cmd_twist_ = rotation_right_base_world * world_right_arm_cmd_twist_;
 
 	dual_arm_toolbox::Transform::transformVector6dtoTwist(left_base_arm_cmd_twist_, left_arm_twist_cmd);
 	dual_arm_toolbox::Transform::transformVector6dtoTwist(right_base_arm_cmd_twist_, right_arm_twist_cmd);
 	pub_left_arm_cmd_.publish(left_arm_twist_cmd);
 	pub_right_arm_cmd_.publish(right_arm_twist_cmd);
-	ros::spinOnce();
-	loop_rate.sleep();
-	left_force_norm = left_robotiq_ft_subscriber.wrench_external_.norm();
-	right_force_norm = right_robotiq_ft_subscriber.wrench_external_.norm();
+	
+	left_force_norm = left_robotiq_ft_subscriber.wrench_external_(2);
+	right_force_norm = right_robotiq_ft_subscriber.wrench_external_(2);
 	absolute_diff = std::abs(left_force_norm-right_force_norm);
+    ROS_INFO_STREAM("left_force_norm = " << left_force_norm << "  right_force_norm = " << right_force_norm << "\nabsolute_diff = " << absolute_diff);
+    ros::spinOnce();
+	loop_rate.sleep();
   }
 
 

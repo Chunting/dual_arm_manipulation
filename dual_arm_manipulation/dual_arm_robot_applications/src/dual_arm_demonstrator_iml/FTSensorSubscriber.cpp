@@ -49,7 +49,7 @@ void FTSensorSubscriber::wrenchCallback(const geometry_msgs::WrenchStamped::Ptr 
   // ROS_INFO_STREAM("After dead zone wrench_ft_frame: \n" << wrench_ft_frame);
   // Filter and update
   wrench_external_ =
-      (1 - wrench_filter_factor_) * wrench_external_ + wrench_filter_factor_ * rotation_world_sensor_ * wrench_ft_frame;
+      (1 - wrench_filter_factor_) * wrench_external_ + wrench_filter_factor_ *  wrench_ft_frame;
   last_wrench_msg_.header = msg->header;
   last_wrench_msg_.wrench.force.x = wrench_external_(0);
   last_wrench_msg_.wrench.force.y = wrench_external_(1);

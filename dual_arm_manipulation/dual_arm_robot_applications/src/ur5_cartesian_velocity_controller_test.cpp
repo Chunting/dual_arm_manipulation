@@ -131,7 +131,7 @@ int main(int argc, char **argv)
 	Matrix6d rotation_right_base_world;
 	Vector6d world_right_arm_cmd_twist_;
 	Vector6d right_base_arm_cmd_twist_;
-	world_right_arm_cmd_twist_ << 0, 0.01, 0, 0, 0, 0;
+	world_right_arm_cmd_twist_ << 0, -0.01, 0, 0, 0, 0;
 	while (!get_rotation_matrix(rotation_right_base_world, listener_arm_,"right_base_link", "world" ))
 	{
 		sleep(1);
@@ -146,7 +146,7 @@ int main(int argc, char **argv)
 	Vector6d world_left_arm_cmd_twist_;
 	Matrix6d rotation_left_base_world;
 	Vector6d left_base_arm_cmd_twist_;
-	world_left_arm_cmd_twist_ << 0, 0.01, 0, 0, 0, 0;
+	world_left_arm_cmd_twist_ << 0, -0.01, 0, 0, 0, 0;
 	while (!get_rotation_matrix(rotation_left_base_world, listener_arm_,"left_base_link", "world" ))
 	{
 		sleep(1);
