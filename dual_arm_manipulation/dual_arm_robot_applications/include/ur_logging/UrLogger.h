@@ -28,6 +28,7 @@ public:
     char delimiter_;
 
     void generate_logfile_name();       //automatically generate a name
+    std::string generate_logfolder();
     void start(int log_rate = 100);     //log_rate=[Hz]
     void stop();
     std::string headline(UR_Message_Listener &ur_listener);	//return a headline

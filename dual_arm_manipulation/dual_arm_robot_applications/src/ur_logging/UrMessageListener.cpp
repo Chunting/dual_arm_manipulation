@@ -2,8 +2,9 @@
 
 // UR_Message_Listener::UR_Message_Listener(ros::NodeHandle& nh, std::string ur_namespace) : nh_(nh),
 // ur_namespace_(ur_namespace){
-UR_Message_Listener::UR_Message_Listener(ros::NodeHandle &nh, std::string ur_namespace, double frequency)
-  : nh_(nh), ur_namespace_(ur_namespace), loop_rate_(frequency)
+UR_Message_Listener::UR_Message_Listener(ros::NodeHandle &nh, std::string ur_namespace, std::string folder_name,
+                                         double frequency)
+  : nh_(nh), ur_namespace_(ur_namespace), folder_name_(folder_name), loop_rate_(frequency)
 {
   if (ur_namespace_.size() > 0)
   {
@@ -25,18 +26,19 @@ UR_Message_Listener::UR_Message_Listener(ros::NodeHandle &nh, std::string ur_nam
   sub_joint_cmd_ = nh_.subscribe(topic_joint_cmd_, 100, &UR_Message_Listener::joint_cmd_callback, this);
 
   ROS_INFO_STREAM("The recorder node is created at: " << nh_.getNamespace() << " with freq: " << frequency
-                                                      << "Hz prefix: " << ur_namespace_);
+                                                      << " Hz prefix: " << ur_namespace_);
   generate_logfile();
 
-      // Measured joint variables
-      // state_sub_ = nh_.subscribe("/joint_states", 1, &UR_Message_Listener::joint_state_Callback, this);
-      // It takes a long time to get message from this topic, about 0.5s
+  // Measured joint variables
+  // state_sub_ = nh_.subscribe("/joint_states", 1, &UR_Message_Listener::joint_state_Callback, this);
+  // It takes a long time to get message from this topic, about 0.5s
 
-      pose_sub_ = nh_.subscribe<geometry_msgs::PoseStamped>(ur_namespace_ + "/pose", 10,
-                                                            &UR_Message_Listener::m_tcp_pose_Callback, this);
+  pose_sub_ = nh_.subscribe<geometry_msgs::PoseStamped>(ur_namespace_ + "/pose", 10,
+                                                        &UR_Message_Listener::m_tcp_pose_Callback, this);
 
-//   sub_wrench_external_ = nh_.subscribe<geometry_msgs::WrenchStamped>(ur_namespace_ + "/robotiq_ft_wrench", 1,
-//                                                                      &UR_Message_Listener::FT_wrench_Callback, this);
+  //   sub_wrench_external_ = nh_.subscribe<geometry_msgs::WrenchStamped>(ur_namespace_ + "/robotiq_ft_wrench", 1,
+  //                                                                      &UR_Message_Listener::FT_wrench_Callback,
+  //                                                                      this);
   // Measured tcp velocity
   m_tcp_speed_sub_ = nh_.subscribe<geometry_msgs::TwistStamped>(ur_namespace + "/m_tool_velocity", 10,
                                                                 &UR_Message_Listener::m_tcp_speedCallback, this);
@@ -225,18 +227,18 @@ void UR_Message_Listener::generate_logfile()
 {  // automatically generate a name
 
   // Creating a recording directory
-  std::string recPath_ = "/home/chunting/catkin_ws/src/dual_arm_manipulation/dataLog/";
-  time_t rawtime;
-  struct tm *timeinfo;
-  char buffer[20];
+  //   std::string recPath_ = "/home/chunting/catkin_ws/src/dual_arm_manipulation/dataLog/";
+  //   time_t rawtime;
+  //   struct tm *timeinfo;
+  //   char buffer[20];
 
-  time(&rawtime);
-  timeinfo = localtime(&rawtime);
+  //   time(&rawtime);
+  //   timeinfo = localtime(&rawtime);
 
-  strftime(buffer, 80, "%Y_%m_%d_%H_%M_%S", timeinfo);
-  recPath_ = recPath_ + std::string(buffer) + '/';
-  const int dir_err = mkdir(recPath_.c_str(), 0777);
-  std::string logfile_path = recPath_ + ur_namespace_;
+  //   strftime(buffer, 80, "%Y_%m_%d_%H_%M", timeinfo);
+  //   recPath_ = recPath_ + std::string(buffer) + '/';
+  //   const int dir_err = mkdir(recPath_.c_str(), 0777);
+  std::string logfile_path = folder_name_ + ur_namespace_;
   std::string logfile_name_ = logfile_path + "_cartesian_state.csv";
   file_cartesian_state_.open(logfile_name_.c_str(), std::ofstream::out | std::ofstream::trunc);
   if (!file_cartesian_state_.is_open())

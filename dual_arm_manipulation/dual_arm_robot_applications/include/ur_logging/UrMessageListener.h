@@ -51,7 +51,7 @@ protected:
   ros::Subscriber offset_sub_;
 
 public:
-  UR_Message_Listener(ros::NodeHandle &nh, std::string ur_namespace, double frequency=100);
+  UR_Message_Listener(ros::NodeHandle &nh, std::string ur_namespace, std::string folder_name, double frequency=100);
 
   std::string ur_namespace_;
  
@@ -96,6 +96,7 @@ private:
 
   ros::Rate loop_rate_;
   char delimiter_;
+  std::string folder_name_;
 
 
   void cartesian_state_callback(const cartesian_state_msgs::PoseTwistConstPtr msg);
