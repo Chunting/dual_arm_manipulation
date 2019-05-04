@@ -54,7 +54,8 @@ public:
 	strftime(buffer, 80, "%Y-%m-%d-%H-%M-%S", timeinfo);
 	recPath_ = recPath_ + std::string(buffer) + '/';
 	const int dir_err = mkdir(recPath_.c_str(), 0777);
-	sub_ee_state_ = nh_.subscribe("/left/ur5_cartesian_velocity_controller/ee_state", 10, &DemoRecorder::state_arm_callback, this);
+	sub_ee_state_ =
+		nh_.subscribe("/left/ur5_cartesian_velocity_controller/ee_state", 10, &DemoRecorder::state_arm_callback, this);
 
 	std::string recPathFile_demo_positions = recPath_ + prefix_ + "_ee_position.csv";
 	ROS_INFO_STREAM("recPathfile_demo : " << recPathFile_demo_positions);
@@ -64,9 +65,9 @@ public:
 	  ROS_ERROR("Failed to open %s", recPathFile_demo_positions.c_str());
 	}
 
-	file_demo_ee_pose_ << "Time" << delimiter_ << "x" << delimiter_ << "y" << delimiter_ << "z" << delimiter_
-						   << "vx" << delimiter_ << "vy" << delimiter_ << "vz"
-						   << "\n";
+	file_demo_ee_pose_ << "Time" << delimiter_ << "x" << delimiter_ << "y" << delimiter_ << "z" << delimiter_ << "vx"
+					   << delimiter_ << "vy" << delimiter_ << "vz"
+					   << "\n";
 
 	std::string recPathFile_demo_orientation = recPath_ + prefix_ + "_ee_orientation.csv";
 	file_demo_ee_velocity_.open(recPathFile_demo_orientation);
@@ -76,8 +77,6 @@ public:
 	}
 
 	file_demo_ee_velocity_ << "Time \t x \t y \t z \t w \t rx \t ry \t rz \n";
-
-	
   }
 
   void Run()
@@ -91,15 +90,13 @@ public:
 
   void state_arm_callback(const cartesian_state_msgs::PoseTwistConstPtr msg)
   {
-	file_demo_ee_pose_ << ros::Time::now() << delimiter_ << msg->pose.position.x << delimiter_
-						   << msg->pose.position.y << delimiter_ << msg->pose.position.z << delimiter_
-						   << msg->pose.orientation.x << delimiter_ << msg->pose.orientation.y << delimiter_ 
-						   << msg->pose.orientation.z << delimiter_ << msg->pose.orientation.w << "\n";
+	file_demo_ee_pose_ << ros::Time::now() << delimiter_ << msg->pose.position.x << delimiter_ << msg->pose.position.y
+					   << delimiter_ << msg->pose.position.z << delimiter_ << msg->pose.orientation.x << delimiter_
+					   << msg->pose.orientation.y << delimiter_ << msg->pose.orientation.z << delimiter_
+					   << msg->pose.orientation.w << "\n";
 
-						 
-
-	file_demo_ee_velocity_ << ros::Time::now() << delimiter_  << msg->twist.linear.x << delimiter_ << msg->twist.linear.y << delimiter_
-						   << msg->twist.linear.z << delimiter_ << msg->twist.angular.x << delimiter_
+	file_demo_ee_velocity_ << ros::Time::now() << delimiter_ << msg->twist.linear.x << delimiter_ << msg->twist.linear.y
+						   << delimiter_ << msg->twist.linear.z << delimiter_ << msg->twist.angular.x << delimiter_
 						   << msg->twist.angular.y << delimiter_ << msg->twist.angular.z << "\n";
   }
 };
