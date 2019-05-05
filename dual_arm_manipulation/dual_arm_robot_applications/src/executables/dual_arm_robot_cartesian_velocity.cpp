@@ -70,6 +70,11 @@ int main(int argc, char **argv)
   ros::Rate loop_rate(100);
   Matrix6d rotation_left_base_world;
   Matrix6d rotation_right_base_world;
+  Matrix6d rotation_world_left_ee;
+  Matrix6d rotation_world_right_ee;
+
+  rotation_world_left_ee.setZero();
+  rotation_world_right_ee.setZero();
   bool left_base_world_ready_ = false;
   bool right_base_world_ready_ = false;
   tf::TransformListener listener_arm_;
@@ -105,20 +110,6 @@ int main(int argc, char **argv)
   double right_force_norm = right_robotiq_ft_subscriber.wrench_external_(2);
   double desired_diff_ = std::abs(left_force_norm - right_force_norm);
 
-  //   while (left_force_norm < 15)
-  //   {
-  // 	dualArmRobot.graspMove(0.001, false, true, false);  // true : left arm; false: right arm
-  // 	left_force_norm = sqrt(left_robotiq_ft_subscriber.last_wrench_msg_.wrench.force.x *
-  // 							   left_robotiq_ft_subscriber.last_wrench_msg_.wrench.force.x +
-  // 						   left_robotiq_ft_subscriber.last_wrench_msg_.wrench.force.y *
-  // 							   left_robotiq_ft_subscriber.last_wrench_msg_.wrench.force.y +
-  // 						   left_robotiq_ft_subscriber.last_wrench_msg_.wrench.force.z *
-  // 							   left_robotiq_ft_subscriber.last_wrench_msg_.wrench.force.z);
-  // 	ROS_INFO("I heard: Force [%f]  FX[%f] FY[%f] FZ[%f]", left_force_norm,
-  // 			 left_robotiq_ft_subscriber.last_wrench_msg_.wrench.force.x,
-  // 			 left_robotiq_ft_subscriber.last_wrench_msg_.wrench.force.y,
-  // 			 left_robotiq_ft_subscriber.last_wrench_msg_.wrench.force.z);
-  //   }
   /* Adjust left arm pose */
   geometry_msgs::Twist left_arm_twist_cmd;
   geometry_msgs::Twist right_arm_twist_cmd;
@@ -158,6 +149,8 @@ int main(int argc, char **argv)
   pub_left_arm_cmd_.publish(left_arm_twist_cmd);
   pub_right_arm_cmd_.publish(right_arm_twist_cmd);
 
+
+  
   ros::Publisher offset_desired_pub = nh.advertise<geometry_msgs::PointStamped>("/desired_offset_point", 1);
   // Publish the desired offset between two EEs, described in right EE coordinate system
   KDL::Frame desired_offset = dualArmRobot.getCurrentOffset();  // w.r.t left_ee_link coordinate system
@@ -223,10 +216,59 @@ int main(int argc, char **argv)
   pub_right_arm_cmd_.publish(right_arm_twist_cmd);
   sleep(3);
 
+  if (!dualArmRobot.switch_controller("ur5_cartesian_velocity_controller", "vel_based_pos_traj_controller", "left"))
+    ROS_WARN("failed switching controller");
+  if (!dualArmRobot.switch_controller("ur5_cartesian_velocity_controller", "vel_based_pos_traj_controller", "right"))
+    ROS_WARN("failed switching controller");
 
+  geometry_msgs::PoseStamped box7_goal_pose_stamped;
+  box7_goal_pose_stamped.header = dualArmRobot.left_current_pose_.header;
+
+  dualArmRobot.left_current_pose_ = dualArmRobot.left_.getCurrentPose(dualArmRobot.left_.getEndEffectorLink());
+  box7_goal_pose_stamped.pose = dualArmRobot.left_current_pose_.pose;
+  KDL::Frame left_frame_eef;  // endeffector frame
+  dual_arm_toolbox::Transform::transformPoseToKDL(dualArmRobot.left_current_pose_.pose, left_frame_eef);
+  KDL::Rotation left_rot = left_frame_eef.M;
+  // KDL::Rotation rotationAgnle = KDL::Rotation::Identity();
+  double yaw = 0;    // Z-axis
+  double pitch = 0;  // Y-axis
+  double roll = 0;   // X-axis
+  double angle = 0;
+  left_rot.GetEulerZYX(yaw, pitch, roll);
+  ROS_INFO("Before roll = %f\tpitch = %f\t yaw = %f", roll, pitch, yaw);
+  angle = 3.14 / 12;
+  pitch += angle;
+  left_rot = KDL::Rotation::RPY(roll, pitch, yaw);
+
+  left_rot.GetEulerZYX(yaw, pitch, roll);
+  left_rot.GetQuaternion(box7_goal_pose_stamped.pose.orientation.x, box7_goal_pose_stamped.pose.orientation.y,
+                         box7_goal_pose_stamped.pose.orientation.z, box7_goal_pose_stamped.pose.orientation.w);
+  ROS_INFO("After roll = %f\tpitch = %f\t yaw = %f", roll, pitch, yaw);
+  dualArmRobot.moveObject("box7", box7_goal_pose_stamped, 0.1);
+  sleep(5);
+
+  pitch -= angle;
+  left_rot = KDL::Rotation::RPY(roll, pitch, yaw);
+  left_rot.GetEulerZYX(yaw, pitch, roll);
+  ROS_INFO("After roll = %f\tpitch = %f\t yaw = %f", roll, pitch, yaw);
+
+  left_rot.GetQuaternion(box7_goal_pose_stamped.pose.orientation.x, box7_goal_pose_stamped.pose.orientation.y,
+                         box7_goal_pose_stamped.pose.orientation.z, box7_goal_pose_stamped.pose.orientation.w);
+  dualArmRobot.moveObject("box7", box7_goal_pose_stamped, 0.1);
+  sleep(1);
+
+
+
+  // dualArmRobot.graspMove(0.01, false, true, false);
+  if (!dualArmRobot.switch_controller("vel_based_pos_traj_controller", "ur5_cartesian_velocity_controller", "left"))
+    ROS_WARN("Failed switching left controller");
+  if (!dualArmRobot.switch_controller("vel_based_pos_traj_controller", "ur5_cartesian_velocity_controller", "right"))
+    ROS_WARN("Failed switching right controller");
+
+  ROS_INFO("========== PLACE DOWN =================");
   world_left_arm_cmd_twist_ << 0, 0, -0.01, 0, 0, 0;
   world_right_arm_cmd_twist_ << 0, 0, -0.01, 0, 0, 0;
-  
+  duration = ros::Duration(0);
   before_pick_7 = ros::Time::now();
   while (duration.toSec() < 10 && nh.ok())
   {
@@ -260,35 +302,8 @@ int main(int argc, char **argv)
   pub_left_arm_cmd_.publish(left_arm_twist_cmd);
   pub_right_arm_cmd_.publish(right_arm_twist_cmd);
   sleep(3);
-//   world_left_arm_cmd_twist_ << 0, 0, 0, 0.01, 0, 0;
-//   world_right_arm_cmd_twist_ << 0, 0, 0, 0.01, 0, 0;
-//   left_base_arm_cmd_twist_ = rotation_left_base_world * world_left_arm_cmd_twist_;
-//   right_base_arm_cmd_twist_ = rotation_right_base_world * world_right_arm_cmd_twist_;
 
-//   // left_force_norm = left_robotiq_ft_subscriber.wrench_external_.norm();
-//   dual_arm_toolbox::Transform::transformVector6dtoTwist(left_base_arm_cmd_twist_, left_arm_twist_cmd);
-//   dual_arm_toolbox::Transform::transformVector6dtoTwist(right_base_arm_cmd_twist_, right_arm_twist_cmd);
-//   duration = ros::Duration(0);
-//   before_pick_7 = ros::Time::now();
-//   while (duration.toSec() < 10 && nh.ok())
-//   {
-//     pub_left_arm_cmd_.publish(left_arm_twist_cmd);
-//     pub_right_arm_cmd_.publish(right_arm_twist_cmd);
-//     ros::spinOnce();
-//     loop_rate.sleep();
-//     // evaluation
-//     after_place_7 = ros::Time::now();
-//     duration = after_place_7 - before_pick_7;
-//     // ROS_INFO("manipulation box 7 took: %f sec", duration.toSec());
-//   }
-//   world_left_arm_cmd_twist_.setZero();
-//   world_right_arm_cmd_twist_.setZero();
-//   left_base_arm_cmd_twist_.setZero();
-//   right_base_arm_cmd_twist_.setZero();
-//   dual_arm_toolbox::Transform::transformVector6dtoTwist(left_base_arm_cmd_twist_, left_arm_twist_cmd);
-//   dual_arm_toolbox::Transform::transformVector6dtoTwist(right_base_arm_cmd_twist_, right_arm_twist_cmd);
-//   pub_left_arm_cmd_.publish(left_arm_twist_cmd);
-//   pub_right_arm_cmd_.publish(right_arm_twist_cmd);
+
   // if (!dualArmRobot.pickBox("box7", direction))
   // {
   // ROS_WARN("Pick failed");
@@ -297,43 +312,9 @@ int main(int argc, char **argv)
   // }
 
   // box7 goal pose
-  /*
-  geometry_msgs::PoseStamped box7_goal_pose_stamped;
-  box7_goal_pose_stamped.header = dualArmRobot.left_current_pose_.header;
+  
 
-  dualArmRobot.left_current_pose_ = dualArmRobot.left_.getCurrentPose(dualArmRobot.left_.getEndEffectorLink());
-  box7_goal_pose_stamped.pose = dualArmRobot.left_current_pose_.pose;
-  KDL::Frame left_frame_eef;  // endeffector frame
-  dual_arm_toolbox::Transform::transformPoseToKDL(dualArmRobot.left_current_pose_.pose, left_frame_eef);
-  KDL::Rotation left_rot = left_frame_eef.M;
-  // KDL::Rotation rotationAgnle = KDL::Rotation::Identity();
-  double yaw = 0;    // Z-axis
-  double pitch = 0;  // Y-axis
-  double roll = 0;   // X-axis
-  double angle = 0;
-  left_rot.GetEulerZYX(yaw, pitch, roll);
-  ROS_INFO("Before roll = %f\tpitch = %f\t yaw = %f", roll, pitch, yaw);
-  angle = 3.14 / 12;
-  roll += angle;
-  left_rot = KDL::Rotation::RPY(roll, pitch, yaw);
-
-  left_rot.GetEulerZYX(yaw, pitch, roll);
-  left_rot.GetQuaternion(box7_goal_pose_stamped.pose.orientation.x, box7_goal_pose_stamped.pose.orientation.y,
-                         box7_goal_pose_stamped.pose.orientation.z, box7_goal_pose_stamped.pose.orientation.w);
-  ROS_INFO("After roll = %f\tpitch = %f\t yaw = %f", roll, pitch, yaw);
-  dualArmRobot.moveObject("box7", box7_goal_pose_stamped, 0.1);
-  sleep(5);
-
-  roll -= angle;
-  left_rot = KDL::Rotation::RPY(roll, pitch, yaw);
-  left_rot.GetEulerZYX(yaw, pitch, roll);
-  ROS_INFO("After roll = %f\tpitch = %f\t yaw = %f", roll, pitch, yaw);
-
-  left_rot.GetQuaternion(box7_goal_pose_stamped.pose.orientation.x, box7_goal_pose_stamped.pose.orientation.y,
-                         box7_goal_pose_stamped.pose.orientation.z, box7_goal_pose_stamped.pose.orientation.w);
-  dualArmRobot.moveObject("box7", box7_goal_pose_stamped, 0.1);
-  sleep(1);
-
+/*
   // angle = 3.14/18;
   // pitch += angle;
   // left_rot = KDL::Rotation::RPY(roll, pitch, yaw);

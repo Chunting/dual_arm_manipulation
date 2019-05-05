@@ -65,16 +65,16 @@ Visualization Manager:
           Link Tree Style: Links in Alphabetic Order
           left_fts_robotside:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
             Value: true
           fts_toolside:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
           left_base:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
           left_base_link:
             Alpha: 1
@@ -83,11 +83,11 @@ Visualization Manager:
             Value: true
           left_ee_0:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
           left_ee_frame:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
             Value: true
           left_ee_link:
@@ -97,46 +97,46 @@ Visualization Manager:
             Value: true
           left_ee_spring:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
             Value: true
           left_forearm_link:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
             Value: true
           left_shoulder_link:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
             Value: true
           left_tool0:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
           left_upper_arm_link:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
             Value: true
           left_wrist_1_link:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
             Value: true
           left_wrist_2_link:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
             Value: true
           left_wrist_3_link:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
             Value: true
           right_base:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
           right_base_link:
             Alpha: 1
@@ -145,11 +145,11 @@ Visualization Manager:
             Value: true
           right_ee_0:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
           right_ee_frame:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
             Value: true
           right_ee_link:
@@ -159,41 +159,41 @@ Visualization Manager:
             Value: true
           right_ee_spring:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
             Value: true
           right_forearm_link:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
             Value: true
           right_shoulder_link:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
             Value: true
           right_tool0:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
           right_upper_arm_link:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
             Value: true
           right_wrist_1_link:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
             Value: true
           right_wrist_2_link:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
             Value: true
           right_wrist_3_link:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
             Value: true
           left_robotiq_ft_frame_id:
@@ -202,37 +202,37 @@ Visualization Manager:
             Show Trail: false
           stand1:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
             Value: true
           stand2:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
             Value: true
           stand_Base:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
             Value: true
           table:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
             Value: true
           wall:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
             Value: true
           wall1:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
             Value: true
           wall2:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
             Value: true
           world:
@@ -286,16 +286,16 @@ Visualization Manager:
           Link Tree Style: Links in Alphabetic Order
           left_fts_robotside:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
             Value: true
           fts_toolside:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
           left_base:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
           left_base_link:
             Alpha: 1
@@ -304,60 +304,60 @@ Visualization Manager:
             Value: true
           left_ee_0:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
           left_ee_frame:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
             Value: true
           left_ee_link:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
             Value: true
           left_ee_spring:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
             Value: true
           left_forearm_link:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
             Value: true
           left_shoulder_link:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
             Value: true
           left_tool0:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
           left_upper_arm_link:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
             Value: true
           left_wrist_1_link:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
             Value: true
           left_wrist_2_link:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
             Value: true
           left_wrist_3_link:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
             Value: true
           right_base:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
           right_base_link:
             Alpha: 1
@@ -366,11 +366,11 @@ Visualization Manager:
             Value: true
           right_ee_0:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
           right_ee_frame:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
             Value: true
           right_ee_link:
@@ -380,60 +380,60 @@ Visualization Manager:
             Value: true
           right_ee_spring:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
             Value: true
           right_forearm_link:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
             Value: true
           right_shoulder_link:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
             Value: true
           right_tool0:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
           right_upper_arm_link:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
             Value: true
           right_wrist_1_link:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
             Value: true
           right_wrist_2_link:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
             Value: true
           right_wrist_3_link:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
             Value: true
           left_robotiq_ft_frame_id:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
           stand1:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
             Value: true
           stand2:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
             Value: true
           stand_Base:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
             Value: true
           table:
@@ -443,17 +443,17 @@ Visualization Manager:
             Value: true
           wall:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
             Value: true
           wall1:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
             Value: true
           wall2:
             Alpha: 1
-            Show Axes: false
+            Show Axes: true
             Show Trail: false
             Value: true
           world:

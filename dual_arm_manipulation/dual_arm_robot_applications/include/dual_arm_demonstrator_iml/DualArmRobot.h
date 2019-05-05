@@ -166,6 +166,7 @@ public:
                           bool avoid_collisions = true);
 
   bool execute(moveit::planning_interface::MoveGroupInterface::Plan plan);
+  bool executeAC(const trajectory_msgs::JointTrajectory& trajectory);
 
   bool moveHome();
   bool moveGraspPosition();

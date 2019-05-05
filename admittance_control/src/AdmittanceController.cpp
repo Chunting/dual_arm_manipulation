@@ -187,7 +187,7 @@ void AdmittanceController::compute_admittance()
 	// Translation error w.r.t. desired equilibrium
 	error.topRows(3) = arm_real_position_ - equilibrium_position_;
 
-	arm_desired_accelaration = M_a_.inverse() * (-D_a_ * arm_desired_twist_adm_ - K_ * error + admittance_ratio_ * wrench_external_ + wrench_control_);
+	arm_desired_accelaration = M_a_.inverse() * (-D_a_ * arm_desired_twist_adm_ - K_ * error + admittance_ratio_ * wrench_external_ );
 
 	// limiting the accelaration for better stability and safety
 	double a_acc_norm = (arm_desired_accelaration.segment(0, 3)).norm();

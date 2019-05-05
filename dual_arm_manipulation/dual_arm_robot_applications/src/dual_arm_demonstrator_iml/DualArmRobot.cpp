@@ -385,7 +385,7 @@ bool DualArmRobot::graspMove(double distance, bool avoid_collisions, bool use_le
     // right
     
     if (use_right) try_step = true;
-    while (try_step && ros::ok()) {
+    while (use_right && ros::ok()) {
         right_.setStartStateToCurrentState();
         std::vector<geometry_msgs::Pose> right_waypoints;
         geometry_msgs::Pose right_waypoint = right_.getCurrentPose(right_.getEndEffectorLink()).pose;
@@ -464,10 +464,9 @@ bool DualArmRobot::graspMove(double distance, bool avoid_collisions, bool use_le
         else
         {
             dual_arm_toolbox::TrajectoryProcessor::clean(left_trajectory);
-            if (!avoid_collisions)
-            {
-                dual_arm_toolbox::TrajectoryProcessor::scaleTrajectorySpeed(left_trajectory, 0.15);
-            }
+         
+            dual_arm_toolbox::TrajectoryProcessor::scaleTrajectorySpeed(left_trajectory, 0.01);
+            
             moveit::planning_interface::MoveGroupInterface::Plan left_plan;
             left_plan.trajectory_ = left_trajectory;
             execute(left_plan);
@@ -1364,6 +1363,8 @@ bool DualArmRobot::execute(moveit::planning_interface::MoveGroupInterface::Plan 
             ROS_ERROR("Path is invalid. Execution aborted");
             return false;
         }
+    } else{
+        return false;
     }
     /// Print out the joint trajectory infomation
     dual_arm_toolbox::TrajectoryProcessor::publishPlanTrajectory(plan, 1);
@@ -1841,4 +1842,31 @@ bool DualArmRobot::get_rotation_matrix(Matrix6d &rotation_matrix,
 	}
 
 	return true;
+}
+
+bool DualArmRobot::executeAC(const trajectory_msgs::JointTrajectory& trajectory)
+{
+  // Create a Follow Joint Trajectory Action Client
+  //actionlib::SimpleActionClient<control_msgs::FollowJointTrajectoryAction> ac("/robot/limb/left/follow_joint_trajectory", true);
+  actionlib::SimpleActionClient<control_msgs::FollowJointTrajectoryAction> ac("joint_trajectory_action", true);
+  if (!ac.waitForServer(ros::Duration(2.0)))
+  {
+    ROS_ERROR("Could not connect to action server");
+    return false;
+  }
+
+  control_msgs::FollowJointTrajectoryGoal goal;
+  goal.trajectory = trajectory;
+  goal.goal_time_tolerance = ros::Duration(1.0);
+
+  ac.sendGoal(goal);
+  //std::cout << "siz is: " << goal.trajectory.points.size()-1 << std::endl;
+  if (ac.waitForResult(goal.trajectory.points[goal.trajectory.points.size()-1].time_from_start + ros::Duration(5)))
+  {
+    ROS_INFO("Action server reported successful execution");
+    return true;
+  } else {
+    ROS_WARN("Action server could not execute trajectory");
+    return false;
+  }
 }

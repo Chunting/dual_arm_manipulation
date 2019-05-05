@@ -17,19 +17,19 @@
 	<arg unless="$(arg use_cartesian_vel_contrller)" name="stopped_controllers" value= "vel_based_admittance_traj_controller joint_group_vel_controller ur5_cartesian_velocity_controller "/>
 
     <!-- left arm -->
-	<arg name="left_prefix" default=""/>
+	<arg name="left_prefix" default="left"/>
 	<arg name="left_controller_name" default="left"/>
 	<arg name="left_robot_ip" default="192.168.1.101"/>
 	<arg name="left_reverse_port" default="50001"/>
-	<arg name="left_base_frame" default="left_base" />
-	<arg name="left_tool_frame" default="left_ee_link" />
+	<arg name="left_base_frame" default="left_base_link" />
+	<arg name="left_tool_frame" default="left_wrist_3_link" />
 	<!-- right arm -->
-	<arg name="right_prefix" default=""/>
+	<arg name="right_prefix" default="right"/>
 	<arg name="right_controller_name" default="right"/>
 	<arg name="right_robot_ip" default="192.168.1.102"/>
 	<arg name="right_reverse_port" default="50002"/>
-	<arg name="right_base_frame" default="right_base" />
-	<arg name="right_tool_frame" default="right_ee_link" />
+	<arg name="right_base_frame" default="right_base_link" />
+	<arg name="right_tool_frame" default="right_wrist_3_link" />
 	<!-- common variables -->
 	<arg name="limited" default="false"/>
 	<arg name="min_payload" default="0.0"/>
@@ -45,6 +45,7 @@
 	<arg name="max_joint_difference" default="0.01" />
 	<arg name="shutdown_on_disconnect" default="true" />
 	<arg name="config" default="true"/>
+	<arg name="use_ros_control" default="True"/>
 
 	<include file="$(find dual_arm_robot_description)/launch/dual_arm_robot_upload.launch">
 		<arg name="limited" value="$(arg limited)"/>
@@ -61,7 +62,7 @@
 			<param name="min_payload" type="double" value="$(arg min_payload)"/>
 			<param name="max_payload" type="double" value="$(arg max_payload)"/>
 			<param name="max_velocity" type="double" value="$(arg max_velocity)"/>
-			<param name="use_ros_control" type="bool" value="True"/>
+			<param name="use_ros_control" type="bool" value="$(arg use_ros_control)"/>
 			<param name="servoj_gain" type="double" value="750" />
 			<param name="prefix" value="$(arg right_prefix)" />
 			<param name="base_frame" type="str" value="$(arg right_base_frame)"/>
@@ -95,7 +96,7 @@
 			<param name="min_payload" type="double" value="$(arg min_payload)"/>
 			<param name="max_payload" type="double" value="$(arg max_payload)"/>
 			<param name="max_velocity" type="double" value="$(arg max_velocity)"/>
-			<param name="use_ros_control" type="bool" value="True"/>
+			<param name="use_ros_control" type="bool" value="$(arg use_ros_control)"/>
 			<param name="servoj_gain" type="double" value="750" />
 			<param name="prefix" value="$(arg left_prefix)" />
 			<param name="base_frame" type="str" value="$(arg left_base_frame)"/>
