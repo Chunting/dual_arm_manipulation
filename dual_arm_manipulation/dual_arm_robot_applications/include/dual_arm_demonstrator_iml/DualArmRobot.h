@@ -171,6 +171,8 @@ class DualArmRobot
     {
         return (radian * (180 / PI));
     }
+
+    bool MoveParallel(geometry_msgs::Pose &left_pose, geometry_msgs::Pose &right_pose, double traj_scale=0.1);
 };
 } // namespace dual_arm_demonstrator_iml
 

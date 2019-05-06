@@ -4,6 +4,7 @@
         "/opt/ros/kinetic/lib/python2.7/dist-packages"
     ],
     "files.associations": {
+        "*.cpp": "cpp",
         "cctype": "cpp",
         "cmath": "cpp",
         "csignal": "cpp",
@@ -31,7 +32,8 @@
         "mutex": "cpp",
         "system_error": "cpp",
         "ostream": "cpp",
-        "sstream": "cpp"
+        "sstream": "cpp",
+        "bitset": "cpp"
     },
     "C_Cpp.intelliSenseEngineFallback": "Disabled",
     "C_Cpp.errorSquiggles": "Disabled"
