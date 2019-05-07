@@ -1287,7 +1287,7 @@ bool DualArmRobot::execute(moveit::planning_interface::MoveGroupInterface::Plan 
     if (plan_left.trajectory_.joint_trajectory.joint_names.size() > 0)
     {
         dual_arm_toolbox::TrajectoryProcessor::visualizePlan(plan_left, 0);
-        dual_arm_toolbox::TrajectoryProcessor::publishPlanTrajectory(nh_, "left", plan_left,1);
+        // dual_arm_toolbox::TrajectoryProcessor::publishPlanTrajectory(nh_, "left", plan_left,1);
         // publishPlanCartTrajectory(left_.getEndEffectorLink(), plan.start_state_, plan_left.trajectory_);
         success_left = handle_left.sendTrajectory(plan_left.trajectory_);
     }
@@ -1295,7 +1295,7 @@ bool DualArmRobot::execute(moveit::planning_interface::MoveGroupInterface::Plan 
     if (plan_right.trajectory_.joint_trajectory.joint_names.size() > 0)
     {
         dual_arm_toolbox::TrajectoryProcessor::visualizePlan(plan_right, 0);
-        dual_arm_toolbox::TrajectoryProcessor::publishPlanTrajectory(nh_, "right", plan_right,1);
+        // dual_arm_toolbox::TrajectoryProcessor::publishPlanTrajectory(nh_, "right", plan_right,1);
         success_right = handle_right.sendTrajectory(plan_right.trajectory_);
 
     }
