@@ -39,13 +39,7 @@ int main(int argc, char **argv)
     ros::AsyncSpinner asyncSpinner(2);
     asyncSpinner.start();
 
-    // create ur_logger. Use this namespace
-    std::vector<std::string> ur_namespaces;
-    ur_namespaces.push_back("left");
-    UR_Logger ur_logger(nh, ur_namespaces);
-    // start logging
-    ur_logger.start(50);
-    FTSensorSubscriber FTsubscriber(nh, ur_namespaces[0]);
+    FTSensorSubscriber FTsubscriber(nh, "left");
     // Controller Interface
     std::string left_controller_ = "left/vel_based_pos_traj_controller";
     // MoveGroupInterface
@@ -85,7 +79,6 @@ int main(int argc, char **argv)
     ROS_INFO("waiting 10 Seconds. Press Ctrl-C if Robot is in the wrong start position");
     ROS_INFO("Reference Frame: %s", left_.getPlanningFrame().c_str());
     ROS_INFO("EndEffectorLink: %s", left_.getEndEffectorLink().c_str());
-    // left_joint_values = getJointAngles("left_manipulator");
     geometry_msgs::PoseStamped left_current_pose_ = left_.getCurrentPose(left_.getEndEffectorLink());
     ROS_INFO("\nleft_current_pose_ frame_id: %s, end_effector: %s, x=%f, y=%f, z=%f, qx=%f, qy=%f, qz=%f, qw=%f\n",
              left_current_pose_.header.frame_id.c_str(), left_.getEndEffectorLink().c_str(), left_current_pose_.pose.position.x, left_current_pose_.pose.position.y, left_current_pose_.pose.position.z, left_current_pose_.pose.orientation.x, left_current_pose_.pose.orientation.y, left_current_pose_.pose.orientation.z, left_current_pose_.pose.orientation.w);
@@ -233,9 +226,6 @@ int main(int argc, char **argv)
     // ROS_INFO("moveing to start");
     // left_.plan(plan);
     // left_.execute(plan);
-
-    // stop logging
-    ur_logger.stop();
     ROS_INFO("finished. shutting down.");
 
     ros::shutdown();

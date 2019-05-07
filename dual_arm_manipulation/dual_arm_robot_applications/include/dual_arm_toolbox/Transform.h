@@ -9,38 +9,24 @@
 #include <ros/ros.h>
 #include <geometry_msgs/Pose.h>
 
-// Controller Manager
-#include <controller_manager_msgs/SwitchController.h>
-#include <controller_manager_msgs/SwitchControllerRequest.h>
-#include <controller_manager_msgs/SwitchControllerResponse.h>
-
-// MoveIt!
-#include <moveit_msgs/PlanningScene.h>
-#include <moveit/move_group_interface/move_group_interface.h>
-#include <moveit/planning_scene_interface/planning_scene_interface.h>
-#include <moveit_msgs/AttachedCollisionObject.h>
-#include <moveit_msgs/GetStateValidity.h>
-#include <moveit_msgs/DisplayRobotState.h>
-//#include <controller_manager/controller_manager.h>
-//#include <moveit_ros_control_interface>
-
-// Rviz
-#include <moveit_msgs/DisplayTrajectory.h>
-
-// Trajectory tools
-#include <moveit/robot_trajectory/robot_trajectory.h>
-#include <moveit/trajectory_processing/iterative_time_parameterization.h>
-
+#include <geometry_msgs/TwistStamped.h>
 // KDL
 #include <kdl/frames_io.hpp>
 
+// Eigen
+#include <eigen3/Eigen/Core>
+#include <eigen3/Eigen/Geometry>
+#include <eigen3/Eigen/Dense>
 
+typedef Eigen::Matrix<double, 6, 1> Vector6d;
+typedef Eigen::Matrix<double, 6, 6> Matrix6d;
 namespace dual_arm_toolbox{
     class Transform {
     protected:
     public:
         static void transformPoseToKDL(geometry_msgs::Pose pose, KDL::Frame& kdl_frame);
         static void transformKDLtoPose(KDL::Frame kdl_frame, geometry_msgs::Pose& pose);
+        static void transformVector6dtoTwist(Vector6d twist_vector, geometry_msgs::Twist &twist);
     };
 }
 

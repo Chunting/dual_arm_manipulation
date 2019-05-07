@@ -1,6 +1,5 @@
 #include <ros/ros.h>
 #include <std_msgs/String.h>
-#include <sstream>
 
 #include <iostream>
 #include <fstream>
@@ -20,7 +19,7 @@ protected:
     std::vector<UR_Message_Listener*> ur_listeners_;
 
 public:
-    UR_Logger(ros::NodeHandle& nh, std::vector<std::string> ur_namespaces);
+    UR_Logger(ros::NodeHandle& nh, std::vector<std::string> &ur_namespaces);
     ~UR_Logger();
 
     Stopwatch stopwatch_;
@@ -29,6 +28,7 @@ public:
     char delimiter_;
 
     void generate_logfile_name();       //automatically generate a name
+    std::string generate_logfolder();
     void start(int log_rate = 100);     //log_rate=[Hz]
     void stop();
     std::string headline(UR_Message_Listener &ur_listener);	//return a headline

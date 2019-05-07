@@ -267,6 +267,18 @@ add_executable(dual_arm_robot_demonstration
               src/ur_logging/UrMessageListener.cpp)
 target_link_libraries(dual_arm_robot_demonstration ${catkin_LIBRARIES})
 
+add_executable(dual_arm_robot_cartesian_velocity 
+              src/executables/dual_arm_robot_cartesian_velocity.cpp 
+              src/dual_arm_toolbox/TrajectoryProcessor.cpp 
+              src/dual_arm_toolbox/Transform.cpp 
+              src/dual_arm_demonstrator_iml/DualArmRobot.cpp 
+              src/dual_arm_demonstrator_iml/SceneManager.cpp
+              src/dual_arm_demonstrator_iml/FTSensorSubscriber.cpp
+              src/ur_logging/UrLogger.cpp 
+              src/ur_logging/Stopwatch.cpp 
+              src/ur_logging/UrMessageListener.cpp)
+target_link_libraries(dual_arm_robot_cartesian_velocity ${catkin_LIBRARIES})
+
 add_executable(dual_arm_robot_lift_experiment_planning 
               src/executables/dual_arm_robot_lift_experiment_planning.cpp 
               src/dual_arm_toolbox/TrajectoryProcessor.cpp 
@@ -326,7 +338,9 @@ add_executable(demonstration_setup_helper
 target_link_libraries(demonstration_setup_helper ${catkin_LIBRARIES})
 
 
-add_executable(ur5_cartesian_velocity_controller_test src/ur5_cartesian_velocity_controller_test.cpp)
+add_executable(ur5_cartesian_velocity_controller_test 
+              src/ur5_cartesian_velocity_controller_test.cpp
+              src/dual_arm_toolbox/Transform.cpp)
 target_link_libraries(ur5_cartesian_velocity_controller_test   ${catkin_LIBRARIES})
 
 add_executable(ur5_joint_speed src/ur5_joint_speed.cpp)

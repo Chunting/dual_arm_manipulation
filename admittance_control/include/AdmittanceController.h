@@ -6,9 +6,6 @@
 #include "cartesian_state_msgs/PoseTwist.h"
 #include "geometry_msgs/WrenchStamped.h"
 #include "geometry_msgs/TwistStamped.h"
-#include "nav_msgs/Odometry.h"
-#include "sensor_msgs/LaserScan.h"
-#include "laser_geometry/laser_geometry.h"
 #include <tf/transform_datatypes.h>
 #include <tf_conversions/tf_eigen.h>
 #include <tf/transform_listener.h>
@@ -139,7 +136,9 @@ class AdmittanceController
 	Vector6d ee_twist_world_;
 
 	// Transform from base_link to world
-	Matrix6d rotation_base_;
+	Matrix6d rotation_world_base_;
+	// Transform from robotiq_ft_frame_id to tip_name
+	Matrix6d rotation_tip_ftsensor_;
 
 	// TF:
 	// Listeners

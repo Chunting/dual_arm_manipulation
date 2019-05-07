@@ -33,3 +33,13 @@ void Transform::transformKDLtoPose(KDL::Frame kdl_frame, geometry_msgs::Pose &po
     pose.position.y = kdl_frame.p.y();
     pose.position.z = kdl_frame.p.z();
 }
+
+void Transform::transformVector6dtoTwist(Vector6d twist_vector, geometry_msgs::Twist &twist)
+{
+  twist.linear.x = twist_vector(0);
+  twist.linear.y = twist_vector(1);
+  twist.linear.z = twist_vector(2);
+  twist.angular.x = twist_vector(3);
+  twist.angular.y = twist_vector(4);
+  twist.angular.z = twist_vector(5);
+}

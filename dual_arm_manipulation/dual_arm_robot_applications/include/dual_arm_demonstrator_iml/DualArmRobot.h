@@ -116,6 +116,13 @@ class DualArmRobot
 
     std::thread *pose_publish_thread_;
 
+      // Transform from base_link to world
+    Matrix6d rotation_world_left_base_;
+    // Transform from robotiq_ft_frame_id to tip_name
+    Matrix6d rotation_tip_left_sensor_;
+    Matrix6d rotation_world_right_base_;
+    Matrix6d rotation_tip_right_sensor_;
+
     void publishPoseMsg();
     // workaround for moveGroup method does not return attached objects correctly (issue)
     robot_state::RobotState getCurrentRobotState();
@@ -173,8 +180,11 @@ class DualArmRobot
     {
         return (radian * (180 / PI));
     }
+    bool get_rotation_matrix(Matrix6d &rotation_matrix, tf::TransformListener &listener, std::string from_frame, std::string to_frame);
 
     bool MoveParallel(geometry_msgs::Pose &left_pose, geometry_msgs::Pose &right_pose, double traj_scale=0.1);
+
+    bool executeAC(const trajectory_msgs::JointTrajectory &trajectory);
 };
 } // namespace dual_arm_demonstrator_iml
 

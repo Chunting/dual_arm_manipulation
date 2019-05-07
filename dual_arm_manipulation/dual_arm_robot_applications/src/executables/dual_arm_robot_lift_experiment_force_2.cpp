@@ -23,9 +23,6 @@
 #include "dual_arm_demonstrator_iml/DualArmRobot.h"
 #include "dual_arm_demonstrator_iml/SceneManager.h"
 
-// UR Logger
-#include "ur_logging/UrLogger.h"
-
 
 int main(int argc, char **argv) {
     ros::init(argc, argv, "dual_arm_robot_demonstration");
@@ -94,34 +91,6 @@ int main(int argc, char **argv) {
     geometry_msgs::Vector3Stamped linear_move_direction;
     linear_move_direction.vector.z = 0.00;
     linear_move_direction.header.frame_id = "world";
-
-//#ifndef OFFLINE
-    // experiment just hold
-    ROS_INFO("Starting Log in 10");
-    sleep(7);
-    ROS_INFO("Starting Log in 3");
-    sleep(1);
-    ROS_INFO("Starting Log in 2");
-    sleep(1);
-    ROS_INFO("Starting Log in 1");
-    sleep(1);
-    ROS_INFO("Starting Log now");
-    // start log
-    std::vector<std::string> ur_namespaces;
-    ur_namespaces.push_back("left");
-    UR_Logger ur_logger(nh, ur_namespaces);
-    ur_logger.start(100);
-
-    ROS_INFO("Waiting 10 seconds");
-    ros::Duration(7).sleep();
-    ROS_INFO("Stop Log in 3");
-    sleep(1);
-    ROS_INFO("Stop Log in 2");
-    sleep(1);
-    ROS_INFO("Stop Log in 1");
-    sleep(1);
-
-    ur_logger.stop();
 /*
     // experiment hold and linear move
     ROS_INFO("Starting next experiment in 10 Seconds");
