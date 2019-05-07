@@ -39,13 +39,7 @@ int main(int argc, char **argv)
     ros::AsyncSpinner asyncSpinner(2);
     asyncSpinner.start();
 
-    // create ur_logger. Use this namespace
-    std::vector<std::string> ur_namespaces;
-    ur_namespaces.push_back("left");
-    UR_Logger ur_logger(nh, ur_namespaces);
-    // start logging
-    ur_logger.start(50);
-    FTSensorSubscriber FTsubscriber(nh, ur_namespaces[0]);
+    FTSensorSubscriber FTsubscriber(nh, "left");
     // Controller Interface
     std::string left_controller_ = "left/vel_based_pos_traj_controller";
     // MoveGroupInterface
@@ -232,9 +226,6 @@ int main(int argc, char **argv)
     // ROS_INFO("moveing to start");
     // left_.plan(plan);
     // left_.execute(plan);
-
-    // stop logging
-    ur_logger.stop();
     ROS_INFO("finished. shutting down.");
 
     ros::shutdown();

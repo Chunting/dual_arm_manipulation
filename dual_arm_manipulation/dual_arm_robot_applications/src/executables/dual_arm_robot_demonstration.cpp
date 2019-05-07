@@ -45,20 +45,13 @@ int main(int argc, char **argv)
     // Scene Setup
     dual_arm_demonstrator_iml::SceneManager sceneManager(nh);
     sceneManager.setupScene();
-    // Start logging data
-    std::vector<std::string> ur_namespaces;
-    ur_namespaces.push_back("left");
-    ur_namespaces.push_back("right");
-    UR_Logger ur_logger(nh, ur_namespaces);
-    ur_logger.start(100);
-
     // variables
     moveit::planning_interface::MoveGroupInterface::Plan left_plan;
     moveit::planning_interface::MoveGroupInterface::Plan right_plan;
     moveit::planning_interface::MoveItErrorCode error;
     error.val = -1;
 
-    FTSensorSubscriber FTsubscriber(nh, ur_namespaces[0]);
+    FTSensorSubscriber left_wrench_sub_(nh, "left");
 
     geometry_msgs::Vector3Stamped direction;
     direction.header.frame_id = "world";
@@ -91,15 +84,16 @@ int main(int argc, char **argv)
 
     ROS_INFO("========== MOVE CLOSER =================");
 
-    dualArmRobot.graspMove(0.035, false, true, false);
-    double res_force = sqrt(FTsubscriber.last_wrench_msg_.wrench.force.x * FTsubscriber.last_wrench_msg_.wrench.force.x + FTsubscriber.last_wrench_msg_.wrench.force.y * FTsubscriber.last_wrench_msg_.wrench.force.y + FTsubscriber.last_wrench_msg_.wrench.force.z * FTsubscriber.last_wrench_msg_.wrench.force.z);
+    // dualArmRobot.graspMove(0.02, false, true, false);
+    // double res_force = std::abs(left_wrench_sub_.wrench_external_(2));
+    // ROS_INFO_STREAM(" Left wrench \n" << left_wrench_sub_.wrench_external_);
 
-    while (res_force < 15)
-    {
-        dualArmRobot.graspMove(0.001, false, true, false); // true : left arm; false: right arm
-        res_force = sqrt(FTsubscriber.last_wrench_msg_.wrench.force.x * FTsubscriber.last_wrench_msg_.wrench.force.x + FTsubscriber.last_wrench_msg_.wrench.force.y * FTsubscriber.last_wrench_msg_.wrench.force.y + FTsubscriber.last_wrench_msg_.wrench.force.z * FTsubscriber.last_wrench_msg_.wrench.force.z);
-        ROS_INFO("I heard: Force [%f]  FX[%f] FY[%f] FZ[%f]", res_force, FTsubscriber.last_wrench_msg_.wrench.force.x, FTsubscriber.last_wrench_msg_.wrench.force.y, FTsubscriber.last_wrench_msg_.wrench.force.z);
-    }
+    // while (res_force < 15)
+    // {
+    //     dualArmRobot.graspMove(0.001, false, true, false); // true : left arm; false: right arm
+    //     res_force = std::abs(left_wrench_sub_.wrench_external_(2));
+    //     ROS_INFO("I heard: Force [%f]  FX[%f] FY[%f] FZ[%f]", res_force, left_wrench_sub_.last_wrench_msg_.wrench.force.x, left_wrench_sub_.last_wrench_msg_.wrench.force.y, left_wrench_sub_.last_wrench_msg_.wrench.force.z);
+    // }
 
     ros::Publisher offset_desired_pub = nh.advertise<geometry_msgs::PointStamped>("/desired_offset_point", 1);
     // Publish the desired offset between two EEs, described in right EE coordinate system
@@ -122,7 +116,7 @@ int main(int argc, char **argv)
     direction.header.frame_id = "world";
     direction.vector.x = 0;
     direction.vector.y = 0;
-    direction.vector.z = 0.2;
+    direction.vector.z = 0.1;
     if (!dualArmRobot.pickBox("box7", direction))
     {
         ROS_WARN("Pick failed");
@@ -332,7 +326,6 @@ int main(int argc, char **argv)
     // END
     ROS_INFO("Finished demonstration");
     sleep(1);
-    ur_logger.stop();
     ros::shutdown();
     return 0;
 }

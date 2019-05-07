@@ -431,6 +431,7 @@ bool DualArmRobot::graspMove(double distance, bool avoid_collisions, bool use_le
 
         std::vector<geometry_msgs::Pose> left_waypoints;
         /* Expressed in world frame */
+        left_current_pose_ = left_.getCurrentPose(left_.getEndEffectorLink());
         geometry_msgs::Pose left_waypoint = left_current_pose_.pose;
         left_waypoints.push_back(left_waypoint);
 
@@ -464,13 +465,13 @@ bool DualArmRobot::graspMove(double distance, bool avoid_collisions, bool use_le
         {
             dual_arm_toolbox::TrajectoryProcessor::clean(left_trajectory);
          
-            dual_arm_toolbox::TrajectoryProcessor::scaleTrajectorySpeed(left_trajectory, 0.01);
+            dual_arm_toolbox::TrajectoryProcessor::scaleTrajectorySpeed(left_trajectory, 0.1);
             
             moveit::planning_interface::MoveGroupInterface::Plan left_plan;
             left_plan.trajectory_ = left_trajectory;
             execute(left_plan);
             try_step = false;
-            ROS_INFO("GraspMove X=%f Y=%f Z=%f", left_vec_d.x(), left_vec_d.y(), left_vec_d.z());
+            ROS_INFO("Left arm graspMove X=%f Y=%f Z=%f", left_vec_d.x(), left_vec_d.y(), left_vec_d.z());
         }
     }
     
@@ -1273,7 +1274,6 @@ bool DualArmRobot::linearMove(geometry_msgs::Vector3Stamped direction,
 
 bool DualArmRobot::execute(moveit::planning_interface::MoveGroupInterface::Plan plan)
 {
-#ifndef OFFLINE
     moveit::planning_interface::MoveGroupInterface::Plan plan_left;
     moveit::planning_interface::MoveGroupInterface::Plan plan_right;
 
@@ -1294,8 +1294,8 @@ bool DualArmRobot::execute(moveit::planning_interface::MoveGroupInterface::Plan 
     if ((plan_left.trajectory_.joint_trajectory.joint_names.size() > 0) && (plan_right.trajectory_.joint_trajectory.joint_names.size() > 0))
     {
         // check trajectory for collisions
-        // robot_model_loader::RobotModelLoader robot_model_loader("robot_description");
-        // robot_model::RobotModelPtr kinematic_model = robot_model_loader.getModel();
+        robot_model_loader::RobotModelLoader robot_model_loader("robot_description");
+        robot_model::RobotModelPtr kinematic_model = robot_model_loader.getModel();
         planning_scene::PlanningScene planningScene(kinematic_model);
         bool isValid = planningScene.isPathValid(plan.start_state_, plan.trajectory_, "arms");
         if (!isValid)
@@ -1310,7 +1310,7 @@ bool DualArmRobot::execute(moveit::planning_interface::MoveGroupInterface::Plan 
     {
         dual_arm_toolbox::TrajectoryProcessor::visualizePlan(plan_left, 0);
         dual_arm_toolbox::TrajectoryProcessor::publishPlanTrajectory(nh_, "left", plan_left,1);
-        // publishPlanCartTrajectory(left_.getEndEffectorLink(), plan.start_state_, plan_left.trajectory_);
+        publishPlanCartTrajectory(left_.getEndEffectorLink(), plan.start_state_, plan_left.trajectory_);
         success_left = handle_left.sendTrajectory(plan_left.trajectory_);
     }
 
@@ -1358,7 +1358,6 @@ bool DualArmRobot::execute(moveit::planning_interface::MoveGroupInterface::Plan 
         left_current_pose_ = left_.getCurrentPose(left_.getEndEffectorLink());
     }
     return success_left && success_right;
-#endif
 #ifdef OFFLINE
 
     double error = arms_.execute(plan);

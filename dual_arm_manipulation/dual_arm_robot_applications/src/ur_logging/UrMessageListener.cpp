@@ -1,7 +1,5 @@
 #include "ur_logging/UrMessageListener.h"
 
-// UR_Message_Listener::UR_Message_Listener(ros::NodeHandle& nh, std::string ur_namespace) : nh_(nh),
-// ur_namespace_(ur_namespace){
 UR_Message_Listener::UR_Message_Listener(ros::NodeHandle &nh, std::string ur_namespace, std::string folder_name,
                                          double frequency)
   : nh_(nh), ur_namespace_(ur_namespace), folder_name_(folder_name), loop_rate_(frequency)
