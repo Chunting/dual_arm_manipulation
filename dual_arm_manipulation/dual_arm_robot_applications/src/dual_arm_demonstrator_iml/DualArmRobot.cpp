@@ -87,7 +87,6 @@ DualArmRobot::DualArmRobot(ros::NodeHandle &nh) : left_("left_manipulator"),
     setConstraints();
     kinematic_state->enforceBounds();
 
-    // left_joint_values = getJointAngles("left_manipulator");
     ROS_INFO("\nleft_current_pose_ frame_id: %s, end_effector: %s\n x=%f, y=%f, z=%f, qx=%f, qy=%f, qz=%f, qw=%f\n",
              left_current_pose_.header.frame_id.c_str(), left_.getEndEffectorLink().c_str(),
              left_current_pose_.pose.position.x, left_current_pose_.pose.position.y, left_current_pose_.pose.position.z,
@@ -108,6 +107,33 @@ DualArmRobot::DualArmRobot(ros::NodeHandle &nh) : left_("left_manipulator"),
     {
         ROS_INFO("Joint %s: %f", armsJointNames[i].c_str(), armsJointValues[i]);
     }
+
+    // Makes sure all TFs exists before enabling all transformations in the callbacks
+  	// Transform from base_link to world
+	rotation_world_left_base_.setZero();
+	// Transform from robotiq_ft_frame_id to tip_name
+	rotation_tip_left_sensor_.setZero();
+	rotation_world_right_base_.setZero();
+	rotation_tip_right_sensor_.setZero();
+
+	while (!get_rotation_matrix(rotation_world_left_base_, listener_arm_, "world", "left_base_link"))
+	{
+		sleep(1);
+	}
+	
+	while (!get_rotation_matrix(rotation_world_right_base_, listener_arm_, "world", "right_base_link"))
+	{
+		sleep(1);
+	}
+    while (!get_rotation_matrix(rotation_tip_left_sensor_, listener_arm_, "left_wrist_3_link", "left_robotiq_ft_frame_id"))
+	{
+		sleep(1);
+	}
+	
+	while (!get_rotation_matrix(rotation_tip_right_sensor_, listener_arm_, "right_wrist_3_link", "right_robotiq_ft_frame_id"))
+	{
+		sleep(1);
+	}
 }
 DualArmRobot::~DualArmRobot()
 {
@@ -311,18 +337,17 @@ bool DualArmRobot::switch_controller(std::string stop_name, std::string start_na
     // stop
     switchController.request.stop_controllers.push_back(stop_name);
     bool success_stop = srv_switch_controller.call(switchController);
-    ROS_INFO("Stopping controller %s", success_stop ? "SUCCEDED" : "FAILED");
+    ROS_INFO("Stopping controller %s %s", stop_name.c_str(), success_stop ? "SUCCEDED" : "FAILED");
     if (!success_stop)
         return false;
 
     // clear
     switchController.request.stop_controllers.clear();
-
     // start admittance controller
     switchController.request.BEST_EFFORT;
     switchController.request.start_controllers.push_back(start_name);
     bool success_start = srv_switch_controller.call(switchController);
-    ROS_INFO("Starting controller %s", success_start ? "SUCCEDED" : "FAILED");
+    ROS_INFO("Starting controller %s %s", start_name.c_str(), success_start ? "SUCCEDED" : "FAILED");
     switchController.request.start_controllers.clear();
 
     // Switch controller in moveit-interface
@@ -359,7 +384,7 @@ bool DualArmRobot::graspMove(double distance, bool avoid_collisions, bool use_le
     // right
     
     if (use_right) try_step = true;
-    while (try_step && ros::ok()) {
+    while (use_right && ros::ok()) {
         right_.setStartStateToCurrentState();
         std::vector<geometry_msgs::Pose> right_waypoints;
         geometry_msgs::Pose right_waypoint = right_.getCurrentPose(right_.getEndEffectorLink()).pose;
@@ -417,7 +442,7 @@ bool DualArmRobot::graspMove(double distance, bool avoid_collisions, bool use_le
         left_vec_d.y(0);
         left_vec_d.z(0);
         left_vec_d = left_p_eef.M * left_vec_d; // Rotate distance vector
-        ROS_INFO(" X=%f Y=%f Z=%f", left_vec_d.x(), left_vec_d.y(), left_vec_d.z());
+        
 
         // calculate waypoint
         left_waypoint.position.x = left_waypoint.position.x + left_vec_d.x();
@@ -438,17 +463,17 @@ bool DualArmRobot::graspMove(double distance, bool avoid_collisions, bool use_le
         else
         {
             dual_arm_toolbox::TrajectoryProcessor::clean(left_trajectory);
-            if (!avoid_collisions)
-            {
-                dual_arm_toolbox::TrajectoryProcessor::scaleTrajectorySpeed(left_trajectory, 0.15);
-            }
+         
+            dual_arm_toolbox::TrajectoryProcessor::scaleTrajectorySpeed(left_trajectory, 0.01);
+            
             moveit::planning_interface::MoveGroupInterface::Plan left_plan;
             left_plan.trajectory_ = left_trajectory;
             execute(left_plan);
             try_step = false;
+            ROS_INFO("GraspMove X=%f Y=%f Z=%f", left_vec_d.x(), left_vec_d.y(), left_vec_d.z());
         }
     }
-
+    
     return true;
 }
 
@@ -569,7 +594,6 @@ bool DualArmRobot::linearMoveParallel(geometry_msgs::Vector3Stamped direction,
             try_step = try_again_question();
             if (!try_step)
             {
-                allowedArmCollision(false, object_id);
                 return false;
             }
         }
@@ -587,11 +611,9 @@ bool DualArmRobot::linearMoveParallel(geometry_msgs::Vector3Stamped direction,
     else
     {
         ROS_WARN("Problem adapting trajectory");
-        allowedArmCollision(false, object_id);
         return false;
     }
     dual_arm_toolbox::TrajectoryProcessor::clean(both_arms_trajectory);
-    allowedArmCollision(false, object_id);
 
     // scale trajectory
     dual_arm_toolbox::TrajectoryProcessor::scaleTrajectorySpeed(both_arms_trajectory, traj_scale);
@@ -1283,7 +1305,7 @@ bool DualArmRobot::execute(moveit::planning_interface::MoveGroupInterface::Plan 
         }
     }
     /// Print out the joint trajectory infomation
-    // dual_arm_toolbox::TrajectoryProcessor::publishPlanTrajectory(plan, 1);
+    dual_arm_toolbox::TrajectoryProcessor::publishPlanTrajectory(plan, 1);
     if (plan_left.trajectory_.joint_trajectory.joint_names.size() > 0)
     {
         dual_arm_toolbox::TrajectoryProcessor::visualizePlan(plan_left, 0);
@@ -1351,17 +1373,6 @@ bool DualArmRobot::execute(moveit::planning_interface::MoveGroupInterface::Plan 
 #endif
 }
 
-// Get the joint angles
-// groupName: "left_manipulator" "right_manipulator" "arms"
-std::vector<double> DualArmRobot::getJointAngles(std::string groupName)
-{
-    planning_scene::PlanningScene planningScene(kinematic_model);
-    const robot_state::JointModelGroup *joint_model_group = kinematic_model->getJointModelGroup(groupName);
-    const std::vector<std::string> &joint_names = joint_model_group->getJointModelNames();
-    std::vector<double> joint_values;
-    kinematic_state->copyJointGroupPositions(joint_model_group, joint_values);
-    return joint_values;
-}
 /* Move the robot to its home position defined in SRDF file */
 bool DualArmRobot::moveHome()
 {
@@ -1730,8 +1741,8 @@ void DualArmRobot::setConstraints()
     right_.setPathConstraints(right_constraints);
 
     jcm.joint_name = "right_shoulder_lift_joint";
-    jcm.position = 0.01;
-    jcm.tolerance_above = 3;
+    jcm.position = 0;
+    jcm.tolerance_above = 6;
     jcm.tolerance_below = 3;
     jcm.weight = 1.0;
     right_constraints.joint_constraints.push_back(jcm);
@@ -1798,4 +1809,61 @@ bool DualArmRobot::MoveParallel(geometry_msgs::Pose &left_pose,
     }
     return true;
 
+}
+
+
+bool DualArmRobot::get_rotation_matrix(Matrix6d &rotation_matrix,
+						 tf::TransformListener &listener,
+						 std::string from_frame,
+						 std::string to_frame)
+{
+	tf::StampedTransform transform;
+	Matrix3d rotation_from_to;
+	try
+	{
+		listener.lookupTransform(from_frame, to_frame, ros::Time(0), transform);
+		tf::matrixTFToEigen(transform.getBasis(), rotation_from_to);
+		rotation_matrix.setZero();
+		rotation_matrix.topLeftCorner(3, 3) = rotation_from_to;
+		rotation_matrix.bottomRightCorner(3, 3) = rotation_from_to;
+		// std::cout << "Get TF from " << from_frame << " to: " << to_frame << std::endl
+		// 	  << rotation_from_to << std::endl
+		// 	  << "rotation_from_to " << std::endl
+		// 	  << rotation_from_to << std::endl;
+	}
+	catch (tf::TransformException ex)
+	{
+		rotation_matrix.setZero();
+		ROS_WARN_STREAM_THROTTLE(1, "Waiting for TF from: " << from_frame << " to: " << to_frame);
+		return false;
+	}
+
+	return true;
+}
+
+bool DualArmRobot::executeAC(const trajectory_msgs::JointTrajectory& trajectory)
+{
+  // Create a Follow Joint Trajectory Action Client
+  //actionlib::SimpleActionClient<control_msgs::FollowJointTrajectoryAction> ac("/robot/limb/left/follow_joint_trajectory", true);
+  actionlib::SimpleActionClient<control_msgs::FollowJointTrajectoryAction> ac("joint_trajectory_action", true);
+  if (!ac.waitForServer(ros::Duration(2.0)))
+  {
+    ROS_ERROR("Could not connect to action server");
+    return false;
+  }
+
+  control_msgs::FollowJointTrajectoryGoal goal;
+  goal.trajectory = trajectory;
+  goal.goal_time_tolerance = ros::Duration(1.0);
+
+  ac.sendGoal(goal);
+  //std::cout << "siz is: " << goal.trajectory.points.size()-1 << std::endl;
+  if (ac.waitForResult(goal.trajectory.points[goal.trajectory.points.size()-1].time_from_start + ros::Duration(5)))
+  {
+    ROS_INFO("Action server reported successful execution");
+    return true;
+  } else {
+    ROS_WARN("Action server could not execute trajectory");
+    return false;
+  }
 }

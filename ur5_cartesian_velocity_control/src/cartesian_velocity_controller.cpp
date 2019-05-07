@@ -1,7 +1,7 @@
-#include <pluginlib/class_list_macros.h>
-#include "ur5_cartesian_velocity_control/kinematic_chain_controller_base.h"
 #include "ur5_cartesian_velocity_control/cartesian_velocity_controller.h"
 #include "kdl_conversions/kdl_msg.h"
+#include "ur5_cartesian_velocity_control/kinematic_chain_controller_base.h"
+#include <pluginlib/class_list_macros.h>
 
 namespace controller_interface
 {
@@ -14,10 +14,12 @@ bool CartesianVelocityControllerBase<T>::init(T *robot, ros::NodeHandle &n)
 	// KDL
 	KinematicChainControllerBase<T>::init(robot, n);
 	/*
-	 * KDL::ChainIkSolverVel_pinv_givens:
-	 * A inverse velocity kinematics algorithm based on the generalize pseudo inverse to calculate the velocity transformation 
-	 * from Cartesian to joint space of a general KDL::Chain. It uses a svd-calculation based on householders rotations. 
-	*/
+   * KDL::ChainIkSolverVel_pinv_givens:
+   * A inverse velocity kinematics algorithm based on the generalize pseudo
+   * inverse to calculate the velocity transformation
+   * from Cartesian to joint space of a general KDL::Chain. It uses a
+   * svd-calculation based on householders rotations.
+  */
 	ik_vel_solver_.reset(new KDL::ChainIkSolverVel_pinv_givens(this->kdl_chain_));
 	fk_vel_solver_.reset(new KDL::ChainFkSolverVel_recursive(this->kdl_chain_));
 	fk_pos_solver_.reset(new KDL::ChainFkSolverPos_recursive(this->kdl_chain_));
@@ -28,12 +30,15 @@ bool CartesianVelocityControllerBase<T>::init(T *robot, ros::NodeHandle &n)
 		ROS_ERROR("Parameter 'publish_rate' not set");
 		return false;
 	}
-	realtime_pub_.reset(new realtime_tools::RealtimePublisher<cartesian_state_msgs::PoseTwist>(n, "ee_state", 4));
+	realtime_pub_.reset(
+		new realtime_tools::RealtimePublisher<cartesian_state_msgs::PoseTwist>(
+			n, "ee_state", 4));
 
 	// Topics
-	sub_command_ = n.subscribe("command_cart_vel", 5,
-							   &CartesianVelocityControllerBase<T>::command_cart_vel,
-							   this, ros::TransportHints().reliable().tcpNoDelay());
+	sub_command_ =
+		n.subscribe("command_cart_vel", 5,
+					&CartesianVelocityControllerBase<T>::command_cart_vel, this,
+					ros::TransportHints().reliable().tcpNoDelay());
 
 	// Variable init
 	this->joint_msr_.resize(this->kdl_chain_.getNrOfJoints());
@@ -70,7 +75,6 @@ template <typename T>
 void CartesianVelocityControllerBase<T>::update(const ros::Time &time,
 												const ros::Duration &period)
 {
-
 	// Get joint positions
 	// It contains all the 12 joints, both right arm and left arm.
 	//
@@ -90,14 +94,15 @@ void CartesianVelocityControllerBase<T>::update(const ros::Time &time,
 	fk_pos_solver_->JntToCart(this->joint_msr_.q, x_);
 
 	// Limit rate of publishing
-	if (publish_rate_ > 0.0 && last_publish_time_ + ros::Duration(1.0 / publish_rate_) < time)
+	if (publish_rate_ > 0.0 &&
+		last_publish_time_ + ros::Duration(1.0 / publish_rate_) < time)
 	{
-
 		// try to publish
 		if (realtime_pub_->trylock())
 		{
 			// we're actually publishing, so increment time
-			last_publish_time_ = last_publish_time_ + ros::Duration(1.0 / publish_rate_);
+			last_publish_time_ =
+				last_publish_time_ + ros::Duration(1.0 / publish_rate_);
 
 			// populate message
 			realtime_pub_->msg_.header.stamp = time;
@@ -152,7 +157,8 @@ void CartesianVelocityControllerSim::writeVelocityCommands(
 {
 	for (std::size_t i = 0; i < this->joint_handles_.size(); i++)
 	{
-		this->joint_handles_[i].setCommand(this->joint_msr_.q(i) + q_dt_cmd_(i) * period.toSec());
+		this->joint_handles_[i].setCommand(this->joint_msr_.q(i) +
+										   q_dt_cmd_(i) * period.toSec());
 	}
 }
 

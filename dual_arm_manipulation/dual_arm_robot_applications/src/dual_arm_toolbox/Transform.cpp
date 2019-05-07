@@ -12,24 +12,26 @@ geometry_msgs/Pose.msg:
 */
 void Transform::transformPoseToKDL(geometry_msgs::Pose pose, KDL::Frame &kdl_frame)
 {
-    kdl_frame.M = kdl_frame.M.Quaternion(
-        pose.orientation.x,
-        pose.orientation.y,
-        pose.orientation.z,
-        pose.orientation.w);
-    kdl_frame.p.x(pose.position.x);
-    kdl_frame.p.y(pose.position.y);
-    kdl_frame.p.z(pose.position.z);
+  kdl_frame.M = kdl_frame.M.Quaternion(pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w);
+  kdl_frame.p.x(pose.position.x);
+  kdl_frame.p.y(pose.position.y);
+  kdl_frame.p.z(pose.position.z);
 }
 
 void Transform::transformKDLtoPose(KDL::Frame kdl_frame, geometry_msgs::Pose &pose)
 {
-    kdl_frame.M.GetQuaternion(
-        pose.orientation.x,
-        pose.orientation.y,
-        pose.orientation.z,
-        pose.orientation.w);
-    pose.position.x = kdl_frame.p.x();
-    pose.position.y = kdl_frame.p.y();
-    pose.position.z = kdl_frame.p.z();
+  kdl_frame.M.GetQuaternion(pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w);
+  pose.position.x = kdl_frame.p.x();
+  pose.position.y = kdl_frame.p.y();
+  pose.position.z = kdl_frame.p.z();
+}
+
+void Transform::transformVector6dtoTwist(Vector6d twist_vector, geometry_msgs::Twist &twist)
+{
+  twist.linear.x = twist_vector(0);
+  twist.linear.y = twist_vector(1);
+  twist.linear.z = twist_vector(2);
+  twist.angular.x = twist_vector(3);
+  twist.angular.y = twist_vector(4);
+  twist.angular.z = twist_vector(5);
 }

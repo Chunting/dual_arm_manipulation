@@ -5,13 +5,16 @@
  */
 const float rot2deg = 1; //180/3.14159;
 
-UR_Logger::UR_Logger(ros::NodeHandle &nh, std::vector<std::string> ur_namespaces) : nh_(nh)
+UR_Logger::UR_Logger(ros::NodeHandle &nh, std::vector<std::string> &ur_namespaces) : nh_(nh)
 {
+    std::string foldername = generate_logfolder();
+
     for (int i = 0; i < ur_namespaces.size(); i++)
     {
-        ur_listeners_.push_back(new UR_Message_Listener(nh_, ur_namespaces[i]));
+        ur_listeners_.push_back(new UR_Message_Listener(nh_, ur_namespaces[i], foldername, 100));
     }
-
+    
+    
     delimiter_ = ',';
 
     ROS_INFO("Initialising UR Logger"); //it needs to be waited until msgs can be received
@@ -421,6 +424,25 @@ void UR_Logger::logCallback(const ros::TimerEvent &)
     if (ur_listeners_[0]->newTrajectory)
         logfile_command_ << data_line_command(*ur_listeners_[0]);
     //}
+}
+
+std::string UR_Logger::generate_logfolder(){
+    // Creating a recording directory
+  std::string recPath_ = "/home/chunting/catkin_ws/src/dual_arm_manipulation/dataLog/";
+  time_t rawtime;
+  struct tm *timeinfo;
+  char buffer[20];
+
+  time(&rawtime);
+  timeinfo = localtime(&rawtime);
+
+  strftime(buffer, 80, "%Y_%m_%d_%H_%M", timeinfo);
+  recPath_ = recPath_ + std::string(buffer) + '/';
+  const int folder = mkdir(recPath_.c_str(), 0777);
+  if(folder == -1){
+      ROS_ERROR("Failed to creat log folder %s", recPath_.c_str());
+  }
+  return recPath_;
 }
 
 // /* Simple Log-Node */

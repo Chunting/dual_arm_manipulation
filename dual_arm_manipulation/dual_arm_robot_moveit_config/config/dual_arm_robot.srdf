@@ -155,6 +155,7 @@
     <disable_collisions link1="left_shoulder_link" link2="wall1" reason="Never" />
     <disable_collisions link1="left_shoulder_link" link2="wall2" reason="Never" />
     <disable_collisions link1="left_upper_arm_link" link2="right_shoulder_link" reason="Never" />
+    <disable_collisions link1="left_upper_arm_link" link2="stand2" reason="Never" />
     <disable_collisions link1="left_upper_arm_link" link2="wall" reason="Never" />
     <disable_collisions link1="left_upper_arm_link" link2="wall1" reason="Never" />
     <disable_collisions link1="left_upper_arm_link" link2="wall2" reason="Never" />
@@ -217,6 +218,7 @@
     <disable_collisions link1="right_shoulder_link" link2="wall1" reason="Never" />
     <disable_collisions link1="right_shoulder_link" link2="wall2" reason="Never" />
     <disable_collisions link1="right_upper_arm_link" link2="wall" reason="Never" />
+    <disable_collisions link1="right_upper_arm_link" link2="stand2" reason="Never" />
     <disable_collisions link1="right_upper_arm_link" link2="wall1" reason="Never" />
     <disable_collisions link1="right_upper_arm_link" link2="wall2" reason="Never" />
     <disable_collisions link1="right_wrist_1_link" link2="right_wrist_2_link" reason="Adjacent" />

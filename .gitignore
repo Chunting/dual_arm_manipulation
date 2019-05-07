@@ -36,3 +36,16 @@ dataLog/
 *.ipch
 
 admittance_control/\.vscode/
+
+admittance_control/build/catkin/catkin_generated/version/
+
+*.log
+
+admittance_control/build/
+
+
+
+
+admittance_control/\.clang-format
+
+dual_arm_manipulation/\.vscode/
