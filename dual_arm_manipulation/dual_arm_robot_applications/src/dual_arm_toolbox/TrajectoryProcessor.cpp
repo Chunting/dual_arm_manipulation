@@ -181,3 +181,19 @@ void TrajectoryProcessor::publishPlanTrajectory(moveit::planning_interface::Move
     //         }
     //     }
 }
+void TrajectoryProcessor::publishPlanTrajectory(ros::NodeHandle &nh, std::string groupName, 
+                                                moveit::planning_interface::MoveGroupInterface::Plan& plan, unsigned int sec){
+    std::string topic = groupName + "/joint_traj_pt_cmd";
+    ros::Publisher pub_joint_traj_point = nh.advertise<trajectory_msgs::JointTrajectoryPoint>(topic, 1, true);
+    moveit_msgs::RobotTrajectory trajectory_ = plan.trajectory_;
+    for(auto & point : trajectory_.joint_trajectory.points){
+        pub_joint_traj_point.publish(point);
+        // for (unsigned int a = 0; a < point.positions.size(); a++){
+        //     ROS_INFO("%s:\tpos %f\tvel %f", 
+        //     trajectory_.joint_trajectory.joint_names[a].c_str(), 
+        //     point.positions[a]*(180/3.14159),
+        //     point.velocities[a]*(180/3.14159));
+        // }
+    }
+    sleep(sec);
+}

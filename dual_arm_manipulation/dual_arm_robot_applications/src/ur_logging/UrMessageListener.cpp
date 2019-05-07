@@ -32,13 +32,13 @@ UR_Message_Listener::UR_Message_Listener(ros::NodeHandle &nh, std::string ur_nam
   execTrajectorySub_ = nh_.subscribe<moveit_msgs::RobotTrajectory>("/execute_my_trajectory", 10,
                                                                    &UR_Message_Listener::trajectoryCallback, this);
 
-  offset_sub_ = nh_.subscribe("/offset_point", 1, &UR_Message_Listener::offset_Callback, this);
+  offset_sub_ = nh_.subscribe("/real_time_offset_point", 1, &UR_Message_Listener::offset_Callback, this);
 
   newTrajectory = false;
   wrench_external_.setZero();
   wrench_filter_factor_ = 0.1;
-  force_dead_zone_thres_ = 5;
-  torque_dead_zone_thres_ = 0.1;
+  force_dead_zone_thres_ = 2;
+  torque_dead_zone_thres_ = 0;
 }
 
 void UR_Message_Listener::c_joint_vel_Callback(const trajectory_msgs::JointTrajectory::ConstPtr &msg)

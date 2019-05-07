@@ -105,7 +105,7 @@ int main(int argc, char **argv)
     // Publish the desired offset between two EEs, described in right EE coordinate system
     KDL::Frame desired_offset = dualArmRobot.getCurrentOffset(); // w.r.t left_ee_link coordinate system
     geometry_msgs::PointStamped offset_point_temp_;
-    offset_point_temp_.header.frame_id = dualArmRobot.right_.getEndEffectorLink();
+    offset_point_temp_.header.frame_id = dualArmRobot.left_.getEndEffectorLink();
     offset_point_temp_.point.x = desired_offset.p.x();
     offset_point_temp_.point.y = desired_offset.p.y();
     offset_point_temp_.point.z = desired_offset.p.z();

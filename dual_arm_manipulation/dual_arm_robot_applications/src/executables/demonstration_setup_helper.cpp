@@ -81,7 +81,7 @@ int main(int argc, char **argv)
 
     //     // fk -> pos right
     //    std::string right_endeffector = dualArmRobot.right_.getEndEffectorLink();
-    //    geometry_msgs::PoseStamped FK_PoseStamped = dualArmRobot.getPositionFK(right_endeffector, IK_robot_state);
+    //    geometry_msgs::PoseStamped FK_PoseStamped = dualArmRobot.publishPlanCartTrajectory(right_endeffector, IK_robot_state);
 
     //     std::vector<double> right_joint_values = dualArmRobot.right_.getCurrentJointValues();
     //     KDL::Frame frame_pose_right;
