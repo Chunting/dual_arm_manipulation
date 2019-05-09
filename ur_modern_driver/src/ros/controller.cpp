@@ -127,5 +127,5 @@ void ROSController::onRobotStateChange(RobotState state)
     return;
 
   service_enabled_ = next;
-  service_cooldown_ = 125;
+  service_cooldown_ = 100;
 }

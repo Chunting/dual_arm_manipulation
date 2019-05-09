@@ -9,12 +9,16 @@
 	<arg name="paused" default="true" />
 	
 	<!--Load and start -->
-	<arg name="use_cartesian_vel_contrller" default="false" />
-	<arg if="$(arg use_cartesian_vel_contrller)" name="controllers" value= "joint_state_controller force_torque_sensor_controller ur5_cartesian_velocity_controller"/>
-	<arg unless="$(arg use_cartesian_vel_contrller)" name="controllers" value= "joint_state_controller force_torque_sensor_controller vel_based_pos_traj_controller "/>
+	<arg name="use_cartesian_vel_controller" default="false" />
+	<arg if="$(arg use_cartesian_vel_controller)" name="controllers" 
+		value= "joint_state_controller force_torque_sensor_controller ur5_cartesian_velocity_controller"/>
+	<arg unless="$(arg use_cartesian_vel_controller)" name="controllers" 
+		value= "joint_state_controller force_torque_sensor_controller vel_based_pos_traj_controller "/>
 	<!-- Load but not start -->
-	<arg if="$(arg use_cartesian_vel_contrller)" name="stopped_controllers" value= "vel_based_admittance_traj_controller joint_group_vel_controller vel_based_pos_traj_controller"/>
-	<arg unless="$(arg use_cartesian_vel_contrller)" name="stopped_controllers" value= "vel_based_admittance_traj_controller joint_group_vel_controller ur5_cartesian_velocity_controller "/>
+	<arg if="$(arg use_cartesian_vel_controller)" name="stopped_controllers" 
+		value= "vel_based_admittance_traj_controller joint_group_vel_controller vel_based_pos_traj_controller"/>
+	<arg unless="$(arg use_cartesian_vel_controller)" name="stopped_controllers" 
+		value= "vel_based_admittance_traj_controller joint_group_vel_controller ur5_cartesian_velocity_controller "/>
 
     <!-- left arm -->
 	<arg name="left_prefix" default=""/>

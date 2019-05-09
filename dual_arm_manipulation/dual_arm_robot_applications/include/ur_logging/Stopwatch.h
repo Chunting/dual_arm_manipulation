@@ -1,5 +1,6 @@
+#ifndef PROJECT_STOPWATCH_H
+#define PROJECT_STOPWATCH_H
 #include <ros/ros.h>
-//#include <time.h>
 
 class Stopwatch{
 protected:
@@ -10,3 +11,4 @@ public:
 private:
     ros::Time start_;
 };
+#endif

@@ -195,11 +195,6 @@ bool DualArmRobot::adaptTrajectory(moveit_msgs::RobotTrajectory left_trajectory,
                                    moveit_msgs::RobotTrajectory &both_arms_trajectory,
                                    double jump_threshold)
 {
-    // setup planning scene
-    // Look up the robot description on the ROS parameter server and construct a RobotModel to use
-    // planning_scene::PlanningScene planningScene(kinematic_model);
-
-    // const std::vector<std::string>& left_joint_names = left_joint_model_group->getJointModelNames();
     const std::vector<std::string> &right_joint_names = right_joint_model_group->getActiveJointModelNames();
 
     // setup both_arms_trajectory message
@@ -460,8 +455,7 @@ bool DualArmRobot::graspMove(double distance, bool avoid_collisions, bool use_le
             try_step = try_again_question();
             if (!try_step)
                 return false;
-        }
-        else
+        } else
         {
             dual_arm_toolbox::TrajectoryProcessor::clean(left_trajectory);
          
@@ -480,14 +474,6 @@ bool DualArmRobot::graspMove(double distance, bool avoid_collisions, bool use_le
 
 bool DualArmRobot::try_again_question()
 {
-    // ask to try again
-    /*
-    std::cout << "Try this step again? (y/n) ";
-    char response;
-    std::cin >> response;
-    if (response == 'n') return false;
-    else return true;*/
-
     // automatic retry
     if (ros::ok())
     {
@@ -1287,15 +1273,13 @@ bool DualArmRobot::execute(moveit::planning_interface::MoveGroupInterface::Plan 
     // action namespace is follow_joint_trajectory
     moveit_simple_controller_manager::FollowJointTrajectoryControllerHandle handle_left(left_controller_, "follow_joint_trajectory");
     moveit_simple_controller_manager::FollowJointTrajectoryControllerHandle handle_right(right_controller_, "follow_joint_trajectory");
-    //moveit_simple_controller_manager::FollowJointTrajectoryControllerHandle handle_right("right/right_vel_based_traj_admittance_controller","follow_joint_trajectory");
 
     // for both arms trajectories: because in planning each arm was not aware of the other there is a collision check before executing the trajectory
     // TODO: put in again later
+    ros::Duration timeout = ros::Duration(0);  // Action client waitforresult, Wait until the goal is finished.  
     if ((plan_left.trajectory_.joint_trajectory.joint_names.size() > 0) && (plan_right.trajectory_.joint_trajectory.joint_names.size() > 0))
     {
         // check trajectory for collisions
-        robot_model_loader::RobotModelLoader robot_model_loader("robot_description");
-        robot_model::RobotModelPtr kinematic_model = robot_model_loader.getModel();
         planning_scene::PlanningScene planningScene(kinematic_model);
         bool isValid = planningScene.isPathValid(plan.start_state_, plan.trajectory_, "arms");
         if (!isValid)
@@ -1303,41 +1287,34 @@ bool DualArmRobot::execute(moveit::planning_interface::MoveGroupInterface::Plan 
             ROS_ERROR("Path is invalid. Execution aborted");
             return false;
         }
-    }
-    /// Print out the joint trajectory infomation
-    dual_arm_toolbox::TrajectoryProcessor::publishPlanTrajectory(plan, 1);
-    if (plan_left.trajectory_.joint_trajectory.joint_names.size() > 0)
+        dual_arm_toolbox::TrajectoryProcessor::visualizePlan(plan_left, 0);
+        dual_arm_toolbox::TrajectoryProcessor::visualizePlan(plan_right, 0);
+        success_left = handle_left.sendTrajectory(plan_left.trajectory_);
+        success_right = handle_right.sendTrajectory(plan_right.trajectory_);
+        // http://docs.ros.org/jade/api/moveit_simple_controller_manager/html/action__based__controller__handle_8h_source.html#l00106
+        success_left = handle_left.waitForExecution(timeout);  
+        success_right = handle_right.waitForExecution(timeout);
+        publishPlanCartTrajectory(left_.getEndEffectorLink(), plan_left, 100);
+        publishPlanCartTrajectory(right_.getEndEffectorLink(), plan_right, 100);
+        dual_arm_toolbox::TrajectoryProcessor::publishJointTrajectory(nh_, "left", plan_left);
+        dual_arm_toolbox::TrajectoryProcessor::publishJointTrajectory(nh_, "right", plan_right);
+    } else if (plan_left.trajectory_.joint_trajectory.joint_names.size() > 0)
     {
         dual_arm_toolbox::TrajectoryProcessor::visualizePlan(plan_left, 0);
-        // dual_arm_toolbox::TrajectoryProcessor::publishPlanTrajectory(nh_, "left", plan_left,1);
-        // publishPlanCartTrajectory(left_.getEndEffectorLink(), plan.start_state_, plan_left.trajectory_);
         success_left = handle_left.sendTrajectory(plan_left.trajectory_);
-    }
-
-    if (plan_right.trajectory_.joint_trajectory.joint_names.size() > 0)
-    {
+        success_left = handle_left.waitForExecution(timeout); // Without any argument ROS::Duration(), it always returen true.
+        publishPlanCartTrajectory(left_.getEndEffectorLink(), plan_left, 100); 
+        dual_arm_toolbox::TrajectoryProcessor::publishJointTrajectory(nh_, "left", plan_left);
+    } else {
         dual_arm_toolbox::TrajectoryProcessor::visualizePlan(plan_right, 0);
-        // dual_arm_toolbox::TrajectoryProcessor::publishPlanTrajectory(nh_, "right", plan_right,1);
         success_right = handle_right.sendTrajectory(plan_right.trajectory_);
-
+        success_right = handle_right.waitForExecution(timeout);
+        publishPlanCartTrajectory(right_.getEndEffectorLink(), plan_right, 100);
+        dual_arm_toolbox::TrajectoryProcessor::publishJointTrajectory(nh_, "right", plan_right);
     }
-
-    if (plan_left.trajectory_.joint_trajectory.joint_names.size() > 0)
-    {
-        // handle_left.cancelExecution  cancel the executio of the trajectory
-        // handle_left.getLastExecutionStatus, if cancelled, the last_execu is preempted
-        success_left = handle_left.waitForExecution();
-    }
-    else
-        success_left = true;
-
-    if (plan_right.trajectory_.joint_trajectory.joint_names.size() > 0)
-    {
-        success_right = handle_right.waitForExecution();
-    }
-    else
-        success_right = true;
-    // sleep(0.5);  // to be sure robot is at goal position
+    dual_arm_toolbox::TrajectoryProcessor::publishPlanTrajectory(plan, 1);
+   
+    
 
     // update the left arm's target state based on the last point of the trajectory.
     if (plan_left.trajectory_.joint_trajectory.joint_names.size())
@@ -1582,29 +1559,30 @@ Eigen::MatrixXd DualArmRobot::getJacobian(const robot_state::JointModelGroup *jo
     return jacobian;
 }
 
-void DualArmRobot::publishPlanCartTrajectory(std::string endEffectorLink, 
-                                                        moveit_msgs::RobotState seed_robot_state, 
-                                                        moveit_msgs::RobotTrajectory arms_trajectory)
+void DualArmRobot::publishPlanCartTrajectory(std::string endEffectorLink,
+                                            moveit::planning_interface::MoveGroupInterface::Plan& plan, 
+                                            double frequency)
 {
 
     // fk service client setup
     // Use a service to call the forward kinematics and then update the target pose in cartisian space
    
-    
-    ROS_INFO("Call the forward kinematics for the left arm...");
+    ros::Rate loop_rate(frequency);
+    ROS_INFO("Call the forward kinematics for the %s...", endEffectorLink.c_str());
     ros::ServiceClient fk_client = nh_.serviceClient<moveit_msgs::GetPositionFK>("compute_fk");
     moveit_msgs::GetPositionFK fk_msg;
     fk_msg.request.header.frame_id = "world";
     fk_msg.request.fk_link_names.push_back(endEffectorLink);
-    fk_msg.request.robot_state = seed_robot_state;
-    std::string plan_topic = "left/cmd_pose";
+    fk_msg.request.robot_state = plan.start_state_;
+    std::string plan_topic = "left/command_cart_pos";
     std::size_t right_found = endEffectorLink.find("right");
     if (right_found!=std::string::npos){
-        plan_topic = "right/cmd_pose";
+        plan_topic = "right/command_cart_pos";
     } 
     ros::Publisher pub_cart_plan = nh_.advertise<geometry_msgs::PoseStamped>(plan_topic, 100);
     geometry_msgs::PoseStamped poseFK;
-    for(auto & point: arms_trajectory.joint_trajectory.points){
+    poseFK.header.stamp = plan.trajectory_.joint_trajectory.header.stamp;
+    for(auto & point: plan.trajectory_.joint_trajectory.points){
         fk_msg.request.robot_state.joint_state.position.clear();
         std::copy(point.positions.begin(), point.positions.end(),
             std::back_inserter(fk_msg.request.robot_state.joint_state.position));
@@ -1615,12 +1593,13 @@ void DualArmRobot::publishPlanCartTrajectory(std::string endEffectorLink,
         {
             ROS_ERROR("Failed to compute forward kinematics for %s", endEffectorLink.c_str());
         }
+        poseFK.header.stamp += point.time_from_start;
         poseFK = fk_msg.response.pose_stamped[0];
         pub_cart_plan.publish(poseFK);
-        PrintPose(poseFK.pose);
+        loop_rate.sleep();
     }
    
-    ROS_INFO("%ld cartesian postures have been published", arms_trajectory.joint_trajectory.points.size());
+    ROS_INFO("%ld cartesian postures have been published", plan.trajectory_.joint_trajectory.points.size());
     
 }
 
@@ -1647,9 +1626,9 @@ void DualArmRobot::PrintTrajectory(const moveit_msgs::RobotTrajectory &trajector
 
 void DualArmRobot::publishPoseMsg()
 {
-    ros::Publisher left_pose_pub = nh_.advertise<geometry_msgs::PoseStamped>("left/pose", 1);
-    ros::Publisher right_pose_pub = nh_.advertise<geometry_msgs::PoseStamped>("right/pose", 1);
-    ros::Publisher offset_point_pub = nh_.advertise<geometry_msgs::PointStamped>("/real_time_offset_point", 1);
+    ros::Publisher left_pose_pub = nh_.advertise<geometry_msgs::PoseStamped>("left/ee_pose_in_world", 100);
+    ros::Publisher right_pose_pub = nh_.advertise<geometry_msgs::PoseStamped>("right/ee_pose_in_world", 100);
+    ros::Publisher offset_point_pub = nh_.advertise<geometry_msgs::PointStamped>("/real_time_offset_point", 100);
     geometry_msgs::PoseStamped left_current_pose_temp_;
     geometry_msgs::PoseStamped right_current_pose_temp_;
     geometry_msgs::PointStamped offset_point_temp_;

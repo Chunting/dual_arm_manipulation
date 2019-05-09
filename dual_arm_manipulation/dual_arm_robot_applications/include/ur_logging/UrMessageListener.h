@@ -1,3 +1,5 @@
+#ifndef PROJECT_URMESSAGELISTENER_H
+#define PROJECT_URMESSAGELISTENER_H
 #include <ros/ros.h>
 #include <tf/transform_listener.h>
 #include <tf/transform_datatypes.h>
@@ -29,6 +31,8 @@
 #include <eigen3/Eigen/Dense>
 #include <eigen3/Eigen/Geometry>
 
+#include "ur_logging/Stopwatch.h"
+
 using namespace Eigen;
 typedef Matrix<double, 6, 1> Vector6d;
 
@@ -37,10 +41,13 @@ class UR_Message_Listener
 protected:
   ros::NodeHandle nh_;
   ros::Subscriber sub_cartesian_state_;
-  ros::Subscriber sub_cartesian_cmd_;
+  ros::Subscriber sub_cartesian_vel_state_;
+  ros::Subscriber sub_cartesian_pos_state_;
+  ros::Subscriber sub_cartesian_vel_cmd_;
+  ros::Subscriber sub_cartesian_pos_cmd_;
   ros::Subscriber sub_wrench_external_;
   ros::Subscriber sub_joint_state_;
-  ros::Subscriber sub_joint_cmd_;
+  ros::Subscriber sub_joint_traj_cmd_;
 
   ros::Subscriber joint_speed_com_sub_;
   ros::Subscriber state_sub_;
@@ -51,7 +58,8 @@ protected:
   ros::Subscriber offset_sub_;
 
 public:
-  UR_Message_Listener(ros::NodeHandle &nh, std::string ur_namespace, std::string folder_name, double frequency=100);
+  UR_Message_Listener(ros::NodeHandle &nh, std::string ur_namespace, std::string folder_name);
+  void write_logfile();
 
   std::string ur_namespace_;
  
@@ -66,10 +74,13 @@ public:
   moveit_msgs::RobotTrajectory last_trajectory_msg_;
 
   cartesian_state_msgs::PoseTwist last_cartesian_state_msg_;
-  geometry_msgs::Twist last_cartesian_cmd_msg_;
+  geometry_msgs::TwistStamped last_cartesian_vel_state_msg_;
+  geometry_msgs::PoseStamped last_cartesian_pos_state_msg_;
+  geometry_msgs::Twist last_cartesian_vel_cmd_msg_;
+  geometry_msgs::PoseStamped last_cartesian_pos_cmd_msg_;
   geometry_msgs::WrenchStamped last_wrench_msg_;
   sensor_msgs::JointState last_joint_state_msg_;
-  trajectory_msgs::JointTrajectory last_joint_cmd_msg_;
+  trajectory_msgs::JointTrajectory last_joint_traj_cmd_msg_;
 
 
   bool newTrajectory = false;
@@ -83,27 +94,38 @@ public:
 
 private:
   std::string topic_cartesian_state_;
+  std::string topic_cartesian_pos_state_;
+  std::string topic_cartesian_vel_state_;
   std::string topic_joint_state_;
-  std::string topic_cartesian_cmd_;
-  std::string topic_joint_cmd_;
+  std::string topic_cartesian_vel_cmd_;
+  std::string topic_cartesian_pos_cmd_;
+  std::string topic_joint_traj_cmd_;
   std::string topic_external_wrench;
+
   // real variables from the robot
   std::ofstream file_cartesian_state_;
-  std::ofstream file_cartesian_cmd_;
+  std::ofstream file_cartesian_pos_state_;
+  std::ofstream file_cartesian_vel_state_;
+  std::ofstream file_cartesian_vel_cmd_;
+  std::ofstream file_cartesian_pos_cmd_;
   std::ofstream file_wrench_;
   std::ofstream file_joint_state_;
   std::ofstream file_joint_cmd_;
 
-  ros::Rate loop_rate_;
   char delimiter_;
   std::string folder_name_;
+  Stopwatch stopwatch_;
+  double start_secondes_;
 
 
-  void cartesian_state_callback(const cartesian_state_msgs::PoseTwistConstPtr msg);
-  void cartesian_cmd_callback(const geometry_msgs::TwistConstPtr &msg);
+  void cartesian_state_callback(const cartesian_state_msgs::PoseTwistConstPtr &msg);
+  void cartesian_pos_state_callback(const geometry_msgs::PoseStampedPtr &msg);
+  void cartesian_vel_state_callback(const geometry_msgs::TwistStampedConstPtr &msg);
+  void cartesian_vel_cmd_callback(const geometry_msgs::TwistConstPtr &msg);
+  void cartesian_pos_cmd_callback(const geometry_msgs::PoseStampedPtr &msg);
   void wrench_callback(const geometry_msgs::WrenchStampedConstPtr msg);
   void joint_state_callback(const sensor_msgs::JointState::Ptr &msg);
-  void joint_cmd_callback(const trajectory_msgs::JointTrajectory::ConstPtr &msg);
+  void joint_traj_cmd_callback(const trajectory_msgs::JointTrajectoryConstPtr &msg);
 
   void generate_logfile();       //automatically generate a file name
  
@@ -117,3 +139,4 @@ private:
   void c_tcp_speedCallback(const geometry_msgs::TwistStamped::ConstPtr &msg);
   void offset_Callback(const geometry_msgs::PointStamped::ConstPtr &msg);
 };
+#endif

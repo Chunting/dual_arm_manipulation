@@ -48,7 +48,7 @@ bool RTPublisher::publishTool(RTShared& packet, Time& t)
 
 bool RTPublisher::publishTransform(RTShared& packet, Time& t)
 {
-  auto tv = packet.tool_vector_actual;
+  auto tv = packet.tool_vector_actual; // tool_vector_actual is read from robot, be coincident from teachPad
 
   Transform transform;
   transform.setOrigin(Vector3(tv.position.x, tv.position.y, tv.position.z));
@@ -67,7 +67,7 @@ bool RTPublisher::publishTransform(RTShared& packet, Time& t)
   }
 
   transform.setRotation(quat);
-
+  
   transform_broadcaster_.sendTransform(StampedTransform(transform, t, base_frame_, tool_frame_));
 
   Transform transform_tool0_to_world = transform_base_to_world*transform;

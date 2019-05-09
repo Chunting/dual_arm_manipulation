@@ -1,3 +1,5 @@
+#ifndef PROJECT_URLOGGER_H
+#define PROJECT_URLOGGER_H
 #include <ros/ros.h>
 #include <std_msgs/String.h>
 
@@ -24,6 +26,7 @@ public:
 
     Stopwatch stopwatch_;
     std::string logfile_name_;
+    std::string logfolder_name_ = "/home/chunting/catkin_ws/src/dual_arm_manipulation/dataLog/";
     std::string logfile_name_command_;
     char delimiter_;
 
@@ -44,3 +47,4 @@ private:
 
     void logCallback(const ros::TimerEvent&);
 };
+#endif

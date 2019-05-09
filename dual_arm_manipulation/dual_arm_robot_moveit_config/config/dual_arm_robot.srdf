@@ -70,7 +70,7 @@
     </group_state>
     <group_state name="grasp_position" group="arms">
         <joint name="left_shoulder_pan_joint" value="-1.309" />
-         <joint name="left_shoulder_lift_joint" value="-1.396" />
+        <joint name="left_shoulder_lift_joint" value="-1.396" />
         <joint name="left_elbow_joint" value="1.658" />
         <joint name="left_wrist_1_joint" value="-2.618" />
         <joint name="left_wrist_2_joint" value="-1.745" />

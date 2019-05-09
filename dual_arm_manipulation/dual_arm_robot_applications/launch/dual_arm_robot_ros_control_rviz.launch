@@ -15,8 +15,12 @@
 	<arg name="limited" default="true"/>
 	<arg name="config" default="true"/>
 
-	<arg name="use_cartesian_vel_contrller" default="false" />
+	<arg name="use_cartesian_vel_controller" default="false" />
 
+
+    <!-- Loading the admittance parameters from a yaml file 
+    <arg name="ROBOT_PARAMS_FILE" default="$(find dual_arm_robot_driver)/config/admittance_params_real.yaml" />
+	-->
 	<!-- dual_arm_robot bringup. including ros controllers -->
 	<include file="$(find dual_arm_robot_driver)/launch/dual_arm_robot_bringup_ros_control.launch">
 		<arg name="left_robot_ip" value="$(arg left_robot_ip)"/>
@@ -24,8 +28,9 @@
 		<arg name="limited" value="$(arg limited)"/>
 		<arg name="left_prefix" default="$(arg left_prefix)"/>
 		<arg name="right_prefix" default="$(arg right_prefix)"/>
-		<arg name="use_cartesian_vel_contrller" default="$(arg use_cartesian_vel_contrller)"/>
+		<arg name="use_cartesian_vel_controller" default="$(arg use_cartesian_vel_controller)"/>
 	</include>
+
 
 
 	<!-- MoveIt! Setup -->

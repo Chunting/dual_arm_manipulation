@@ -14,7 +14,7 @@
 	<arg name="left_robot_ip" default="192.168.1.101"/>
 	<arg name="left_reverse_port" default="50001"/>
 	<arg name="left_base_frame" default="left_base" />
-	<arg name="left_tool_frame" default="left_ee_link" />
+	<arg name="left_tool_frame" default="left_tool0" />
 	<!--Load and start -->
 	<arg name="left_controllers" default="joint_state_controller vel_based_pos_traj_controller force_torque_sensor_controller "/>
 	<!-- Only load but do not start -->
@@ -26,7 +26,7 @@
 	<arg name="right_robot_ip" default="192.168.1.102"/>
 	<arg name="right_reverse_port" default="50002"/>
 	<arg name="right_base_frame" default="right_base" />
-	<arg name="right_tool_frame" default="right_ee_link" />
+	<arg name="right_tool_frame" default="right_tool0" />
 	<arg name="right_controllers" default="joint_state_controller right_force_torque_sensor_controller  ur5_cartesian_velocity_controller"/>
 	<arg name="right_stopped_controllers" default="vel_based_admittance_traj_controller pos_based_pos_traj_controller joint_group_vel_controller"/>
 
@@ -85,7 +85,7 @@
 
 		<!-- Convert joint states to /tf tranforms -->
 		<node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher">
-			<rosparam param="publish_frequency">125</rosparam>
+			<rosparam param="publish_frequency">100</rosparam>
 		</node>
 			<!-- Start force/torque sensor --> 
 		<node name="ft_sensor" pkg="robotiq_ft_sensor" type="rq_sensor" respawn="true" output="screen">
