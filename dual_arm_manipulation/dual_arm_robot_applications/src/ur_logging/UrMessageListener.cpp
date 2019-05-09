@@ -192,7 +192,7 @@ void UR_Message_Listener::wrench_callback(const geometry_msgs::WrenchStampedCons
 void UR_Message_Listener::joint_state_callback(const sensor_msgs::JointState::Ptr &msg)
 {
     // "joint_states" receives messages of all robots. This is seperating the searched one from the others.
-    if (msg->name[0].find(ur_namespace_) != std::string::npos)
+    if (msg->position.size() > 0 && msg->name[0].find(ur_namespace_) != std::string::npos)
     {
         last_joint_state_msg_ = *msg;
     }
@@ -377,17 +377,16 @@ void UR_Message_Listener::write_logfile()
     file_wrench_ << "\n";
 
     file_joint_state_ << stopwatch_.elapsed().toSec();
-
-    for (auto &pos : last_joint_state_msg_.position)
+    for(int i=0; i<last_joint_state_msg_.position.size(); ++i)
     {
-        file_joint_state_ << delimiter_ << pos;
+        file_joint_state_ << delimiter_ << last_joint_state_msg_.position[i];
     }
 
     // append joint velocity
 
-    for (auto &vel : last_joint_state_msg_.velocity)
+     for(int i=0; i<last_joint_state_msg_.velocity.size(); ++i)
     {
-        file_joint_state_ << delimiter_ << vel;
+        file_joint_state_ << delimiter_ << last_joint_state_msg_.velocity[i];
     }
     file_joint_state_ << "\n";
 

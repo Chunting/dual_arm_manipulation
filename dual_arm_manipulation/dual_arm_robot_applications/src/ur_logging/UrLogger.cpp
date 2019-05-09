@@ -107,92 +107,41 @@ std::string UR_Logger::headline(UR_Message_Listener &ur_listener)
     std::stringstream ss;
 
     // append time
-    ss << "time";
+    ss << "Time";
  
     // append position state
     for (int i = 0; i < 6; i++)
     {
-        ss << delimiter_ << joint_names[i] + "_state_pos"; // << state_pos_suffix;
+        ss << delimiter_ << joint_names[i] + "_state_pos"; 
     }
     for (int i = 0; i < 6; i++)
     {
-        ss << delimiter_ << joint_names[i] + "_state_vel"; // << state_vel_suffix;
+        ss << delimiter_ << joint_names[i] + "_state_vel";
     }
-
-    // append Cartesian state position
-    std::string m_tcp_pos_prefix = "m_tcp_pos_" + ur_listener.ur_namespace_ + "_";
-    //std::string wrench_force_suffix = " [N]";
-    ss << delimiter_ << m_tcp_pos_prefix << "x"
-       << delimiter_ << m_tcp_pos_prefix << "y"
-       << delimiter_ << m_tcp_pos_prefix << "z";
-    // append Cartesian state rotation
-    std::string m_tcp_rot_prefix = "m_tcp_rot_" + ur_listener.ur_namespace_ + "_";
-    //std::string wrench_force_suffix = " [N]";
-    ss << delimiter_ << m_tcp_rot_prefix << "qx"
-       << delimiter_ << m_tcp_rot_prefix << "qy"
-       << delimiter_ << m_tcp_rot_prefix << "qz"
-       << delimiter_ << m_tcp_rot_prefix << "qw";
-    // append measured tcp velocity
-    std::string m_tcp_vel_prefix = "m_tcp_vel_" + ur_listener.ur_namespace_ + "_";
-    //std::string target_vel_suffix = " [rad/s]";
-    ss << delimiter_ << m_tcp_vel_prefix << "x"
-       << delimiter_ << m_tcp_vel_prefix << "y"
-       << delimiter_ << m_tcp_vel_prefix << "z"
-       << delimiter_ << m_tcp_vel_prefix << "ax"
-       << delimiter_ << m_tcp_vel_prefix << "ay"
-       << delimiter_ << m_tcp_vel_prefix << "az";
-
-    // append wrench
-    std::string tcp_force_prefix = ur_listener.ur_namespace_ + "_tcp_force_";
-    //std::string wrench_force_suffix = " [N]";
-    ss << delimiter_ << tcp_force_prefix << "x"
-       << delimiter_ << tcp_force_prefix << "y"
-       << delimiter_ << tcp_force_prefix << "z"
-       << delimiter_ << tcp_force_prefix << "s";
-    std::string tcp_torque_prefix = ur_listener.ur_namespace_ + "_tcp_torque_";
-    //std::string wrench_torque_suffix = " [Nm]";
-    ss << delimiter_ << tcp_torque_prefix << "x"
-       << delimiter_ << tcp_torque_prefix << "y"
-       << delimiter_ << tcp_torque_prefix << "z";
-    // append command joint position
-    // std::string c_joint_pos_prefix = "c_joint_pos_";
-    // for (int i = 0; i < 6; i++)
-    // {
-    //     ss << delimiter_ << c_joint_pos_prefix << ur_listener.last_joint_state_msg_.name[i]; // << state_vel_suffix;
-    // }
-    // append command joint velocity
-    /*
-    std::string c_joint_vel_prefix = "c_joint_vel_";
-    //std::string state_vel_suffix = " [rad/s]";
-    for (int i = 0; i < 6; i++)
-    {
-        ss << delimiter_ << c_joint_vel_prefix << ur_listener.last_joint_state_msg_.name[i]; // << state_vel_suffix;
-    }
-    // // append command tcp position
-    // std::string c_tcp_pos_prefix = "c_tcp_pos_" + ur_listener.ur_namespace_ + "_";
-    // //std::string state_vel_suffix = " [rad/s]";
-    // ss << delimiter_ << c_tcp_pos_prefix << "x"
-    //    << delimiter_ << c_tcp_pos_prefix << "y"
-    //    << delimiter_ << c_tcp_pos_prefix << "z";
-    // // append Cartesian state rotation
-    // std::string c_tcp_rot_prefix = "c_tcp_rot_" + ur_listener.ur_namespace_ + "_";
-    // //std::string wrench_force_suffix = " [N]";
-    // ss << delimiter_ << c_tcp_rot_prefix << "qx"
-    //    << delimiter_ << c_tcp_rot_prefix << "qy"
-    //    << delimiter_ << c_tcp_rot_prefix << "qz"
-    //    << delimiter_ << c_tcp_rot_prefix << "qw";
-    // append measured tcp velocity
-    std::string c_tcp_vel_prefix = "c_tcp_vel_" + ur_listener.ur_namespace_ + "_";
-    //std::string target_vel_suffix = " [rad/s]";
-    ss << delimiter_ << c_tcp_vel_prefix << "x"
-       << delimiter_ << c_tcp_vel_prefix << "y"
-       << delimiter_ << c_tcp_vel_prefix << "z"
-       << delimiter_ << c_tcp_vel_prefix << "ax"
-       << delimiter_ << c_tcp_vel_prefix << "ay"
-       << delimiter_ << c_tcp_vel_prefix << "az";
-    */
-    //std::string target_vel_suffix = " [rad/s]";
-    ss << delimiter_ << "offset_x"
+    std::string tool_pose_state_prefix = ur_listener.ur_namespace_ + "_tool_pose_state_";
+    std::string tool_vel_state_prefix = ur_listener.ur_namespace_ + "_tool_vel_state_";
+    std::string wrench_prefix = ur_listener.ur_namespace_;
+    ss << delimiter_ << tool_pose_state_prefix << "x"
+       << delimiter_ << tool_pose_state_prefix << "y"
+       << delimiter_ << tool_pose_state_prefix << "z"
+       << delimiter_ << tool_pose_state_prefix << "qx"
+       << delimiter_ << tool_pose_state_prefix << "qy"
+       << delimiter_ << tool_pose_state_prefix << "qz"
+       << delimiter_ << tool_pose_state_prefix << "qw"
+       << delimiter_ << tool_vel_state_prefix << "vx"
+       << delimiter_ << tool_vel_state_prefix << "vy"
+       << delimiter_ << tool_vel_state_prefix << "vz"
+       << delimiter_ << tool_vel_state_prefix << "ax"
+       << delimiter_ << tool_vel_state_prefix << "ay"
+       << delimiter_ << tool_vel_state_prefix << "az"
+       << delimiter_ << wrench_prefix << "_Fx"
+       << delimiter_ << wrench_prefix << "_Fy"
+       << delimiter_ << wrench_prefix << "_Fz"
+       << delimiter_ << wrench_prefix << "_Fs"
+       << delimiter_ << wrench_prefix << "x"
+       << delimiter_ << wrench_prefix << "y"
+       << delimiter_ << wrench_prefix << "z"
+       << delimiter_ << "offset_x"
        << delimiter_ << "offset_y"
        << delimiter_ << "offset_z";
 
@@ -203,11 +152,9 @@ std::string UR_Logger::data_line(UR_Message_Listener &ur_listener)
 {
 
     std::ostringstream converter; // stream used to convert numbers to string
-    // append time
     converter << (stopwatch_.elapsed().toSec());
 
     // append joint position state
-    //std::vector<double> state_pos = last_joint_state_msg_.position;
     if (ur_listener.last_joint_state_msg_.position.size() == 6)
     {
         for (int i = 0; i < 6; i++)
@@ -260,27 +207,6 @@ std::string UR_Logger::data_line(UR_Message_Listener &ur_listener)
     converter << delimiter_ << ur_listener.last_wrench_msg_.wrench.torque.x
               << delimiter_ << ur_listener.last_wrench_msg_.wrench.torque.y
               << delimiter_ << ur_listener.last_wrench_msg_.wrench.torque.z;
-
-    // // append joint command velocity
-    // if ((ur_listener.last_c_joint_vel_msg_.points.size() > 0) && (ur_listener.last_c_joint_vel_msg_.points[0].velocities.size() == 6))
-    // {
-    //     for (int i = 0; i < 6; i++)
-    //     {
-    //         converter << delimiter_ << ur_listener.last_c_joint_vel_msg_.points[0].velocities[i] * rot2deg;
-    //     }
-    // }
-    // else
-    // {
-    //     converter << delimiter_ << delimiter_ << delimiter_ << delimiter_ << delimiter_ << delimiter_;
-    // }
-
-    // // append command tcp speed
-    // converter << delimiter_ << ur_listener.last_c_tcp_vel_msg_.twist.linear.x
-    //           << delimiter_ << ur_listener.last_c_tcp_vel_msg_.twist.linear.y
-    //           << delimiter_ << ur_listener.last_c_tcp_vel_msg_.twist.linear.z
-    //           << delimiter_ << ur_listener.last_c_tcp_vel_msg_.twist.angular.x
-    //           << delimiter_ << ur_listener.last_c_tcp_vel_msg_.twist.angular.y
-    //           << delimiter_ << ur_listener.last_c_tcp_vel_msg_.twist.angular.z;
 
     converter << delimiter_ << ur_listener.last_offset_msg_.point.x
               << delimiter_ << ur_listener.last_offset_msg_.point.y
