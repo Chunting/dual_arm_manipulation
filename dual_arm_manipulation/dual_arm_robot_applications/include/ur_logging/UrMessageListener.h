@@ -58,7 +58,8 @@ protected:
   ros::Subscriber offset_sub_;
 
 public:
-  UR_Message_Listener(ros::NodeHandle &nh, std::string ur_namespace, std::string folder_name, double frequency=100);
+  UR_Message_Listener(ros::NodeHandle &nh, std::string ur_namespace, std::string folder_name);
+  void write_logfile();
 
   std::string ur_namespace_;
  
@@ -111,10 +112,10 @@ private:
   std::ofstream file_joint_state_;
   std::ofstream file_joint_cmd_;
 
-  ros::Rate loop_rate_;
   char delimiter_;
   std::string folder_name_;
   Stopwatch stopwatch_;
+  double start_secondes_;
 
 
   void cartesian_state_callback(const cartesian_state_msgs::PoseTwistConstPtr &msg);
