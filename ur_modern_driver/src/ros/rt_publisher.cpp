@@ -48,7 +48,7 @@ bool RTPublisher::publishTool(RTShared& packet, Time& t)
 
 bool RTPublisher::publishTransform(RTShared& packet, Time& t)
 {
-  auto tv = packet.tool_vector_actual;
+  auto tv = packet.tool_vector_actual; // tool_vector_actual is read from robot, be coincident from teachPad
 
   Transform transform;
   transform.setOrigin(Vector3(tv.position.x, tv.position.y, tv.position.z));
@@ -67,19 +67,22 @@ bool RTPublisher::publishTransform(RTShared& packet, Time& t)
   }
 
   transform.setRotation(quat);
-
+  
   transform_broadcaster_.sendTransform(StampedTransform(transform, t, base_frame_, tool_frame_));
 
+  Transform transform_tool0_to_world = transform_base_to_world*transform;
+  Vector3 origin_tool = transform_tool0_to_world.getOrigin();
+  Quaternion quat_tool = transform_tool0_to_world.getRotation();
   geometry_msgs::PoseStamped tool_pose;
   tool_pose.header.stamp = t;
-  tool_pose.header.frame_id=base_frame_;
-  tool_pose.pose.position.x = tv.position.x;
-  tool_pose.pose.position.y = tv.position.y;
-  tool_pose.pose.position.z = tv.position.z;
-  tool_pose.pose.orientation.x = quat.x();
-  tool_pose.pose.orientation.y = quat.y();
-  tool_pose.pose.orientation.z = quat.z();
-  tool_pose.pose.orientation.w = quat.w();
+  tool_pose.header.frame_id = "world";
+  tool_pose.pose.position.x = origin_tool.getX();
+  tool_pose.pose.position.y = origin_tool.getY();
+  tool_pose.pose.position.z = origin_tool.getZ();
+  tool_pose.pose.orientation.x = quat_tool.x();
+  tool_pose.pose.orientation.y = quat_tool.y();
+  tool_pose.pose.orientation.z = quat_tool.z();
+  tool_pose.pose.orientation.w = quat_tool.w();
   tool_pose_pub_.publish(tool_pose);
   return true;
 }

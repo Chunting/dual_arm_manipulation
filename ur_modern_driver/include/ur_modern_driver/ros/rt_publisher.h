@@ -8,6 +8,7 @@
 #include <sensor_msgs/Temperature.h>
 #include <tf/tf.h>
 #include <tf/transform_broadcaster.h>
+#include <tf/transform_listener.h>
 #include <cstdlib>
 #include <vector>
 
@@ -33,6 +34,7 @@ private:
   std::string base_frame_;
   std::string tool_frame_;
   bool temp_only_;
+  Transform transform_base_to_world;
 
   bool publishJoints(RTShared& packet, Time& t);
   bool publishWrench(RTShared& packet, Time& t);
@@ -57,6 +59,14 @@ public:
     {
       joint_names_.push_back(joint_prefix + j);
     }
+    transform_base_to_world = tf::Transform(tf::Quaternion(0, 0, 0, 1), tf::Vector3(0.0, 0.0, 0.0));
+    if(base_frame_.find("left") != std::string::npos){
+      transform_base_to_world = tf::Transform(tf::Quaternion(0.271, -0.653, 0.271, 0.653), tf::Vector3(0.000, -0.250, 1.200));
+    }
+    if(base_frame_.find("right") != std::string::npos){
+      transform_base_to_world = tf::Transform(tf::Quaternion(0.654, -0.270, -0.653, -0.270), tf::Vector3(0.000, 0.250, 1.200));
+    }
+    
   }
 
   virtual bool consume(RTState_V1_6__7& state);

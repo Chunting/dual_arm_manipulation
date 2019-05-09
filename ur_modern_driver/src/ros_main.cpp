@@ -132,9 +132,6 @@ int main(int argc, char **argv)
   // Add prefix to joint names
   std::transform(args.joint_names.begin(), args.joint_names.end(), args.joint_names.begin(),
                  [&args](std::string name) { return args.prefix + name; });
-  printf("Prefix: %s\n Joint names: %s\t%s\t%s\t%s\t%s\t%s\n", args.prefix.c_str(),
-        args.joint_names[0].c_str(),args.joint_names[1].c_str(),args.joint_names[2].c_str(),
-        args.joint_names[3].c_str(),args.joint_names[4].c_str(),args.joint_names[5].c_str());
   std::string local_ip(getLocalIPAccessibleFromHost(args.host));
 
   URFactory factory(args.host);
@@ -147,7 +144,6 @@ int main(int argc, char **argv)
   RTPublisher rt_pub(args.prefix, args.base_frame, args.tool_frame, args.use_ros_control);
   auto rt_commander = factory.getCommander(rt_stream);
   vector<IConsumer<RTPacket> *> rt_vec{ &rt_pub };
-
   INotifier *notifier(nullptr);
   ROSController *controller(nullptr);
   ActionServer *action_server(nullptr);
