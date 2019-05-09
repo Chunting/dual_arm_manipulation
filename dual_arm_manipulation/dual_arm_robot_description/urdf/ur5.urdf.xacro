@@ -99,11 +99,14 @@
         <origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
       </xacro:cylinder_inertial>
     </link>
-
+    <!--This connection is different from the original one (ur_description).  
+        The parent link is changed from ${prefix}base_link to ${prefix}base,  
+        then the transform from the base to tool0 is coincident with teachPad. 
+        The joint rpy is adjusted to rpy="0 0 ${pi}", if connected to ${prefix}base_link, it should be rpy="0 0 0" --> 
     <joint name="${prefix}shoulder_pan_joint" type="revolute">
-      <parent link="${prefix}base_link" />
+      <parent link="${prefix}base" />
       <child link = "${prefix}shoulder_link" />
-      <origin xyz="0.0 0.0 ${ur5_shoulder_height}" rpy="0.0 0.0 0.0" />
+      <origin xyz="0.0 0.0 ${ur5_shoulder_height}" rpy="0 0 ${pi}" /> 
       <axis xyz="0 0 1" />
       <xacro:unless value="${joint_limited}">
         <limit lower="${-pi}" upper="${pi}" effort="150.0" velocity="2"/>

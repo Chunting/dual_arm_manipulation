@@ -70,6 +70,21 @@ bool RTPublisher::publishTransform(RTShared& packet, Time& t)
 
   transform_broadcaster_.sendTransform(StampedTransform(transform, t, base_frame_, tool_frame_));
 
+  Transform transform_tool0_to_world = transform_base_to_world*transform;
+  Vector3 origin_tool = transform_tool0_to_world.getOrigin();
+  Quaternion quat_tool = transform_tool0_to_world.getRotation();
+  geometry_msgs::PoseStamped tool_pose;
+  tool_pose.header.stamp = t;
+  tool_pose.header.frame_id = "world";
+  tool_pose.pose.position.x = origin_tool.getX();
+  tool_pose.pose.position.y = origin_tool.getY();
+  tool_pose.pose.position.z = origin_tool.getZ();
+  tool_pose.pose.orientation.x = quat_tool.x();
+  tool_pose.pose.orientation.y = quat_tool.y();
+  tool_pose.pose.orientation.z = quat_tool.z();
+  tool_pose.pose.orientation.w = quat_tool.w();
+  tool_pose_pub_.publish(tool_pose);
+
   return true;
 }
 

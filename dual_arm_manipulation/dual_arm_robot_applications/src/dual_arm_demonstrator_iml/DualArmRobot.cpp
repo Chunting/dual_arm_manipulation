@@ -394,9 +394,9 @@ bool DualArmRobot::graspMove(double distance, bool avoid_collisions, bool use_le
         KDL::Vector right_vec_d;  // distance vector
         KDL::Frame right_p_eef;   // endeffector frame
         dual_arm_toolbox::Transform::transformPoseToKDL(right_waypoint, right_p_eef);
-        right_vec_d.x(distance);
+        right_vec_d.x(0);
         right_vec_d.y(0);
-        right_vec_d.z(0);
+        right_vec_d.z(distance);
         right_vec_d = right_p_eef.M * right_vec_d;     // Rotate distance vector
 
         // calculate waypoint
@@ -439,9 +439,9 @@ bool DualArmRobot::graspMove(double distance, bool avoid_collisions, bool use_le
         KDL::Vector left_vec_d; // distance vector
         KDL::Frame left_p_eef;  // endeffector frame
         dual_arm_toolbox::Transform::transformPoseToKDL(left_waypoint, left_p_eef);
-        left_vec_d.x(distance);
+        left_vec_d.x(0);
         left_vec_d.y(0);
-        left_vec_d.z(0);
+        left_vec_d.z(distance);
         left_vec_d = left_p_eef.M * left_vec_d; // Rotate distance vector
         
 

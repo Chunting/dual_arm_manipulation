@@ -10,10 +10,10 @@
     <!--CHAINS: When a chain is specified, all the links along the chain (including endpoints) are included in the group. Additionally, all the joints that are parents to included links are also included. This means that joints along the chain and the parent joint of the base link are included in the group-->
     <!--SUBGROUPS: Groups can also be formed by referencing to already defined group names-->
     <group name="left_manipulator">
-        <chain base_link="left_base_link" tip_link="left_ee_link" />
+        <chain base_link="left_base" tip_link="left_tool0" />
     </group>
     <group name="right_manipulator">
-        <chain base_link="right_base_link" tip_link="right_ee_link" />
+        <chain base_link="right_base" tip_link="right_tool0" />
     </group>
     <group name="arms">
         <group name="left_manipulator" />
@@ -98,8 +98,8 @@
         <joint name="right_wrist_3_joint" value="-1.57" />
     </group_state>
     <!--END EFFECTOR: Purpose: Represent information about an end effector.-->
-    <end_effector name="left_endeffector" parent_link="left_ee_link" group="left_ee" parent_group="left_manipulator" />
-    <end_effector name="right_endeffector" parent_link="right_ee_link" group="right_ee" parent_group="right_manipulator" />
+    <end_effector name="left_endeffector" parent_link="left_tool0" group="left_ee" parent_group="left_manipulator" />
+    <end_effector name="right_endeffector" parent_link="right_tool0" group="right_ee" parent_group="right_manipulator" />
     <!--VIRTUAL JOINT: Purpose: this element defines a virtual joint between a robot link and an external frame of reference (considered fixed with respect to the robot)-->
     <virtual_joint name="virtual_joint" type="fixed" parent_frame="stand1" child_link="world" />
     <!--DISABLE COLLISIONS: By default it is assumed that any link of the robot could potentially come into collision with any other link in the robot. This tag disables collision checking between a specified pair of links. -->
