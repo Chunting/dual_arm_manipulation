@@ -70,6 +70,17 @@ bool RTPublisher::publishTransform(RTShared& packet, Time& t)
 
   transform_broadcaster_.sendTransform(StampedTransform(transform, t, base_frame_, tool_frame_));
 
+  geometry_msgs::PoseStamped tool_pose;
+  tool_pose.header.stamp = t;
+  tool_pose.header.frame_id=base_frame_;
+  tool_pose.pose.position.x = tv.position.x;
+  tool_pose.pose.position.y = tv.position.y;
+  tool_pose.pose.position.z = tv.position.z;
+  tool_pose.pose.orientation.x = quat.x();
+  tool_pose.pose.orientation.y = quat.y();
+  tool_pose.pose.orientation.z = quat.z();
+  tool_pose.pose.orientation.w = quat.w();
+  tool_pose_pub_.publish(tool_pose);
   return true;
 }
 

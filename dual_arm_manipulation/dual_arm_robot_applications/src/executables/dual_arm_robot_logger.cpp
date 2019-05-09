@@ -13,7 +13,7 @@ int main(int argc, char **argv){
     ros::init(argc, argv, "dual_arm_robot_logger");
     ros::NodeHandle nh;
 
-    ros::AsyncSpinner asyncSpinner(2);
+    ros::AsyncSpinner asyncSpinner(10);
     asyncSpinner.start();
 
     std::vector<std::string> ur_namespaces;

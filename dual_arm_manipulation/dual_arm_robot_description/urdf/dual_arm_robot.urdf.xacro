@@ -141,7 +141,7 @@
 
 
 	<!-- place robotiq_fts300 to left arm -->
-	<xacro:robotiq_fts300 prefix="$(arg prefix_left)" parent="$(arg prefix_left)ee_link"/>
+	<xacro:robotiq_fts300 prefix="$(arg prefix_left)" parent="$(arg prefix_left)tool0"/>
 
 	<!-- place ur5 endeffector  -->
 	<xacro:endeffector prefix="$(arg prefix_left)"/>
@@ -161,7 +161,7 @@
 	</joint>
 
 	<!-- place robotiq_fts150 to right arm -->
-	<xacro:robotiq_fts300 prefix="$(arg prefix_right)" parent="$(arg prefix_right)ee_link"/>
+	<xacro:robotiq_fts300 prefix="$(arg prefix_right)" parent="$(arg prefix_right)tool0"/>
 	<!-- place ur5 right endeffector -->
 
 	<xacro:endeffector prefix="$(arg prefix_right)"/>

@@ -7,11 +7,11 @@ const float rot2deg = 1; //180/3.14159;
 
 UR_Logger::UR_Logger(ros::NodeHandle &nh, std::vector<std::string> &ur_namespaces) : nh_(nh)
 {
-    std::string foldername = generate_logfolder();
+    logfolder_name_ = generate_logfolder();
 
     for (int i = 0; i < ur_namespaces.size(); i++)
     {
-        ur_listeners_.push_back(new UR_Message_Listener(nh_, ur_namespaces[i], foldername, 100));
+        ur_listeners_.push_back(new UR_Message_Listener(nh_, ur_namespaces[i], logfolder_name_, 100));
     }
     
     
@@ -94,8 +94,8 @@ void UR_Logger::generate_logfile_name()
 
     strftime(buffer, 20, "%Y_%m_%d_%H_%M%S", timeinfo);
     std::string log_suffix = buffer;
-    logfile_name_ = "/home/chunting/catkin_ws/src/dual_arm_manipulation/dataLog/ur_log_" + log_suffix + ".csv";
-    logfile_name_command_ = "/home/chunting/catkin_ws/src/dual_arm_manipulation/dataLog/ur_command_" + log_suffix + ".csv";
+    logfile_name_ = logfolder_name_ + "ur_log.csv";
+    logfile_name_command_ = logfolder_name_ + "ur_command.csv";
 }
 
 std::string UR_Logger::headline(UR_Message_Listener &ur_listener)
@@ -113,19 +113,13 @@ std::string UR_Logger::headline(UR_Message_Listener &ur_listener)
     ss << "time";
  
     // append position state
-    std::string m_joint_pos_prefix = "m_joint_pos_" + ur_listener.ur_namespace_ + "_";
-    //std::string state_pos_suffix = " [rad]";
     for (int i = 0; i < 6; i++)
     {
-        ss << delimiter_ << m_joint_pos_prefix << joint_names[i]; // << state_pos_suffix;
+        ss << delimiter_ << joint_names[i] + "_state_pos"; // << state_pos_suffix;
     }
-
-    // append state velocity
-    std::string m_joint_vel_prefix = "m_joint_vel_" + ur_listener.ur_namespace_ + "_";
-    //std::string state_vel_suffix = " [rad/s]";
     for (int i = 0; i < 6; i++)
     {
-        ss << delimiter_ << m_joint_vel_prefix << joint_names[i]; // << state_vel_suffix;
+        ss << delimiter_ << joint_names[i] + "_state_vel"; // << state_vel_suffix;
     }
 
     // append Cartesian state position
@@ -216,7 +210,6 @@ std::string UR_Logger::data_line(UR_Message_Listener &ur_listener)
     converter << (stopwatch_.elapsed().toSec());
 
     // append joint position state
-    //std::vector<double> state_pos = last_joint_state_msg_.position;
     if (ur_listener.last_joint_state_msg_.position.size() == 6)
     {
         for (int i = 0; i < 6; i++)
@@ -337,7 +330,7 @@ std::string UR_Logger::data_line_command(UR_Message_Listener &ur_listener)
     {
         for (unsigned int i = 0; i < ur_listener.last_trajectory_msg_.joint_trajectory.points.size(); i++)
         {
-            // append time      PCtime+time_from_start
+            // append time   PCtime+time_from_start
             // It waits for 1 sec after pulish the trojectory
             double timeStamp = (stopwatch_.elapsed().toSec()) + ur_listener.last_trajectory_msg_.joint_trajectory.points[i].time_from_start.toSec() + 1;
             converter << timeStamp << delimiter_ << ur_listener.last_trajectory_msg_.joint_trajectory.points[i].time_from_start.toSec();

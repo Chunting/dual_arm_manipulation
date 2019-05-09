@@ -159,8 +159,8 @@ private:
     while (running_)
     {
       // timeout was chosen because we should receive messages
-      // at roughly 125hz (every 8ms) and have to update
-      // the controllers (i.e. the consumer) with *at least* 125Hz
+      // at roughly 100hz (every 8ms) and have to update
+      // the controllers (i.e. the consumer) with *at least* 100Hz
       // So we update the consumer more frequently via onTimeout
       if (!queue_.wait_dequeue_timed(product, std::chrono::milliseconds(8)))
       {

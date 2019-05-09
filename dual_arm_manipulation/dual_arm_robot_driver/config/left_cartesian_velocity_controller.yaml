@@ -1,11 +1,11 @@
 ur5_cartesian_velocity_controller:
   type: cartesian_controller/CartesianVelocityController
-  publish_rate: 125
+  publish_rate: 100
   root_name: left_base_link
   tip_name: left_wrist_3_link
 
 ur5_cartesian_state_controller:
     type: cartesian_controller/CartesianStateController
-    publish_rate: 125
+    publish_rate: 100
     root_name: left_base_link
     tip_name: left_wrist_3_link

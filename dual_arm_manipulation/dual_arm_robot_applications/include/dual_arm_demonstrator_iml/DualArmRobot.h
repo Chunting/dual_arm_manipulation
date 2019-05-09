@@ -167,9 +167,9 @@ class DualArmRobot
     moveit_msgs::RobotState getPositionIK(std::string &groupName, moveit_msgs::RobotState &seed_robot_state, geometry_msgs::PoseStamped &poseIK);
     std::vector<double> getPositionIK(const robot_state::JointModelGroup *joint_model_group, const geometry_msgs::Pose &pose);
 
-    void publishPlanCartTrajectory(std::string endEffectorLink, 
-                                                        moveit_msgs::RobotState seed_robot_state, 
-                                                        moveit_msgs::RobotTrajectory arms_trajectory);
+    void publishPlanCartTrajectory(std::string endEffectorLink,
+                                            moveit::planning_interface::MoveGroupInterface::Plan& plan, 
+                                            double frequency=100);
    
 
     Eigen::MatrixXd getJacobian(const robot_state::JointModelGroup *joint_model_group, Eigen::Vector3d &reference_point_position);
