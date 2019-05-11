@@ -20,8 +20,6 @@
 #include "dual_arm_demonstrator_iml/DualArmRobot.h"
 #include "dual_arm_demonstrator_iml/SceneManager.h"
 
-// UR Logger
-#include "ur_logging/UrLogger.h"
 
 int main(int argc, char **argv)
 {
@@ -42,7 +40,7 @@ int main(int argc, char **argv)
     moveit::planning_interface::MoveItErrorCode error;
     error.val = -1;
     
-    FTSensorSubscriber FTsubscriber(nh, "left");
+    FTSensorSubscriber left_wrench_sub(nh, "left");
 
     geometry_msgs::Vector3Stamped direction;
     direction.header.frame_id = "world";
@@ -76,8 +74,8 @@ int main(int argc, char **argv)
     //     ROS_INFO("Current Pose: ");
     //     dualArmRobot.PrintPose(right_pose.pose);
     //     moveit_msgs::RobotState seed_robot_state = dualArmRobot.getCurrentRobotStateMsg();
-    //     std::string groupName = dualArmRobot.right_.getName();
-    //     moveit_msgs::RobotState IK_robot_state = dualArmRobot.getPositionIK(groupName, seed_robot_state, right_pose);
+    //     std::string ur_namespace = dualArmRobot.right_.getName();
+    //     moveit_msgs::RobotState IK_robot_state = dualArmRobot.getPositionIK(ur_namespace, seed_robot_state, right_pose);
 
     //     // fk -> pos right
     //    std::string right_endeffector = dualArmRobot.right_.getEndEffectorLink();
@@ -101,14 +99,14 @@ int main(int argc, char **argv)
     ROS_INFO("========== MOVE CLOSER =================");
 
     dualArmRobot.graspMove(0.025, false);
-    double res_force = sqrt(FTsubscriber.last_wrench_msg_.wrench.force.x * FTsubscriber.last_wrench_msg_.wrench.force.x + FTsubscriber.last_wrench_msg_.wrench.force.y * FTsubscriber.last_wrench_msg_.wrench.force.y + FTsubscriber.last_wrench_msg_.wrench.force.z * FTsubscriber.last_wrench_msg_.wrench.force.z);
+    double res_force = sqrt(left_wrench_sub.last_wrench_msg_.wrench.force.x * left_wrench_sub.last_wrench_msg_.wrench.force.x + left_wrench_sub.last_wrench_msg_.wrench.force.y * left_wrench_sub.last_wrench_msg_.wrench.force.y + left_wrench_sub.last_wrench_msg_.wrench.force.z * left_wrench_sub.last_wrench_msg_.wrench.force.z);
 
     while (res_force < 20)
     {
         dualArmRobot.graspMove(0.001);
-        res_force = sqrt(FTsubscriber.last_wrench_msg_.wrench.force.x * FTsubscriber.last_wrench_msg_.wrench.force.x + FTsubscriber.last_wrench_msg_.wrench.force.y * FTsubscriber.last_wrench_msg_.wrench.force.y + FTsubscriber.last_wrench_msg_.wrench.force.z * FTsubscriber.last_wrench_msg_.wrench.force.z);
+        res_force = sqrt(left_wrench_sub.last_wrench_msg_.wrench.force.x * left_wrench_sub.last_wrench_msg_.wrench.force.x + left_wrench_sub.last_wrench_msg_.wrench.force.y * left_wrench_sub.last_wrench_msg_.wrench.force.y + left_wrench_sub.last_wrench_msg_.wrench.force.z * left_wrench_sub.last_wrench_msg_.wrench.force.z);
     }
-    ROS_INFO("I heard: Force [%f]  FX[%f] FY[%f] FZ[%f]", res_force, FTsubscriber.last_wrench_msg_.wrench.force.x, FTsubscriber.last_wrench_msg_.wrench.force.y, FTsubscriber.last_wrench_msg_.wrench.force.z);
+    ROS_INFO("I heard: Force [%f]  FX[%f] FY[%f] FZ[%f]", res_force, left_wrench_sub.last_wrench_msg_.wrench.force.x, left_wrench_sub.last_wrench_msg_.wrench.force.y, left_wrench_sub.last_wrench_msg_.wrench.force.z);
 
     sleep(1);
     // ROS_INFO("========== GET OFFSET =================");
@@ -134,15 +132,15 @@ int main(int argc, char **argv)
     //         dualArmRobot.linearMove(direction, true, true,true);
     //     }
     //     dualArmRobot.linearMove(direction, true, true,true);
-    //     res_force = sqrt(FTsubscriber.last_wrench_msg_.wrench.force.x*FTsubscriber.last_wrench_msg_.wrench.force.x
-    //                         + FTsubscriber.last_wrench_msg_.wrench.force.y*FTsubscriber.last_wrench_msg_.wrench.force.y
-    //                         + FTsubscriber.last_wrench_msg_.wrench.force.z*FTsubscriber.last_wrench_msg_.wrench.force.z);
+    //     res_force = sqrt(left_wrench_sub.last_wrench_msg_.wrench.force.x*left_wrench_sub.last_wrench_msg_.wrench.force.x
+    //                         + left_wrench_sub.last_wrench_msg_.wrench.force.y*left_wrench_sub.last_wrench_msg_.wrench.force.y
+    //                         + left_wrench_sub.last_wrench_msg_.wrench.force.z*left_wrench_sub.last_wrench_msg_.wrench.force.z);
     // }
     // while (res_force >= 60 && res_force < 90){
     //     dualArmRobot.linearMove(direction, true, true,true);
-    //     res_force = sqrt(FTsubscriber.last_wrench_msg_.wrench.force.x*FTsubscriber.last_wrench_msg_.wrench.force.x
-    //                         + FTsubscriber.last_wrench_msg_.wrench.force.y*FTsubscriber.last_wrench_msg_.wrench.force.y
-    //                         + FTsubscriber.last_wrench_msg_.wrench.force.z*FTsubscriber.last_wrench_msg_.wrench.force.z);
+    //     res_force = sqrt(left_wrench_sub.last_wrench_msg_.wrench.force.x*left_wrench_sub.last_wrench_msg_.wrench.force.x
+    //                         + left_wrench_sub.last_wrench_msg_.wrench.force.y*left_wrench_sub.last_wrench_msg_.wrench.force.y
+    //                         + left_wrench_sub.last_wrench_msg_.wrench.force.z*left_wrench_sub.last_wrench_msg_.wrench.force.z);
     // }
     // dualArmRobot.linearMoveParallel(direction,"box7", 0.5);
 

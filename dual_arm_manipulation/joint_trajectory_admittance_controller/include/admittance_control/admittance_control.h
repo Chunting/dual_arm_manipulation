@@ -225,7 +225,7 @@ void AdmittanceControl::init(ros::NodeHandle &nh)
     // nh.param("offset_topic", offset_topic, std::string());
     sub_wrench_external_ = nh_.subscribe(wrench_topic, 1, &AdmittanceControl::wrenchCallback, this);
 
-    sub_offset_new_ = nh_.subscribe("/real_time_offset_point", 10, &AdmittanceControl::offsetCallback, this);
+    sub_offset_new_ = nh_.subscribe("/offset_point_state", 10, &AdmittanceControl::offsetCallback, this);
     sub_offset_desired_ = nh_.subscribe("/desired_offset_point", 1, &AdmittanceControl::desiredOffsetCallback, this);
 }
 

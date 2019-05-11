@@ -15,7 +15,7 @@
 	<arg name="limited" default="true"/>
 	<arg name="config" default="true"/>
 
-	<arg name="use_cartesian_vel_controller" default="false" />
+	<arg name="use_cart_vel_controller" default="false" />
 
 
     <!-- Loading the admittance parameters from a yaml file 
@@ -28,7 +28,7 @@
 		<arg name="limited" value="$(arg limited)"/>
 		<arg name="left_prefix" default="$(arg left_prefix)"/>
 		<arg name="right_prefix" default="$(arg right_prefix)"/>
-		<arg name="use_cartesian_vel_controller" default="$(arg use_cartesian_vel_controller)"/>
+		<arg name="use_cart_vel_controller" default="$(arg use_cart_vel_controller)"/>
 	</include>
 
 

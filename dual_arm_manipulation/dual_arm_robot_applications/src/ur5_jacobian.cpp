@@ -24,8 +24,6 @@
 #include "dual_arm_toolbox/TrajectoryProcessor.h"
 #include "dual_arm_toolbox/Transform.h"
 
-// UR Logger
-#include "ur_logging/UrLogger.h"
 std::vector<double> joint_speeds;
 std::vector<double> joint_values;
 bool data_come = false;
@@ -147,11 +145,6 @@ int main(int argc, char **argv)
     int direction = 1;
     int counter = 0;
     ros::Time be = ros::Time::now();
-      // Start logging data
-    std::vector<std::string> ur_namespaces;
-    ur_namespaces.push_back("left");
-    UR_Logger ur_logger(nh, ur_namespaces);
-    ur_logger.start(100);
     while (ros::ok())
     {
         if (data_come)
@@ -270,7 +263,6 @@ int main(int argc, char **argv)
     // END_TUTORIAL
     
     sleep(1);
-    ur_logger.stop();
     ros::shutdown();
     return 0;
 }

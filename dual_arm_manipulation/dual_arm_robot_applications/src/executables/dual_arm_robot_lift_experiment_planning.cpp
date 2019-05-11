@@ -24,9 +24,6 @@
 #include "dual_arm_demonstrator_iml/DualArmRobot.h"
 #include "dual_arm_demonstrator_iml/SceneManager.h"
 
-// UR Logger
-#include "ur_logging/UrLogger.h"
-
 
 int main(int argc, char **argv) {
     ros::init(argc, argv, "dual_arm_robot_demonstration");
@@ -40,19 +37,13 @@ int main(int argc, char **argv) {
     // Scene Setup
     dual_arm_demonstrator_iml::SceneManager sceneManager(nh);
     sceneManager.setupScene();
-    // Start logging data
-    std::vector<std::string> ur_namespaces;
-    ur_namespaces.push_back("left");
-    ur_namespaces.push_back("right");
-    UR_Logger ur_logger(nh, ur_namespaces);
-    ur_logger.start(100);
     // MoveIt! motion planning variables
     moveit::planning_interface::MoveGroupInterface::Plan left_plan;
     moveit::planning_interface::MoveGroupInterface::Plan right_plan;
     moveit::planning_interface::MoveItErrorCode error;
     error.val = -1;
     // Start listening the FT sensor
-    FTSensorSubscriber FTsubscriber(nh, ur_namespaces[0]);
+    FTSensorSubscriber left_wrench_sub(nh, "left");
 
     // Set some joint constraints
     //@TODO verify its effectiveness
@@ -130,7 +121,6 @@ int main(int argc, char **argv) {
 
     // END
     sleep(1);
-    ur_logger.stop();
     ROS_INFO("Finished demonstration");
     ros::shutdown();
     return 0;

@@ -23,9 +23,6 @@
 #include "dual_arm_demonstrator_iml/DualArmRobot.h"
 #include "dual_arm_demonstrator_iml/SceneManager.h"
 
-// UR Logger
-#include "ur_logging/UrLogger.h"
-
 // #include "dual_arm_demonstrator_iml/FTSensorSubscriber.h"
 
 int main(int argc, char **argv)
@@ -41,12 +38,6 @@ int main(int argc, char **argv)
   // Scene Setup
   dual_arm_demonstrator_iml::SceneManager sceneManager(nh);
   sceneManager.setupScene();
-  // Start logging data
-  std::vector<std::string> ur_namespaces;
-  ur_namespaces.push_back("left");
-  ur_namespaces.push_back("right");
-  UR_Logger ur_logger(nh, ur_namespaces);
-  ur_logger.start(100);
 
   // variables
   moveit::planning_interface::MoveGroupInterface::Plan left_plan;
@@ -54,8 +45,8 @@ int main(int argc, char **argv)
   moveit::planning_interface::MoveItErrorCode error;
   error.val = -1;
   // Force torque sensor setup
-  FTSensorSubscriber left_robotiq_ft_subscriber(nh, ur_namespaces[0]);
-  FTSensorSubscriber right_robotiq_ft_subscriber(nh, ur_namespaces[1]);
+  FTSensorSubscriber left_robotiq_ft_subscriber(nh, "left");
+  FTSensorSubscriber right_robotiq_ft_subscriber(nh, "right");
 
   geometry_msgs::Vector3Stamped direction;
   direction.header.frame_id = "world";
@@ -111,28 +102,28 @@ int main(int argc, char **argv)
   double desired_diff_ = std::abs(left_force_norm - right_force_norm);
 
   /* Adjust left arm pose */
-  geometry_msgs::Twist left_arm_twist_cmd;
-  geometry_msgs::Twist right_arm_twist_cmd;
-  Vector6d world_left_arm_cmd_twist_;
-  Vector6d world_right_arm_cmd_twist_;
-  Vector6d left_base_arm_cmd_twist_;
-  Vector6d right_base_arm_cmd_twist_;
-  world_left_arm_cmd_twist_.setZero();
-  world_right_arm_cmd_twist_.setZero();
-  left_base_arm_cmd_twist_.setZero();
-  right_base_arm_cmd_twist_.setZero();
-  world_left_arm_cmd_twist_ << 0, 0.001, 0, 0, 0, 0;
-  world_right_arm_cmd_twist_ << 0, -0.001, 0, 0, 0, 0;
+  geometry_msgs::Twist left_arm_vel_cmd;
+  geometry_msgs::Twist right_arm_vel_cmd;
+  Vector6d world_left_arm_cmd_vel_;
+  Vector6d world_right_arm_cmd_vel_;
+  Vector6d left_base_arm_cmd_vel_;
+  Vector6d right_base_arm_cmd_vel_;
+  world_left_arm_cmd_vel_.setZero();
+  world_right_arm_cmd_vel_.setZero();
+  left_base_arm_cmd_vel_.setZero();
+  right_base_arm_cmd_vel_.setZero();
+  world_left_arm_cmd_vel_ << 0, 0.001, 0, 0, 0, 0;
+  world_right_arm_cmd_vel_ << 0, -0.001, 0, 0, 0, 0;
   sleep(3);
   while (std::abs(left_force_norm) < 20 || desired_diff_ > 0.5)
   {
-    left_base_arm_cmd_twist_ = rotation_left_base_world * world_left_arm_cmd_twist_;
-    right_base_arm_cmd_twist_ = rotation_right_base_world * world_right_arm_cmd_twist_;
+    left_base_arm_cmd_vel_ = rotation_left_base_world * world_left_arm_cmd_vel_;
+    right_base_arm_cmd_vel_ = rotation_right_base_world * world_right_arm_cmd_vel_;
 
-    dual_arm_toolbox::Transform::transformVector6dtoTwist(left_base_arm_cmd_twist_, left_arm_twist_cmd);
-    dual_arm_toolbox::Transform::transformVector6dtoTwist(right_base_arm_cmd_twist_, right_arm_twist_cmd);
-    pub_left_arm_cmd_.publish(left_arm_twist_cmd);
-    pub_right_arm_cmd_.publish(right_arm_twist_cmd);
+    dual_arm_toolbox::Transform::transformVector6dtoTwist(left_base_arm_cmd_vel_, left_arm_vel_cmd);
+    dual_arm_toolbox::Transform::transformVector6dtoTwist(right_base_arm_cmd_vel_, right_arm_vel_cmd);
+    pub_left_arm_cmd_.publish(left_arm_vel_cmd);
+    pub_right_arm_cmd_.publish(right_arm_vel_cmd);
 
     left_force_norm = left_robotiq_ft_subscriber.wrench_external_(2);
     right_force_norm = right_robotiq_ft_subscriber.wrench_external_(2);
@@ -142,12 +133,12 @@ int main(int argc, char **argv)
     ros::spinOnce();
     loop_rate.sleep();
   }
-  left_base_arm_cmd_twist_.setZero();
-  right_base_arm_cmd_twist_.setZero();
-  dual_arm_toolbox::Transform::transformVector6dtoTwist(left_base_arm_cmd_twist_, left_arm_twist_cmd);
-  dual_arm_toolbox::Transform::transformVector6dtoTwist(right_base_arm_cmd_twist_, right_arm_twist_cmd);
-  pub_left_arm_cmd_.publish(left_arm_twist_cmd);
-  pub_right_arm_cmd_.publish(right_arm_twist_cmd);
+  left_base_arm_cmd_vel_.setZero();
+  right_base_arm_cmd_vel_.setZero();
+  dual_arm_toolbox::Transform::transformVector6dtoTwist(left_base_arm_cmd_vel_, left_arm_vel_cmd);
+  dual_arm_toolbox::Transform::transformVector6dtoTwist(right_base_arm_cmd_vel_, right_arm_vel_cmd);
+  pub_left_arm_cmd_.publish(left_arm_vel_cmd);
+  pub_right_arm_cmd_.publish(right_arm_vel_cmd);
 
 
   
@@ -173,12 +164,12 @@ int main(int argc, char **argv)
   direction.vector.x = 0;
   direction.vector.y = 0;
   direction.vector.z = 0.15;
-  world_left_arm_cmd_twist_.setZero();
-  world_right_arm_cmd_twist_.setZero();
-  left_base_arm_cmd_twist_.setZero();
-  right_base_arm_cmd_twist_.setZero();
-  world_left_arm_cmd_twist_ << 0, 0, 0.01, 0, 0, 0;
-  world_right_arm_cmd_twist_ << 0, 0, 0.01, 0, 0, 0;
+  world_left_arm_cmd_vel_.setZero();
+  world_right_arm_cmd_vel_.setZero();
+  left_base_arm_cmd_vel_.setZero();
+  right_base_arm_cmd_vel_.setZero();
+  world_left_arm_cmd_vel_ << 0, 0, 0.01, 0, 0, 0;
+  world_right_arm_cmd_vel_ << 0, 0, 0.01, 0, 0, 0;
   
  
   sleep(3);
@@ -188,16 +179,16 @@ int main(int argc, char **argv)
     
     double temp_diff = std::abs(left_robotiq_ft_subscriber.wrench_external_(2) - right_robotiq_ft_subscriber.wrench_external_(2));
     if(std::abs(desired_diff_ - temp_diff)>0.5){
-        world_right_arm_cmd_twist_(1) = 0.002*(desired_diff_ - temp_diff);
+        world_right_arm_cmd_vel_(1) = 0.002*(desired_diff_ - temp_diff);
     }else {
-        world_right_arm_cmd_twist_(1) = 0 ;
+        world_right_arm_cmd_vel_(1) = 0 ;
     }
-    left_base_arm_cmd_twist_ = rotation_left_base_world * world_left_arm_cmd_twist_;
-    right_base_arm_cmd_twist_ = rotation_right_base_world * world_right_arm_cmd_twist_;
-    dual_arm_toolbox::Transform::transformVector6dtoTwist(left_base_arm_cmd_twist_, left_arm_twist_cmd);
-    dual_arm_toolbox::Transform::transformVector6dtoTwist(right_base_arm_cmd_twist_, right_arm_twist_cmd);
-    pub_left_arm_cmd_.publish(left_arm_twist_cmd);
-    pub_right_arm_cmd_.publish(right_arm_twist_cmd);
+    left_base_arm_cmd_vel_ = rotation_left_base_world * world_left_arm_cmd_vel_;
+    right_base_arm_cmd_vel_ = rotation_right_base_world * world_right_arm_cmd_vel_;
+    dual_arm_toolbox::Transform::transformVector6dtoTwist(left_base_arm_cmd_vel_, left_arm_vel_cmd);
+    dual_arm_toolbox::Transform::transformVector6dtoTwist(right_base_arm_cmd_vel_, right_arm_vel_cmd);
+    pub_left_arm_cmd_.publish(left_arm_vel_cmd);
+    pub_right_arm_cmd_.publish(right_arm_vel_cmd);
     ros::spinOnce();
     loop_rate.sleep();
     // evaluation
@@ -205,15 +196,15 @@ int main(int argc, char **argv)
     duration = after_place_7 - before_pick_7;
     // ROS_INFO("manipulation box 7 took: %f sec", duration.toSec());
   }
-  world_left_arm_cmd_twist_.setZero();
-  world_right_arm_cmd_twist_.setZero();
-  left_base_arm_cmd_twist_.setZero();
-  right_base_arm_cmd_twist_.setZero();
+  world_left_arm_cmd_vel_.setZero();
+  world_right_arm_cmd_vel_.setZero();
+  left_base_arm_cmd_vel_.setZero();
+  right_base_arm_cmd_vel_.setZero();
 
-  dual_arm_toolbox::Transform::transformVector6dtoTwist(left_base_arm_cmd_twist_, left_arm_twist_cmd);
-  dual_arm_toolbox::Transform::transformVector6dtoTwist(right_base_arm_cmd_twist_, right_arm_twist_cmd);
-  pub_left_arm_cmd_.publish(left_arm_twist_cmd);
-  pub_right_arm_cmd_.publish(right_arm_twist_cmd);
+  dual_arm_toolbox::Transform::transformVector6dtoTwist(left_base_arm_cmd_vel_, left_arm_vel_cmd);
+  dual_arm_toolbox::Transform::transformVector6dtoTwist(right_base_arm_cmd_vel_, right_arm_vel_cmd);
+  pub_left_arm_cmd_.publish(left_arm_vel_cmd);
+  pub_right_arm_cmd_.publish(right_arm_vel_cmd);
   sleep(3);
 
   if (!dualArmRobot.switch_controller("ur5_cartesian_velocity_controller", "vel_based_pos_traj_controller", "left"))
@@ -266,8 +257,8 @@ int main(int argc, char **argv)
     ROS_WARN("Failed switching right controller");
 
   ROS_INFO("========== PLACE DOWN =================");
-  world_left_arm_cmd_twist_ << 0, 0, -0.01, 0, 0, 0;
-  world_right_arm_cmd_twist_ << 0, 0, -0.01, 0, 0, 0;
+  world_left_arm_cmd_vel_ << 0, 0, -0.01, 0, 0, 0;
+  world_right_arm_cmd_vel_ << 0, 0, -0.01, 0, 0, 0;
   duration = ros::Duration(0);
   before_pick_7 = ros::Time::now();
   while (duration.toSec() < 10 && nh.ok())
@@ -275,16 +266,16 @@ int main(int argc, char **argv)
     
     double temp_diff = std::abs(left_robotiq_ft_subscriber.wrench_external_(2) - right_robotiq_ft_subscriber.wrench_external_(2));
     if(std::abs(desired_diff_ - temp_diff)>1){
-        world_right_arm_cmd_twist_(1) = 0.001*(desired_diff_ - temp_diff);
+        world_right_arm_cmd_vel_(1) = 0.001*(desired_diff_ - temp_diff);
     }else {
-        world_right_arm_cmd_twist_(1) = 0 ;
+        world_right_arm_cmd_vel_(1) = 0 ;
     }
-    left_base_arm_cmd_twist_ = rotation_left_base_world * world_left_arm_cmd_twist_;
-    right_base_arm_cmd_twist_ = rotation_right_base_world * world_right_arm_cmd_twist_;
-    dual_arm_toolbox::Transform::transformVector6dtoTwist(left_base_arm_cmd_twist_, left_arm_twist_cmd);
-    dual_arm_toolbox::Transform::transformVector6dtoTwist(right_base_arm_cmd_twist_, right_arm_twist_cmd);
-    pub_left_arm_cmd_.publish(left_arm_twist_cmd);
-    pub_right_arm_cmd_.publish(right_arm_twist_cmd);
+    left_base_arm_cmd_vel_ = rotation_left_base_world * world_left_arm_cmd_vel_;
+    right_base_arm_cmd_vel_ = rotation_right_base_world * world_right_arm_cmd_vel_;
+    dual_arm_toolbox::Transform::transformVector6dtoTwist(left_base_arm_cmd_vel_, left_arm_vel_cmd);
+    dual_arm_toolbox::Transform::transformVector6dtoTwist(right_base_arm_cmd_vel_, right_arm_vel_cmd);
+    pub_left_arm_cmd_.publish(left_arm_vel_cmd);
+    pub_right_arm_cmd_.publish(right_arm_vel_cmd);
     ros::spinOnce();
     loop_rate.sleep();
     // evaluation
@@ -292,15 +283,15 @@ int main(int argc, char **argv)
     duration = after_place_7 - before_pick_7;
     // ROS_INFO("manipulation box 7 took: %f sec", duration.toSec());
   }
-  world_left_arm_cmd_twist_.setZero();
-  world_right_arm_cmd_twist_.setZero();
-  left_base_arm_cmd_twist_.setZero();
-  right_base_arm_cmd_twist_.setZero();
+  world_left_arm_cmd_vel_.setZero();
+  world_right_arm_cmd_vel_.setZero();
+  left_base_arm_cmd_vel_.setZero();
+  right_base_arm_cmd_vel_.setZero();
 
-  dual_arm_toolbox::Transform::transformVector6dtoTwist(left_base_arm_cmd_twist_, left_arm_twist_cmd);
-  dual_arm_toolbox::Transform::transformVector6dtoTwist(right_base_arm_cmd_twist_, right_arm_twist_cmd);
-  pub_left_arm_cmd_.publish(left_arm_twist_cmd);
-  pub_right_arm_cmd_.publish(right_arm_twist_cmd);
+  dual_arm_toolbox::Transform::transformVector6dtoTwist(left_base_arm_cmd_vel_, left_arm_vel_cmd);
+  dual_arm_toolbox::Transform::transformVector6dtoTwist(right_base_arm_cmd_vel_, right_arm_vel_cmd);
+  pub_left_arm_cmd_.publish(left_arm_vel_cmd);
+  pub_right_arm_cmd_.publish(right_arm_vel_cmd);
   sleep(3);
 
 
@@ -473,7 +464,6 @@ int main(int argc, char **argv)
   // END
   ROS_INFO("Finished demonstration");
   sleep(1);
-  ur_logger.stop();
   ros::shutdown();
   return 0;
 }

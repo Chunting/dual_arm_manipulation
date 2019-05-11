@@ -162,9 +162,9 @@ class DualArmRobot
     bool moveHome();
     bool moveGraspPosition();
     // Planning to a joint-space goal
-    std::vector<double> getJointAngles(std::string groupName);
+    std::vector<double> getJointAngles(std::string ur_namespace);
 
-    moveit_msgs::RobotState getPositionIK(std::string &groupName, moveit_msgs::RobotState &seed_robot_state, geometry_msgs::PoseStamped &poseIK);
+    moveit_msgs::RobotState getPositionIK(std::string &ur_namespace, moveit_msgs::RobotState &seed_robot_state, geometry_msgs::PoseStamped &poseIK);
     std::vector<double> getPositionIK(const robot_state::JointModelGroup *joint_model_group, const geometry_msgs::Pose &pose);
 
     void publishPlanCartTrajectory(std::string endEffectorLink,

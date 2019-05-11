@@ -23,9 +23,6 @@
 #include "dual_arm_demonstrator_iml/DualArmRobot.h"
 #include "dual_arm_demonstrator_iml/SceneManager.h"
 
-// UR Logger
-#include "ur_logging/UrLogger.h"
-
 // #include "dual_arm_demonstrator_iml/FTSensorSubscriber.h"
 
 int main(int argc, char **argv)
@@ -45,12 +42,7 @@ int main(int argc, char **argv)
     // Scene Setup
     dual_arm_demonstrator_iml::SceneManager sceneManager(nh);
     sceneManager.setupScene();
-    // Start logging data
-    std::vector<std::string> ur_namespaces;
-    ur_namespaces.push_back("left");
-    ur_namespaces.push_back("right");
-    UR_Logger ur_logger(nh, ur_namespaces);
-    ur_logger.start(100);
+
 
     // variables
     moveit::planning_interface::MoveGroupInterface::Plan left_plan;
@@ -58,7 +50,8 @@ int main(int argc, char **argv)
     moveit::planning_interface::MoveItErrorCode error;
     error.val = -1;
 
-    FTSensorSubscriber FTsubscriber(nh, ur_namespaces[0]);
+    FTSensorSubscriber left_wrench_sub(nh, "left");
+    FTSensorSubscriber right_wrench_sub(nh, "right");
 
     geometry_msgs::Vector3Stamped direction;
     direction.header.frame_id = "world";
@@ -92,13 +85,13 @@ int main(int argc, char **argv)
     ROS_INFO("========== MOVE CLOSER =================");
 
     dualArmRobot.graspMove(0.035, false, true, false);
-    double res_force = sqrt(FTsubscriber.last_wrench_msg_.wrench.force.x * FTsubscriber.last_wrench_msg_.wrench.force.x + FTsubscriber.last_wrench_msg_.wrench.force.y * FTsubscriber.last_wrench_msg_.wrench.force.y + FTsubscriber.last_wrench_msg_.wrench.force.z * FTsubscriber.last_wrench_msg_.wrench.force.z);
+    double res_force = sqrt(left_wrench_sub.last_wrench_msg_.wrench.force.x * left_wrench_sub.last_wrench_msg_.wrench.force.x + left_wrench_sub.last_wrench_msg_.wrench.force.y * left_wrench_sub.last_wrench_msg_.wrench.force.y + left_wrench_sub.last_wrench_msg_.wrench.force.z * left_wrench_sub.last_wrench_msg_.wrench.force.z);
 
     while (res_force < 15)
     {
         dualArmRobot.graspMove(0.001, false, true, false); // true : left arm; false: right arm
-        res_force = sqrt(FTsubscriber.last_wrench_msg_.wrench.force.x * FTsubscriber.last_wrench_msg_.wrench.force.x + FTsubscriber.last_wrench_msg_.wrench.force.y * FTsubscriber.last_wrench_msg_.wrench.force.y + FTsubscriber.last_wrench_msg_.wrench.force.z * FTsubscriber.last_wrench_msg_.wrench.force.z);
-        ROS_INFO("I heard: Force [%f]  FX[%f] FY[%f] FZ[%f]", res_force, FTsubscriber.last_wrench_msg_.wrench.force.x, FTsubscriber.last_wrench_msg_.wrench.force.y, FTsubscriber.last_wrench_msg_.wrench.force.z);
+        res_force = sqrt(left_wrench_sub.last_wrench_msg_.wrench.force.x * left_wrench_sub.last_wrench_msg_.wrench.force.x + left_wrench_sub.last_wrench_msg_.wrench.force.y * left_wrench_sub.last_wrench_msg_.wrench.force.y + left_wrench_sub.last_wrench_msg_.wrench.force.z * left_wrench_sub.last_wrench_msg_.wrench.force.z);
+        ROS_INFO("I heard: Force [%f]  FX[%f] FY[%f] FZ[%f]", res_force, left_wrench_sub.last_wrench_msg_.wrench.force.x, left_wrench_sub.last_wrench_msg_.wrench.force.y, left_wrench_sub.last_wrench_msg_.wrench.force.z);
     }
 
     ros::Publisher offset_desired_pub = nh.advertise<geometry_msgs::PointStamped>("/desired_offset_point", 1);
@@ -332,7 +325,6 @@ int main(int argc, char **argv)
     // END
     ROS_INFO("Finished demonstration");
     sleep(1);
-    ur_logger.stop();
     ros::shutdown();
     return 0;
 }

@@ -23,10 +23,6 @@
 #include "dual_arm_demonstrator_iml/DualArmRobot.h"
 #include "dual_arm_demonstrator_iml/SceneManager.h"
 
-// UR Logger
-#include "ur_logging/UrLogger.h"
-
-
 int main(int argc, char **argv) {
     ros::init(argc, argv, "dual_arm_robot_demonstration");
     ros::AsyncSpinner spinner(2);
@@ -104,12 +100,6 @@ int main(int argc, char **argv) {
     ROS_INFO("Starting Log in 1");
     sleep(1);
     ROS_INFO("Starting Log now");
-    // start log
-    std::vector<std::string> ur_namespaces;
-    ur_namespaces.push_back("ur5");
-    UR_Logger ur_logger(nh, ur_namespaces);
-    ur_logger.start(20);
-
     ROS_INFO("Waiting 10 seconds");
     ros::Duration(7).sleep();
     ROS_INFO("Stop Log in 3");
@@ -118,8 +108,6 @@ int main(int argc, char **argv) {
     sleep(1);
     ROS_INFO("Stop Log in 1");
     sleep(1);
-
-    ur_logger.stop();
 
     // experiment hold and linear move
     ROS_INFO("Starting next experiment in 10 Seconds");
@@ -147,7 +135,6 @@ int main(int argc, char **argv) {
     sleep(1);
     ROS_INFO("Stop Log in 1");
     sleep(1);
-    ur_logger.stop();
 #endif
 
     // place box

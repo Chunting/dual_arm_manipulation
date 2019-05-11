@@ -12,7 +12,7 @@
 #include <moveit/planning_scene_interface/planning_scene_interface.h>
 #include <moveit/planning_scene/planning_scene.h>
 
-#include "ur_logging/UrLogger.h"
+#include "ur_logging/Stopwatch.h"
 
 /* TODO
  * vel increase, fall to zero, move backwards
@@ -157,7 +157,7 @@ int main(int argc, char **argv)
 
     // left_.plan(plan);
 
-    // ros::Publisher execTrajectoryPub_ = nh.advertise<moveit_msgs::RobotTrajectory>("/execute_my_trajectory", 1, true);
+    // ros::Publisher execTrajectoryPub_ = nh.advertise<moveit_msgs::RobotTrajectory>("/robot_traj_cmd", 1, true);
     // moveit_msgs::RobotTrajectory trajectory_ = plan.trajectory_;
     // ROS_INFO("Publishing plan and waiting for %i seconds", sec);
     // execTrajectoryPub_.publish(trajectory_);

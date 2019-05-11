@@ -227,17 +227,12 @@ install(DIRECTORY include/${PROJECT_NAME}/
 
 
 add_executable(dual_arm_robot_vel_force_experiment 
-              src/dual_arm_robot_vel_force_experiment.cpp 
-              src/ur_logging/UrLogger.cpp 
-              src/ur_logging/Stopwatch.cpp 
-              src/ur_logging/UrMessageListener.cpp)
+              src/ur_logging/Stopwatch.cpp
+              src/dual_arm_robot_vel_force_experiment.cpp)
 target_link_libraries(dual_arm_robot_vel_force_experiment ${catkin_LIBRARIES})
 
 add_executable(left_force_hold_exp 
               src/left_force_hold_exp.cpp 
-              src/ur_logging/UrLogger.cpp 
-              src/ur_logging/Stopwatch.cpp 
-              src/ur_logging/UrMessageListener.cpp
               src/dual_arm_demonstrator_iml/DualArmRobot.cpp
               src/dual_arm_demonstrator_iml/FTSensorSubscriber.cpp
               src/dual_arm_toolbox/TrajectoryProcessor.cpp 
@@ -261,10 +256,7 @@ add_executable(dual_arm_robot_demonstration
               src/dual_arm_toolbox/Transform.cpp 
               src/dual_arm_demonstrator_iml/DualArmRobot.cpp 
               src/dual_arm_demonstrator_iml/SceneManager.cpp
-              src/dual_arm_demonstrator_iml/FTSensorSubscriber.cpp
-              src/ur_logging/UrLogger.cpp 
-              src/ur_logging/Stopwatch.cpp 
-              src/ur_logging/UrMessageListener.cpp)
+              src/dual_arm_demonstrator_iml/FTSensorSubscriber.cpp)
 target_link_libraries(dual_arm_robot_demonstration ${catkin_LIBRARIES})
 
 add_executable(dual_arm_robot_cartesian_velocity 
@@ -273,10 +265,7 @@ add_executable(dual_arm_robot_cartesian_velocity
               src/dual_arm_toolbox/Transform.cpp 
               src/dual_arm_demonstrator_iml/DualArmRobot.cpp 
               src/dual_arm_demonstrator_iml/SceneManager.cpp
-              src/dual_arm_demonstrator_iml/FTSensorSubscriber.cpp
-              src/ur_logging/UrLogger.cpp 
-              src/ur_logging/Stopwatch.cpp 
-              src/ur_logging/UrMessageListener.cpp)
+              src/dual_arm_demonstrator_iml/FTSensorSubscriber.cpp)
 target_link_libraries(dual_arm_robot_cartesian_velocity ${catkin_LIBRARIES})
 
 add_executable(dual_arm_robot_lift_experiment_planning 
@@ -285,10 +274,7 @@ add_executable(dual_arm_robot_lift_experiment_planning
               src/dual_arm_toolbox/Transform.cpp 
               src/dual_arm_demonstrator_iml/DualArmRobot.cpp 
               src/dual_arm_demonstrator_iml/SceneManager.cpp
-              src/dual_arm_demonstrator_iml/FTSensorSubscriber.cpp
-              src/ur_logging/UrLogger.cpp 
-              src/ur_logging/Stopwatch.cpp
-              src/ur_logging/UrMessageListener.cpp )
+              src/dual_arm_demonstrator_iml/FTSensorSubscriber.cpp)
 target_link_libraries(dual_arm_robot_lift_experiment_planning ${catkin_LIBRARIES})
 
 add_executable(dual_arm_robot_lift_experiment_force 
@@ -296,10 +282,7 @@ add_executable(dual_arm_robot_lift_experiment_force
               src/dual_arm_toolbox/TrajectoryProcessor.cpp 
               src/dual_arm_toolbox/Transform.cpp 
               src/dual_arm_demonstrator_iml/DualArmRobot.cpp 
-              src/dual_arm_demonstrator_iml/SceneManager.cpp 
-              src/ur_logging/UrLogger.cpp 
-              src/ur_logging/Stopwatch.cpp 
-              src/ur_logging/UrMessageListener.cpp)
+              src/dual_arm_demonstrator_iml/SceneManager.cpp) 
 target_link_libraries(dual_arm_robot_lift_experiment_force ${catkin_LIBRARIES})
 
 add_executable(dual_arm_robot_lift_experiment_force_1 
@@ -307,9 +290,7 @@ add_executable(dual_arm_robot_lift_experiment_force_1
               src/dual_arm_toolbox/TrajectoryProcessor.cpp 
               src/dual_arm_toolbox/Transform.cpp 
               src/dual_arm_demonstrator_iml/DualArmRobot.cpp 
-              src/dual_arm_demonstrator_iml/SceneManager.cpp 
-              src/ur_logging/UrLogger.cpp src/ur_logging/Stopwatch.cpp 
-              src/ur_logging/UrMessageListener.cpp)
+              src/dual_arm_demonstrator_iml/SceneManager.cpp) 
 target_link_libraries(dual_arm_robot_lift_experiment_force_1 ${catkin_LIBRARIES})
 
 add_executable(dual_arm_robot_lift_experiment_force_2 
@@ -317,10 +298,7 @@ add_executable(dual_arm_robot_lift_experiment_force_2
               src/dual_arm_toolbox/TrajectoryProcessor.cpp 
               src/dual_arm_toolbox/Transform.cpp 
               src/dual_arm_demonstrator_iml/DualArmRobot.cpp 
-              src/dual_arm_demonstrator_iml/SceneManager.cpp 
-              src/ur_logging/UrLogger.cpp 
-              src/ur_logging/Stopwatch.cpp 
-              src/ur_logging/UrMessageListener.cpp)
+              src/dual_arm_demonstrator_iml/SceneManager.cpp) 
 target_link_libraries(dual_arm_robot_lift_experiment_force_2 ${catkin_LIBRARIES})
 
 add_executable(demonstration_setup_helper 
@@ -329,12 +307,7 @@ add_executable(demonstration_setup_helper
               src/dual_arm_toolbox/Transform.cpp 
               src/dual_arm_demonstrator_iml/DualArmRobot.cpp 
               src/dual_arm_demonstrator_iml/SceneManager.cpp
-              src/dual_arm_demonstrator_iml/FTSensorSubscriber.cpp
-              src/ur_logging/UrLogger.cpp 
-              src/ur_logging/Stopwatch.cpp 
-              src/ur_logging/UrMessageListener.cpp
-              
-              )
+              src/dual_arm_demonstrator_iml/FTSensorSubscriber.cpp)
 target_link_libraries(demonstration_setup_helper ${catkin_LIBRARIES})
 
 
@@ -349,8 +322,5 @@ target_link_libraries(ur5_joint_speed   ${catkin_LIBRARIES})
 add_executable(ur5_jacobian 
               src/ur5_jacobian.cpp
               src/dual_arm_toolbox/TrajectoryProcessor.cpp 
-              src/dual_arm_toolbox/Transform.cpp
-              src/ur_logging/UrLogger.cpp 
-              src/ur_logging/Stopwatch.cpp 
-              src/ur_logging/UrMessageListener.cpp)
+              src/dual_arm_toolbox/Transform.cpp)
 target_link_libraries(ur5_jacobian ${catkin_LIBRARIES})

@@ -66,7 +66,7 @@ namespace dual_arm_toolbox {
         static void visualizePlan(moveit::planning_interface::MoveGroupInterface::Plan &plan, unsigned int sec);
         static void publishPlanTrajectory(moveit::planning_interface::MoveGroupInterface::Plan& plan, unsigned int sec);
         static void publishJointTrajectory(ros::NodeHandle &nh, 
-                                            std::string groupName, 
+                                            std::string ur_namespace, 
                                             moveit::planning_interface::MoveGroupInterface::Plan& plan);
     };
 }//namespace

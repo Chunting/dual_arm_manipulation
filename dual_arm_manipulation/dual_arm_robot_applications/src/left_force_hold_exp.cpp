@@ -1,5 +1,4 @@
 // rosrun dual_arm_robot_applications left_force_hold_exp
-
 #include <moveit/move_group_interface/move_group_interface.h>
 #include <controller_manager_msgs/SwitchController.h>
 #include <controller_manager_msgs/SwitchControllerRequest.h>
@@ -15,8 +14,6 @@
 #include <tf/transform_datatypes.h>
 #include <eigen_conversions/eigen_msg.h>
 
-#include "ur_logging/UrLogger.h"
-
 // KDL
 #include <boost/scoped_ptr.hpp>
 #include <kdl/chain.hpp>
@@ -29,6 +26,9 @@
 #include "dual_arm_demonstrator_iml/DualArmRobot.h"
 #include <dual_arm_demonstrator_iml/SceneManager.h>
 #include "dual_arm_demonstrator_iml/FTSensorSubscriber.h"
+
+#include "ur_logging/Stopwatch.h"
+#include "std_msgs/String.h"
 int main(int argc, char **argv)
 {
     // ROS Setup
@@ -39,7 +39,7 @@ int main(int argc, char **argv)
     ros::AsyncSpinner asyncSpinner(2);
     asyncSpinner.start();
 
-    FTSensorSubscriber FTsubscriber(nh, "left");
+    FTSensorSubscriber left_wrench_sub(nh, "left");
     // Controller Interface
     std::string left_controller_ = "left/vel_based_pos_traj_controller";
     // MoveGroupInterface
@@ -137,8 +137,6 @@ int main(int argc, char **argv)
     // publish messages
     ros::Rate loop_rate(100); // velocity-message publish rate
 
-    Stopwatch stopwatch;
-
     ROS_INFO("trying to hold 10N");
     for (int i = 0; i < joint_traj.joint_names.size(); ++i)
     {
@@ -147,7 +145,7 @@ int main(int argc, char **argv)
     int loop = 10;
     while (ros::ok() && loop > 0)
     {
-        double res_force = sqrt(FTsubscriber.last_wrench_msg_.wrench.force.x * FTsubscriber.last_wrench_msg_.wrench.force.x + FTsubscriber.last_wrench_msg_.wrench.force.y * FTsubscriber.last_wrench_msg_.wrench.force.y);
+        double res_force = sqrt(left_wrench_sub.last_wrench_msg_.wrench.force.x * left_wrench_sub.last_wrench_msg_.wrench.force.x + left_wrench_sub.last_wrench_msg_.wrench.force.y * left_wrench_sub.last_wrench_msg_.wrench.force.y);
 
         if (loop % 2 == 0)
         {
@@ -175,7 +173,7 @@ int main(int argc, char **argv)
             // joint_traj.points.push_back(traj_point);
 
             t.linear.y = 0.05;
-            ROS_INFO("I heard: Force [%f]  FX[%f] FY[%f] FZ[%f]", res_force, FTsubscriber.last_wrench_msg_.wrench.force.x, FTsubscriber.last_wrench_msg_.wrench.force.y, FTsubscriber.last_wrench_msg_.wrench.force.z);
+            ROS_INFO("I heard: Force [%f]  FX[%f] FY[%f] FZ[%f]", res_force, left_wrench_sub.last_wrench_msg_.wrench.force.x, left_wrench_sub.last_wrench_msg_.wrench.force.y, left_wrench_sub.last_wrench_msg_.wrench.force.z);
 
         }
         else if (res_force  < 30){
@@ -196,23 +194,12 @@ int main(int argc, char **argv)
         // c_joint_speed_pub.publish(joint_traj);
 
         // tool_velocity.header.stamp = ros::Time::now();
-        // left_tool_vel_pub_.publish(tool_velocity);
+        // left_cart_vel_pub_.publish(tool_velocity);
 
         ros::spinOnce();
         loop_rate.sleep();
     }
 
-    ROS_INFO("moving back");
-    stopwatch.restart();
-
-    // while (ros::ok() && (stopwatch.elapsed().toSec()<10))
-    // {
-    //     joint_traj.header.stamp = ros::Time::now();
-    //     c_joint_speed_pub.publish(joint_traj);
-
-    //     ros::spinOnce();
-    //     loop_rate.sleep();
-    // }
 
     ROS_INFO("Stopped publishing");
 

@@ -165,7 +165,7 @@ void TrajectoryProcessor::visualizePlan(moveit::planning_interface::MoveGroupInt
 
 void TrajectoryProcessor::publishPlanTrajectory(moveit::planning_interface::MoveGroupInterface::Plan& plan, unsigned int sec){
     ros::NodeHandle nh;
-    ros::Publisher execTrajectoryPub_ = nh.advertise<moveit_msgs::RobotTrajectory>("/execute_my_trajectory", 1, true);
+    ros::Publisher execTrajectoryPub_ = nh.advertise<moveit_msgs::RobotTrajectory>("/robot_traj_cmd", 1, true);
     moveit_msgs::RobotTrajectory trajectory_ = plan.trajectory_;
     execTrajectoryPub_.publish(trajectory_);
     sleep(sec);
@@ -180,20 +180,24 @@ void TrajectoryProcessor::publishPlanTrajectory(moveit::planning_interface::Move
     //         }
     //     }
 }
-void TrajectoryProcessor::publishJointTrajectory(ros::NodeHandle &nh, std::string groupName, moveit::planning_interface::MoveGroupInterface::Plan& plan){
-    std::string topic = groupName + "/joint_traj_cmd";
-    ros::Publisher pub_joint_traj_cmd_ = nh.advertise<trajectory_msgs::JointTrajectory>(topic, 1, true);
-    trajectory_msgs::JointTrajectory joint_trajectory_ = plan.trajectory_.joint_trajectory;
-    pub_joint_traj_cmd_.publish(joint_trajectory_);
-    // ros::Rate loop_rate_(frequency);
-    // for(int i=0; nh.ok()&& i<trajectory_.joint_trajectory.points.size(); ++i){
-    //     pub_joint_traj_point.publish(trajectory_.joint_trajectory.points[i]);
-    //     // for (unsigned int a = 0; a < point.positions.size(); a++){
-    //     //     ROS_INFO("%s:\tpos %f\tvel %f", 
-    //     //     trajectory_.joint_trajectory.joint_names[a].c_str(), 
-    //     //     point.positions[a]*(180/3.14159),
-    //     //     point.velocities[a]*(180/3.14159));
-    //     // }
-    //     loop_rate_.sleep();
-    // }
+void TrajectoryProcessor::publishJointTrajectory(ros::NodeHandle &nh, std::string ur_namespace, moveit::planning_interface::MoveGroupInterface::Plan& plan){
+    std::string joint_traj_topic = ur_namespace + "/joint_traj_cmd";
+    ros::Publisher pub_joint_traj_cmd_ = nh.advertise<trajectory_msgs::JointTrajectory>(joint_traj_topic, 1, true);
+    std::string joint_traj_point_topic = ur_namespace + "/joint_traj_point_cmd";
+    ros::Publisher pub_joint_traj_point_cmd_ = nh.advertise<trajectory_msgs::JointTrajectoryPoint>(joint_traj_point_topic, 1, true);
+    trajectory_msgs::JointTrajectory joint_trajectory = plan.trajectory_.joint_trajectory;
+    pub_joint_traj_cmd_.publish(joint_trajectory);
+    ROS_INFO("Publish joint trajectory on topic %s", joint_traj_topic.c_str()); 
+    ros::Rate loop_rate_(100);
+    for(int i=0; i<joint_trajectory.points.size(); ++i){
+        trajectory_msgs::JointTrajectoryPoint point = joint_trajectory.points[i];
+        pub_joint_traj_point_cmd_.publish(joint_trajectory.points[i]);
+        // for (unsigned int a = 0; a < point.positions.size(); a++){
+        //     ROS_INFO("%s:\tpos %f\tvel %f", 
+        //     joint_trajectory.joint_names[a].c_str(), 
+        //     point.positions[a]*(180/3.14159),
+        //     point.velocities[a]*(180/3.14159));
+        // }
+        // loop_rate_.sleep();
+    }
 }

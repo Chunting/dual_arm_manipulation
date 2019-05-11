@@ -42,7 +42,6 @@ class FTSensorSubscriber
 	tf::TransformListener listener_ft_;
 	bool ft_arm_ready_;
 	std::string robotiq_ft_frame_;
-	// std::vector<std::string> ur_namespaces;
 
   public:
 	FTSensorSubscriber(ros::NodeHandle &nh, std::string ur_namespace);

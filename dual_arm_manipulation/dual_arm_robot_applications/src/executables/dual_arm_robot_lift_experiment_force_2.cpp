@@ -118,7 +118,7 @@ int main(int argc, char **argv) {
     sleep(1);
     ROS_INFO("Stop Log in 1");
     sleep(1);
-    ur_logger.stop();
+
 #endif
 */
     // place box

@@ -1289,28 +1289,30 @@ bool DualArmRobot::execute(moveit::planning_interface::MoveGroupInterface::Plan 
         }
         dual_arm_toolbox::TrajectoryProcessor::visualizePlan(plan_left, 0);
         dual_arm_toolbox::TrajectoryProcessor::visualizePlan(plan_right, 0);
+        publishPlanCartTrajectory(left_.getEndEffectorLink(), plan_left, 100);
+        publishPlanCartTrajectory(right_.getEndEffectorLink(), plan_right, 100);
+        dual_arm_toolbox::TrajectoryProcessor::publishJointTrajectory(nh_, "left", plan_left);
+        dual_arm_toolbox::TrajectoryProcessor::publishJointTrajectory(nh_, "right", plan_right);
         success_left = handle_left.sendTrajectory(plan_left.trajectory_);
         success_right = handle_right.sendTrajectory(plan_right.trajectory_);
         // http://docs.ros.org/jade/api/moveit_simple_controller_manager/html/action__based__controller__handle_8h_source.html#l00106
         success_left = handle_left.waitForExecution(timeout);  
         success_right = handle_right.waitForExecution(timeout);
-        publishPlanCartTrajectory(left_.getEndEffectorLink(), plan_left, 100);
-        publishPlanCartTrajectory(right_.getEndEffectorLink(), plan_right, 100);
-        dual_arm_toolbox::TrajectoryProcessor::publishJointTrajectory(nh_, "left", plan_left);
-        dual_arm_toolbox::TrajectoryProcessor::publishJointTrajectory(nh_, "right", plan_right);
+       
     } else if (plan_left.trajectory_.joint_trajectory.joint_names.size() > 0)
     {
         dual_arm_toolbox::TrajectoryProcessor::visualizePlan(plan_left, 0);
-        success_left = handle_left.sendTrajectory(plan_left.trajectory_);
-        success_left = handle_left.waitForExecution(timeout); // Without any argument ROS::Duration(), it always returen true.
         publishPlanCartTrajectory(left_.getEndEffectorLink(), plan_left, 100); 
         dual_arm_toolbox::TrajectoryProcessor::publishJointTrajectory(nh_, "left", plan_left);
+        success_left = handle_left.sendTrajectory(plan_left.trajectory_);
+        success_left = handle_left.waitForExecution(timeout); // Without any argument ROS::Duration(), it always returen true.
+       
     } else {
         dual_arm_toolbox::TrajectoryProcessor::visualizePlan(plan_right, 0);
-        success_right = handle_right.sendTrajectory(plan_right.trajectory_);
-        success_right = handle_right.waitForExecution(timeout);
         publishPlanCartTrajectory(right_.getEndEffectorLink(), plan_right, 100);
         dual_arm_toolbox::TrajectoryProcessor::publishJointTrajectory(nh_, "right", plan_right);
+        success_right = handle_right.sendTrajectory(plan_right.trajectory_);
+        success_right = handle_right.waitForExecution(timeout);
     }
     dual_arm_toolbox::TrajectoryProcessor::publishPlanTrajectory(plan, 1);
    
@@ -1432,11 +1434,11 @@ bool DualArmRobot::moveGraspPosition()
     return true;
 }
 /*
-groupName like "left_manipulator";
+ur_namespace like "left_manipulator";
 moveit_msgs::RobotState& seed_robot_state, the starting robot state, initialize the active joints, last_dual_arm_goal_state_ = getCurrentRobotStateMsg(); 
 geometry_msgs::PoseStamped poseIK, the Cartisian pose to be computed
 */
-moveit_msgs::RobotState DualArmRobot::getPositionIK(std::string &groupName,
+moveit_msgs::RobotState DualArmRobot::getPositionIK(std::string &ur_namespace,
                                                     moveit_msgs::RobotState &seed_robot_state,
                                                     geometry_msgs::PoseStamped &poseIK)
 {
@@ -1448,7 +1450,7 @@ moveit_msgs::RobotState DualArmRobot::getPositionIK(std::string &groupName,
     // A service call to carry out an inverse kinematics computation
     moveit_msgs::GetPositionIK ik_msg;
     /* The name of the group which will be used to compute IK */
-    ik_msg.request.ik_request.group_name = groupName;
+    ik_msg.request.ik_request.group_name = ur_namespace;
     /* A service call to carry out an inverse kinematics computaion 
        This state MUST contain state for all joints to be used by IK solver to compute IK.
        The list of joints can be found using SRDF for the corresponding group.
@@ -1482,9 +1484,9 @@ moveit_msgs::RobotState DualArmRobot::getPositionIK(std::string &groupName,
         float jump_threshold = 0.3;
         unsigned int joint_index = 0;
 
-        if (groupName.compare("right_manipulator") == 0)
+        if (ur_namespace.compare("right_manipulator") == 0)
         {
-            ROS_INFO("Group Name %s", groupName.c_str());
+            ROS_INFO("Group Name %s", ur_namespace.c_str());
             joint_index = 6;
         }
         /* moveit_msgs/RobotState solution: the resultant RobotState, which contains two arms */
@@ -1628,7 +1630,7 @@ void DualArmRobot::publishPoseMsg()
 {
     ros::Publisher left_pose_pub = nh_.advertise<geometry_msgs::PoseStamped>("left/ee_pose_in_world", 100);
     ros::Publisher right_pose_pub = nh_.advertise<geometry_msgs::PoseStamped>("right/ee_pose_in_world", 100);
-    ros::Publisher offset_point_pub = nh_.advertise<geometry_msgs::PointStamped>("/real_time_offset_point", 100);
+    ros::Publisher offset_point_pub = nh_.advertise<geometry_msgs::PointStamped>("/offset_point_state", 100);
     geometry_msgs::PoseStamped left_current_pose_temp_;
     geometry_msgs::PoseStamped right_current_pose_temp_;
     geometry_msgs::PointStamped offset_point_temp_;

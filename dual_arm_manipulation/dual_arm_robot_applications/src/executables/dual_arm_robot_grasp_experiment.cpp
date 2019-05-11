@@ -23,9 +23,6 @@
 #include "dual_arm_demonstrator_iml/DualArmRobot.h"
 #include "dual_arm_demonstrator_iml/SceneManager.h"
 
-// UR Logger
-#include "ur_logging/UrLogger.h"
-
 // Robotiq 2 finger gripper
 #include <robotiq_2f_gripper_control/Robotiq2FGripper_robot_output.h>
 
@@ -46,13 +43,6 @@ int main(int argc, char **argv) {
     // Scene Setup
     dual_arm_demonstrator_iml::SceneManager sceneManager(nh);
     sceneManager.setupSceneLift();
-    
-    // Data log set-up
-    std::vector<std::string> ur_namespaces;
-    ur_namespaces.push_back("left");
-    ur_namespaces.push_back("right");
-    UR_Logger ur_logger(nh, ur_namespaces);
-    ur_logger.start(100);
 
     // plan variables
     moveit::planning_interface::MoveGroupInterface::Plan left_plan;
@@ -103,7 +93,6 @@ int main(int argc, char **argv) {
     }
 
     sleep(1);
-    ur_logger.stop();
     // END
     ROS_INFO("Finished demonstration");
     ros::shutdown();
