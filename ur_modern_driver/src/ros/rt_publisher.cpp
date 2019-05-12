@@ -9,7 +9,6 @@ bool RTPublisher::publishJoints(RTShared& packet, Time& t)
   joint_msg.position.assign(packet.q_actual.begin(), packet.q_actual.end());
   joint_msg.velocity.assign(packet.qd_actual.begin(), packet.qd_actual.end());
   joint_msg.effort.assign(packet.i_actual.begin(), packet.i_actual.end());
-
   joint_pub_.publish(joint_msg);
 
   return true;
@@ -107,12 +106,12 @@ bool RTPublisher::publish(RTShared& packet)
 {
   Time time = Time::now();
   bool res = true;
-  if (!temp_only_)
+  if (!use_ros_control_)
   {
-    res = publishJoints(packet, time) && publishWrench(packet, time);
+    res =  publishWrench(packet, time);
   }
 
-  return res && publishTool(packet, time) && publishTransform(packet, time) && publishTemperature(packet, time);
+  return res && publishJoints(packet, time) && publishTool(packet, time) && publishTransform(packet, time) && publishTemperature(packet, time);
 }
 
 bool RTPublisher::consume(RTState_V1_6__7& state)

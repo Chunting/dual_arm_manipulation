@@ -85,7 +85,7 @@ public:
   float torque_dead_zone_thres_;
   Vector6d wrench_external_;
 
-  void start();
+  void start(int log_rate);
 
 private:
   std::string topic_cart_state_;
@@ -114,6 +114,7 @@ private:
   Stopwatch stopwatch_;
   double start_time_ = 0.0;
   double pre_cmd_time_ =0.0;
+  ros::Timer timer_;
 
 
   void tool_state_callback(const cartesian_state_msgs::PoseTwist::ConstPtr &msg);
@@ -126,10 +127,11 @@ private:
   void joint_traj_cmd_callback(const trajectory_msgs::JointTrajectoryConstPtr &msg);
 
   void generate_logfile();       //automatically generate a file name
-  bool waitForValid(double seconds = 2.0);
+  bool waitForValid(double seconds = 20); // It takes a little bit long to connect to ft sensor
 
- 
   void robot_traj_cmd_callback(const moveit_msgs::RobotTrajectory::ConstPtr &msg);
   void offset_point_state_callback(const geometry_msgs::PointStamped::ConstPtr &msg);
+
+  void logCallback(const ros::TimerEvent&);
 };
 #endif

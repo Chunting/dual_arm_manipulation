@@ -141,7 +141,7 @@ int main(int argc, char **argv)
   auto rt_parser = factory.getRTParser();
   URStream rt_stream(args.host, UR_RT_PORT);
   URProducer<RTPacket> rt_prod(rt_stream, *rt_parser);
-  RTPublisher rt_pub(args.prefix, args.base_frame, args.tool_frame, args.use_ros_control);
+  RTPublisher rt_pub(args.prefix, args.joint_names, args.base_frame, args.tool_frame, args.use_ros_control);
   auto rt_commander = factory.getCommander(rt_stream);
   vector<IConsumer<RTPacket> *> rt_vec{ &rt_pub };
   INotifier *notifier(nullptr);

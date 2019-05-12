@@ -4,18 +4,18 @@ UR_Message_Listener::UR_Message_Listener(ros::NodeHandle &nh, std::string ur_nam
     : nh_(nh), ur_namespace_(ur_namespace), folder_name_(folder_name)
 {
     stopwatch_.restart();
-
-    topic_cart_state_ = ur_namespace_ + "/ur5_cartesian_velocity_controller/ee_state";
-    topic_cart_vel_cmd_ = ur_namespace_ + "/ur5_cartesian_velocity_controller/command_cart_vel";
-
-    topic_cart_pose_state_ = ur_namespace_ + "/tool_pose";
-    topic_cart_vel_state_ = ur_namespace_ + "/tool_velocity";
-    topic_cart_pose_cmd_ = ur_namespace_ + "/command_cart_pos";
-    topic_external_wrench = ur_namespace_ + "/robotiq_ft_wrench";
-    topic_joint_traj_cmd_ = ur_namespace_ + "/joint_traj_cmd";
-    topic_joint_state_ = ur_namespace_ + "/joint_states";
-    topic_robot_traj_cmd_ = "/robot_traj_cmd";
-    topic_offset_point_state_ = "/offset_point_state";
+    std::string prefix = nh_.getNamespace(); 
+    topic_cart_state_ = "ur5_cartesian_velocity_controller/ee_state";
+    topic_cart_vel_cmd_ = "ur5_cartesian_velocity_controller/command_cart_vel";
+    
+    topic_cart_pose_state_ = "tool_pose";
+    topic_cart_vel_state_ = "tool_velocity";
+    topic_cart_pose_cmd_ = ur_namespace_ + "/cart_pose_cmd";
+    topic_external_wrench = "robotiq_ft_wrench";
+    topic_joint_traj_cmd_ = ur_namespace_ + "joint_traj_cmd";
+    topic_joint_state_ = "ur_driver/joint_states";  // From ur_modern_driver
+    topic_robot_traj_cmd_ = ur_namespace_ + "robot_traj_cmd";
+    topic_offset_point_state_ = ur_namespace_ + "offset_point_state";
 
 
     sub_cart_state_         = nh_.subscribe<cartesian_state_msgs::PoseTwist>(topic_cart_state_, 100, &UR_Message_Listener::tool_state_callback, this);
@@ -28,7 +28,8 @@ UR_Message_Listener::UR_Message_Listener(ros::NodeHandle &nh, std::string ur_nam
     sub_joint_traj_cmd_     = nh_.subscribe<trajectory_msgs::JointTrajectory>(topic_joint_traj_cmd_, 1, &UR_Message_Listener::joint_traj_cmd_callback, this);
     sub_offset_point_state_ = nh_.subscribe<geometry_msgs::PointStamped>(topic_offset_point_state_, 1, &UR_Message_Listener::offset_point_state_callback, this);
     sub_robot_traj_cmd_     = nh_.subscribe<moveit_msgs::RobotTrajectory>(topic_robot_traj_cmd_, 100, &UR_Message_Listener::robot_traj_cmd_callback, this);
-    pub_joint_state_        = nh_.advertise<sensor_msgs::JointState>("joint_states", 1);
+    pub_joint_state_        = nh_.advertise<sensor_msgs::JointState>("/joint_states", 1);
+    // ROS_ERROR_STREAM("Started to reveive messages from " << topic_joint_state_);
     start_time_ = ros::Time::now().toSec();
     delimiter_ = ',';
     wrench_external_.setZero();
@@ -40,35 +41,31 @@ UR_Message_Listener::UR_Message_Listener(ros::NodeHandle &nh, std::string ur_nam
 bool UR_Message_Listener::waitForValid(double seconds)
 {
     ros::Duration(seconds).sleep();
-    if(last_joint_state_msg_.header.stamp.waitForValid()){
+    start_time_ = last_joint_state_msg_.header.stamp.toSec();
+    if(!last_joint_state_msg_.header.stamp.is_zero()){
         start_time_ = last_joint_state_msg_.header.stamp.toSec();
     } else {
         ROS_ERROR("There is no joint state message coming...");
         return false;
     }
-    if(last_joint_state_msg_.header.stamp.waitForValid()){
-        start_time_ = last_joint_state_msg_.header.stamp.toSec();
+    if(!last_wrench_msg_.header.stamp.is_zero()){
+        start_time_ = std::min(last_wrench_msg_.header.stamp.toSec(), start_time_);
     } else {
-        ROS_ERROR("There is no joint state message coming...");
-        return false;
-    }
-    if(last_cart_vel_state_msg_.header.stamp.waitForValid()){
-        start_time_ = std::min(last_cart_vel_state_msg_.header.stamp.toSec(), start_time_);
-    } else {
-        ROS_ERROR("There is no Cartesian message coming...");
+        ROS_ERROR("There is no wrench message coming...");
         return false;
     }
     pre_cmd_time_ = start_time_;
     ROS_ERROR("start_time_ = %f", start_time_ );
     return true;
 }
-void UR_Message_Listener::start()
+void UR_Message_Listener::start(int log_rate)
 {
-    if(waitForValid()){
-        generate_logfile();
-    } else{
-        ROS_ERROR("Please wait for message to come...");
-    }
+    while(!waitForValid()){
+        sleep(1);
+    } 
+    generate_logfile();
+    double log_duration = 1.0 / log_rate;
+    timer_ = nh_.createTimer(ros::Duration().fromSec(log_duration), &UR_Message_Listener::logCallback, this);
 }
 
 
@@ -159,12 +156,8 @@ void UR_Message_Listener::wrench_callback(const geometry_msgs::WrenchStamped::Co
 }
 void UR_Message_Listener::joint_state_callback(const sensor_msgs::JointState::ConstPtr &msg)
 {
-    // "joint_states" receives messages of all robots. This is seperating the searched one from the others.
-    if (msg->position.size() > 0 && msg->name[0].find(ur_namespace_) != std::string::npos)
-    {
+    if(msg->header.stamp.toSec()>last_joint_state_msg_.header.stamp.toSec())
         last_joint_state_msg_ = *msg;
-    }
-    pub_joint_state_.publish(last_joint_state_msg_);
 }
 void UR_Message_Listener::joint_traj_cmd_callback(const trajectory_msgs::JointTrajectory::ConstPtr &msg)
 {
@@ -176,20 +169,20 @@ void UR_Message_Listener::generate_logfile()
 
     std::string logfile_path = folder_name_ + ur_namespace_;
     std::string logfile_name = logfile_path + "_cartesian_state.csv";
-    file_cartesian_state_.open(logfile_name.c_str(), std::ofstream::out | std::ofstream::trunc);
-    if (!file_cartesian_state_.is_open())
-    {
-        ROS_ERROR("Failed to open %s", logfile_name.c_str());
-    }
+    // file_cartesian_state_.open(logfile_name.c_str(), std::ofstream::out | std::ofstream::trunc);
+    // if (!file_cartesian_state_.is_open())
+    // {
+    //     ROS_ERROR("Failed to open %s", logfile_name.c_str());
+    // }
 
-    file_cartesian_state_ << "Time" << delimiter_ << ur_namespace_ + "_state_x" << delimiter_
-                          << ur_namespace_ + "_state_y" << delimiter_ << ur_namespace_ + "_state_z" << delimiter_
-                          << ur_namespace_ + "_state_w" << delimiter_ << ur_namespace_ + "_state_rx" << delimiter_
-                          << ur_namespace_ + "_state_ry" << delimiter_ << ur_namespace_ + "_state_rz" << delimiter_
-                          << ur_namespace_ + "_state_vx" << delimiter_ << ur_namespace_ + "_state_vy" << delimiter_
-                          << ur_namespace_ + "_state_vz" << delimiter_ << ur_namespace_ + "_state_wx" << delimiter_
-                          << ur_namespace_ + "_state_wy" << delimiter_ << ur_namespace_ + "_state_wz"
-                          << "\n";
+    // file_cartesian_state_ << "Time" << delimiter_ << ur_namespace_ + "_state_x" << delimiter_
+    //                       << ur_namespace_ + "_state_y" << delimiter_ << ur_namespace_ + "_state_z" << delimiter_
+    //                       << ur_namespace_ + "_state_w" << delimiter_ << ur_namespace_ + "_state_rx" << delimiter_
+    //                       << ur_namespace_ + "_state_ry" << delimiter_ << ur_namespace_ + "_state_rz" << delimiter_
+    //                       << ur_namespace_ + "_state_vx" << delimiter_ << ur_namespace_ + "_state_vy" << delimiter_
+    //                       << ur_namespace_ + "_state_vz" << delimiter_ << ur_namespace_ + "_state_wx" << delimiter_
+    //                       << ur_namespace_ + "_state_wy" << delimiter_ << ur_namespace_ + "_state_wz"
+    //                       << "\n";
     // Create log file for Cartesian information
     logfile_name = logfile_path + "_cart_vel_state.csv";
     file_cart_vel_state_.open(logfile_name.c_str(), std::ofstream::out | std::ofstream::trunc);
@@ -293,20 +286,20 @@ void UR_Message_Listener::generate_logfile()
 }
 void UR_Message_Listener::write_logfile()
 {
-    file_cartesian_state_ << last_cart_state_msg_.header.stamp.toSec() - start_time_
-                          << delimiter_ << last_cart_state_msg_.pose.position.x
-                          << delimiter_ << last_cart_state_msg_.pose.position.y
-                          << delimiter_ << last_cart_state_msg_.pose.position.z
-                          << delimiter_ << last_cart_state_msg_.pose.orientation.x
-                          << delimiter_ << last_cart_state_msg_.pose.orientation.y
-                          << delimiter_ << last_cart_state_msg_.pose.orientation.z
-                          << delimiter_ << last_cart_state_msg_.pose.orientation.w
-                          << delimiter_ << last_cart_state_msg_.twist.linear.x
-                          << delimiter_ << last_cart_state_msg_.twist.linear.y
-                          << delimiter_ << last_cart_state_msg_.twist.linear.z
-                          << delimiter_ << last_cart_state_msg_.twist.angular.x
-                          << delimiter_ << last_cart_state_msg_.twist.angular.y
-                          << delimiter_ << last_cart_state_msg_.twist.angular.z << "\n";
+    // file_cartesian_state_ << last_cart_state_msg_.header.stamp.toSec() - start_time_
+    //                       << delimiter_ << last_cart_state_msg_.pose.position.x
+    //                       << delimiter_ << last_cart_state_msg_.pose.position.y
+    //                       << delimiter_ << last_cart_state_msg_.pose.position.z
+    //                       << delimiter_ << last_cart_state_msg_.pose.orientation.x
+    //                       << delimiter_ << last_cart_state_msg_.pose.orientation.y
+    //                       << delimiter_ << last_cart_state_msg_.pose.orientation.z
+    //                       << delimiter_ << last_cart_state_msg_.pose.orientation.w
+    //                       << delimiter_ << last_cart_state_msg_.twist.linear.x
+    //                       << delimiter_ << last_cart_state_msg_.twist.linear.y
+    //                       << delimiter_ << last_cart_state_msg_.twist.linear.z
+    //                       << delimiter_ << last_cart_state_msg_.twist.angular.x
+    //                       << delimiter_ << last_cart_state_msg_.twist.angular.y
+    //                       << delimiter_ << last_cart_state_msg_.twist.angular.z << "\n";
     file_cart_vel_state_ << last_cart_vel_state_msg_.header.stamp.toSec() - start_time_
                               << delimiter_ << last_cart_vel_state_msg_.twist.linear.x
                               << delimiter_ << last_cart_vel_state_msg_.twist.linear.y
@@ -341,7 +334,7 @@ void UR_Message_Listener::write_logfile()
                             << delimiter_ << last_cart_pose_cmd_msg_.pose.orientation.w << "\n";
     }
 
-    file_wrench_ << last_cart_pose_cmd_msg_.header.stamp.toSec() - start_time_
+    file_wrench_ << last_wrench_msg_.header.stamp.toSec() - start_time_
                             << delimiter_ << last_wrench_msg_.wrench.force.x
                             << delimiter_ << last_wrench_msg_.wrench.force.y 
                             << delimiter_ << last_wrench_msg_.wrench.force.z 
@@ -396,6 +389,10 @@ void UR_Message_Listener::write_logfile()
         }
         pre_cmd_time_ = last_joint_traj_cmd_msg_.header.stamp.toSec();
     }
+}
+void UR_Message_Listener::logCallback(const ros::TimerEvent &)
+{
+   write_logfile();
 }
 /*
 std::string UR_Message_Listener::write_cart_vel_state_line()

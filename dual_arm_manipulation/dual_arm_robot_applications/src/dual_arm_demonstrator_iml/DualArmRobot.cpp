@@ -1576,10 +1576,10 @@ void DualArmRobot::publishPlanCartTrajectory(std::string endEffectorLink,
     fk_msg.request.header.frame_id = "world";
     fk_msg.request.fk_link_names.push_back(endEffectorLink);
     fk_msg.request.robot_state = plan.start_state_;
-    std::string plan_topic = "left/command_cart_pos";
+    std::string plan_topic = "left/cart_pose_cmd";
     std::size_t right_found = endEffectorLink.find("right");
     if (right_found!=std::string::npos){
-        plan_topic = "right/command_cart_pos";
+        plan_topic = "right/cart_pose_cmd";
     } 
     ros::Publisher pub_cart_plan = nh_.advertise<geometry_msgs::PoseStamped>(plan_topic, 100);
     geometry_msgs::PoseStamped poseFK;

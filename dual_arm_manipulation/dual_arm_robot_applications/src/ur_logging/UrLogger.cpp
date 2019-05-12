@@ -30,10 +30,10 @@ UR_Logger::~UR_Logger()
 
 void UR_Logger::start(int log_rate)
 {
-    for (int i = 0; i < ur_listeners_.size(); i++)
-    {
-        ur_listeners_[i]->start();
-    }
+    // for (int i = 0; i < ur_listeners_.size(); i++)
+    // {
+    //     ur_listeners_[i]->start();
+    // }
     if (logfile_name_ == "" || logfile_name_command_ == "")
     { //automatically generate a name if no name specified
         generate_logfile_name();

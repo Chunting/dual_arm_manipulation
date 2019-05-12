@@ -139,7 +139,7 @@ bool KinematicChainControllerBase<JI>::init(JI *robot, ros::NodeHandle &n)
 		KDL::SegmentMap::iterator it;
 
 		for (it = segment_map.begin(); it != segment_map.end(); it++)
-			ROS_ERROR_STREAM("    " << (*it).first);
+			ROS_INFO_STREAM("    " << (*it).first);
 
 		return false;
 	}
@@ -193,7 +193,7 @@ bool KinematicChainControllerBase<JI>::init(JI *robot, ros::NodeHandle &n)
 		 it != kdl_chain_.segments.end(); ++it)
 	{
 
-		ROS_ERROR("%s type: %s", it->getJoint().getName().c_str(),
+		ROS_INFO("%s type: %s", it->getJoint().getName().c_str(),
 				 it->getJoint().getTypeName().c_str());
 		if (it->getJoint().getTypeName() != "None" && count < 7)
 		{
@@ -202,8 +202,8 @@ bool KinematicChainControllerBase<JI>::init(JI *robot, ros::NodeHandle &n)
 		count++;
 	}
 
-	ROS_ERROR("Number of joints in handle = %lu", joint_handles_.size());
-	ROS_ERROR_STREAM("kdl_chain.getNrOfJoints: " << kdl_chain_.getNrOfJoints());
+	ROS_INFO("Number of joints in handle = %lu", joint_handles_.size());
+	ROS_INFO_STREAM("kdl_chain.getNrOfJoints: " << kdl_chain_.getNrOfJoints());
 
 	ROS_INFO("Finished Kinematic Base init");
 
