@@ -90,6 +90,9 @@
 			<arg name="prefix" value="$(arg right_controller_name)"/>
 		</include>
 		-->
+		<node name="dual_arm_robot_logger" pkg="dual_arm_robot_applications" type="dual_arm_robot_logger" respawn="true" output="screen">
+				<param name="prefix" type="str" value="$(arg right_controller_name)" />
+		</node>
 	</group>
 	<group ns="$(arg left_controller_name)">
 		<remap from="joint_states" to="/joint_states"/>
@@ -120,15 +123,18 @@
 		</node>
 		<!-- Bias the F/T sensor at startup -->
 		<node pkg="rosservice" type="rosservice" name="ft_sensor_biaser" args="call --wait /left/robotiq_ft_sensor_acc &quot;command: 'SET_ZRO'&quot; " />
-
+    <node name="dual_arm_robot_logger" pkg="dual_arm_robot_applications" type="dual_arm_robot_logger" respawn="true" output="screen">
+			<param name="prefix" type="str" value="$(arg left_controller_name)" />
+		</node>
 
 		<!-- State Cartesian admittance controller 
 		<include file="$(find admittance_control)/launch/admittance_controller_real.launch">
 			<arg name="prefix" value="$(arg left_controller_name)"/>
 		</include>
 		-->
+		
 	</group>
 
-	<node name="dual_arm_robot_logger" pkg="dual_arm_robot_applications" type="dual_arm_robot_logger"/>
+	
 
 </launch>

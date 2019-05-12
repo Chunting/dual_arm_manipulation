@@ -6,9 +6,10 @@ UR_Message_Listener::UR_Message_Listener(ros::NodeHandle &nh, std::string ur_nam
     stopwatch_.restart();
 
     topic_cart_state_ = ur_namespace_ + "/ur5_cartesian_velocity_controller/ee_state";
+    topic_cart_vel_cmd_ = ur_namespace_ + "/ur5_cartesian_velocity_controller/command_cart_vel";
+
     topic_cart_pose_state_ = ur_namespace_ + "/tool_pose";
     topic_cart_vel_state_ = ur_namespace_ + "/tool_velocity";
-    topic_cart_vel_cmd_ = ur_namespace_ + "/ur5_cartesian_velocity_controller/command_cart_vel";
     topic_cart_pose_cmd_ = ur_namespace_ + "/command_cart_pos";
     topic_external_wrench = ur_namespace_ + "/robotiq_ft_wrench";
     topic_joint_traj_cmd_ = ur_namespace_ + "/joint_traj_cmd";
@@ -16,24 +17,25 @@ UR_Message_Listener::UR_Message_Listener(ros::NodeHandle &nh, std::string ur_nam
     topic_robot_traj_cmd_ = "/robot_traj_cmd";
     topic_offset_point_state_ = "/offset_point_state";
 
-    delimiter_ = ',';
-    wrench_external_.setZero();
-    wrench_filter_factor_ = 0.1;
-    force_dead_zone_thres_ = 5;
-    torque_dead_zone_thres_ = 0.1;
-    newTrajectory = false;
 
-    sub_cartesian_state_    = nh_.subscribe<cartesian_state_msgs::PoseTwist>(topic_cart_state_, 100, &UR_Message_Listener::tool_state_callback, this);
+    sub_cart_state_         = nh_.subscribe<cartesian_state_msgs::PoseTwist>(topic_cart_state_, 100, &UR_Message_Listener::tool_state_callback, this);
+    sub_cart_vel_cmd_       = nh_.subscribe<geometry_msgs::Twist>(topic_cart_vel_cmd_, 100, &UR_Message_Listener::cart_vel_cmd_callback, this);
     sub_cart_vel_state_     = nh_.subscribe<geometry_msgs::TwistStamped>(topic_cart_vel_state_, 100, &UR_Message_Listener::cart_vel_state_callback, this);
     sub_cart_pose_state_    = nh_.subscribe<geometry_msgs::PoseStamped>(topic_cart_pose_state_, 100, &UR_Message_Listener::cart_pose_state_callback, this);
-    sub_cart_vel_cmd_       = nh_.subscribe<geometry_msgs::Twist>(topic_cart_vel_cmd_, 100, &UR_Message_Listener::cart_vel_cmd_callback, this);
     sub_cart_pose_cmd_      = nh_.subscribe<geometry_msgs::PoseStamped>(topic_cart_pose_cmd_, 100, &UR_Message_Listener::cartesian_pose_cmd_callback, this);
     sub_wrench_external_    = nh_.subscribe<geometry_msgs::WrenchStamped>(topic_external_wrench, 100, &UR_Message_Listener::wrench_callback, this);
     sub_joint_state_        = nh_.subscribe<sensor_msgs::JointState>(topic_joint_state_, 100, &UR_Message_Listener::joint_state_callback, this);
     sub_joint_traj_cmd_     = nh_.subscribe<trajectory_msgs::JointTrajectory>(topic_joint_traj_cmd_, 1, &UR_Message_Listener::joint_traj_cmd_callback, this);
     sub_offset_point_state_ = nh_.subscribe<geometry_msgs::PointStamped>(topic_offset_point_state_, 1, &UR_Message_Listener::offset_point_state_callback, this);
     sub_robot_traj_cmd_     = nh_.subscribe<moveit_msgs::RobotTrajectory>(topic_robot_traj_cmd_, 100, &UR_Message_Listener::robot_traj_cmd_callback, this);
-    
+    pub_joint_state_        = nh_.advertise<sensor_msgs::JointState>("joint_states", 1);
+    start_time_ = ros::Time::now().toSec();
+    delimiter_ = ',';
+    wrench_external_.setZero();
+    wrench_filter_factor_ = 0.1;
+    force_dead_zone_thres_ = 5;
+    torque_dead_zone_thres_ = 0.1;
+    newTrajectory = false;
 }
 bool UR_Message_Listener::waitForValid(double seconds)
 {
@@ -57,9 +59,16 @@ bool UR_Message_Listener::waitForValid(double seconds)
         return false;
     }
     pre_cmd_time_ = start_time_;
-    ROS_INFO("start_time_ = %f", start_time_ );
-    generate_logfile();
-
+    ROS_ERROR("start_time_ = %f", start_time_ );
+    return true;
+}
+void UR_Message_Listener::start()
+{
+    if(waitForValid()){
+        generate_logfile();
+    } else{
+        ROS_ERROR("Please wait for message to come...");
+    }
 }
 
 
@@ -155,6 +164,7 @@ void UR_Message_Listener::joint_state_callback(const sensor_msgs::JointState::Co
     {
         last_joint_state_msg_ = *msg;
     }
+    pub_joint_state_.publish(last_joint_state_msg_);
 }
 void UR_Message_Listener::joint_traj_cmd_callback(const trajectory_msgs::JointTrajectory::ConstPtr &msg)
 {
@@ -341,18 +351,30 @@ void UR_Message_Listener::write_logfile()
 
     file_joint_state_ << last_joint_state_msg_.header.stamp.toSec() - start_time_;
     /* elbow_joint, shoulder_lift_joint, shoulder_pan_joint, wrist_1_joint, wrist_2_joint, wrist_3_joint */
-    file_joint_state_   << delimiter_ << last_joint_state_msg_.position[2]
-                        << delimiter_ << last_joint_state_msg_.position[1]
-                        << delimiter_ << last_joint_state_msg_.position[0]
-                        << delimiter_ << last_joint_state_msg_.position[3]
-                        << delimiter_ << last_joint_state_msg_.position[4]
-                        << delimiter_ << last_joint_state_msg_.position[5]
-                        << delimiter_ << last_joint_state_msg_.velocity[2]
-                        << delimiter_ << last_joint_state_msg_.velocity[1]
-                        << delimiter_ << last_joint_state_msg_.velocity[0]
-                        << delimiter_ << last_joint_state_msg_.velocity[3]
-                        << delimiter_ << last_joint_state_msg_.velocity[4]
-                        << delimiter_ << last_joint_state_msg_.velocity[5] << "\n";
+    for(int i=0; i<last_joint_state_msg_.position.size(); ++i)
+    {
+        file_joint_state_ << delimiter_ << last_joint_state_msg_.position[i];
+    }
+
+    // append joint velocity
+
+     for(int i=0; i<last_joint_state_msg_.velocity.size(); ++i)
+    {
+        file_joint_state_ << delimiter_ << last_joint_state_msg_.velocity[i];
+    }
+    file_joint_state_ << "\n";
+    // file_joint_state_   << delimiter_ << last_joint_state_msg_.position[2]
+    //                     << delimiter_ << last_joint_state_msg_.position[1]
+    //                     << delimiter_ << last_joint_state_msg_.position[0]
+    //                     << delimiter_ << last_joint_state_msg_.position[3]
+    //                     << delimiter_ << last_joint_state_msg_.position[4]
+    //                     << delimiter_ << last_joint_state_msg_.position[5]
+    //                     << delimiter_ << last_joint_state_msg_.velocity[2]
+    //                     << delimiter_ << last_joint_state_msg_.velocity[1]
+    //                     << delimiter_ << last_joint_state_msg_.velocity[0]
+    //                     << delimiter_ << last_joint_state_msg_.velocity[3]
+    //                     << delimiter_ << last_joint_state_msg_.velocity[4]
+    //                     << delimiter_ << last_joint_state_msg_.velocity[5] << "\n";
 
     
     if(last_joint_traj_cmd_msg_.header.stamp.toSec() > pre_cmd_time_){

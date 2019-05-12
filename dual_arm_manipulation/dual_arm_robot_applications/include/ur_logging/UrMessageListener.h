@@ -40,7 +40,7 @@ class UR_Message_Listener
 {  // handles callbacks and saves last received messages
 protected:
   ros::NodeHandle nh_;
-  ros::Subscriber sub_cartesian_state_;
+  ros::Subscriber sub_cart_state_;
   ros::Subscriber sub_cart_vel_state_;
   ros::Subscriber sub_cart_pose_state_;
   ros::Subscriber sub_cart_vel_cmd_;
@@ -49,13 +49,10 @@ protected:
   ros::Subscriber sub_joint_state_;
   ros::Subscriber sub_joint_traj_cmd_;
 
-  ros::Subscriber joint_speed_com_sub_;
-  ros::Subscriber state_sub_;
-  ros::Subscriber pose_sub_;
   ros::Subscriber sub_robot_traj_cmd_;
-  ros::Subscriber m_tcp_speed_sub_;
-  ros::Subscriber c_tcp_speed_sub_;
   ros::Subscriber sub_offset_point_state_;
+
+  ros::Publisher pub_joint_state_;
 
 public:
   UR_Message_Listener(ros::NodeHandle &nh, std::string ur_namespace, std::string folder_name);
@@ -87,6 +84,8 @@ public:
   float force_dead_zone_thres_;
   float torque_dead_zone_thres_;
   Vector6d wrench_external_;
+
+  void start();
 
 private:
   std::string topic_cart_state_;
@@ -128,6 +127,7 @@ private:
 
   void generate_logfile();       //automatically generate a file name
   bool waitForValid(double seconds = 2.0);
+
  
   void robot_traj_cmd_callback(const moveit_msgs::RobotTrajectory::ConstPtr &msg);
   void offset_point_state_callback(const geometry_msgs::PointStamped::ConstPtr &msg);
