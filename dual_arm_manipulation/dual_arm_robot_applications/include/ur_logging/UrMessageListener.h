@@ -51,6 +51,7 @@ protected:
 
   ros::Subscriber sub_robot_traj_cmd_;
   ros::Subscriber sub_offset_point_state_;
+  ros::Subscriber sub_joint_traj_point_cmd_;
 
   ros::Publisher pub_joint_state_;
 
@@ -62,18 +63,19 @@ public:
 
   moveit_msgs::RobotTrajectory last_robot_traj_cmd_msg_;
 
-  cartesian_state_msgs::PoseTwist last_cart_state_msg_;
-  geometry_msgs::TwistStamped last_cart_vel_state_msg_;
-  geometry_msgs::PoseStamped last_cart_pose_state_msg_;
-  geometry_msgs::PointStamped last_offset_point_state_msg_;
+  cartesian_state_msgs::PoseTwist   last_cart_state_msg_;
+  geometry_msgs::TwistStamped       last_cart_vel_state_msg_;
+  geometry_msgs::PoseStamped        last_cart_pose_state_msg_;
+  geometry_msgs::PointStamped       last_offset_point_state_msg_;
 
-  geometry_msgs::Twist last_cart_vel_cmd_msg_;
-  geometry_msgs::PoseStamped last_cart_pose_cmd_msg_;
+  geometry_msgs::Twist              last_cart_vel_cmd_msg_;
+  geometry_msgs::PoseStamped        last_cart_pose_cmd_msg_;
 
-  geometry_msgs::WrenchStamped last_wrench_msg_;
+  geometry_msgs::WrenchStamped      last_wrench_msg_;
 
-  sensor_msgs::JointState last_joint_state_msg_;
-  trajectory_msgs::JointTrajectory last_joint_traj_cmd_msg_;
+  sensor_msgs::JointState           last_joint_state_msg_;
+  trajectory_msgs::JointTrajectory  last_joint_traj_cmd_msg_;
+  trajectory_msgs::JointTrajectoryPoint last_joint_traj_point_cmd_msg_;
 
 
   bool newTrajectory = false;
@@ -86,6 +88,7 @@ public:
   Vector6d wrench_external_;
 
   void start(int log_rate);
+  void stop();
 
 private:
   std::string topic_cart_state_;
@@ -98,6 +101,7 @@ private:
   std::string topic_external_wrench;
   std::string topic_robot_traj_cmd_;
   std::string topic_offset_point_state_;
+  std::string topic_joint_traj_point_cmd_;
 
   // real variables from the robot
   std::ofstream file_cartesian_state_;
@@ -107,7 +111,7 @@ private:
   std::ofstream file_cart_pose_cmd_;
   std::ofstream file_wrench_;
   std::ofstream file_joint_state_;
-  std::ofstream file_joint_cmd_;
+  std::ofstream file_joint_traj_cmd_;
 
   char delimiter_;
   std::string folder_name_;
@@ -124,7 +128,8 @@ private:
   void cartesian_pose_cmd_callback(const geometry_msgs::PoseStamped::ConstPtr &msg);
   void wrench_callback(const geometry_msgs::WrenchStamped::ConstPtr &msg);
   void joint_state_callback(const sensor_msgs::JointState::ConstPtr &msg);
-  void joint_traj_cmd_callback(const trajectory_msgs::JointTrajectoryConstPtr &msg);
+  void joint_traj_cmd_callback(const trajectory_msgs::JointTrajectory::ConstPtr &msg);
+  void joint_traj_point_cmd_callback(const trajectory_msgs::JointTrajectoryPoint::ConstPtr &msg);
 
   void generate_logfile();       //automatically generate a file name
   bool waitForValid(double seconds = 20); // It takes a little bit long to connect to ft sensor

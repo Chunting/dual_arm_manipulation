@@ -79,8 +79,7 @@ class DualArmRobot
     ros::NodeHandle nh_;
     std::string left_controller_;
     std::string right_controller_;
-    moveit_msgs::RobotState last_dual_arm_goal_state_; // mounted with force sensor
-    double ee_dist_;                                   // distance to object because of endeffector size
+    moveit_msgs::RobotState current_dual_arm_robotstate_msg_; // mounted with force sensor
     KDL::Frame arms_offset_;                           // offset between arms
     bool try_again_question();
     // PlanningSceneMonitorPtr is aka std::shared_ptr<planning_scene_monitor::PlanningSceneMonitor>
@@ -102,17 +101,11 @@ class DualArmRobot
     const robot_state::JointModelGroup *right_joint_model_group;
     // Get the current pose of end effector
     geometry_msgs::PoseStamped left_current_pose_;
-    geometry_msgs::PoseStamped left_current_pose_temp_;
-
     geometry_msgs::PoseStamped right_current_pose_;
-    geometry_msgs::PoseStamped right_current_pose_temp_;
     // The MoveGroupInterface class can be easily setup using the group name
     moveit::planning_interface::MoveGroupInterface left_;
     moveit::planning_interface::MoveGroupInterface right_;
     moveit::planning_interface::MoveGroupInterface arms_;
-
-    std::vector<double> left_joint_values;
-    std::vector<double> right_joint_values;
 
     std::thread *pose_publish_thread_;
 
@@ -123,7 +116,7 @@ class DualArmRobot
     Matrix6d rotation_world_right_base_;
     Matrix6d rotation_tip_right_sensor_;
 
-    void publishPoseMsg();
+    void publishOffsetPointState();
     // workaround for moveGroup method does not return attached objects correctly (issue)
     robot_state::RobotState getCurrentRobotState();
     moveit_msgs::RobotState getCurrentRobotStateMsg();
@@ -164,12 +157,13 @@ class DualArmRobot
     // Planning to a joint-space goal
     std::vector<double> getJointAngles(std::string ur_namespace);
 
-    moveit_msgs::RobotState getPositionIK(std::string &ur_namespace, moveit_msgs::RobotState &seed_robot_state, geometry_msgs::PoseStamped &poseIK);
-    std::vector<double> getPositionIK(const robot_state::JointModelGroup *joint_model_group, const geometry_msgs::Pose &pose);
-
     void publishPlanCartTrajectory(std::string endEffectorLink,
                                             moveit::planning_interface::MoveGroupInterface::Plan& plan, 
                                             double frequency=100);
+    void publishPlanCartTrajectory(std::string endEffectorLink,
+                                            const robot_state::JointModelGroup *joint_model_group,
+                                            moveit::planning_interface::MoveGroupInterface::Plan& plan, 
+                                            double frequency=100);                                      
    
 
     Eigen::MatrixXd getJacobian(const robot_state::JointModelGroup *joint_model_group, Eigen::Vector3d &reference_point_position);

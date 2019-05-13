@@ -181,10 +181,19 @@ void TrajectoryProcessor::publishPlanTrajectory(moveit::planning_interface::Move
     //     }
 }
 void TrajectoryProcessor::publishJointTrajectory(ros::NodeHandle &nh, std::string ur_namespace, moveit::planning_interface::MoveGroupInterface::Plan& plan){
-    std::string joint_traj_topic = ur_namespace + "/joint_traj_cmd";
-    ros::Publisher pub_joint_traj_cmd_ = nh.advertise<trajectory_msgs::JointTrajectory>(joint_traj_topic, 1, true);
-    std::string joint_traj_point_topic = ur_namespace + "/joint_traj_point_cmd";
-    ros::Publisher pub_joint_traj_point_cmd_ = nh.advertise<trajectory_msgs::JointTrajectoryPoint>(joint_traj_point_topic, 1, true);
+    std::string joint_traj_topic = "/joint_traj_cmd";
+    std::string joint_traj_point_topic = "/joint_traj_point_cmd";
+    if(ur_namespace == "left"){
+        joint_traj_topic = "left/joint_traj_cmd";
+        joint_traj_point_topic = "left/joint_traj_point_cmd";
+    } else if(ur_namespace == "right"){
+        joint_traj_topic = "right/joint_traj_cmd";
+        joint_traj_point_topic = "right/joint_traj_point_cmd";
+    }
+    
+    ros::Publisher pub_joint_traj_cmd_ = nh.advertise<trajectory_msgs::JointTrajectory>(joint_traj_topic, 1);
+    
+    ros::Publisher pub_joint_traj_point_cmd_ = nh.advertise<trajectory_msgs::JointTrajectoryPoint>(joint_traj_point_topic, 1);
     trajectory_msgs::JointTrajectory joint_trajectory = plan.trajectory_.joint_trajectory;
     pub_joint_traj_cmd_.publish(joint_trajectory);
     ROS_INFO("Publish joint trajectory on topic %s", joint_traj_topic.c_str()); 

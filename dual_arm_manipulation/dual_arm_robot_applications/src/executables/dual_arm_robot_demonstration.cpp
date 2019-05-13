@@ -141,8 +141,8 @@ int main(int argc, char **argv)
     left_rot.GetEulerZYX(yaw, pitch, roll);
 
     ROS_INFO("Before roll = %f\tpitch = %f\t yaw = %f", roll, pitch, yaw);
-    angle = 3.14/6;
-    pitch += angle;
+    angle = 3.14/12;
+    roll += angle;
     left_rot = KDL::Rotation::EulerZYX(yaw, pitch, roll);
 
     left_rot.GetEulerZYX(yaw, pitch, roll);
@@ -154,7 +154,7 @@ int main(int argc, char **argv)
     dualArmRobot.moveObject("box7", box7_goal_pose_stamped, 0.1);
     sleep(5);
 
-    pitch -= angle;
+    roll -= angle;
     left_rot = KDL::Rotation::RPY(roll, pitch, yaw);
     left_rot.GetEulerZYX(yaw, pitch, roll);
     ROS_INFO("After roll = %f\tpitch = %f\t yaw = %f", roll, pitch, yaw);

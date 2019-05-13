@@ -10,12 +10,13 @@ UR_Message_Listener::UR_Message_Listener(ros::NodeHandle &nh, std::string ur_nam
     
     topic_cart_pose_state_ = "tool_pose";
     topic_cart_vel_state_ = "tool_velocity";
-    topic_cart_pose_cmd_ = ur_namespace_ + "/cart_pose_cmd";
+    topic_cart_pose_cmd_ = "cart_pose_cmd";
     topic_external_wrench = "robotiq_ft_wrench";
-    topic_joint_traj_cmd_ = ur_namespace_ + "joint_traj_cmd";
+    topic_joint_traj_cmd_ = "joint_traj_cmd";
+    topic_joint_traj_cmd_ = "joint_traj_point_cmd";
     topic_joint_state_ = "ur_driver/joint_states";  // From ur_modern_driver
-    topic_robot_traj_cmd_ = ur_namespace_ + "robot_traj_cmd";
-    topic_offset_point_state_ = ur_namespace_ + "offset_point_state";
+    topic_robot_traj_cmd_ = "/robot_traj_cmd";
+    topic_offset_point_state_ = "/offset_point_state";
 
 
     sub_cart_state_         = nh_.subscribe<cartesian_state_msgs::PoseTwist>(topic_cart_state_, 100, &UR_Message_Listener::tool_state_callback, this);
@@ -29,6 +30,7 @@ UR_Message_Listener::UR_Message_Listener(ros::NodeHandle &nh, std::string ur_nam
     sub_offset_point_state_ = nh_.subscribe<geometry_msgs::PointStamped>(topic_offset_point_state_, 1, &UR_Message_Listener::offset_point_state_callback, this);
     sub_robot_traj_cmd_     = nh_.subscribe<moveit_msgs::RobotTrajectory>(topic_robot_traj_cmd_, 100, &UR_Message_Listener::robot_traj_cmd_callback, this);
     pub_joint_state_        = nh_.advertise<sensor_msgs::JointState>("/joint_states", 1);
+    sub_joint_traj_point_cmd_ = nh_.subscribe<trajectory_msgs::JointTrajectoryPoint>(topic_joint_traj_cmd_, 100, &UR_Message_Listener::joint_traj_point_cmd_callback, this);
     // ROS_ERROR_STREAM("Started to reveive messages from " << topic_joint_state_);
     start_time_ = ros::Time::now().toSec();
     delimiter_ = ',';
@@ -68,7 +70,19 @@ void UR_Message_Listener::start(int log_rate)
     timer_ = nh_.createTimer(ros::Duration().fromSec(log_duration), &UR_Message_Listener::logCallback, this);
 }
 
-
+void UR_Message_Listener::stop()
+{
+    ROS_INFO("Stopped logging");
+    timer_.stop();
+    file_cartesian_state_.close();
+    file_cart_pose_state_.close();
+    file_cart_vel_state_.close();
+    file_cart_vel_cmd_.close();
+    file_cart_pose_cmd_.close();
+    file_wrench_.close();
+    file_joint_state_.close();
+    file_joint_traj_cmd_.close();
+}
 void UR_Message_Listener::robot_traj_cmd_callback(const moveit_msgs::RobotTrajectory::ConstPtr &msg)
 {
     std::string left = "left";
@@ -163,7 +177,11 @@ void UR_Message_Listener::joint_traj_cmd_callback(const trajectory_msgs::JointTr
 {
     last_joint_traj_cmd_msg_ = *msg;
 }
-
+void UR_Message_Listener::joint_traj_point_cmd_callback(const trajectory_msgs::JointTrajectoryPoint::ConstPtr &msg)
+{
+    last_joint_traj_point_cmd_msg_ = *msg;
+    ROS_INFO("last_joint_traj_point_cmd_msg_ %f", last_joint_traj_point_cmd_msg_.time_from_start.toSec());
+}
 void UR_Message_Listener::generate_logfile()
 { // automatically generate a name
 
@@ -197,7 +215,7 @@ void UR_Message_Listener::generate_logfile()
 
     logfile_name = logfile_path + "_cart_pose_state.csv";
     file_cart_pose_state_.open(logfile_name.c_str(), std::ofstream::out | std::ofstream::trunc);
-    if (!file_cart_pose_cmd_.is_open())
+    if (!file_cart_pose_state_.is_open())
     {
         ROS_ERROR("Failed to open %s", logfile_name.c_str());
     }
@@ -249,7 +267,7 @@ void UR_Message_Listener::generate_logfile()
     {
         ROS_ERROR("UR Logger: could not properly load joint names");
     }
-    logfile_name = logfile_path + "_joint_state.csv";
+    logfile_name = logfile_path + "_joint_traj_state.csv";
     file_joint_state_.open(logfile_name.c_str(), std::ofstream::out | std::ofstream::trunc);
     if (!file_joint_state_.is_open())
     {
@@ -267,22 +285,22 @@ void UR_Message_Listener::generate_logfile()
     file_joint_state_ << "\n";
 
     // Create *_joint_cmd.csv
-    logfile_name = logfile_path + "_joint_cmd.csv";
-    file_joint_cmd_.open(logfile_name.c_str(), std::ofstream::out | std::ofstream::trunc);
-    if (!file_joint_cmd_.is_open())
+    logfile_name = logfile_path + "_joint_traj_cmd.csv";
+    file_joint_traj_cmd_.open(logfile_name.c_str(), std::ofstream::out | std::ofstream::trunc);
+    if (!file_joint_traj_cmd_.is_open())
     {
         ROS_ERROR("Failed to open %s", logfile_name.c_str());
     }
-    file_joint_cmd_ << "Time" << delimiter_ << "time_from_start";
+    file_joint_traj_cmd_ << "Time" << delimiter_ << "time_from_start";
     for (auto &jointname : joint_names)
     {
-        file_joint_cmd_ << delimiter_ << jointname + "_cmd_pos";
+        file_joint_traj_cmd_ << delimiter_ << jointname + "_cmd_pos";
     }
     for (auto &jointname : joint_names)
     {
-        file_joint_cmd_ << delimiter_ << jointname + "_cmd_vel";
+        file_joint_traj_cmd_ << delimiter_ << jointname + "_cmd_vel";
     }
-    file_joint_cmd_ << "\n";
+    file_joint_traj_cmd_ << "\n";
 }
 void UR_Message_Listener::write_logfile()
 {
@@ -374,18 +392,18 @@ void UR_Message_Listener::write_logfile()
         for (int i=0; i<last_joint_traj_cmd_msg_.points.size(); ++i)
         {
             auto point  = last_joint_traj_cmd_msg_.points[i];
-            file_joint_cmd_ << last_joint_traj_cmd_msg_.header.stamp.toSec() - start_time_ + point.time_from_start.toSec()
+            file_joint_traj_cmd_ << last_joint_traj_cmd_msg_.header.stamp.toSec() - start_time_ + point.time_from_start.toSec()
                             << delimiter_ << point.time_from_start.toSec();
             for (int i=0; i<point.positions.size();++i)
             {
-                file_joint_cmd_ << delimiter_ << point.positions[i];
+                file_joint_traj_cmd_ << delimiter_ << point.positions[i];
                 ROS_INFO("pos %f", point.positions[i]);
             }
             for (int i=0; i<point.velocities.size(); ++i)
             {
-                file_joint_cmd_ << delimiter_ << point.velocities[i];
+                file_joint_traj_cmd_ << delimiter_ << point.velocities[i];
             }
-            file_joint_cmd_ << "\n";
+            file_joint_traj_cmd_ << "\n";
         }
         pre_cmd_time_ = last_joint_traj_cmd_msg_.header.stamp.toSec();
     }
@@ -485,7 +503,7 @@ std::string UR_Message_Listener::write_joint_state_line()
     converter << "\n";
     return converter.str();
 }
-std::string UR_Message_Listener::write_joint_cmd_line()
+std::string UR_Message_Listener::write_joint_traj_cmd_line()
 {
     std::ostringstream converter; // stream used to convert numbers to string
     converter << stopwatch_.elapsed().toSec();
