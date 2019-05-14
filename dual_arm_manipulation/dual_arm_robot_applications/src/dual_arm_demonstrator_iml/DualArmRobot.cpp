@@ -453,9 +453,7 @@ bool DualArmRobot::graspMove(double distance, bool avoid_collisions, bool use_le
         } else
         {
             dual_arm_toolbox::TrajectoryProcessor::clean(left_trajectory);
-         
             dual_arm_toolbox::TrajectoryProcessor::scaleTrajectorySpeed(left_trajectory, 0.1);
-            
             moveit::planning_interface::MoveGroupInterface::Plan left_plan;
             left_plan.trajectory_ = left_trajectory;
             execute(left_plan);
@@ -1232,7 +1230,9 @@ bool DualArmRobot::execute(moveit::planning_interface::MoveGroupInterface::Plan 
 
     // for both arms trajectories: because in planning each arm was not aware of the other there is a collision check before executing the trajectory
     // TODO: put in again later
-    ros::Duration timeout = ros::Duration(0);  // Action client waitforresult, Wait until the goal is finished.  
+    ros::Time time_send_cmd = ros::Time::now();
+    ROS_INFO("joint_trajectory header stamp : %f, left plan has %ld points, and plan right has %ld points.", 
+        time_send_cmd.toSec(), plan_left.trajectory_.joint_trajectory.points.size(), plan_right.trajectory_.joint_trajectory.points.size());
     if ((plan_left.trajectory_.joint_trajectory.joint_names.size() > 0) && (plan_right.trajectory_.joint_trajectory.joint_names.size() > 0))
     {
         // check trajectory for collisions
@@ -1244,31 +1244,52 @@ bool DualArmRobot::execute(moveit::planning_interface::MoveGroupInterface::Plan 
             return false;
         }
         dual_arm_toolbox::TrajectoryProcessor::visualizePlan(plan_left, 0);
-        dual_arm_toolbox::TrajectoryProcessor::visualizePlan(plan_right, 0);
-        publishPlanCartTrajectory(left_.getEndEffectorLink(), plan_left, 100);
-        publishPlanCartTrajectory(right_.getEndEffectorLink(), plan_right, 100);
-        dual_arm_toolbox::TrajectoryProcessor::publishJointTrajectory(nh_, "left", plan_left);
-        dual_arm_toolbox::TrajectoryProcessor::publishJointTrajectory(nh_, "right", plan_right);
-        success_left = handle_left.sendTrajectory(plan_left.trajectory_);
-        success_right = handle_right.sendTrajectory(plan_right.trajectory_);
+        dual_arm_toolbox::TrajectoryProcessor::visualizePlan(plan_right, 0);      
+        if(handle_left.sendTrajectory(plan_left.trajectory_) && handle_right.sendTrajectory(plan_right.trajectory_)) {
+            if(handle_left.waitForExecution() && handle_right.waitForExecution()){
+                publishPlanCartTrajectory(left_.getEndEffectorLink(), left_joint_model_group, plan_left, time_send_cmd, 100);
+                publishPlanCartTrajectory(right_.getEndEffectorLink(), right_joint_model_group, plan_right,time_send_cmd, 100);
+            } else {
+                ROS_ERROR("The execution is not complete!!");
+            }
+        }else{
+            ROS_ERROR("The controller cannot accept the trajectory.!!");
+        }
+        // publishPlanCartTrajectory(left_.getEndEffectorLink(), plan_left, 100);
+        // publishPlanCartTrajectory(right_.getEndEffectorLink(), plan_right, 100);
+        
+        // dual_arm_toolbox::TrajectoryProcessor::publishJointTrajectory(nh_, "left", plan_left);
+        // dual_arm_toolbox::TrajectoryProcessor::publishJointTrajectory(nh_, "right", plan_right);
         // http://docs.ros.org/jade/api/moveit_simple_controller_manager/html/action__based__controller__handle_8h_source.html#l00106
-        success_left = handle_left.waitForExecution(timeout);  
-        success_right = handle_right.waitForExecution(timeout);
+  
        
     } else if (plan_left.trajectory_.joint_trajectory.joint_names.size() > 0)
     {
         dual_arm_toolbox::TrajectoryProcessor::visualizePlan(plan_left, 0);
-        publishPlanCartTrajectory(left_.getEndEffectorLink(), plan_left, 100); 
-        dual_arm_toolbox::TrajectoryProcessor::publishJointTrajectory(nh_, "left", plan_left);
-        success_left = handle_left.sendTrajectory(plan_left.trajectory_);
-        success_left = handle_left.waitForExecution(timeout); // Without any argument ROS::Duration(), it always returen true.
+        if(handle_left.sendTrajectory(plan_left.trajectory_)) {
+            if(handle_left.waitForExecution()){
+                publishPlanCartTrajectory(left_.getEndEffectorLink(), left_joint_model_group, plan_left, time_send_cmd, 100);
+            } else {
+                ROS_ERROR("The execution is not complete!!");
+            }
+        }else{
+            ROS_ERROR("The controller cannot accept the trajectory.!!");
+        }
+        
        
     } else {
         dual_arm_toolbox::TrajectoryProcessor::visualizePlan(plan_right, 0);
-        publishPlanCartTrajectory(right_.getEndEffectorLink(), plan_right, 100);
-        dual_arm_toolbox::TrajectoryProcessor::publishJointTrajectory(nh_, "right", plan_right);
-        success_right = handle_right.sendTrajectory(plan_right.trajectory_);
-        success_right = handle_right.waitForExecution(timeout);
+        if(handle_right.sendTrajectory(plan_right.trajectory_)) {
+            if(handle_right.waitForExecution()){
+                publishPlanCartTrajectory(right_.getEndEffectorLink(), right_joint_model_group, plan_right,time_send_cmd, 100);
+            } else {
+                ROS_ERROR("The execution is not complete!!");
+            }
+        }else{
+            ROS_ERROR("The controller cannot accept the trajectory.!!");
+        }
+        // dual_arm_toolbox::TrajectoryProcessor::publishJointTrajectory(nh_, "right", plan_right);
+        //publishPlanCartTrajectory(right_.getEndEffectorLink(), right_joint_model_group, plan_right, time_send_cmd, 100);
     }
     dual_arm_toolbox::TrajectoryProcessor::publishPlanTrajectory(plan, 1);
    
@@ -1443,13 +1464,26 @@ void DualArmRobot::publishPlanCartTrajectory(std::string endEffectorLink,
 void DualArmRobot::publishPlanCartTrajectory(std::string endEffectorLink,
                                                 const robot_state::JointModelGroup *joint_model_group,
                                                 moveit::planning_interface::MoveGroupInterface::Plan& plan, 
+                                                ros::Time time_send_cmd,
                                                 double frequency)
 {
+    std::string plan_topic = "left/cart_pose_cmd";
+    std::string joint_traj_point_topic = "left/joint_traj_point_cmd";
+    std::size_t right_found = endEffectorLink.find("right");
+    if (right_found!=std::string::npos){
+        plan_topic = "right/cart_pose_cmd";
+        joint_traj_point_topic = "right/joint_traj_point_cmd";
+    } 
+    ros::Publisher pub_cart_plan = nh_.advertise<geometry_msgs::PoseStamped>(plan_topic, 1);
+    ros::Publisher pub_joint_traj_point_cmd_ = nh_.advertise<trajectory_msgs::JointTrajectoryPoint>(joint_traj_point_topic, 1);
+    
     geometry_msgs::PoseStamped poseFK;
+    poseFK.header.stamp = time_send_cmd;
+    poseFK.header.frame_id = "world";
+    
     ros::Rate loop_rate(frequency);
     std::vector<double> joint_values;
-    poseFK.header.stamp = ros::Time::now();
-    poseFK.header.frame_id = "world";
+
     for (unsigned int i = 0; i < plan.trajectory_.joint_trajectory.points.size(); i++)
     {
         joint_values.clear();
@@ -1466,12 +1500,22 @@ void DualArmRobot::publishPlanCartTrajectory(std::string endEffectorLink,
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         geometry_msgs::Pose pose_msg;
         dual_arm_toolbox::Transform::transformKDLtoPose(frame_pose, pose_msg);
-        loop_rate.sleep();
+        poseFK.pose = std::move(pose_msg);
+        poseFK.header.stamp = time_send_cmd + point.time_from_start;
+        do{
+            pub_cart_plan.publish(poseFK);
+        }while(pub_cart_plan.getNumSubscribers()<1);
+        do{
+            pub_joint_traj_point_cmd_.publish(point);
+        }while(pub_joint_traj_point_cmd_.getNumSubscribers()<1);
+        ROS_INFO("Publish to %s, get number of subscribers %d, timestamp %f", 
+                pub_joint_traj_point_cmd_.getTopic().c_str(), pub_joint_traj_point_cmd_.getNumSubscribers(), point.time_from_start.toSec());
         
-
+        loop_rate.sleep();
     }
 
 }
+
 void DualArmRobot::PrintPose(geometry_msgs::Pose &pose)
 {
     ROS_INFO("Print Pose: x=%f, y=%f, z=%f, qx=%f, qy=%f, qz=%f, qw=%f\n",
@@ -1511,6 +1555,53 @@ void DualArmRobot::publishOffsetPointState()
         rate.sleep();
     }
 }
+// void DualArmRobot::publishPlanCartTrajectory()
+// {
+//     std::string plan_topic = "left/cart_pose_cmd";
+//     std::string joint_traj_point_topic = "left/joint_traj_point_cmd";
+//     std::size_t right_found = endEffectorLink.find("right");
+//     if (right_found!=std::string::npos){
+//         plan_topic = "right/cart_pose_cmd";
+//         joint_traj_point_topic = "right/joint_traj_point_cmd";
+//     } 
+//     ros::Publisher pub_cart_plan = nh_.advertise<geometry_msgs::PoseStamped>(plan_topic, 1);
+//     ros::Publisher pub_joint_traj_point_cmd_ = nh_.advertise<trajectory_msgs::JointTrajectoryPoint>(joint_traj_point_topic, 1);
+    
+//     geometry_msgs::PoseStamped poseFK;
+//     poseFK.header.stamp = ros::Time::now();
+//     poseFK.header.frame_id = "world";
+    
+//     ros::Rate loop_rate(100);
+//     std::vector<double> joint_values;
+
+//     for (unsigned int i = 0; i < plan.trajectory_.joint_trajectory.points.size(); i++)
+//     {
+//         joint_values.clear();
+//         auto point = plan.trajectory_.joint_trajectory.points[i];
+//         // ROS_INFO("Read joint points from arm trajectory %d", i);
+//         std::copy(point.positions.begin(), point.positions.end(),
+//                     std::back_inserter(joint_values));
+
+//         // fk -> pos left
+//         KDL::Frame frame_pose;
+//         kinematic_state->setJointGroupPositions(joint_model_group, joint_values);
+//         const Eigen::Affine3d &Affine3d_pose = kinematic_state->getGlobalLinkTransform(endEffectorLink);
+//         tf::transformEigenToKDL(Affine3d_pose, frame_pose);
+//         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//         geometry_msgs::Pose pose_msg;
+//         dual_arm_toolbox::Transform::transformKDLtoPose(frame_pose, pose_msg);
+//         poseFK.pose = std::move(pose_msg);
+//         poseFK.header.stamp += point.time_from_start;
+//         do{
+//             pub_cart_plan.publish(poseFK);
+//         }while(pub_cart_plan.getNumSubscribers()<1);
+//         ROS_INFO("Publish to %s, get number of subscribers %d, timestamp %f", 
+//                 pub_cart_plan.getTopic().c_str(), pub_cart_plan.getNumSubscribers(), poseFK.header.stamp.toSec());
+//         //pub_joint_traj_point_cmd_.publish(point);
+//         loop_rate.sleep();
+//     }
+
+// }
 void DualArmRobot::setConstraints()
 {
     // setup constraints

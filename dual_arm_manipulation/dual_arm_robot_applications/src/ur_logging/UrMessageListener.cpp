@@ -5,32 +5,35 @@ UR_Message_Listener::UR_Message_Listener(ros::NodeHandle &nh, std::string ur_nam
 {
     stopwatch_.restart();
     std::string prefix = nh_.getNamespace(); 
-    topic_cart_state_ = "ur5_cartesian_velocity_controller/ee_state";
-    topic_cart_vel_cmd_ = "ur5_cartesian_velocity_controller/command_cart_vel";
-    
+    /// robot states
     topic_cart_pose_state_ = "tool_pose";
     topic_cart_vel_state_ = "tool_velocity";
-    topic_cart_pose_cmd_ = "cart_pose_cmd";
     topic_external_wrench = "robotiq_ft_wrench";
-    topic_joint_traj_cmd_ = "joint_traj_cmd";
-    topic_joint_traj_cmd_ = "joint_traj_point_cmd";
     topic_joint_state_ = "ur_driver/joint_states";  // From ur_modern_driver
+    topic_offset_point_state_ = "/offset_point_state"; // Not yet recorded
+    /// robot command
+    topic_cart_pose_cmd_ = "cart_pose_cmd";
+    topic_joint_traj_cmd_ = "joint_traj_cmd";
+    topic_joint_traj_point_cmd_ = "joint_traj_point_cmd";
     topic_robot_traj_cmd_ = "/robot_traj_cmd";
-    topic_offset_point_state_ = "/offset_point_state";
-
-
-    sub_cart_state_         = nh_.subscribe<cartesian_state_msgs::PoseTwist>(topic_cart_state_, 100, &UR_Message_Listener::tool_state_callback, this);
-    sub_cart_vel_cmd_       = nh_.subscribe<geometry_msgs::Twist>(topic_cart_vel_cmd_, 100, &UR_Message_Listener::cart_vel_cmd_callback, this);
-    sub_cart_vel_state_     = nh_.subscribe<geometry_msgs::TwistStamped>(topic_cart_vel_state_, 100, &UR_Message_Listener::cart_vel_state_callback, this);
+    // For ur5_cartesian_velocity_controller
+    // topic_cart_state_ = "ur5_cartesian_velocity_controller/ee_state";
+    // topic_cart_vel_cmd_ = "ur5_cartesian_velocity_controller/command_cart_vel";
+    // sub_cart_vel_cmd_       = nh_.subscribe<geometry_msgs::Twist>(topic_cart_vel_cmd_, 100, &UR_Message_Listener::cart_vel_cmd_callback, this);
+    
     sub_cart_pose_state_    = nh_.subscribe<geometry_msgs::PoseStamped>(topic_cart_pose_state_, 100, &UR_Message_Listener::cart_pose_state_callback, this);
-    sub_cart_pose_cmd_      = nh_.subscribe<geometry_msgs::PoseStamped>(topic_cart_pose_cmd_, 100, &UR_Message_Listener::cartesian_pose_cmd_callback, this);
-    sub_wrench_external_    = nh_.subscribe<geometry_msgs::WrenchStamped>(topic_external_wrench, 100, &UR_Message_Listener::wrench_callback, this);
+    sub_cart_vel_state_     = nh_.subscribe<geometry_msgs::TwistStamped>(topic_cart_vel_state_, 100, &UR_Message_Listener::cart_vel_state_callback, this);
     sub_joint_state_        = nh_.subscribe<sensor_msgs::JointState>(topic_joint_state_, 100, &UR_Message_Listener::joint_state_callback, this);
-    sub_joint_traj_cmd_     = nh_.subscribe<trajectory_msgs::JointTrajectory>(topic_joint_traj_cmd_, 1, &UR_Message_Listener::joint_traj_cmd_callback, this);
+    sub_wrench_external_    = nh_.subscribe<geometry_msgs::WrenchStamped>(topic_external_wrench, 100, &UR_Message_Listener::wrench_callback, this);
     sub_offset_point_state_ = nh_.subscribe<geometry_msgs::PointStamped>(topic_offset_point_state_, 1, &UR_Message_Listener::offset_point_state_callback, this);
-    sub_robot_traj_cmd_     = nh_.subscribe<moveit_msgs::RobotTrajectory>(topic_robot_traj_cmd_, 100, &UR_Message_Listener::robot_traj_cmd_callback, this);
-    pub_joint_state_        = nh_.advertise<sensor_msgs::JointState>("/joint_states", 1);
-    sub_joint_traj_point_cmd_ = nh_.subscribe<trajectory_msgs::JointTrajectoryPoint>(topic_joint_traj_cmd_, 100, &UR_Message_Listener::joint_traj_point_cmd_callback, this);
+    
+    
+    sub_cart_pose_cmd_      = nh_.subscribe<geometry_msgs::PoseStamped>(topic_cart_pose_cmd_, 100, &UR_Message_Listener::cart_pose_cmd_callback, this);
+    // sub_joint_traj_cmd_     = nh_.subscribe<trajectory_msgs::JointTrajectory>(topic_joint_traj_cmd_, 1, &UR_Message_Listener::joint_traj_cmd_callback, this);
+    sub_joint_traj_point_cmd_ = nh_.subscribe<trajectory_msgs::JointTrajectoryPoint>(topic_joint_traj_point_cmd_, 100, &UR_Message_Listener::joint_traj_point_cmd_callback, this);
+    // sub_robot_traj_cmd_     = nh_.subscribe<moveit_msgs::RobotTrajectory>(topic_robot_traj_cmd_, 100, &UR_Message_Listener::robot_traj_cmd_callback, this);
+    // // sub_cart_state_         = nh_.subscribe<cartesian_state_msgs::PoseTwist>(topic_cart_state_, 100, &UR_Message_Listener::cart_state_callback, this);
+    
     // ROS_ERROR_STREAM("Started to reveive messages from " << topic_joint_state_);
     start_time_ = ros::Time::now().toSec();
     delimiter_ = ',';
@@ -68,20 +71,15 @@ void UR_Message_Listener::start(int log_rate)
     generate_logfile();
     double log_duration = 1.0 / log_rate;
     timer_ = nh_.createTimer(ros::Duration().fromSec(log_duration), &UR_Message_Listener::logCallback, this);
+    ROS_INFO("Start to subscrib topic %s", sub_cart_pose_cmd_.getTopic().c_str());
 }
 
 void UR_Message_Listener::stop()
 {
     ROS_INFO("Stopped logging");
     timer_.stop();
-    file_cartesian_state_.close();
-    file_cart_pose_state_.close();
-    file_cart_vel_state_.close();
-    file_cart_vel_cmd_.close();
-    file_cart_pose_cmd_.close();
-    file_wrench_.close();
-    file_joint_state_.close();
-    file_joint_traj_cmd_.close();
+    file_robot_state_.close();
+    file_robot_cmd_.close();
 }
 void UR_Message_Listener::robot_traj_cmd_callback(const moveit_msgs::RobotTrajectory::ConstPtr &msg)
 {
@@ -120,7 +118,7 @@ void UR_Message_Listener::offset_point_state_callback(const geometry_msgs::Point
 ////////////////////////// Callbacks //////////////////////////
 ///////////////////////////////////////////////////////////////
 
-void UR_Message_Listener::tool_state_callback(const cartesian_state_msgs::PoseTwist::ConstPtr &msg)
+void UR_Message_Listener::cart_state_callback(const cartesian_state_msgs::PoseTwist::ConstPtr &msg)
 {
     last_cart_state_msg_ = *msg;
 }
@@ -136,9 +134,11 @@ void UR_Message_Listener::cart_vel_cmd_callback(const geometry_msgs::Twist::Cons
 {
     last_cart_vel_cmd_msg_ = *msg;
 }
-void UR_Message_Listener::cartesian_pose_cmd_callback(const geometry_msgs::PoseStamped::ConstPtr &msg)
+void UR_Message_Listener::cart_pose_cmd_callback(const geometry_msgs::PoseStamped::ConstPtr &msg)
 {
     last_cart_pose_cmd_msg_ = *msg;
+    // ROS_INFO("Subscribe %s, number of publishers %d, timestamp %f", 
+    // sub_cart_pose_cmd_.getTopic().c_str(), sub_cart_pose_cmd_.getNumPublishers(), last_cart_pose_cmd_msg_.header.stamp.toSec());
 }
 void UR_Message_Listener::wrench_callback(const geometry_msgs::WrenchStamped::ConstPtr &msg)
 {
@@ -180,127 +180,117 @@ void UR_Message_Listener::joint_traj_cmd_callback(const trajectory_msgs::JointTr
 void UR_Message_Listener::joint_traj_point_cmd_callback(const trajectory_msgs::JointTrajectoryPoint::ConstPtr &msg)
 {
     last_joint_traj_point_cmd_msg_ = *msg;
-    ROS_INFO("last_joint_traj_point_cmd_msg_ %f", last_joint_traj_point_cmd_msg_.time_from_start.toSec());
+    ROS_INFO("Subscribe %s, number of publishers %d, timestamp %f", 
+        sub_joint_traj_point_cmd_.getTopic().c_str(), sub_joint_traj_point_cmd_.getNumPublishers(), 
+        last_joint_traj_point_cmd_msg_.time_from_start.toSec());
 }
-void UR_Message_Listener::generate_logfile()
+bool UR_Message_Listener::generate_logfile()
 { // automatically generate a name
 
     std::string logfile_path = folder_name_ + ur_namespace_;
-    std::string logfile_name = logfile_path + "_cartesian_state.csv";
-    // file_cartesian_state_.open(logfile_name.c_str(), std::ofstream::out | std::ofstream::trunc);
-    // if (!file_cartesian_state_.is_open())
-    // {
-    //     ROS_ERROR("Failed to open %s", logfile_name.c_str());
-    // }
+    std::string logfile_name = logfile_path + "_robot_state.csv";
 
-    // file_cartesian_state_ << "Time" << delimiter_ << ur_namespace_ + "_state_x" << delimiter_
-    //                       << ur_namespace_ + "_state_y" << delimiter_ << ur_namespace_ + "_state_z" << delimiter_
-    //                       << ur_namespace_ + "_state_w" << delimiter_ << ur_namespace_ + "_state_rx" << delimiter_
-    //                       << ur_namespace_ + "_state_ry" << delimiter_ << ur_namespace_ + "_state_rz" << delimiter_
-    //                       << ur_namespace_ + "_state_vx" << delimiter_ << ur_namespace_ + "_state_vy" << delimiter_
-    //                       << ur_namespace_ + "_state_vz" << delimiter_ << ur_namespace_ + "_state_wx" << delimiter_
-    //                       << ur_namespace_ + "_state_wy" << delimiter_ << ur_namespace_ + "_state_wz"
-    //                       << "\n";
-    // Create log file for Cartesian information
-    logfile_name = logfile_path + "_cart_vel_state.csv";
-    file_cart_vel_state_.open(logfile_name.c_str(), std::ofstream::out | std::ofstream::trunc);
-    if (!file_cart_vel_state_.is_open())
-    {
-        ROS_ERROR("Failed to open %s", logfile_name.c_str());
-    }
-    file_cart_vel_state_ << "Time" << delimiter_ << ur_namespace_ + "_state_vx" << delimiter_ << ur_namespace_ + "_state_vy"
-                              << delimiter_ << ur_namespace_ + "_state_vz" << delimiter_ << ur_namespace_ + "_state_wx"
-                              << delimiter_ << ur_namespace_ + "_state_wy" << delimiter_ << ur_namespace_ + "_state_wz"
-                              << "\n";
-
-    logfile_name = logfile_path + "_cart_pose_state.csv";
-    file_cart_pose_state_.open(logfile_name.c_str(), std::ofstream::out | std::ofstream::trunc);
-    if (!file_cart_pose_state_.is_open())
-    {
-        ROS_ERROR("Failed to open %s", logfile_name.c_str());
-    }
-    file_cart_pose_state_ << "Time" << delimiter_ << ur_namespace_ + "_state_x" << delimiter_ << ur_namespace_ + "_state_y"
-                              << delimiter_ << ur_namespace_ + "_state_z" << delimiter_ << ur_namespace_ + "_state_qx"
-                              << delimiter_ << ur_namespace_ + "_state_qy" << delimiter_ << ur_namespace_ + "_state_qz"
-                              << delimiter_ << ur_namespace_ + "_state_qw"
-                              << "\n";
-    // Create log file for cartesian command
-    logfile_name = logfile_path + "_cart_vel_cmd.csv";
-    file_cart_vel_cmd_.open(logfile_name.c_str(), std::ofstream::out | std::ofstream::trunc);
-    if (!file_cart_vel_cmd_.is_open())
-    {
-        ROS_ERROR("Failed to open %s", logfile_name.c_str());
-    }
-    file_cart_vel_cmd_ << "Time" << delimiter_ << ur_namespace_ + "_cmd_vx" << delimiter_ << ur_namespace_ + "_cmd_vy"
-                            << delimiter_ << ur_namespace_ + "_cmd_vz" << delimiter_ << ur_namespace_ + "_cmd_wx"
-                            << delimiter_ << ur_namespace_ + "_cmd_wy" << delimiter_ << ur_namespace_ + "_cmd_wz"
-                            << "\n";
-
-    logfile_name = logfile_path + "_cart_pose_cmd.csv";
-    file_cart_pose_cmd_.open(logfile_name.c_str(), std::ofstream::out | std::ofstream::trunc);
-    if (!file_cart_pose_cmd_.is_open())
-    {
-        ROS_ERROR("Failed to open %s", logfile_name.c_str());
-    }
-    file_cart_pose_cmd_ << "Time" << delimiter_ << ur_namespace_ + "_cmd_x" << delimiter_ << ur_namespace_ + "_cmd_y"
-                            << delimiter_ << ur_namespace_ + "_cmd_z" << delimiter_ << ur_namespace_ + "_cmd_qx"
-                            << delimiter_ << ur_namespace_ + "_cmd_qy" << delimiter_ << ur_namespace_ + "_cmd_qz"
-                            << delimiter_ << ur_namespace_ + "_cmd_qw"
-                            << "\n";
-
-    // Create log file for end-effector wrench data in robotiq_ft_frame_id frame
-    logfile_name = logfile_path + "_wrench.csv";
-    file_wrench_.open(logfile_name.c_str(), std::ofstream::out | std::ofstream::trunc);
-    if (!file_wrench_.is_open())
-    {
-        ROS_ERROR("Failed to open %s", logfile_name.c_str());
-    }
-    file_wrench_ << "Time" << delimiter_ << ur_namespace_ + "_Fx" << delimiter_ << ur_namespace_ + "_Fy" << delimiter_
-                 << ur_namespace_ + "_Fz" << delimiter_ << ur_namespace_ + "_Tx" << delimiter_ << ur_namespace_ + "_Ty"
-                 << delimiter_ << ur_namespace_ + "_Tz"
-                 << "\n";
-
-    // Create *_joint_state.csv
     std::vector<std::string> joint_names;
     std::copy(last_joint_state_msg_.name.begin(), last_joint_state_msg_.name.end(), std::back_inserter(joint_names));
     if (joint_names.size() < 6)
     {
         ROS_ERROR("UR Logger: could not properly load joint names");
+        return false;
     }
-    logfile_name = logfile_path + "_joint_traj_state.csv";
-    file_joint_state_.open(logfile_name.c_str(), std::ofstream::out | std::ofstream::trunc);
-    if (!file_joint_state_.is_open())
+    
+    
+    file_robot_state_.open(logfile_name.c_str(), std::ofstream::out | std::ofstream::trunc);
+    if (!file_robot_state_.is_open())
     {
         ROS_ERROR("Failed to open %s", logfile_name.c_str());
+        return false;
     }
-    file_joint_state_ << "Time";
-    for (auto &jointname : joint_names)
-    {
-        file_joint_state_ << delimiter_ << jointname + "_state_pos";
-    }
-    for (auto &jointname : joint_names)
-    {
-        file_joint_state_ << delimiter_ << jointname + "_state_vel";
-    }
-    file_joint_state_ << "\n";
+    file_robot_state_ << "Time" 
+                      << delimiter_ << ur_namespace_ + "_state_x" 
+                      << delimiter_ << ur_namespace_ + "_state_y"
+                      << delimiter_ << ur_namespace_ + "_state_z" 
+                      << delimiter_ << ur_namespace_ + "_state_qx"
+                      << delimiter_ << ur_namespace_ + "_state_qy" 
+                      << delimiter_ << ur_namespace_ + "_state_qz"
+                      << delimiter_ << ur_namespace_ + "_state_qw"
+                      << delimiter_ << ur_namespace_ + "_state_vx" 
+                      << delimiter_ << ur_namespace_ + "_state_vy"
+                      << delimiter_ << ur_namespace_ + "_state_vz" 
+                      << delimiter_ << ur_namespace_ + "_state_wx"
+                      << delimiter_ << ur_namespace_ + "_state_wy" 
+                      << delimiter_ << ur_namespace_ + "_state_wz"
+                      << delimiter_ << ur_namespace_ + "_Fx" 
+                      << delimiter_ << ur_namespace_ + "_Fy" 
+                      << delimiter_ << ur_namespace_ + "_Fz" 
+                      << delimiter_ << ur_namespace_ + "_Tx" 
+                      << delimiter_ << ur_namespace_ + "_Ty"
+                      << delimiter_ << ur_namespace_ + "_Tz"
+                      << delimiter_ << joint_names[0] + "_state_pos"
+                      << delimiter_ << joint_names[1] + "_state_pos"
+                      << delimiter_ << joint_names[2] + "_state_pos"
+                      << delimiter_ << joint_names[3] + "_state_pos"
+                      << delimiter_ << joint_names[4] + "_state_pos"
+                      << delimiter_ << joint_names[5] + "_state_pos"
+                      << delimiter_ << joint_names[0] + "_state_vel"
+                      << delimiter_ << joint_names[1] + "_state_vel"
+                      << delimiter_ << joint_names[2] + "_state_vel"
+                      << delimiter_ << joint_names[3] + "_state_vel"
+                      << delimiter_ << joint_names[4] + "_state_vel"
+                      << delimiter_ << joint_names[5] + "_state_vel" << "\n";
+    // for (auto &jointname : joint_names)
+    // {
+    //     file_robot_state_  << delimiter_ << jointname + "_state_pos";
+    // }
+    // for (auto &jointname : joint_names)
+    // {
+    //     file_robot_state_  << delimiter_ << jointname + "_state_vel";
+    // }
+    // file_robot_state_  << "\n";
 
-    // Create *_joint_cmd.csv
-    logfile_name = logfile_path + "_joint_traj_cmd.csv";
-    file_joint_traj_cmd_.open(logfile_name.c_str(), std::ofstream::out | std::ofstream::trunc);
-    if (!file_joint_traj_cmd_.is_open())
+
+ 
+    logfile_name = logfile_path + "_robot_cmd.csv";
+    file_robot_cmd_.open(logfile_name.c_str(), std::ofstream::out | std::ofstream::trunc);
+    if (!file_robot_cmd_.is_open())
     {
         ROS_ERROR("Failed to open %s", logfile_name.c_str());
+        return false;
     }
-    file_joint_traj_cmd_ << "Time" << delimiter_ << "time_from_start";
-    for (auto &jointname : joint_names)
-    {
-        file_joint_traj_cmd_ << delimiter_ << jointname + "_cmd_pos";
-    }
-    for (auto &jointname : joint_names)
-    {
-        file_joint_traj_cmd_ << delimiter_ << jointname + "_cmd_vel";
-    }
-    file_joint_traj_cmd_ << "\n";
+    file_robot_cmd_ << "Time" << delimiter_ << "time_from_start"
+                    << delimiter_ << ur_namespace_ + "_cmd_x" 
+                    << delimiter_ << ur_namespace_ + "_cmd_y"
+                    << delimiter_ << ur_namespace_ + "_cmd_z" 
+                    << delimiter_ << ur_namespace_ + "_cmd_qx"
+                    << delimiter_ << ur_namespace_ + "_cmd_qy" 
+                    << delimiter_ << ur_namespace_ + "_cmd_qz"
+                    << delimiter_ << ur_namespace_ + "_cmd_qw"
+                    // << delimiter_ << ur_namespace_ + "_cmd_vx" 
+                    // << delimiter_ << ur_namespace_ + "_cmd_vy"
+                    // << delimiter_ << ur_namespace_ + "_cmd_vz" 
+                    // << delimiter_ << ur_namespace_ + "_cmd_wx"
+                    // << delimiter_ << ur_namespace_ + "_cmd_wy" 
+                    // << delimiter_ << ur_namespace_ + "_cmd_wz"
+                    << delimiter_ << joint_names[0] + "_cmd_pos"
+                    << delimiter_ << joint_names[1] + "_cmd_pos"
+                    << delimiter_ << joint_names[2] + "_cmd_pos"
+                    << delimiter_ << joint_names[3] + "_cmd_pos"
+                    << delimiter_ << joint_names[4] + "_cmd_pos"
+                    << delimiter_ << joint_names[5] + "_cmd_pos"
+                    << delimiter_ << joint_names[0] + "_cmd_vel"
+                    << delimiter_ << joint_names[1] + "_cmd_vel"
+                    << delimiter_ << joint_names[2] + "_cmd_vel"
+                    << delimiter_ << joint_names[3] + "_cmd_vel"
+                    << delimiter_ << joint_names[4] + "_cmd_vel"
+                    << delimiter_ << joint_names[5] + "_cmd_vel" << "\n";
+    // for (auto &jointname : joint_names)
+    // {
+    //     file_robot_cmd_ << delimiter_ << jointname + "_cmd_pos";
+    // }
+    // for (auto &jointname : joint_names)
+    // {
+    //     file_robot_cmd_ << delimiter_ << jointname + "_cmd_vel";
+    // }
+    // file_robot_cmd_ << "\n";
 }
 void UR_Message_Listener::write_logfile()
 {
@@ -318,95 +308,92 @@ void UR_Message_Listener::write_logfile()
     //                       << delimiter_ << last_cart_state_msg_.twist.angular.x
     //                       << delimiter_ << last_cart_state_msg_.twist.angular.y
     //                       << delimiter_ << last_cart_state_msg_.twist.angular.z << "\n";
-    file_cart_vel_state_ << last_cart_vel_state_msg_.header.stamp.toSec() - start_time_
-                              << delimiter_ << last_cart_vel_state_msg_.twist.linear.x
-                              << delimiter_ << last_cart_vel_state_msg_.twist.linear.y
-                              << delimiter_ << last_cart_vel_state_msg_.twist.linear.z
-                              << delimiter_ << last_cart_vel_state_msg_.twist.angular.x
-                              << delimiter_ << last_cart_vel_state_msg_.twist.angular.y
-                              << delimiter_ << last_cart_vel_state_msg_.twist.angular.z << "\n";
+    file_robot_state_ << last_cart_pose_state_msg_.header.stamp.toSec() - start_time_
+                    << delimiter_ << last_cart_pose_state_msg_.pose.position.x
+                    << delimiter_ << last_cart_pose_state_msg_.pose.position.y
+                    << delimiter_ << last_cart_pose_state_msg_.pose.position.z
+                    << delimiter_ << last_cart_pose_state_msg_.pose.orientation.x
+                    << delimiter_ << last_cart_pose_state_msg_.pose.orientation.y
+                    << delimiter_ << last_cart_pose_state_msg_.pose.orientation.z
+                    << delimiter_ << last_cart_pose_state_msg_.pose.orientation.w
+                    << delimiter_ << last_cart_vel_state_msg_.twist.linear.x
+                    << delimiter_ << last_cart_vel_state_msg_.twist.linear.y
+                    << delimiter_ << last_cart_vel_state_msg_.twist.linear.z
+                    << delimiter_ << last_cart_vel_state_msg_.twist.angular.x
+                    << delimiter_ << last_cart_vel_state_msg_.twist.angular.y
+                    << delimiter_ << last_cart_vel_state_msg_.twist.angular.z
+                    << delimiter_ << last_wrench_msg_.wrench.force.x
+                    << delimiter_ << last_wrench_msg_.wrench.force.y 
+                    << delimiter_ << last_wrench_msg_.wrench.force.z 
+                    << delimiter_ << last_wrench_msg_.wrench.torque.x 
+                    << delimiter_ << last_wrench_msg_.wrench.torque.y 
+                    << delimiter_ << last_wrench_msg_.wrench.torque.z
+                    << delimiter_ << last_joint_state_msg_.position[0]
+                    << delimiter_ << last_joint_state_msg_.position[1]
+                    << delimiter_ << last_joint_state_msg_.position[2]
+                    << delimiter_ << last_joint_state_msg_.position[3]
+                    << delimiter_ << last_joint_state_msg_.position[4]
+                    << delimiter_ << last_joint_state_msg_.position[5]
+                    << delimiter_ << last_joint_state_msg_.velocity[0]
+                    << delimiter_ << last_joint_state_msg_.velocity[1]
+                    << delimiter_ << last_joint_state_msg_.velocity[2]
+                    << delimiter_ << last_joint_state_msg_.velocity[3]
+                    << delimiter_ << last_joint_state_msg_.velocity[4]
+                    << delimiter_ << last_joint_state_msg_.velocity[5] << "\n";
 
-    file_cart_pose_state_ << last_cart_pose_state_msg_.header.stamp.toSec() - start_time_
-                              << delimiter_ << last_cart_pose_state_msg_.pose.position.x
-                              << delimiter_ << last_cart_pose_state_msg_.pose.position.y
-                              << delimiter_ << last_cart_pose_state_msg_.pose.position.z
-                              << delimiter_ << last_cart_pose_state_msg_.pose.orientation.x
-                              << delimiter_ << last_cart_pose_state_msg_.pose.orientation.y
-                              << delimiter_ << last_cart_pose_state_msg_.pose.orientation.z
-                              << delimiter_ << last_cart_pose_state_msg_.pose.orientation.w << "\n";
-    file_cart_vel_cmd_ << stopwatch_.elapsed().toSec()
-                            << delimiter_ << last_cart_vel_cmd_msg_.linear.x
-                            << delimiter_ << last_cart_vel_cmd_msg_.linear.y
-                            << delimiter_ << last_cart_vel_cmd_msg_.linear.z
-                            << delimiter_ << last_cart_vel_cmd_msg_.angular.x
-                            << delimiter_ << last_cart_vel_cmd_msg_.angular.y
-                            << delimiter_ << last_cart_vel_cmd_msg_.angular.z << "\n";
-    if(!last_cart_pose_cmd_msg_.header.stamp.is_zero()){
-        file_cart_pose_cmd_ << last_cart_pose_cmd_msg_.header.stamp.toSec() - start_time_
-                            << delimiter_ << last_cart_pose_cmd_msg_.pose.position.x
-                            << delimiter_ << last_cart_pose_cmd_msg_.pose.position.y
-                            << delimiter_ << last_cart_pose_cmd_msg_.pose.position.z
-                            << delimiter_ << last_cart_pose_cmd_msg_.pose.orientation.x
-                            << delimiter_ << last_cart_pose_cmd_msg_.pose.orientation.y
-                            << delimiter_ << last_cart_pose_cmd_msg_.pose.orientation.z
-                            << delimiter_ << last_cart_pose_cmd_msg_.pose.orientation.w << "\n";
+    if( last_cart_pose_cmd_msg_.header.stamp.toSec() > pre_cmd_time_ 
+        && last_joint_traj_point_cmd_msg_.positions.size()>0){
+        file_robot_cmd_ << last_cart_pose_cmd_msg_.header.stamp.toSec() - start_time_ 
+                    << delimiter_ << last_joint_traj_point_cmd_msg_.time_from_start
+                    << delimiter_ << last_cart_pose_cmd_msg_.pose.position.x
+                    << delimiter_ << last_cart_pose_cmd_msg_.pose.position.y
+                    << delimiter_ << last_cart_pose_cmd_msg_.pose.position.z
+                    << delimiter_ << last_cart_pose_cmd_msg_.pose.orientation.x
+                    << delimiter_ << last_cart_pose_cmd_msg_.pose.orientation.y
+                    << delimiter_ << last_cart_pose_cmd_msg_.pose.orientation.z
+                    << delimiter_ << last_cart_pose_cmd_msg_.pose.orientation.w
+                    // << delimiter_ << last_cart_vel_cmd_msg_.linear.x
+                    // << delimiter_ << last_cart_vel_cmd_msg_.linear.y
+                    // << delimiter_ << last_cart_vel_cmd_msg_.linear.z
+                    // << delimiter_ << last_cart_vel_cmd_msg_.angular.x
+                    // << delimiter_ << last_cart_vel_cmd_msg_.angular.y
+                    // << delimiter_ << last_cart_vel_cmd_msg_.angular.z
+                    << delimiter_ << last_joint_traj_point_cmd_msg_.positions[0]
+                    << delimiter_ << last_joint_traj_point_cmd_msg_.positions[1]
+                    << delimiter_ << last_joint_traj_point_cmd_msg_.positions[2]
+                    << delimiter_ << last_joint_traj_point_cmd_msg_.positions[3]
+                    << delimiter_ << last_joint_traj_point_cmd_msg_.positions[4]
+                    << delimiter_ << last_joint_traj_point_cmd_msg_.positions[5]
+                    << delimiter_ << last_joint_traj_point_cmd_msg_.velocities[0]
+                    << delimiter_ << last_joint_traj_point_cmd_msg_.velocities[1]
+                    << delimiter_ << last_joint_traj_point_cmd_msg_.velocities[2]
+                    << delimiter_ << last_joint_traj_point_cmd_msg_.velocities[3]
+                    << delimiter_ << last_joint_traj_point_cmd_msg_.velocities[4]
+                    << delimiter_ << last_joint_traj_point_cmd_msg_.velocities[5] <<"\n";
+        pre_cmd_time_ = last_cart_pose_cmd_msg_.header.stamp.toSec();
     }
 
-    file_wrench_ << last_wrench_msg_.header.stamp.toSec() - start_time_
-                            << delimiter_ << last_wrench_msg_.wrench.force.x
-                            << delimiter_ << last_wrench_msg_.wrench.force.y 
-                            << delimiter_ << last_wrench_msg_.wrench.force.z 
-                            << delimiter_ << last_wrench_msg_.wrench.torque.x 
-                            << delimiter_ << last_wrench_msg_.wrench.torque.y 
-                            << delimiter_ << last_wrench_msg_.wrench.torque.z << "\n";
-
-    file_joint_state_ << last_joint_state_msg_.header.stamp.toSec() - start_time_;
-    /* elbow_joint, shoulder_lift_joint, shoulder_pan_joint, wrist_1_joint, wrist_2_joint, wrist_3_joint */
-    for(int i=0; i<last_joint_state_msg_.position.size(); ++i)
-    {
-        file_joint_state_ << delimiter_ << last_joint_state_msg_.position[i];
-    }
-
-    // append joint velocity
-
-     for(int i=0; i<last_joint_state_msg_.velocity.size(); ++i)
-    {
-        file_joint_state_ << delimiter_ << last_joint_state_msg_.velocity[i];
-    }
-    file_joint_state_ << "\n";
-    // file_joint_state_   << delimiter_ << last_joint_state_msg_.position[2]
-    //                     << delimiter_ << last_joint_state_msg_.position[1]
-    //                     << delimiter_ << last_joint_state_msg_.position[0]
-    //                     << delimiter_ << last_joint_state_msg_.position[3]
-    //                     << delimiter_ << last_joint_state_msg_.position[4]
-    //                     << delimiter_ << last_joint_state_msg_.position[5]
-    //                     << delimiter_ << last_joint_state_msg_.velocity[2]
-    //                     << delimiter_ << last_joint_state_msg_.velocity[1]
-    //                     << delimiter_ << last_joint_state_msg_.velocity[0]
-    //                     << delimiter_ << last_joint_state_msg_.velocity[3]
-    //                     << delimiter_ << last_joint_state_msg_.velocity[4]
-    //                     << delimiter_ << last_joint_state_msg_.velocity[5] << "\n";
 
     
-    if(last_joint_traj_cmd_msg_.header.stamp.toSec() > pre_cmd_time_){
-        for (int i=0; i<last_joint_traj_cmd_msg_.points.size(); ++i)
-        {
-            auto point  = last_joint_traj_cmd_msg_.points[i];
-            file_joint_traj_cmd_ << last_joint_traj_cmd_msg_.header.stamp.toSec() - start_time_ + point.time_from_start.toSec()
-                            << delimiter_ << point.time_from_start.toSec();
-            for (int i=0; i<point.positions.size();++i)
-            {
-                file_joint_traj_cmd_ << delimiter_ << point.positions[i];
-                ROS_INFO("pos %f", point.positions[i]);
-            }
-            for (int i=0; i<point.velocities.size(); ++i)
-            {
-                file_joint_traj_cmd_ << delimiter_ << point.velocities[i];
-            }
-            file_joint_traj_cmd_ << "\n";
-        }
-        pre_cmd_time_ = last_joint_traj_cmd_msg_.header.stamp.toSec();
-    }
+    // if(last_joint_traj_cmd_msg_.header.stamp.toSec() > pre_cmd_time_){
+    //     for (int i=0; i<last_joint_traj_cmd_msg_.points.size(); ++i)
+    //     {
+    //         auto point  = last_joint_traj_cmd_msg_.points[i];
+    //         file_joint_traj_cmd_ << last_joint_traj_cmd_msg_.header.stamp.toSec() - start_time_ + point.time_from_start.toSec()
+    //                         << delimiter_ << point.time_from_start.toSec();
+    //         for (int i=0; i<point.positions.size();++i)
+    //         {
+    //             file_joint_traj_cmd_ << delimiter_ << point.positions[i];
+    //             ROS_INFO("pos %f", point.positions[i]);
+    //         }
+    //         for (int i=0; i<point.velocities.size(); ++i)
+    //         {
+    //             file_joint_traj_cmd_ << delimiter_ << point.velocities[i];
+    //         }
+    //         file_joint_traj_cmd_ << "\n";
+    //     }
+        
+    // }
 }
 void UR_Message_Listener::logCallback(const ros::TimerEvent &)
 {

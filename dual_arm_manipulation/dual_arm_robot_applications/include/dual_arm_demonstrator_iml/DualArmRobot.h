@@ -163,6 +163,7 @@ class DualArmRobot
     void publishPlanCartTrajectory(std::string endEffectorLink,
                                             const robot_state::JointModelGroup *joint_model_group,
                                             moveit::planning_interface::MoveGroupInterface::Plan& plan, 
+                                            ros::Time time_send_cmd = ros::Time::now(),
                                             double frequency=100);                                      
    
 

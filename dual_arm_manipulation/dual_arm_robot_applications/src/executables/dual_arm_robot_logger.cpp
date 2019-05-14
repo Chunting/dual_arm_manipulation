@@ -36,12 +36,12 @@ int main(int argc, char **argv){
     
     ros::AsyncSpinner asyncSpinner(4);
     asyncSpinner.start();
-    // std::string logfolder_name_ = generate_logfolder();
-    // std::shared_ptr<UR_Message_Listener> ur_listenerPtr 
-    //     = std::make_shared<UR_Message_Listener> (nh_, prefix, logfolder_name_);
-    // ur_listenerPtr->start(100);
-    // ros::waitForShutdown();
-    // ur_listenerPtr->stop();
+    std::string logfolder_name_ = generate_logfolder();
+    std::shared_ptr<UR_Message_Listener> ur_listenerPtr 
+        = std::make_shared<UR_Message_Listener> (nh_, prefix, logfolder_name_);
+    ur_listenerPtr->start(100);
+    ros::waitForShutdown();
+    ur_listenerPtr->stop();
    
     // std::vector<std::string> ur_namespaces;
     // ur_namespaces.push_back("left");

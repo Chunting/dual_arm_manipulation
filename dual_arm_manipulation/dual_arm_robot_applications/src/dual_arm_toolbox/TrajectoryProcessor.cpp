@@ -61,9 +61,10 @@ bool TrajectoryProcessor::split(moveit_msgs::RobotTrajectory arms_trajectory,
                                 moveit_msgs::RobotTrajectory &arm2_trajectory,
                                 std::string arm1_prefix,
                                 std::string arm2_prefix) {
-    // header
-    arm1_trajectory.joint_trajectory.header = arms_trajectory.joint_trajectory.header;
-    arm2_trajectory.joint_trajectory.header = arms_trajectory.joint_trajectory.header;
+    if(arms_trajectory.joint_trajectory.joint_names.empty() || arms_trajectory.joint_trajectory.points.empty()){
+        ROS_ERROR("Empty arms trajectory!");
+        return false;
+    }
 
     // joint names
     for (unsigned int i = 0; i < arms_trajectory.joint_trajectory.joint_names.size(); i++){
@@ -74,13 +75,24 @@ bool TrajectoryProcessor::split(moveit_msgs::RobotTrajectory arms_trajectory,
             arm2_trajectory.joint_trajectory.joint_names.push_back(arms_trajectory.joint_trajectory.joint_names[i]);
         }
     }
+    // if(arm1_trajectory.joint_trajectory.joint_names.size() == 0) {
+    //     arm2_trajectory = arms_trajectory;
+    //     return true;
+    // }
+    // if(arm2_trajectory.joint_trajectory.joint_names.size() == 0) {
+    //     arm1_trajectory = arms_trajectory;
+    //     return true;
+    // }
+
+     // header
+    arm1_trajectory.joint_trajectory.header = arms_trajectory.joint_trajectory.header;
+    arm2_trajectory.joint_trajectory.header = arms_trajectory.joint_trajectory.header;
 
     // points
     arm1_trajectory.joint_trajectory.points.resize(arms_trajectory.joint_trajectory.points.size());
     arm2_trajectory.joint_trajectory.points.resize(arms_trajectory.joint_trajectory.points.size());
     for (unsigned int i = 0; i < arms_trajectory.joint_trajectory.points.size(); i++){
         for (unsigned int j = 0; j < arms_trajectory.joint_trajectory.joint_names.size(); j++){
-
             if (arms_trajectory.joint_trajectory.joint_names[j].compare(0,arm1_prefix.size(),arm1_prefix)==0){
                 /*arm1_trajectory.joint_trajectory.points[i].accelerations.push_back(
                         arms_trajectory.joint_trajectory.points[i].accelerations[j]);

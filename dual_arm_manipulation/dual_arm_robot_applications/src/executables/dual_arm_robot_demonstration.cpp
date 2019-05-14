@@ -57,6 +57,8 @@ int main(int argc, char **argv)
     direction.header.frame_id = "world";
     // dualArmRobot.setConstraints();
     dualArmRobot.kinematic_state->enforceBounds();
+    ROS_INFO("Wait 2 secs for the logger to set up...");
+    sleep(2);
     ROS_INFO("========== MOVE HOME POSITION =================");
     dualArmRobot.moveHome();
     sleep(1);
@@ -141,7 +143,7 @@ int main(int argc, char **argv)
     left_rot.GetEulerZYX(yaw, pitch, roll);
 
     ROS_INFO("Before roll = %f\tpitch = %f\t yaw = %f", roll, pitch, yaw);
-    angle = 3.14/12;
+    angle = -3.14/12;
     roll += angle;
     left_rot = KDL::Rotation::EulerZYX(yaw, pitch, roll);
 
