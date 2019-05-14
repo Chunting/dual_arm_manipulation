@@ -1474,8 +1474,8 @@ void DualArmRobot::publishPlanCartTrajectory(std::string endEffectorLink,
         plan_topic = "right/cart_pose_cmd";
         joint_traj_point_topic = "right/joint_traj_point_cmd";
     } 
-    ros::Publisher pub_cart_plan = nh_.advertise<geometry_msgs::PoseStamped>(plan_topic, 1);
-    ros::Publisher pub_joint_traj_point_cmd_ = nh_.advertise<trajectory_msgs::JointTrajectoryPoint>(joint_traj_point_topic, 1);
+    ros::Publisher pub_cart_plan = nh_.advertise<geometry_msgs::PoseStamped>(plan_topic, 100);
+    ros::Publisher pub_joint_traj_point_cmd_ = nh_.advertise<trajectory_msgs::JointTrajectoryPoint>(joint_traj_point_topic, 100);
     
     geometry_msgs::PoseStamped poseFK;
     poseFK.header.stamp = time_send_cmd;
