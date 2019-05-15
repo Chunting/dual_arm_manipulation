@@ -198,9 +198,9 @@ std::string UR_Logger::data_line(UR_Message_Listener &ur_listener)
               << delimiter_ << ur_listener.last_wrench_msg_.wrench.torque.y
               << delimiter_ << ur_listener.last_wrench_msg_.wrench.torque.z;
 
-    converter << delimiter_ << ur_listener.last_offset_point_state_msg_.point.x
-              << delimiter_ << ur_listener.last_offset_point_state_msg_.point.y
-              << delimiter_ << ur_listener.last_offset_point_state_msg_.point.z;
+    converter << delimiter_ << ur_listener.last_offset_pose_state_msg_.position.x
+              << delimiter_ << ur_listener.last_offset_pose_state_msg_.position.y
+              << delimiter_ << ur_listener.last_offset_pose_state_msg_.position.z;
 
     return converter.str();
 }

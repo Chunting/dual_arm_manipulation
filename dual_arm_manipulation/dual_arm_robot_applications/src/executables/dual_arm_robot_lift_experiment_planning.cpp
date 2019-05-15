@@ -48,7 +48,7 @@ int main(int argc, char **argv) {
     // Set some joint constraints
     //@TODO verify its effectiveness
     dualArmRobot.setConstraints();
-    dualArmRobot.kinematic_state->enforceBounds();
+    dualArmRobot.kinematic_statePtr->enforceBounds();
 
     ROS_INFO("========== MOVE HOME POSITION =================");
     dualArmRobot.moveHome();

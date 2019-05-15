@@ -56,7 +56,7 @@ int main(int argc, char **argv)
     geometry_msgs::Vector3Stamped direction;
     direction.header.frame_id = "world";
     // dualArmRobot.setConstraints();
-    dualArmRobot.kinematic_state->enforceBounds();
+    dualArmRobot.kinematic_statePtr->enforceBounds();
     ROS_INFO("Wait 2 secs for the logger to set up...");
     sleep(2);
     ROS_INFO("========== MOVE HOME POSITION =================");
@@ -86,7 +86,7 @@ int main(int argc, char **argv)
 
     ROS_INFO("========== MOVE CLOSER =================");
 
-    dualArmRobot.graspMove(0.035, false, true, false);
+    dualArmRobot.graspMove(0.017, false, true, true);
     double res_force = sqrt(left_wrench_sub.last_wrench_msg_.wrench.force.x * left_wrench_sub.last_wrench_msg_.wrench.force.x + left_wrench_sub.last_wrench_msg_.wrench.force.y * left_wrench_sub.last_wrench_msg_.wrench.force.y + left_wrench_sub.last_wrench_msg_.wrench.force.z * left_wrench_sub.last_wrench_msg_.wrench.force.z);
 
     while (res_force < 15)
@@ -94,17 +94,27 @@ int main(int argc, char **argv)
         dualArmRobot.graspMove(0.001, false, true, false); // true : left arm; false: right arm
         res_force = sqrt(left_wrench_sub.last_wrench_msg_.wrench.force.x * left_wrench_sub.last_wrench_msg_.wrench.force.x + left_wrench_sub.last_wrench_msg_.wrench.force.y * left_wrench_sub.last_wrench_msg_.wrench.force.y + left_wrench_sub.last_wrench_msg_.wrench.force.z * left_wrench_sub.last_wrench_msg_.wrench.force.z);
         ROS_INFO("I heard: Force [%f]  FX[%f] FY[%f] FZ[%f]", res_force, left_wrench_sub.last_wrench_msg_.wrench.force.x, left_wrench_sub.last_wrench_msg_.wrench.force.y, left_wrench_sub.last_wrench_msg_.wrench.force.z);
+        
     }
-
-    ros::Publisher offset_desired_pub = nh.advertise<geometry_msgs::PointStamped>("/desired_offset_point", 1);
-    // Publish the desired offset between two EEs, described in right EE coordinate system
-    KDL::Frame desired_offset = dualArmRobot.getCurrentOffset(); // w.r.t left_ee_link coordinate system
-    geometry_msgs::PointStamped offset_point_temp_;
-    offset_point_temp_.header.frame_id = dualArmRobot.left_.getEndEffectorLink();
-    offset_point_temp_.point.x = desired_offset.p.x();
-    offset_point_temp_.point.y = desired_offset.p.y();
-    offset_point_temp_.point.z = desired_offset.p.z();
-    offset_desired_pub.publish(offset_point_temp_);
+    KDL::Frame desired_offset = dualArmRobot.getCurrentOffset(); 
+    Vector3d offset_position;
+    Eigen::Quaterniond offset_quaternion;
+    tf::vectorKDLToEigen (desired_offset.p, offset_position);
+    tf::quaternionKDLToEigen (desired_offset.M, offset_quaternion);
+    Vector6d offset_vec;
+    offset_vec.topRows(3) = offset_position;
+    offset_vec.bottomRows(3) =  offset_quaternion.toRotationMatrix().eulerAngles(0,1,2);
+    
+    std::cout << "Desired offset in left arm frame (in roll, pitch, yaw)\n" << offset_vec << std::endl;
+    // ros::Publisher offset_desired_pub = nh.advertise<geometry_msgs::PointStamped>("/desired_offset_point", 1);
+    // // Publish the desired offset between two EEs, described in right EE coordinate system
+    // KDL::Frame desired_offset = dualArmRobot.getCurrentOffset(); // w.r.t left_ee_link coordinate system
+    // geometry_msgs::PointStamped offset_point_temp_;
+    // offset_point_temp_.header.frame_id = dualArmRobot.left_.getEndEffectorLink();
+    // offset_point_temp_.point.x = desired_offset.p.x();
+    // offset_point_temp_.point.y = desired_offset.p.y();
+    // offset_point_temp_.point.z = desired_offset.p.z();
+    // offset_desired_pub.publish(offset_point_temp_);
     sleep(5);
     ROS_INFO("========== PICK UP =================");
     // Eval
@@ -143,7 +153,7 @@ int main(int argc, char **argv)
     left_rot.GetEulerZYX(yaw, pitch, roll);
 
     ROS_INFO("Before roll = %f\tpitch = %f\t yaw = %f", roll, pitch, yaw);
-    angle = -3.14/12;
+    angle = -3.14/6;
     roll += angle;
     left_rot = KDL::Rotation::EulerZYX(yaw, pitch, roll);
 
@@ -153,7 +163,7 @@ int main(int argc, char **argv)
                            box7_goal_pose_stamped.pose.orientation.z,
                            box7_goal_pose_stamped.pose.orientation.w);
     ROS_INFO("After roll = %f\tpitch = %f\t yaw = %f", roll, pitch, yaw);
-    dualArmRobot.moveObject("box7", box7_goal_pose_stamped, 0.1);
+    dualArmRobot.moveObject("box7", box7_goal_pose_stamped, 0.2);
     sleep(5);
 
     roll -= angle;
@@ -165,7 +175,7 @@ int main(int argc, char **argv)
                            box7_goal_pose_stamped.pose.orientation.y,
                            box7_goal_pose_stamped.pose.orientation.z,
                            box7_goal_pose_stamped.pose.orientation.w);
-    dualArmRobot.moveObject("box7", box7_goal_pose_stamped, 0.1);
+    dualArmRobot.moveObject("box7", box7_goal_pose_stamped, 0.2);
     sleep(5);
 
     // // Create an desired frame

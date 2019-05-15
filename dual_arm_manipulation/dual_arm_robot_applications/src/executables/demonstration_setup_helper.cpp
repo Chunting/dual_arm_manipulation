@@ -45,7 +45,7 @@ int main(int argc, char **argv)
     geometry_msgs::Vector3Stamped direction;
     direction.header.frame_id = "world";
     dualArmRobot.setConstraints();
-    dualArmRobot.kinematic_state->enforceBounds();
+    dualArmRobot.kinematic_statePtr->enforceBounds();
     ROS_INFO("========== MOVE HOME POSITION =================");
     dualArmRobot.moveHome();
     sleep(1);
@@ -56,12 +56,12 @@ int main(int argc, char **argv)
 
     // std::vector<double> left_joint_values = dualArmRobot.getPositionIK(dualArmRobot.left_joint_model_group, left_pose.pose);
 
-    // // ROS_INFO_STREAM("Current state is " <<dualArmRobot.kinematic_state->satisfiesBounds(left_joint_model_group));
+    // // ROS_INFO_STREAM("Current state is " <<dualArmRobot.kinematic_statePtr->satisfiesBounds(left_joint_model_group));
 
     // // fk -> pos left
     // KDL::Frame frame_pose_left;
-    // dualArmRobot.kinematic_state->setJointGroupPositions(dualArmRobot.left_joint_model_group, left_joint_values);
-    // const Eigen::Affine3d &end_effector_pose_left = dualArmRobot.kinematic_state->getGlobalLinkTransform(dualArmRobot.left_.getEndEffectorLink());
+    // dualArmRobot.kinematic_statePtr->setJointGroupPositions(dualArmRobot.left_joint_model_group, left_joint_values);
+    // const Eigen::Affine3d &end_effector_pose_left = dualArmRobot.kinematic_statePtr->getGlobalLinkTransform(dualArmRobot.left_.getEndEffectorLink());
     // tf::transformEigenToKDL(end_effector_pose_left, frame_pose_left);
 
     // geometry_msgs::Pose left_temp_pose;
@@ -83,8 +83,8 @@ int main(int argc, char **argv)
 
     //     std::vector<double> right_joint_values = dualArmRobot.right_.getCurrentJointValues();
     //     KDL::Frame frame_pose_right;
-    //     dualArmRobot.kinematic_state->setJointGroupPositions(dualArmRobot.right_joint_model_group, right_joint_values);
-    //     const Eigen::Affine3d &end_effector_pose_right = dualArmRobot.kinematic_state->getGlobalLinkTransform(dualArmRobot.right_.getEndEffectorLink());
+    //     dualArmRobot.kinematic_statePtr->setJointGroupPositions(dualArmRobot.right_joint_model_group, right_joint_values);
+    //     const Eigen::Affine3d &end_effector_pose_right = dualArmRobot.kinematic_statePtr->getGlobalLinkTransform(dualArmRobot.right_.getEndEffectorLink());
     //     tf::transformEigenToKDL(end_effector_pose_right, frame_pose_right);
 
     //     geometry_msgs::Pose right_temp_pose;

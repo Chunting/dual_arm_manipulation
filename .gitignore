@@ -49,3 +49,5 @@ admittance_control/build/
 admittance_control/\.clang-format
 
 dual_arm_manipulation/\.vscode/
+
+universal_robot/ur_kinematics/\.vscode/

@@ -9,17 +9,29 @@ using namespace dual_arm_toolbox;
 bool TrajectoryProcessor::fuse(moveit_msgs::RobotTrajectory &arms_trajectory,
                                moveit_msgs::RobotTrajectory arm1_trajectory,
                                moveit_msgs::RobotTrajectory arm2_trajectory) {
-    arms_trajectory = arm1_trajectory;
     int i1 = arm1_trajectory.joint_trajectory.points.size();
     int i2 = arm2_trajectory.joint_trajectory.points.size();
     int num = std::min(i1,i2);
+    ROS_INFO("Start to fuse trajectory i1=%d, i2=%d, num=%d", i1, i2, num);
+    if(i1==0 && i2==0){
+        ROS_ERROR(" Can not fuse empty trajectory");
+        return false;
+    }
+    if(i1==0){
+        arms_trajectory = arm2_trajectory;
+        return true;
+    }
+    if(i2==0){
+        arms_trajectory = arm1_trajectory;
+        return true;
+    }
+    arms_trajectory.joint_trajectory.points.resize(num);
     if(i1<=i2){
         /* If arm1_trajectory has fewer points, remove the first points of arm2_trajectory,
            then the two arms have the same number of points to run*/
-        num = i1;
         arms_trajectory = arm1_trajectory;
         for (unsigned int i=0; i < arm2_trajectory.joint_trajectory.joint_names.size(); i++)
-        arms_trajectory.joint_trajectory.joint_names.push_back(arm2_trajectory.joint_trajectory.joint_names[i]);
+            arms_trajectory.joint_trajectory.joint_names.push_back(arm2_trajectory.joint_trajectory.joint_names[i]);
         for (unsigned int i=0; i < num; i++){
             for (unsigned int j=0; j < arm2_trajectory.joint_trajectory.joint_names.size(); j++){
                 int offset = i2-num;
@@ -31,13 +43,13 @@ bool TrajectoryProcessor::fuse(moveit_msgs::RobotTrajectory &arms_trajectory,
     } else {
         /* If arm2_trajectory has fewer points, remove the first points of arm1_trajectory
             then the two arms have the same number of points to run*/
-        num = i2;
         for (unsigned int i=0; i < arm1_trajectory.joint_trajectory.joint_names.size(); i++)
             arms_trajectory.joint_trajectory.joint_names.push_back(arm1_trajectory.joint_trajectory.joint_names[i]);
         for (unsigned int i=0; i < arm2_trajectory.joint_trajectory.joint_names.size(); i++)
             arms_trajectory.joint_trajectory.joint_names.push_back(arm2_trajectory.joint_trajectory.joint_names[i]);
         for (unsigned int i=0; i < num; i++){
             int offset = i1-num;
+            arms_trajectory.joint_trajectory.points[i].time_from_start = arm2_trajectory.joint_trajectory.points[i].time_from_start;
             for (unsigned int j=0; j < arm1_trajectory.joint_trajectory.joint_names.size(); j++){
                 arms_trajectory.joint_trajectory.points[i].positions.push_back(arm1_trajectory.joint_trajectory.points[i+offset].positions[j]);
                 arms_trajectory.joint_trajectory.points[i].accelerations.push_back(arm1_trajectory.joint_trajectory.points[i+offset].accelerations[j]);
@@ -125,7 +137,7 @@ bool TrajectoryProcessor::split(moveit_msgs::RobotTrajectory arms_trajectory,
 void TrajectoryProcessor::clean(moveit_msgs::RobotTrajectory &trajectory) {
     for (unsigned int i = 1; i < trajectory.joint_trajectory.points.size(); i++){
         if (trajectory.joint_trajectory.points[i-1].time_from_start >= trajectory.joint_trajectory.points[i].time_from_start){
-            ROS_WARN("Detected that trajectory is not increasing in time. Erased false entry.");
+            ROS_WARN("Detected that trajectory is not increasing in time. Erased false entry, %d", i);
             trajectory.joint_trajectory.points.erase(trajectory.joint_trajectory.points.begin()+i-1);
         }
     }
@@ -220,5 +232,19 @@ void TrajectoryProcessor::publishJointTrajectory(ros::NodeHandle &nh, std::strin
         //     point.velocities[a]*(180/3.14159));
         // }
         // loop_rate_.sleep();
+    }
+}
+void TrajectoryProcessor::PrintTrajectory(const moveit_msgs::RobotTrajectory &trajectory)
+{
+    for (unsigned int i = 0; i < trajectory.joint_trajectory.points.size(); i++)
+    {
+        ROS_INFO("Points %d", i);
+        for (unsigned int a = 0; a < trajectory.joint_trajectory.points[i].positions.size(); a++)
+        {
+            ROS_INFO("%s: pos %f\t vel %f",
+                     trajectory.joint_trajectory.joint_names[a].c_str(),
+                     trajectory.joint_trajectory.points[i].positions[a],
+                     trajectory.joint_trajectory.points[i].velocities[a]);
+        }
     }
 }

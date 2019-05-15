@@ -51,7 +51,7 @@ int main(int argc, char **argv)
   geometry_msgs::Vector3Stamped direction;
   direction.header.frame_id = "world";
   dualArmRobot.setConstraints();
-  dualArmRobot.kinematic_state->enforceBounds();
+  dualArmRobot.kinematic_statePtr->enforceBounds();
   // Cartesian velocity controller command topic
   std::string topic_left_arm_cmd("/left/ur5_cartesian_velocity_controller/command_cart_vel");
   ros::Publisher pub_left_arm_cmd_ = nh.advertise<geometry_msgs::Twist>(topic_left_arm_cmd, 5);

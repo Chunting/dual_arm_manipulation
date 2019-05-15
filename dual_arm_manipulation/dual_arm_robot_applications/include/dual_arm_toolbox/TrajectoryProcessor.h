@@ -68,6 +68,7 @@ namespace dual_arm_toolbox {
         static void publishJointTrajectory(ros::NodeHandle &nh, 
                                             std::string ur_namespace, 
                                             moveit::planning_interface::MoveGroupInterface::Plan& plan);
+        static void PrintTrajectory(const moveit_msgs::RobotTrajectory &trajectory);
     };
 }//namespace
 #endif //PROJECT_TRAJECTORYPROCESSOR_H

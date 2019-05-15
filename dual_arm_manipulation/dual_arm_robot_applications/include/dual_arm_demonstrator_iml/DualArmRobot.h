@@ -86,14 +86,14 @@ class DualArmRobot
     planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
 
     robot_model_loader::RobotModelLoader robotModelLoader;
-    robot_model::RobotModelPtr kinematic_model;
-    //planning_scene::PlanningScene planningScene;
+    robot_model::RobotModelPtr kinematic_modelPtr;
+    planning_scene::PlanningScenePtr planningScenePtr;
 
   public:
     DualArmRobot(ros::NodeHandle &nh);
     ~DualArmRobot();
     // Construct a RobotState that maintains the configuration of the robot.
-    robot_state::RobotStatePtr kinematic_state;
+    robot_state::RobotStatePtr kinematic_statePtr;
 
     // setup JointModelGroup
     // Represents the robot model for a particular group.
@@ -170,7 +170,6 @@ class DualArmRobot
     Eigen::MatrixXd getJacobian(const robot_state::JointModelGroup *joint_model_group, Eigen::Vector3d &reference_point_position);
     void setConstraints();
     void PrintPose(geometry_msgs::Pose &pose);
-    void PrintTrajectory(const moveit_msgs::RobotTrajectory &trajectory);
     double radianToDegree(double radian)
     {
         return (radian * (180 / PI));

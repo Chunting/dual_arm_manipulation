@@ -10,7 +10,7 @@ UR_Message_Listener::UR_Message_Listener(ros::NodeHandle &nh, std::string ur_nam
     topic_cart_vel_state_ = "tool_velocity";
     topic_external_wrench = "robotiq_ft_wrench";
     topic_joint_state_ = "ur_driver/joint_states";  // From ur_modern_driver
-    topic_offset_point_state_ = "/offset_point_state"; // Not yet recorded
+    topic_offset_pose_state_ = "/offset_pose_state"; // Not yet recorded
     /// robot command
     topic_cart_pose_cmd_ = "cart_pose_cmd";
     topic_joint_traj_cmd_ = "joint_traj_cmd";
@@ -25,7 +25,7 @@ UR_Message_Listener::UR_Message_Listener(ros::NodeHandle &nh, std::string ur_nam
     sub_cart_vel_state_     = nh_.subscribe<geometry_msgs::TwistStamped>(topic_cart_vel_state_, 100, &UR_Message_Listener::cart_vel_state_callback, this);
     sub_joint_state_        = nh_.subscribe<sensor_msgs::JointState>(topic_joint_state_, 100, &UR_Message_Listener::joint_state_callback, this);
     sub_wrench_external_    = nh_.subscribe<geometry_msgs::WrenchStamped>(topic_external_wrench, 100, &UR_Message_Listener::wrench_callback, this);
-    sub_offset_point_state_ = nh_.subscribe<geometry_msgs::PointStamped>(topic_offset_point_state_, 1, &UR_Message_Listener::offset_point_state_callback, this);
+    sub_offset_pose_state_ = nh_.subscribe<geometry_msgs::Pose>(topic_offset_pose_state_, 1, &UR_Message_Listener::offset_pose_state_callback, this);
     
     
     sub_cart_pose_cmd_      = nh_.subscribe<geometry_msgs::PoseStamped>(topic_cart_pose_cmd_, 100, &UR_Message_Listener::cart_pose_cmd_callback, this);
@@ -109,9 +109,9 @@ void UR_Message_Listener::robot_traj_cmd_callback(const moveit_msgs::RobotTrajec
     }
 }
 
-void UR_Message_Listener::offset_point_state_callback(const geometry_msgs::PointStamped::ConstPtr &msg)
+void UR_Message_Listener::offset_pose_state_callback(const geometry_msgs::Pose::ConstPtr &msg)
 {
-    last_offset_point_state_msg_ = *msg;
+    last_offset_pose_state_msg_ = *msg;
 }
 
 ///////////////////////////////////////////////////////////////
@@ -180,9 +180,9 @@ void UR_Message_Listener::joint_traj_cmd_callback(const trajectory_msgs::JointTr
 void UR_Message_Listener::joint_traj_point_cmd_callback(const trajectory_msgs::JointTrajectoryPoint::ConstPtr &msg)
 {
     last_joint_traj_point_cmd_msg_ = *msg;
-    ROS_INFO("Subscribe %s, number of publishers %d, timestamp %f", 
-        sub_joint_traj_point_cmd_.getTopic().c_str(), sub_joint_traj_point_cmd_.getNumPublishers(), 
-        last_joint_traj_point_cmd_msg_.time_from_start.toSec());
+    // ROS_INFO("Subscribe %s, number of publishers %d, timestamp %f", 
+    //     sub_joint_traj_point_cmd_.getTopic().c_str(), sub_joint_traj_point_cmd_.getNumPublishers(), 
+    //     last_joint_traj_point_cmd_msg_.time_from_start.toSec());
 }
 bool UR_Message_Listener::generate_logfile()
 { // automatically generate a name
@@ -236,7 +236,14 @@ bool UR_Message_Listener::generate_logfile()
                       << delimiter_ << joint_names[2] + "_state_vel"
                       << delimiter_ << joint_names[3] + "_state_vel"
                       << delimiter_ << joint_names[4] + "_state_vel"
-                      << delimiter_ << joint_names[5] + "_state_vel" << "\n";
+                      << delimiter_ << joint_names[5] + "_state_vel" 
+                      << delimiter_ << "offset_x"
+                      << delimiter_ << "offset_y"
+                      << delimiter_ << "offset_z"
+                      << delimiter_ << "offset_qx"
+                      << delimiter_ << "offset_qy"
+                      << delimiter_ << "offset_qz" 
+                      << delimiter_ << "offset_qw"<< "\n";
     // for (auto &jointname : joint_names)
     // {
     //     file_robot_state_  << delimiter_ << jointname + "_state_pos";
@@ -339,7 +346,14 @@ void UR_Message_Listener::write_logfile()
                     << delimiter_ << last_joint_state_msg_.velocity[2]
                     << delimiter_ << last_joint_state_msg_.velocity[3]
                     << delimiter_ << last_joint_state_msg_.velocity[4]
-                    << delimiter_ << last_joint_state_msg_.velocity[5] << "\n";
+                    << delimiter_ << last_joint_state_msg_.velocity[5] 
+                    << delimiter_ << last_offset_pose_state_msg_.position.x
+                    << delimiter_ << last_offset_pose_state_msg_.position.y
+                    << delimiter_ << last_offset_pose_state_msg_.position.z
+                    << delimiter_ << last_offset_pose_state_msg_.orientation.x
+                    << delimiter_ << last_offset_pose_state_msg_.orientation.y
+                    << delimiter_ << last_offset_pose_state_msg_.orientation.z
+                    << delimiter_ << last_offset_pose_state_msg_.orientation.w << "\n";
 
     if( last_cart_pose_cmd_msg_.header.stamp.toSec() > pre_cmd_time_ 
         && last_joint_traj_point_cmd_msg_.positions.size()>0){

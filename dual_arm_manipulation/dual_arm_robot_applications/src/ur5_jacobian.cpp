@@ -99,15 +99,15 @@ int main(int argc, char **argv)
     Eigen::MatrixXd jacobian_inverse;
 
     robot_model_loader::RobotModelLoader robot_model_loader("robot_description");
-    robot_model::RobotModelPtr kinematic_model = robot_model_loader.getModel();
+    robot_model::RobotModelPtr kinematic_modelPtr = robot_model_loader.getModel();
 
-    robot_state::RobotStatePtr kinematic_state(new robot_state::RobotState(kinematic_model));
-    const robot_state::JointModelGroup *joint_model_group = kinematic_model->getJointModelGroup("left_manipulator");
-    ROS_INFO("Model frame: %s\tLast Link %s", kinematic_model->getModelFrame().c_str(), joint_model_group->getLinkModelNames().back().c_str());
+    robot_state::RobotStatePtr kinematic_statePtr(new robot_state::RobotState(kinematic_modelPtr));
+    const robot_state::JointModelGroup *joint_model_group = kinematic_modelPtr->getJointModelGroup("left_manipulator");
+    ROS_INFO("Model frame: %s\tLast Link %s", kinematic_modelPtr->getModelFrame().c_str(), joint_model_group->getLinkModelNames().back().c_str());
 
     // MoveIt! Setup
     // The MoveGroupInterface class can be easily setup using the group name
-    planning_scene::PlanningScene planningScene(kinematic_model);
+    planning_scene::PlanningScene planningScene(kinematic_modelPtr);
     moveit::planning_interface::MoveGroupInterface left_("left_manipulator");
     // Spceciy the maximum amount of time to use when planning
     left_.setPlanningTime(5);
@@ -127,7 +127,7 @@ int main(int argc, char **argv)
     // We can retreive the current set of joint values stored in the state for the right arm.
     const std::vector<std::string> &joint_names = left_.getActiveJoints();
     std::vector<double> joint_values = left_.getCurrentJointValues();
-    // kinematic_state->copyJointGroupPositions(joint_model_group, joint_values);
+    // kinematic_statePtr->copyJointGroupPositions(joint_model_group, joint_values);
     for (std::size_t i = 0; i < joint_names.size(); i++)
     {
         ROS_INFO("Joint %s: %f", joint_names[i].c_str(), joint_values[i]);
@@ -156,10 +156,10 @@ int main(int argc, char **argv)
                      joint_speeds[0], joint_speeds[1], joint_speeds[2], joint_speeds[3], joint_speeds[4], joint_speeds[5]);
             // ROS_INFO("measured joint_values: %.3f, %.3f, %.3f, %.3f, %.3f, %.3f",
             //          joint_values[0], joint_values[1], joint_values[2], joint_values[3], joint_values[4], joint_values[5]);
-            kinematic_state->setJointGroupPositions(joint_model_group, joint_values);
+            kinematic_statePtr->setJointGroupPositions(joint_model_group, joint_values);
 
-            kinematic_state->getJacobian(joint_model_group,
-                                         kinematic_state->getLinkModel(joint_model_group->getLinkModelNames().back()),
+            kinematic_statePtr->getJacobian(joint_model_group,
+                                         kinematic_statePtr->getLinkModel(joint_model_group->getLinkModelNames().back()),
                                          reference_point_position, // The reference point position (with respect to the link specified in link_name)
                                          jacobian);
             joint_velocities(0, 0) = joint_speeds[0];

@@ -50,7 +50,7 @@ protected:
   ros::Subscriber sub_joint_traj_cmd_;
 
   ros::Subscriber sub_robot_traj_cmd_;
-  ros::Subscriber sub_offset_point_state_;
+  ros::Subscriber sub_offset_pose_state_;
   ros::Subscriber sub_joint_traj_point_cmd_;
 
   ros::Publisher pub_joint_state_;
@@ -66,7 +66,7 @@ public:
   cartesian_state_msgs::PoseTwist   last_cart_state_msg_;
   geometry_msgs::TwistStamped       last_cart_vel_state_msg_;
   geometry_msgs::PoseStamped        last_cart_pose_state_msg_;
-  geometry_msgs::PointStamped       last_offset_point_state_msg_;
+  geometry_msgs::Pose               last_offset_pose_state_msg_;
 
   geometry_msgs::Twist              last_cart_vel_cmd_msg_;
   geometry_msgs::PoseStamped        last_cart_pose_cmd_msg_;
@@ -100,7 +100,7 @@ private:
   std::string topic_joint_traj_cmd_;
   std::string topic_external_wrench;
   std::string topic_robot_traj_cmd_;
-  std::string topic_offset_point_state_;
+  std::string topic_offset_pose_state_;
   std::string topic_joint_traj_point_cmd_;
 
   // real variables from the robot
@@ -136,7 +136,7 @@ private:
   bool waitForValid(double seconds = 15); // It takes a little bit long to connect to ft sensor
 
   void robot_traj_cmd_callback(const moveit_msgs::RobotTrajectory::ConstPtr &msg);
-  void offset_point_state_callback(const geometry_msgs::PointStamped::ConstPtr &msg);
+  void offset_pose_state_callback(const geometry_msgs::Pose::ConstPtr &msg);
 
   void logCallback(const ros::TimerEvent&);
 };
