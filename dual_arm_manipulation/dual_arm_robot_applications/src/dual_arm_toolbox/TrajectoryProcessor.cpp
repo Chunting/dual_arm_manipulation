@@ -182,7 +182,7 @@ void TrajectoryProcessor::visualizePlan(moveit::planning_interface::MoveGroupInt
     moveit_msgs::DisplayTrajectory display_trajectory;
     display_trajectory.trajectory_start = plan.start_state_;
     display_trajectory.trajectory.push_back(plan.trajectory_);
-    ROS_INFO("Visualizing plan and waiting for %i seconds", sec);
+    // ROS_INFO("Visualizing plan and waiting for %i seconds", sec);
     display_publisher.publish(display_trajectory);
     sleep(sec);
 }

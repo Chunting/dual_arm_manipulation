@@ -47,6 +47,13 @@ DualArmRobot::DualArmRobot(ros::NodeHandle &nh) : left_("left_manipulator"),
     // kinematic_statePtr->setToDefaultValues();
     left_joint_model_group = kinematic_modelPtr->getJointModelGroup("left_manipulator");
     right_joint_model_group = kinematic_modelPtr->getJointModelGroup("right_manipulator");
+    const kinematics::KinematicsBaseConstPtr& right_solver = right_joint_model_group->getSolverInstance();
+    const kinematics::KinematicsBaseConstPtr& left_solver = left_joint_model_group->getSolverInstance();
+    ROS_INFO("Kinematics solver %s for joint group %s:  ",
+                      typeid(*right_solver).name(), right_joint_model_group->getName().c_str());
+    ROS_INFO("Kinematics solver %s for joint group %s. ",
+                      typeid(*left_solver).name(), left_joint_model_group->getName().c_str());
+
 
     // MoveIt! Setup
     //left_.setPlanningTime(40);
@@ -65,7 +72,8 @@ DualArmRobot::DualArmRobot(ros::NodeHandle &nh) : left_("left_manipulator"),
     // Allow replanning
     left_.allowReplanning(true);
     right_.allowReplanning(true);
-
+    left_.setStartStateToCurrentState();
+    right_.setStartStateToCurrentState();
     // Controller Interface
     // It has to be consistent with group ns and names in controllers.yaml
     left_controller_ = "left/vel_based_pos_traj_controller";
@@ -193,31 +201,14 @@ bool DualArmRobot::adaptTrajectory(moveit_msgs::RobotTrajectory left_trajectory,
                                    double jump_threshold)
 {
     const std::vector<std::string> &right_joint_names = right_joint_model_group->getActiveJointModelNames();
-
-    // setup both_arms_trajectory message
     both_arms_trajectory = left_trajectory;
-    for (unsigned int j = 0; j < right_joint_model_group->getActiveJointModelNames().size(); j++)
+    for (unsigned int j = 0; j < right_joint_names.size(); j++)
     {
         both_arms_trajectory.joint_trajectory.joint_names.push_back(right_joint_names[j]);
     }
 
-    int both_traj_start_index = 6;
-
-    // ik service client setup
-    // moveit_msgs::GetPositionIK # A service call to carry out an inverse kinematics computation
-    ros::ServiceClient ik_client = nh_.serviceClient<moveit_msgs::GetPositionIK>("compute_ik");
-    // A service call to carry out an inverse kinematics computation
-    moveit_msgs::GetPositionIK ik_msg;
-
-    // current state for initial seed
-    /* Get the active joints, it's better to put this part outside for loop */
-    ik_msg.request.ik_request.robot_state = getCurrentRobotStateMsg();
-    ik_msg.request.ik_request.attempts = 5;
-    ik_msg.request.ik_request.avoid_collisions = true;
-    ik_msg.request.ik_request.group_name = right_.getName();
-    ik_msg.request.ik_request.timeout = ros::Duration(15);
-
     // computing values for trajectory
+    right_.setStartStateToCurrentState();
     for (unsigned int i = 0; i < left_trajectory.joint_trajectory.points.size(); i++)
     {
         std::vector<double> left_joint_values;
@@ -239,97 +230,25 @@ bool DualArmRobot::adaptTrajectory(moveit_msgs::RobotTrajectory left_trajectory,
         geometry_msgs::Pose right_temp_pose;
         // compute pos right
         KDL::Frame frame_pose_right = frame_pose_left * offset_frame;
-        dual_arm_toolbox::Transform::transformKDLtoPose(frame_pose_right, right_temp_pose);
+        // dual_arm_toolbox::Transform::transformKDLtoPose(frame_pose_right, right_temp_pose);
+        Eigen::Affine3d end_effector_pose_right;
+        std::vector<double> right_joint_values;
 
-        // ik msg for request for right
-        ik_msg.request.ik_request.pose_stamped.header.frame_id = "world";
-        ik_msg.request.ik_request.pose_stamped.pose.position.x = frame_pose_right.p.x();
-        ik_msg.request.ik_request.pose_stamped.pose.position.y = frame_pose_right.p.y();
-        ik_msg.request.ik_request.pose_stamped.pose.position.z = frame_pose_right.p.z();
-        // Get the quaternion of this matrix(frame_pose_right)
-        frame_pose_right.M.GetQuaternion(
-            ik_msg.request.ik_request.pose_stamped.pose.orientation.x,
-            ik_msg.request.ik_request.pose_stamped.pose.orientation.y,
-            ik_msg.request.ik_request.pose_stamped.pose.orientation.z,
-            ik_msg.request.ik_request.pose_stamped.pose.orientation.w);
+        tf::transformKDLToEigen(frame_pose_right, end_effector_pose_right);
 
-        // get ik solution
-        bool try_again;
-        double try_count = 0;
-        do
-        {
-            ik_client.call(ik_msg.request, ik_msg.response);
-            if (ik_msg.response.error_code.val != 1)
-            {
-                Eigen::Affine3d end_effector_pose_right;
-                std::vector<double> joint_values;
-                ROS_WARN("ik request error %d", ik_msg.response.error_code.val);
-                ROS_WARN("left arm end effector:");
-                ROS_WARN_STREAM("Translation : " << end_effector_pose_left.translation());
-                ROS_WARN_STREAM("Rotation : " << end_effector_pose_left.rotation());
-                tf::transformKDLToEigen(frame_pose_right, end_effector_pose_right);
-                ROS_WARN("right arm end effector:");
-                ROS_WARN_STREAM("Translation : " << end_effector_pose_right.translation());
-                ROS_WARN_STREAM("Rotation : " << end_effector_pose_right.rotation());
-                bool found_ik = kinematic_statePtr->setFromIK(right_joint_model_group, end_effector_pose_right, 10, 0.1);
-                if(found_ik){
-                    kinematic_statePtr->copyJointGroupPositions(right_joint_model_group, joint_values);
-                    for(std::size_t i=0; i<joint_values.size(); ++i){
-                        ROS_INFO("joint %s %f", right_joint_model_group->getJointModelNames()[i].c_str(), joint_values[i]);
-                    }
-                }else{
-                    ROS_WARN("Did not find ik solution!");
-                }
-                return false;
+        bool found_ik = kinematic_statePtr->setFromIK(right_joint_model_group, end_effector_pose_right, 10, 0.1);
+        if(found_ik){
+            kinematic_statePtr->copyJointGroupPositions(right_joint_model_group, right_joint_values);
+            for(std::size_t j=0; j<right_joint_values.size(); ++j){
+                both_arms_trajectory.joint_trajectory.points[i].positions.push_back(right_joint_values[j]);
             }
-            // try again if jump is too huge
-            try_again = false;
-            int resp_size = ik_msg.response.solution.joint_state.position.size();
-            for (unsigned int a = 0; a < ik_msg.response.solution.joint_state.position.size(); a++)
-            {
-                try_again = try_again || (std::abs(ik_msg.response.solution.joint_state.position[a] - ik_msg.request.ik_request.robot_state.joint_state.position[a]) > jump_threshold);
-            }
-            if (try_again)
-            {
-                ROS_INFO("Ik: jump detected. One value deviates more than %f. Trying again", jump_threshold);
-                try_count++;
-                if (try_count > 10)
-                {
-                    ROS_WARN("could not find solution without jump");
-                    return false;
-                }
-            }
-        } while (try_again);
-
-        // write results into trajectory msg
-
-        // Check response position size, it seems strange that sometimes it is 12, but sometimes it is 6
-        int response_size = ik_msg.response.solution.joint_state.position.size();
-        // @TODO NO hard code 6 or 12!!!
-        if (response_size == 6)
-        {
-            both_traj_start_index = 0;
+            kinematic_statePtr->setJointGroupPositions(right_joint_model_group, right_joint_values);
+        }else{
+            ROS_WARN("Did not find ik solution for point %d !", i);
         }
-        else if (response_size == 12)
-        {
-            both_traj_start_index = 6;
-        }
-        else
-        {
-            ROS_ERROR("WRONG JOINT NUMBER !!!");
-            return false;
-        }
-        for (unsigned int j = both_traj_start_index; j < response_size; j++)
-        {
-            both_arms_trajectory.joint_trajectory.points[i].positions.push_back(ik_msg.response.solution.joint_state.position[j]);
-        }
-
-        // use result as seed for next calculation
-        ik_msg.request.ik_request.robot_state = ik_msg.response.solution;
     }
     // execution speed
     dual_arm_toolbox::TrajectoryProcessor::computeTimeFromStart(both_arms_trajectory, 0.4);
-
     // compute velocities for trajectory
     return dual_arm_toolbox::TrajectoryProcessor::computeVelocities(both_arms_trajectory, arms_);
 }
@@ -481,15 +400,18 @@ bool DualArmRobot::graspMove(double distance, bool avoid_collisions, bool use_le
         dual_arm_toolbox::TrajectoryProcessor::clean(both_arms_trajectory);
         arms_plan.trajectory_ = both_arms_trajectory;
         bool success = execute(arms_plan);
-        if (!success)
-            ROS_WARN("Both arm's trajectory failed! ");
+        if (!success){
+            ROS_ERROR("Both arm's trajectory failed! ");
+            return false;
+        }
+            
     } else if(use_left){
         
         moveit::planning_interface::MoveGroupInterface::Plan left_plan;
         left_plan.trajectory_ = left_trajectory;
         bool success = execute(left_plan);
         if (!success){
-            ROS_WARN("Left arm's trajectory failed! ");
+            ROS_ERROR("Left arm's trajectory failed! ");
             return false;
         }
        
@@ -498,11 +420,10 @@ bool DualArmRobot::graspMove(double distance, bool avoid_collisions, bool use_le
             right_plan.trajectory_ = right_trajectory;
             bool success = execute(right_plan);
         if (!success){
-            ROS_WARN("Right arm's trajectory failed! ");
+            ROS_ERROR("Right arm's trajectory failed! ");
             return false;
         }
     }
-    
     return true;
 }
 
@@ -576,6 +497,7 @@ bool DualArmRobot::pickBox(std::string object_id, geometry_msgs::Vector3Stamped 
     // get plan from trajectory
     moveit::planning_interface::MoveGroupInterface::Plan both_arms_plan;
     both_arms_plan.trajectory_ = both_arms_trajectory;
+    both_arms_plan.start_state_ = getCurrentRobotStateMsg();
     // both_arms_plan.start_state_.attached_collision_objects = getCurrentRobotStateMsg().attached_collision_objects;
     execute(both_arms_plan);
     return true;
@@ -1241,9 +1163,6 @@ bool DualArmRobot::execute(moveit::planning_interface::MoveGroupInterface::Plan 
     dual_arm_toolbox::TrajectoryProcessor::split(plan.trajectory_, plan_left.trajectory_, plan_right.trajectory_, "left", "right");
     dual_arm_toolbox::TrajectoryProcessor::clean(plan_left.trajectory_);
     dual_arm_toolbox::TrajectoryProcessor::clean(plan_right.trajectory_);
-
-    bool success_right;
-    bool success_left;
     // These are two action client, whose names are, respectively, left_controller_ and right_controller_
     // action namespace is follow_joint_trajectory
     moveit_simple_controller_manager::FollowJointTrajectoryControllerHandle handle_left(left_controller_, "follow_joint_trajectory");
@@ -1258,26 +1177,26 @@ bool DualArmRobot::execute(moveit::planning_interface::MoveGroupInterface::Plan 
     {
         // check trajectory for collisions
         plan.start_state_.is_diff = true;
-        bool isValid = planningScenePtr->isPathValid(plan.start_state_, plan.trajectory_, "arms");
-        if (!isValid)
-        {
+        // bool isValid = planningScenePtr->isPathValid(plan.start_state_, plan.trajectory_, "arms");
+        // if (!isValid)
+        // {
 
-            ROS_ERROR("Path is invalid. Execution aborted");
-            dual_arm_toolbox::TrajectoryProcessor::PrintTrajectory(plan.trajectory_);
-            return false;
-        }  
+        //     ROS_ERROR("Path is invalid. Execution aborted");
+        //     // dual_arm_toolbox::TrajectoryProcessor::PrintTrajectory(plan.trajectory_);
+        //     // return false;
+        // }  
         if(handle_left.sendTrajectory(plan_left.trajectory_) && handle_right.sendTrajectory(plan_right.trajectory_)) {
             if(handle_left.waitForExecution() && handle_right.waitForExecution()){
                 publishPlanCartTrajectory(left_.getEndEffectorLink(), left_joint_model_group, plan_left, time_send_cmd, 100);
                 publishPlanCartTrajectory(right_.getEndEffectorLink(), right_joint_model_group, plan_right,time_send_cmd, 100);
             } else {
                 ROS_ERROR("The execution is not complete!!");
+                return false;
             }
         }else{
             ROS_ERROR("The controller cannot accept the trajectory.!!");
+            return false;
         }
-        // publishPlanCartTrajectory(left_.getEndEffectorLink(), plan_left, 100);
-        // publishPlanCartTrajectory(right_.getEndEffectorLink(), plan_right, 100);
         
         // dual_arm_toolbox::TrajectoryProcessor::publishJointTrajectory(nh_, "left", plan_left);
         // dual_arm_toolbox::TrajectoryProcessor::publishJointTrajectory(nh_, "right", plan_right);
@@ -1291,45 +1210,39 @@ bool DualArmRobot::execute(moveit::planning_interface::MoveGroupInterface::Plan 
                 publishPlanCartTrajectory(left_.getEndEffectorLink(), left_joint_model_group, plan_left, time_send_cmd, 100);
             } else {
                 ROS_ERROR("The execution is not complete!!");
+                return false;
             }
         }else{
             ROS_ERROR("The controller cannot accept the trajectory.!!");
+            return false;
         }
-        
-       
     } else {
         if(handle_right.sendTrajectory(plan_right.trajectory_)) {
             if(handle_right.waitForExecution()){
                 publishPlanCartTrajectory(right_.getEndEffectorLink(), right_joint_model_group, plan_right,time_send_cmd, 100);
             } else {
                 ROS_ERROR("The execution is not complete!!");
+                return false;
             }
         }else{
             ROS_ERROR("The controller cannot accept the trajectory.!!");
+            return false;
         }
         // dual_arm_toolbox::TrajectoryProcessor::publishJointTrajectory(nh_, "right", plan_right);
-        //publishPlanCartTrajectory(right_.getEndEffectorLink(), right_joint_model_group, plan_right, time_send_cmd, 100);
     }
     dual_arm_toolbox::TrajectoryProcessor::publishPlanTrajectory(plan, 1);
     // update the left arm's target state based on the last point of the trajectory.
     if (plan_left.trajectory_.joint_trajectory.joint_names.size())
     {
         current_dual_arm_robotstate_msg_.is_diff = true;
-
         current_dual_arm_robotstate_msg_.joint_state.effort = plan_left.trajectory_.joint_trajectory.points[plan_left.trajectory_.joint_trajectory.points.size() - 1].effort;
-
         current_dual_arm_robotstate_msg_.joint_state.header = plan_left.trajectory_.joint_trajectory.header;
-
         current_dual_arm_robotstate_msg_.joint_state.name = plan_left.trajectory_.joint_trajectory.joint_names;
-
         current_dual_arm_robotstate_msg_.joint_state.position = plan_left.trajectory_.joint_trajectory.points[plan_left.trajectory_.joint_trajectory.points.size() - 1].positions;
-
         current_dual_arm_robotstate_msg_.joint_state.velocity = plan_left.trajectory_.joint_trajectory.points[plan_left.trajectory_.joint_trajectory.points.size() - 1].velocities;
-
-        //sleep(2); // to be sure robot is at goal position
         left_current_pose_ = left_.getCurrentPose(left_.getEndEffectorLink());
     }
-    return success_left && success_right;
+    return true;
 #ifdef OFFLINE
 
     double error = arms_.execute(plan);
@@ -1354,12 +1267,6 @@ bool DualArmRobot::moveHome()
     while (try_step && ros::ok())
     {
         arms_.setNamedTarget("arms_up");
-        const robot_state::JointModelGroup *joint_model_group = kinematic_modelPtr->getJointModelGroup(arms_.getName());
-        const robot_state::RobotState home_rs = arms_.getJointValueTarget();
-        std::vector<double> home;
-        std::vector<std::string> joint_names;
-        joint_names = arms_.getJointNames();
-        home_rs.copyJointGroupPositions(joint_model_group, home);
         moveit::planning_interface::MoveGroupInterface::Plan arms_plan;
         error = arms_.plan(arms_plan);
         if (error.val != 1)
@@ -1387,24 +1294,14 @@ bool DualArmRobot::moveGraspPosition()
     moveit::planning_interface::MoveItErrorCode error;
 
     // move both at simultaneously
-    moveit_msgs::RobotState robot_grasp_state_;
-    robot_grasp_state_ = getCurrentRobotStateMsg();
+    left_.setStartStateToCurrentState();
+    right_.setStartStateToCurrentState();
     geometry_msgs::PoseStamped left_grasp_pose_ = left_.getCurrentPose(left_.getEndEffectorLink());
     geometry_msgs::PoseStamped right_grasp_pose_ = right_.getCurrentPose(right_.getEndEffectorLink());
-
     try_step = true;
     while (try_step && ros::ok())
     {
         arms_.setNamedTarget("grasp_position");
-        const robot_state::JointModelGroup *joint_model_group = kinematic_modelPtr->getJointModelGroup(arms_.getName());
-        const robot_state::RobotState grasp_rs = arms_.getJointValueTarget();
-        std::vector<double> grasp_position;
-        std::vector<std::string> joint_names = arms_.getActiveJoints();
-        grasp_rs.copyJointGroupPositions(joint_model_group, grasp_position);
-        for (int i = 0; i < joint_names.size(); i++)
-        {
-            ROS_INFO("%s : desired position  %f", joint_names[i].c_str(), grasp_position[i]);
-        }
         moveit::planning_interface::MoveGroupInterface::Plan arms_plan;
         error = arms_.plan(arms_plan);
         if (error.val != 1)
@@ -1426,57 +1323,6 @@ bool DualArmRobot::moveGraspPosition()
     }
     return true;
 }
-
-void DualArmRobot::publishPlanCartTrajectory(std::string endEffectorLink,
-                                            moveit::planning_interface::MoveGroupInterface::Plan& plan, 
-                                            double frequency)
-{
-
-    // fk service client setup
-    // Use a service to call the forward kinematics and then update the target pose in cartisian space
-   
-    ros::Rate loop_rate(frequency);
-    ROS_INFO("Call the forward kinematics for the %s...", endEffectorLink.c_str());
-    ros::ServiceClient fk_client = nh_.serviceClient<moveit_msgs::GetPositionFK>("compute_fk");
-    moveit_msgs::GetPositionFK fk_msg;
-    fk_msg.request.header.frame_id = "world";
-    fk_msg.request.fk_link_names.push_back(endEffectorLink);
-    fk_msg.request.robot_state = getCurrentRobotStateMsg();// plan.start_state_.joint_state.name[i];
-    for(int i=0; i<fk_msg.request.robot_state.joint_state.name.size(); ++i){
-        ROS_INFO_STREAM("joint in start_state_ " << fk_msg.request.robot_state.joint_state.name[i] );
-    }
-    std::string plan_topic = "left/cart_pose_cmd";
-    std::string joint_traj_point_topic = "left/joint_traj_point_cmd";
-    std::size_t right_found = endEffectorLink.find("right");
-    if (right_found!=std::string::npos){
-        plan_topic = "right/cart_pose_cmd";
-        joint_traj_point_topic = "right/joint_traj_point_cmd";
-    } 
-    ros::Publisher pub_cart_plan = nh_.advertise<geometry_msgs::PoseStamped>(plan_topic, 100);
-    ros::Publisher pub_joint_traj_point_cmd_ = nh_.advertise<trajectory_msgs::JointTrajectoryPoint>(joint_traj_point_topic, 100);
-    geometry_msgs::PoseStamped poseFK;
-    poseFK.header.stamp = plan.trajectory_.joint_trajectory.header.stamp;
-    for(int i=0; i<plan.trajectory_.joint_trajectory.points.size(); ++i){
-        fk_msg.request.robot_state.joint_state.position.clear();
-        auto point = plan.trajectory_.joint_trajectory.points[i];
-        std::copy(point.positions.begin(), point.positions.end(),
-                std::back_inserter(fk_msg.request.robot_state.joint_state.position));
-       
-        fk_client.call(fk_msg.request, fk_msg.response);
-        // get virtual pose from virtual state
-        if (fk_msg.response.error_code.val != 1)
-        {
-            ROS_ERROR("Failed to compute forward kinematics for %s", endEffectorLink.c_str());
-        }
-        poseFK.header.stamp += point.time_from_start;
-        poseFK = fk_msg.response.pose_stamped[0];
-        pub_cart_plan.publish(poseFK);
-        pub_joint_traj_point_cmd_.publish(point);
-        loop_rate.sleep();
-    }
-    ROS_INFO("%ld cartesian postures have been published", plan.trajectory_.joint_trajectory.points.size());
-
-}
 void DualArmRobot::publishPlanCartTrajectory(std::string endEffectorLink,
                                                 const robot_state::JointModelGroup *joint_model_group,
                                                 moveit::planning_interface::MoveGroupInterface::Plan& plan, 
@@ -1492,11 +1338,9 @@ void DualArmRobot::publishPlanCartTrajectory(std::string endEffectorLink,
     } 
     ros::Publisher pub_cart_plan = nh_.advertise<geometry_msgs::PoseStamped>(plan_topic, 100);
     ros::Publisher pub_joint_traj_point_cmd_ = nh_.advertise<trajectory_msgs::JointTrajectoryPoint>(joint_traj_point_topic, 100);
-    
     geometry_msgs::PoseStamped poseFK;
     poseFK.header.stamp = time_send_cmd;
     poseFK.header.frame_id = "world";
-    
     ros::Rate loop_rate(frequency);
     std::vector<double> joint_values;
 
@@ -1504,7 +1348,6 @@ void DualArmRobot::publishPlanCartTrajectory(std::string endEffectorLink,
     {
         joint_values.clear();
         auto point = plan.trajectory_.joint_trajectory.points[i];
-        // ROS_INFO("Read joint points from arm trajectory %d", i);
         std::copy(point.positions.begin(), point.positions.end(),
                     std::back_inserter(joint_values));
 
@@ -1513,7 +1356,6 @@ void DualArmRobot::publishPlanCartTrajectory(std::string endEffectorLink,
         kinematic_statePtr->setJointGroupPositions(joint_model_group, joint_values);
         const Eigen::Affine3d &Affine3d_pose = kinematic_statePtr->getGlobalLinkTransform(endEffectorLink);
         tf::transformEigenToKDL(Affine3d_pose, frame_pose);
-        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         geometry_msgs::Pose pose_msg;
         dual_arm_toolbox::Transform::transformKDLtoPose(frame_pose, pose_msg);
         poseFK.pose = std::move(pose_msg);
@@ -1523,13 +1365,9 @@ void DualArmRobot::publishPlanCartTrajectory(std::string endEffectorLink,
         }while(pub_cart_plan.getNumSubscribers()<1);
         do{
             pub_joint_traj_point_cmd_.publish(point);
-        }while(pub_joint_traj_point_cmd_.getNumSubscribers()<1);
-        // ROS_INFO("Publish to %s, get number of subscribers %d, timestamp %f", 
-        //         pub_joint_traj_point_cmd_.getTopic().c_str(), pub_joint_traj_point_cmd_.getNumSubscribers(), point.time_from_start.toSec());
-        
+        } while(pub_joint_traj_point_cmd_.getNumSubscribers()<1);
         loop_rate.sleep();
     }
-
 }
 
 void DualArmRobot::PrintPose(geometry_msgs::Pose &pose)
@@ -1538,8 +1376,6 @@ void DualArmRobot::PrintPose(geometry_msgs::Pose &pose)
              pose.position.x, pose.position.y, pose.position.z, pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w);
 }
 
-
-
 void DualArmRobot::publishOffsetPointState()
 {
     ros::Publisher offset_pose_pub = nh_.advertise<geometry_msgs::Pose>("/offset_pose_state", 100);
@@ -1547,7 +1383,6 @@ void DualArmRobot::publishOffsetPointState()
     ros::Rate rate(100);
     while (ros::ok())
     {
-        // @TODO Change the offset_frame coordinate system to remove inverse()
         KDL::Frame offset_frame = getCurrentOffset();  // in left EE coordinate system
         offset_pose.position.x = offset_frame.p.x();
         offset_pose.position.y = offset_frame.p.y();
@@ -1559,53 +1394,7 @@ void DualArmRobot::publishOffsetPointState()
         rate.sleep();
     }
 }
-// void DualArmRobot::publishPlanCartTrajectory()
-// {
-//     std::string plan_topic = "left/cart_pose_cmd";
-//     std::string joint_traj_point_topic = "left/joint_traj_point_cmd";
-//     std::size_t right_found = endEffectorLink.find("right");
-//     if (right_found!=std::string::npos){
-//         plan_topic = "right/cart_pose_cmd";
-//         joint_traj_point_topic = "right/joint_traj_point_cmd";
-//     } 
-//     ros::Publisher pub_cart_plan = nh_.advertise<geometry_msgs::PoseStamped>(plan_topic, 1);
-//     ros::Publisher pub_joint_traj_point_cmd_ = nh_.advertise<trajectory_msgs::JointTrajectoryPoint>(joint_traj_point_topic, 1);
-    
-//     geometry_msgs::PoseStamped poseFK;
-//     poseFK.header.stamp = ros::Time::now();
-//     poseFK.header.frame_id = "world";
-    
-//     ros::Rate loop_rate(100);
-//     std::vector<double> joint_values;
 
-//     for (unsigned int i = 0; i < plan.trajectory_.joint_trajectory.points.size(); i++)
-//     {
-//         joint_values.clear();
-//         auto point = plan.trajectory_.joint_trajectory.points[i];
-//         // ROS_INFO("Read joint points from arm trajectory %d", i);
-//         std::copy(point.positions.begin(), point.positions.end(),
-//                     std::back_inserter(joint_values));
-
-//         // fk -> pos left
-//         KDL::Frame frame_pose;
-//         kinematic_statePtr->setJointGroupPositions(joint_model_group, joint_values);
-//         const Eigen::Affine3d &Affine3d_pose = kinematic_statePtr->getGlobalLinkTransform(endEffectorLink);
-//         tf::transformEigenToKDL(Affine3d_pose, frame_pose);
-//         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//         geometry_msgs::Pose pose_msg;
-//         dual_arm_toolbox::Transform::transformKDLtoPose(frame_pose, pose_msg);
-//         poseFK.pose = std::move(pose_msg);
-//         poseFK.header.stamp += point.time_from_start;
-//         do{
-//             pub_cart_plan.publish(poseFK);
-//         }while(pub_cart_plan.getNumSubscribers()<1);
-//         ROS_INFO("Publish to %s, get number of subscribers %d, timestamp %f", 
-//                 pub_cart_plan.getTopic().c_str(), pub_cart_plan.getNumSubscribers(), poseFK.header.stamp.toSec());
-//         //pub_joint_traj_point_cmd_.publish(point);
-//         loop_rate.sleep();
-//     }
-
-// }
 void DualArmRobot::setConstraints()
 {
     // setup constraints
@@ -1646,8 +1435,8 @@ void DualArmRobot::setConstraints()
     jcm.joint_name = "left_elbow_joint";
     jcm.position = 0.0;
     jcm.tolerance_above = 3;
-    jcm.tolerance_below = 3;
-    jcm.weight = 0.5;
+    jcm.tolerance_below = 2;
+    jcm.weight = 1;
     left_constraints.joint_constraints.push_back(jcm);
     both_constraints.joint_constraints.push_back(jcm);
     left_.setPathConstraints(left_constraints);

@@ -158,6 +158,7 @@
     <disable_collisions link1="left_upper_arm_link" link2="wall" reason="Never" />
     <disable_collisions link1="left_upper_arm_link" link2="wall1" reason="Never" />
     <disable_collisions link1="left_upper_arm_link" link2="wall2" reason="Never" />
+    <disable_collisions link1="left_upper_arm_link" link2="stand2" reason="Never" />
     <disable_collisions link1="left_wrist_1_link" link2="left_wrist_2_link" reason="Adjacent" />
     <disable_collisions link1="left_wrist_1_link" link2="left_wrist_3_link" reason="Never" />
     <disable_collisions link1="left_wrist_1_link" link2="stand_Base" reason="Default" />
@@ -219,6 +220,7 @@
     <disable_collisions link1="right_upper_arm_link" link2="wall" reason="Never" />
     <disable_collisions link1="right_upper_arm_link" link2="wall1" reason="Never" />
     <disable_collisions link1="right_upper_arm_link" link2="wall2" reason="Never" />
+    <disable_collisions link1="right_upper_arm_link" link2="stand2" reason="Never" />
     <disable_collisions link1="right_wrist_1_link" link2="right_wrist_2_link" reason="Adjacent" />
     <disable_collisions link1="right_wrist_1_link" link2="right_wrist_3_link" reason="Never" />
     <disable_collisions link1="right_wrist_1_link" link2="wall" reason="Never" />
@@ -256,4 +258,5 @@
     <disable_collisions link1="table" link2="left_fts_robotside" reason="Never" />
     <disable_collisions link1="table" link2="left_fts_toolside" reason="Never" />
     <disable_collisions link1="table" link2="left_robotiq_ft_frame_id" reason="Never" />
+
 </robot>

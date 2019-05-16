@@ -60,8 +60,7 @@ namespace dual_arm_toolbox {
 
         static void scaleTrajectorySpeed(moveit_msgs::RobotTrajectory &trajectory, double scale);
 
-        static bool
-        computeVelocities(moveit_msgs::RobotTrajectory &trajectory, moveit::planning_interface::MoveGroupInterface &moveGroup);
+        static bool computeVelocities(moveit_msgs::RobotTrajectory &trajectory, moveit::planning_interface::MoveGroupInterface &moveGroup);
 
         static void visualizePlan(moveit::planning_interface::MoveGroupInterface::Plan &plan, unsigned int sec);
         static void publishPlanTrajectory(moveit::planning_interface::MoveGroupInterface::Plan& plan, unsigned int sec);

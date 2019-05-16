@@ -23,8 +23,6 @@
 #include "dual_arm_demonstrator_iml/DualArmRobot.h"
 #include "dual_arm_demonstrator_iml/SceneManager.h"
 
-// #include "dual_arm_demonstrator_iml/FTSensorSubscriber.h"
-
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "dual_arm_robot_demonstration");
@@ -43,53 +41,18 @@ int main(int argc, char **argv)
     dual_arm_demonstrator_iml::SceneManager sceneManager(nh);
     sceneManager.setupScene();
 
-
-    // variables
-    moveit::planning_interface::MoveGroupInterface::Plan left_plan;
-    moveit::planning_interface::MoveGroupInterface::Plan right_plan;
-    moveit::planning_interface::MoveItErrorCode error;
-    error.val = -1;
-
     FTSensorSubscriber left_wrench_sub(nh, "left");
     FTSensorSubscriber right_wrench_sub(nh, "right");
-
-    geometry_msgs::Vector3Stamped direction;
-    direction.header.frame_id = "world";
-    // dualArmRobot.setConstraints();
-    dualArmRobot.kinematic_statePtr->enforceBounds();
-    ROS_INFO("Wait 2 secs for the logger to set up...");
-    sleep(2);
     ROS_INFO("========== MOVE HOME POSITION =================");
     dualArmRobot.moveHome();
     sleep(1);
     ROS_INFO("========== MOVE GRASP POSITION =================");
     dualArmRobot.moveGraspPosition();
-    // geometry_msgs::Pose left_grasp_pose, right_grasp_pose;
-
-    // left_grasp_pose.position.x = -0.671;
-    // left_grasp_pose.position.y = -0.138;
-    // left_grasp_pose.position.z = 0.958;
-    // left_grasp_pose.orientation.x = -0.070;
-    // left_grasp_pose.orientation.y = -0.061;
-    // left_grasp_pose.orientation.z = 0.710;
-    // left_grasp_pose.orientation.w = 0.698;
-
-    // right_grasp_pose.position.x = -0.671;
-    // right_grasp_pose.position.y = 0.138;
-    // right_grasp_pose.position.z = 0.958;
-    // right_grasp_pose.orientation.x = -0.070;
-    // right_grasp_pose.orientation.y = 0.710;
-    // right_grasp_pose.orientation.z = -0.061;
-    // right_grasp_pose.orientation.w = 0.690;
-    // dualArmRobot.MoveParallel(left_grasp_pose, right_grasp_pose);
-    // sleep(1);
-
     ROS_INFO("========== MOVE CLOSER =================");
-
     dualArmRobot.graspMove(0.017, false, true, true);
     double res_force = sqrt(left_wrench_sub.last_wrench_msg_.wrench.force.x * left_wrench_sub.last_wrench_msg_.wrench.force.x + left_wrench_sub.last_wrench_msg_.wrench.force.y * left_wrench_sub.last_wrench_msg_.wrench.force.y + left_wrench_sub.last_wrench_msg_.wrench.force.z * left_wrench_sub.last_wrench_msg_.wrench.force.z);
 
-    while (res_force < 15)
+    while (res_force < 20)
     {
         dualArmRobot.graspMove(0.001, false, true, false); // true : left arm; false: right arm
         res_force = sqrt(left_wrench_sub.last_wrench_msg_.wrench.force.x * left_wrench_sub.last_wrench_msg_.wrench.force.x + left_wrench_sub.last_wrench_msg_.wrench.force.y * left_wrench_sub.last_wrench_msg_.wrench.force.y + left_wrench_sub.last_wrench_msg_.wrench.force.z * left_wrench_sub.last_wrench_msg_.wrench.force.z);
@@ -104,17 +67,7 @@ int main(int argc, char **argv)
     Vector6d offset_vec;
     offset_vec.topRows(3) = offset_position;
     offset_vec.bottomRows(3) =  offset_quaternion.toRotationMatrix().eulerAngles(0,1,2);
-    
     std::cout << "Desired offset in left arm frame (in roll, pitch, yaw)\n" << offset_vec << std::endl;
-    // ros::Publisher offset_desired_pub = nh.advertise<geometry_msgs::PointStamped>("/desired_offset_point", 1);
-    // // Publish the desired offset between two EEs, described in right EE coordinate system
-    // KDL::Frame desired_offset = dualArmRobot.getCurrentOffset(); // w.r.t left_ee_link coordinate system
-    // geometry_msgs::PointStamped offset_point_temp_;
-    // offset_point_temp_.header.frame_id = dualArmRobot.left_.getEndEffectorLink();
-    // offset_point_temp_.point.x = desired_offset.p.x();
-    // offset_point_temp_.point.y = desired_offset.p.y();
-    // offset_point_temp_.point.z = desired_offset.p.z();
-    // offset_desired_pub.publish(offset_point_temp_);
     sleep(5);
     ROS_INFO("========== PICK UP =================");
     // Eval
@@ -124,39 +77,35 @@ int main(int argc, char **argv)
 
     before_pick_7 = ros::Time::now();
     // Pick box7 on top
+    geometry_msgs::Vector3Stamped direction;
     direction.header.frame_id = "world";
     direction.vector.x = 0;
     direction.vector.y = 0;
-    direction.vector.z = 0.2;
+    direction.vector.z = 0.20;
     if (!dualArmRobot.pickBox("box7", direction))
     {
         ROS_WARN("Pick failed");
         ROS_ERROR("Can't execute demonstration without successful pick. Demonstration aborted.");
         return 0;
     }
-
     // box7 goal pose
     geometry_msgs::PoseStamped box7_goal_pose_stamped;
-    box7_goal_pose_stamped.header = dualArmRobot.left_current_pose_.header;
-
     dualArmRobot.left_current_pose_ = dualArmRobot.left_.getCurrentPose(dualArmRobot.left_.getEndEffectorLink());
+    box7_goal_pose_stamped.header = dualArmRobot.left_current_pose_.header;
     box7_goal_pose_stamped.pose = dualArmRobot.left_current_pose_.pose;
     KDL::Frame left_frame_eef; // endeffector frame
     dual_arm_toolbox::Transform::transformPoseToKDL(dualArmRobot.left_current_pose_.pose, left_frame_eef);
     ROS_INFO_STREAM("Left position in frame " << box7_goal_pose_stamped.header.frame_id << "\n" << left_frame_eef.p);
     KDL::Rotation left_rot = left_frame_eef.M;
-    // KDL::Rotation rotationAgnle = KDL::Rotation::Identity();
     double yaw = 0;   // Z-axis
     double pitch = 0; // Y-axis
     double roll = 0;  // X-axis
     double angle = 0;
     left_rot.GetEulerZYX(yaw, pitch, roll);
-
     ROS_INFO("Before roll = %f\tpitch = %f\t yaw = %f", roll, pitch, yaw);
     angle = -3.14/6;
     roll += angle;
     left_rot = KDL::Rotation::EulerZYX(yaw, pitch, roll);
-
     left_rot.GetEulerZYX(yaw, pitch, roll);
     left_rot.GetQuaternion(box7_goal_pose_stamped.pose.orientation.x,
                            box7_goal_pose_stamped.pose.orientation.y,
@@ -170,22 +119,12 @@ int main(int argc, char **argv)
     left_rot = KDL::Rotation::RPY(roll, pitch, yaw);
     left_rot.GetEulerZYX(yaw, pitch, roll);
     ROS_INFO("After roll = %f\tpitch = %f\t yaw = %f", roll, pitch, yaw);
-
     left_rot.GetQuaternion(box7_goal_pose_stamped.pose.orientation.x,
                            box7_goal_pose_stamped.pose.orientation.y,
                            box7_goal_pose_stamped.pose.orientation.z,
                            box7_goal_pose_stamped.pose.orientation.w);
     dualArmRobot.moveObject("box7", box7_goal_pose_stamped, 0.2);
     sleep(5);
-
-    // // Create an desired frame
-    // KDL::Frame desired_end_effector_pose(
-    // KDL::Rotation::RPY(-1.57,0,1.57), // Rotation rad
-    // KDL::Vector(-0.2,-0.3,0.8));      // Position x,y,z in meters
-    // KDL::Rotation rot = left_frame_eef.R
-
-    // // clear constraints of ur5
-    // dualArmRobot.left_.clearPathConstraints();
     ROS_INFO("========== PLACE DOWN =================");
     // Place box7
     geometry_msgs::Vector3 go_down;
@@ -198,145 +137,13 @@ int main(int argc, char **argv)
         ROS_ERROR("Demonstration aborted to avoid further problems");
         return 0;
     }
-
-    // evaluation
     after_place_7 = ros::Time::now();
     manipulation_7 = after_place_7 - before_pick_7;
     ROS_INFO(":::::: VALUES EVALUATION ::::::");
     ROS_INFO("manipulation box 7 took: %li nsec", manipulation_7.toNSec());
-    sleep(5);
-
-    dualArmRobot.moveHome();
-    /*
-    // setup constraints
-    // ur5 sometimes blocks itself when moving the box on bottom, this should solve the issue
-    left_constraints.joint_constraints.clear();
-    right_constraints.joint_constraints.clear();
-    both_constraints.joint_constraints.clear();
-
-    jcm.joint_name="left_wrist_2_joint";
-    jcm.position = 1.5;
-    jcm.tolerance_above = 0.6;
-    jcm.tolerance_below = 0.6;
-    jcm.weight = 1.0;
-    left_constraints.joint_constraints.push_back(jcm);
-    dualArmRobot.left_.setPathConstraints(left_constraints);
-    both_constraints.joint_constraints.push_back(jcm);
-
-    // ur5 sometimes blocks itself for path adaption when picking the box on bottom, this should solve the issue
-    jcm.joint_name="right_wrist_1_joint";
-    jcm.position = 0.7;
-    jcm.tolerance_above = 1.0;
-    jcm.tolerance_below = 1.0;
-    jcm.weight = 1.0;
-    right_constraints.joint_constraints.push_back(jcm);
-    dualArmRobot.right_.setPathConstraints(right_constraints);
-    both_constraints.joint_constraints.push_back(jcm);
-
-    // when placing box on top ur5 can get blocked because wrist 1 reaches limit
-    jcm.joint_name="left_wrist_1_joint";
-    jcm.position = 0.0;
-    jcm.tolerance_above = 3.0;
-    jcm.tolerance_below = 3.0;
-    jcm.weight = 1.0;
-    left_constraints.joint_constraints.push_back(jcm);
-    dualArmRobot.left_.setPathConstraints(left_constraints);
-    both_constraints.joint_constraints.push_back(jcm);
-
-    jcm.joint_name="left_shoulder_pan_joint";
-    jcm.position = -2.4;
-    jcm.tolerance_above = 2.4;
-    jcm.tolerance_below = 0.7;
-    jcm.weight = 1.0;
-    left_constraints.joint_constraints.push_back(jcm);
-    dualArmRobot.left_.setPathConstraints(left_constraints);
-    both_constraints.joint_constraints.push_back(jcm);
-
-    // ur5 sometimes blocks itself when picking the box on top, this should solve the issue
-    jcm.joint_name="right_wrist_2_joint";
-    jcm.position = 0;
-    jcm.tolerance_above = 2.5;
-    jcm.tolerance_below = 2.5;
-    jcm.weight = 1.0;
-    right_constraints.joint_constraints.push_back(jcm);
-    dualArmRobot.right_.setPathConstraints(right_constraints);
-    both_constraints.joint_constraints.push_back(jcm);
-
-    dualArmRobot.arms_.setPathConstraints(both_constraints);
-
-
-    //Eval
-    ros::Time before_pick_3;
-    ros::Duration manipulation_3;
-    ros::Time after_place_3;
-
-    before_pick_3 = ros::Time::now();
-
-    // Pick box3 on bottom
-    geometry_msgs::Vector3Stamped direction2;
-    direction2.header.frame_id = "world";
-    direction2.vector.x = 0.20;
-    direction2.vector.y = 0.20;
-    direction2.vector.z = 0.02;
-    if (!dualArmRobot.pickBox("box3", direction2)) {
-        ROS_WARN("Pick failed");
-        ROS_ERROR("Can't execute demonstration without successful pick. Demonstration aborted.");
-        return 0;
-    }
-
-    // Place box3 by pushing it to its goal position
-    // first, determine box3 goal pose
-    geometry_msgs::Pose box3_goal_pose;
-    box3_goal_pose.position.x = 0.04 + sceneManager.box_.dimensions[1]/2 +0.001; //+ sceneManager.box_.dimensions[1]
-    box3_goal_pose.position.y = 0.04 + sceneManager.box_.dimensions[2]/2 + sceneManager.box_.dimensions[2]+0.001;
-    box3_goal_pose.position.z = 0.0155+0.52/2+0.0155/2+sceneManager.box_.dimensions[0]/2+0.005;
-    KDL::Rotation box3_goal_rot;
-    box3_goal_rot.DoRotY(-3.14/2);
-    box3_goal_rot.GetQuaternion(box3_goal_pose.orientation.x, box3_goal_pose.orientation.y, box3_goal_pose.orientation.z, box3_goal_pose.orientation.w);
-    geometry_msgs::PoseStamped box3_goal_pose_stamped;
-    box3_goal_pose_stamped.header.frame_id = "shelf";
-    box3_goal_pose_stamped.pose=box3_goal_pose;
-
-    // second, determine direction for pushing box into goal position
-    geometry_msgs::Vector3 direction_push;
-    direction_push.x = 0.0;
-    direction_push.y = - (sceneManager.box_.dimensions[2]+0.005);// + 0.04);
-    direction_push.z = 0.0;
-
-    // setup constraints
-    dualArmRobot.left_.clearPathConstraints();
-
-    // pre-goal position
-    ROS_INFO("moving closer to target position");
-    geometry_msgs::PoseStamped left_pre_pose = dualArmRobot.left_current_pose_;
-    left_pre_pose.pose.position.z += 0.2;
-    if (!dualArmRobot.moveObject("box3", left_pre_pose, 0.5)){
-        ROS_ERROR("Failed to move box3. Demonstration aborted.");
-        return false;
-    }
-
-    // start Push Place sequence
-    if (!dualArmRobot.pushPlaceBox("box3", box3_goal_pose_stamped, direction_push)){
-        ROS_WARN("Push Place Box failed");
-        ROS_ERROR("Demonstration aborted to avoid further problems");
-        return  0;
-    }
-
-    // evaluation
-    after_place_3 = ros::Time::now();
-    manipulation_3 = after_place_3 - before_pick_3;
-    ROS_INFO(":::::: VALUES EVALUATION ::::::");
-    ROS_INFO("manipulation box 3 took: %li nsec", manipulation_3.toNSec());
-    sleep(5);
-    
-    // move robot back into home pose
-    dualArmRobot.right_.clearPathConstraints();
-    dualArmRobot.left_.clearPathConstraints();
-    dualArmRobot.moveHome();
-*/
-    // END
-    ROS_INFO("Finished demonstration");
     sleep(1);
+    dualArmRobot.moveHome();
+    ROS_INFO("Finished demonstration");
     ros::shutdown();
     return 0;
 }
