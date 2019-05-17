@@ -165,7 +165,7 @@ int main(int argc, char **argv)
     // ROS_WARN("visualizing plan. STRG+C to interrupt.");
     // sleep(4);
     // left_.execute(plan);
-    // sleep(3);
+    // sleep(2);
 
     // ::::::: Run Experiments :::::::
 

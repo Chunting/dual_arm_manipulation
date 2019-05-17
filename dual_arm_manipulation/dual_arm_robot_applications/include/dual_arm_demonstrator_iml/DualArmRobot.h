@@ -83,7 +83,7 @@ class DualArmRobot
     KDL::Frame arms_offset_;                           // offset between arms
     bool try_again_question();
     // PlanningSceneMonitorPtr is aka std::shared_ptr<planning_scene_monitor::PlanningSceneMonitor>
-    planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
+    planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitorPtr_;
 
     robot_model_loader::RobotModelLoader robotModelLoader;
     robot_model::RobotModelPtr kinematic_modelPtr;
@@ -108,6 +108,9 @@ class DualArmRobot
     moveit::planning_interface::MoveGroupInterface arms_;
 
     std::thread *pose_publish_thread_;
+    // std::shared_ptr<std::thread> traj_pub_thread_;
+    // bool new_right_traj_;
+    // bool new_left_traj_;
 
       // Transform from base_link to world
     Matrix6d rotation_world_left_base_;
@@ -144,7 +147,7 @@ class DualArmRobot
 
     bool switch_controller(std::string stop_name, std::string start_name, std::string ur_namespace);
 
-    bool graspMove(double distance, bool avoid_collisions = true, bool use_left = true, bool use_right = false); //both arms will be moved closer together
+    bool graspMove(double distance, bool avoid_collisions = true, bool use_left = true, bool use_right = false, float scale = 0.2); //both arms will be moved closer together
 
     bool linearMove(geometry_msgs::Vector3Stamped direction, bool avoid_collisions = true, bool use_left = true, bool use_right = true);
 

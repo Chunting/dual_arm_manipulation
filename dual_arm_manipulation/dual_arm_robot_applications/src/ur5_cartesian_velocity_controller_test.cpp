@@ -118,7 +118,7 @@ int main(int argc, char **argv)
 	ROS_WARN("Failed switching left controller");
   if (!switch_controller(nh_, "vel_based_pos_traj_controller", "ur5_cartesian_velocity_controller", "right"))
 	ROS_WARN("Failed switching right controller");
-  sleep(3);
+  sleep(2);
 
   std::string topic_right_arm_state("/right/ur5_cartesian_velocity_controller/ee_state");
   std::string topic_right_arm_cmd("/right/ur5_cartesian_velocity_controller/command_cart_vel");

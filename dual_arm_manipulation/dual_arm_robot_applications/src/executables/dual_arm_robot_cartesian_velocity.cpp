@@ -96,7 +96,7 @@ int main(int argc, char **argv)
     ROS_WARN("Failed switching left controller");
   if (!dualArmRobot.switch_controller("vel_based_pos_traj_controller", "ur5_cartesian_velocity_controller", "right"))
     ROS_WARN("Failed switching right controller");
-  sleep(3);
+  sleep(2);
   double left_force_norm = left_robotiq_ft_subscriber.wrench_external_(2);
   double right_force_norm = right_robotiq_ft_subscriber.wrench_external_(2);
   double desired_diff_ = std::abs(left_force_norm - right_force_norm);
@@ -114,7 +114,7 @@ int main(int argc, char **argv)
   right_base_arm_cmd_vel_.setZero();
   world_left_arm_cmd_vel_ << 0, 0.001, 0, 0, 0, 0;
   world_right_arm_cmd_vel_ << 0, -0.001, 0, 0, 0, 0;
-  sleep(3);
+  sleep(2);
   while (std::abs(left_force_norm) < 20 || desired_diff_ > 0.5)
   {
     left_base_arm_cmd_vel_ = rotation_left_base_world * world_left_arm_cmd_vel_;
@@ -172,7 +172,7 @@ int main(int argc, char **argv)
   world_right_arm_cmd_vel_ << 0, 0, 0.01, 0, 0, 0;
   
  
-  sleep(3);
+  sleep(2);
   before_pick_7 = ros::Time::now();
   while (duration.toSec() < 10 && nh.ok())
   {
@@ -205,7 +205,7 @@ int main(int argc, char **argv)
   dual_arm_toolbox::Transform::transformVector6dtoTwist(right_base_arm_cmd_vel_, right_arm_vel_cmd);
   pub_left_arm_cmd_.publish(left_arm_vel_cmd);
   pub_right_arm_cmd_.publish(right_arm_vel_cmd);
-  sleep(3);
+  sleep(2);
 
   if (!dualArmRobot.switch_controller("ur5_cartesian_velocity_controller", "vel_based_pos_traj_controller", "left"))
     ROS_WARN("failed switching controller");
@@ -292,7 +292,7 @@ int main(int argc, char **argv)
   dual_arm_toolbox::Transform::transformVector6dtoTwist(right_base_arm_cmd_vel_, right_arm_vel_cmd);
   pub_left_arm_cmd_.publish(left_arm_vel_cmd);
   pub_right_arm_cmd_.publish(right_arm_vel_cmd);
-  sleep(3);
+  sleep(2);
 
 
   // if (!dualArmRobot.pickBox("box7", direction))
@@ -456,7 +456,7 @@ int main(int argc, char **argv)
     ROS_WARN("failed switching controller");
   if (!dualArmRobot.switch_controller("ur5_cartesian_velocity_controller", "vel_based_pos_traj_controller", "right"))
     ROS_WARN("failed switching controller");
-  sleep(3);
+  sleep(2);
   // move robot back into home pose
   dualArmRobot.right_.clearPathConstraints();
   dualArmRobot.left_.clearPathConstraints();

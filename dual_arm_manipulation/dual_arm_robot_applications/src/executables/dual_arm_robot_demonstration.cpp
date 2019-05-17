@@ -40,24 +40,27 @@ int main(int argc, char **argv)
     // Scene Setup
     dual_arm_demonstrator_iml::SceneManager sceneManager(nh);
     sceneManager.setupScene();
+    ros::Time before_pick_7;
+    ros::Duration manipulation_7;
+    ros::Time after_place_7;
 
+    before_pick_7 = ros::Time::now();
     FTSensorSubscriber left_wrench_sub(nh, "left");
     FTSensorSubscriber right_wrench_sub(nh, "right");
     ROS_INFO("========== MOVE HOME POSITION =================");
     dualArmRobot.moveHome();
-    sleep(1);
     ROS_INFO("========== MOVE GRASP POSITION =================");
     dualArmRobot.moveGraspPosition();
     ROS_INFO("========== MOVE CLOSER =================");
-    dualArmRobot.graspMove(0.017, false, true, true);
+    dualArmRobot.graspMove(0.048, false, true, true);
     double res_force = sqrt(left_wrench_sub.last_wrench_msg_.wrench.force.x * left_wrench_sub.last_wrench_msg_.wrench.force.x + left_wrench_sub.last_wrench_msg_.wrench.force.y * left_wrench_sub.last_wrench_msg_.wrench.force.y + left_wrench_sub.last_wrench_msg_.wrench.force.z * left_wrench_sub.last_wrench_msg_.wrench.force.z);
 
     while (res_force < 20)
     {
-        dualArmRobot.graspMove(0.001, false, true, false); // true : left arm; false: right arm
+        dualArmRobot.graspMove(0.001, false, true, false, 0.1); // true : left arm; false: right arm
         res_force = sqrt(left_wrench_sub.last_wrench_msg_.wrench.force.x * left_wrench_sub.last_wrench_msg_.wrench.force.x + left_wrench_sub.last_wrench_msg_.wrench.force.y * left_wrench_sub.last_wrench_msg_.wrench.force.y + left_wrench_sub.last_wrench_msg_.wrench.force.z * left_wrench_sub.last_wrench_msg_.wrench.force.z);
         ROS_INFO("I heard: Force [%f]  FX[%f] FY[%f] FZ[%f]", res_force, left_wrench_sub.last_wrench_msg_.wrench.force.x, left_wrench_sub.last_wrench_msg_.wrench.force.y, left_wrench_sub.last_wrench_msg_.wrench.force.z);
-        
+        sleep(1);
     }
     KDL::Frame desired_offset = dualArmRobot.getCurrentOffset(); 
     Vector3d offset_position;
@@ -68,26 +71,20 @@ int main(int argc, char **argv)
     offset_vec.topRows(3) = offset_position;
     offset_vec.bottomRows(3) =  offset_quaternion.toRotationMatrix().eulerAngles(0,1,2);
     std::cout << "Desired offset in left arm frame (in roll, pitch, yaw)\n" << offset_vec << std::endl;
-    sleep(5);
     ROS_INFO("========== PICK UP =================");
-    // Eval
-    ros::Time before_pick_7;
-    ros::Duration manipulation_7;
-    ros::Time after_place_7;
-
-    before_pick_7 = ros::Time::now();
     // Pick box7 on top
     geometry_msgs::Vector3Stamped direction;
     direction.header.frame_id = "world";
     direction.vector.x = 0;
     direction.vector.y = 0;
-    direction.vector.z = 0.20;
+    direction.vector.z = 0.25;
     if (!dualArmRobot.pickBox("box7", direction))
     {
         ROS_WARN("Pick failed");
         ROS_ERROR("Can't execute demonstration without successful pick. Demonstration aborted.");
         return 0;
     }
+    ROS_INFO("========== Rotation =================");
     // box7 goal pose
     geometry_msgs::PoseStamped box7_goal_pose_stamped;
     dualArmRobot.left_current_pose_ = dualArmRobot.left_.getCurrentPose(dualArmRobot.left_.getEndEffectorLink());
@@ -95,15 +92,13 @@ int main(int argc, char **argv)
     box7_goal_pose_stamped.pose = dualArmRobot.left_current_pose_.pose;
     KDL::Frame left_frame_eef; // endeffector frame
     dual_arm_toolbox::Transform::transformPoseToKDL(dualArmRobot.left_current_pose_.pose, left_frame_eef);
-    ROS_INFO_STREAM("Left position in frame " << box7_goal_pose_stamped.header.frame_id << "\n" << left_frame_eef.p);
     KDL::Rotation left_rot = left_frame_eef.M;
     double yaw = 0;   // Z-axis
     double pitch = 0; // Y-axis
     double roll = 0;  // X-axis
     double angle = 0;
     left_rot.GetEulerZYX(yaw, pitch, roll);
-    ROS_INFO("Before roll = %f\tpitch = %f\t yaw = %f", roll, pitch, yaw);
-    angle = -3.14/6;
+    angle = -3.14/5;
     roll += angle;
     left_rot = KDL::Rotation::EulerZYX(yaw, pitch, roll);
     left_rot.GetEulerZYX(yaw, pitch, roll);
@@ -111,25 +106,23 @@ int main(int argc, char **argv)
                            box7_goal_pose_stamped.pose.orientation.y,
                            box7_goal_pose_stamped.pose.orientation.z,
                            box7_goal_pose_stamped.pose.orientation.w);
-    ROS_INFO("After roll = %f\tpitch = %f\t yaw = %f", roll, pitch, yaw);
     dualArmRobot.moveObject("box7", box7_goal_pose_stamped, 0.2);
-    sleep(5);
+    sleep(2);
 
     roll -= angle;
     left_rot = KDL::Rotation::RPY(roll, pitch, yaw);
     left_rot.GetEulerZYX(yaw, pitch, roll);
-    ROS_INFO("After roll = %f\tpitch = %f\t yaw = %f", roll, pitch, yaw);
     left_rot.GetQuaternion(box7_goal_pose_stamped.pose.orientation.x,
                            box7_goal_pose_stamped.pose.orientation.y,
                            box7_goal_pose_stamped.pose.orientation.z,
                            box7_goal_pose_stamped.pose.orientation.w);
     dualArmRobot.moveObject("box7", box7_goal_pose_stamped, 0.2);
-    sleep(5);
+    sleep(2);
     ROS_INFO("========== PLACE DOWN =================");
     // Place box7
     geometry_msgs::Vector3 go_down;
-    go_down.x = 0;
-    go_down.y = 0;
+    go_down.x = -direction.vector.x;
+    go_down.y = -direction.vector.y;
     go_down.z = -direction.vector.z;
     if (!dualArmRobot.placeBox("box7", box7_goal_pose_stamped, go_down))
     {
@@ -137,12 +130,12 @@ int main(int argc, char **argv)
         ROS_ERROR("Demonstration aborted to avoid further problems");
         return 0;
     }
+
+    dualArmRobot.moveHome();
     after_place_7 = ros::Time::now();
     manipulation_7 = after_place_7 - before_pick_7;
     ROS_INFO(":::::: VALUES EVALUATION ::::::");
-    ROS_INFO("manipulation box 7 took: %li nsec", manipulation_7.toNSec());
-    sleep(1);
-    dualArmRobot.moveHome();
+    ROS_INFO("manipulation box 7 took: %li sec", manipulation_7.toSec());
     ROS_INFO("Finished demonstration");
     ros::shutdown();
     return 0;
