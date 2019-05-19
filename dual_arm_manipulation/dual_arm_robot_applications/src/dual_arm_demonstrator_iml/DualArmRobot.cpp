@@ -47,7 +47,7 @@ DualArmRobot::DualArmRobot(ros::NodeHandle &nh) : left_("left_manipulator"),
     // kinematic_statePtr->setToDefaultValues();
     left_joint_model_group = kinematic_modelPtr->getJointModelGroup("left_manipulator");
     right_joint_model_group = kinematic_modelPtr->getJointModelGroup("right_manipulator");
-#ifdef 0
+#ifdef NO_CHANCE_THAT_THIS_SYMBOL_WILL_EVER_EXIST
     const kinematics::KinematicsBaseConstPtr& right_solver = right_joint_model_group->getSolverInstance();
     const kinematics::KinematicsBaseConstPtr& left_solver = left_joint_model_group->getSolverInstance();
     ROS_INFO("Kinematics solver %s for joint group %s:  ",
@@ -101,7 +101,7 @@ DualArmRobot::DualArmRobot(ros::NodeHandle &nh) : left_("left_manipulator"),
     kinematic_statePtr->enforceBounds();
 
     
-#ifdef 0
+#ifdef NO_CHANCE_THAT_THIS_SYMBOL_WILL_EVER_EXIST
     ROS_INFO("\nleft_current_pose_ frame_id: %s, end_effector: %s\n x=%f, y=%f, z=%f, qx=%f, qy=%f, qz=%f, qw=%f\n",
              left_current_pose_.header.frame_id.c_str(), left_.getEndEffectorLink().c_str(),
              left_current_pose_.pose.position.x, left_current_pose_.pose.position.y, left_current_pose_.pose.position.z,
@@ -126,21 +126,21 @@ DualArmRobot::DualArmRobot(ros::NodeHandle &nh) : left_("left_manipulator"),
 	rotation_world_right_base_.setZero();
 	rotation_tip_right_sensor_.setZero();
     tf::TransformListener listener_arm_;
-	while (!get_rotation_matrix(rotation_world_left_base_, listener_arm_, "world", "left_base_link"))
+	while (!get_rotation_matrix(rotation_world_left_base_, listener_arm_, "world", "left_base"))
 	{
 		sleep(1);
 	}
 	
-	while (!get_rotation_matrix(rotation_world_right_base_, listener_arm_, "world", "right_base_link"))
+	while (!get_rotation_matrix(rotation_world_right_base_, listener_arm_, "world", "right_base"))
 	{
 		sleep(1);
 	}
-    while (!get_rotation_matrix(rotation_tip_left_sensor_, listener_arm_, "left_wrist_3_link", "left_robotiq_ft_frame_id"))
+    while (!get_rotation_matrix(rotation_tip_left_sensor_, listener_arm_, "left_tool0", "left_robotiq_ft_frame_id"))
 	{
 		sleep(1);
 	}
 	
-	while (!get_rotation_matrix(rotation_tip_right_sensor_, listener_arm_, "right_wrist_3_link", "right_robotiq_ft_frame_id"))
+	while (!get_rotation_matrix(rotation_tip_right_sensor_, listener_arm_, "right_tool0", "right_robotiq_ft_frame_id"))
 	{
 		sleep(1);
 	}
@@ -1024,7 +1024,7 @@ bool DualArmRobot::linearMove(geometry_msgs::Vector3Stamped direction,
         std::vector<geometry_msgs::Pose> left_waypoints;
         geometry_msgs::Pose left_waypoint = left_start_pose.pose;
         left_waypoints.push_back(left_waypoint);
-#ifdef 0
+#ifdef NO_CHANCE_THAT_THIS_SYMBOL_WILL_EVER_EXIST
         ROS_INFO("Linear Linear move start point( %f %f %f)\n",
                  left_waypoint.position.x,
                  left_waypoint.position.y,
@@ -1033,7 +1033,7 @@ bool DualArmRobot::linearMove(geometry_msgs::Vector3Stamped direction,
         left_waypoint.position.x = left_waypoint.position.x + direction.vector.x;
         left_waypoint.position.y = left_waypoint.position.y + direction.vector.y;
         left_waypoint.position.z = left_waypoint.position.z + direction.vector.z;
-#ifdef 0
+#ifdef NO_CHANCE_THAT_THIS_SYMBOL_WILL_EVER_EXIST
         ROS_INFO("Left Linear move target point( %f %f %f)\n",
                  left_waypoint.position.x,
                  left_waypoint.position.y,

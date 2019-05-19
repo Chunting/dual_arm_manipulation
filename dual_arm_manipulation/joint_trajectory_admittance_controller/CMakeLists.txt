@@ -39,7 +39,8 @@ catkin_package(
   trajectory_msgs
   controller_manager
   xacro
-  INCLUDE_DIRS include
+  INCLUDE_DIRS 
+    include
   LIBRARIES ${PROJECT_NAME}
 )
 
@@ -52,7 +53,7 @@ IF( NOT EIGEN3_INCLUDE_DIR )
 ENDIF()
 INCLUDE_DIRECTORIES ( "${EIGEN3_INCLUDE_DIR}" )
 
-include_directories(${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS} "${EIGEN3_INCLUDE_DIR}" include)
+include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS} "${EIGEN3_INCLUDE_DIR}")
 
 add_library(${PROJECT_NAME} src/joint_trajectory_admittance_controller.cpp
                             include/joint_trajectory_admittance_controller/hardware_interface_adapter.h
@@ -83,8 +84,8 @@ if(CATKIN_ENABLE_TESTING)
   catkin_add_gtest(joint_trajectory_segment_test test/joint_trajectory_segment_test.cpp)
   target_link_libraries(joint_trajectory_segment_test ${catkin_LIBRARIES})
 
-  catkin_add_gtest(joint_trajectory_msg_utils_test test/joint_trajectory_msg_utils_test.cpp)
-  target_link_libraries(joint_trajectory_msg_utils_test ${catkin_LIBRARIES})
+  #catkin_add_gtest(joint_trajectory_msg_utils_test test/joint_trajectory_msg_utils_test.cpp)
+  #target_link_libraries(joint_trajectory_msg_utils_test ${catkin_LIBRARIES})
 
   catkin_add_gtest(init_joint_trajectory_test test/init_joint_trajectory_test.cpp)
   target_link_libraries(init_joint_trajectory_test ${catkin_LIBRARIES})

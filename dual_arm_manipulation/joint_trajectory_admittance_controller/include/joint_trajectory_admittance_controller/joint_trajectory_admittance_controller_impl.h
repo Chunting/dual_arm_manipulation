@@ -334,6 +334,7 @@ bool JointTrajectoryAdmittanceController<SegmentImpl, HardwareInterface>::init(H
 															 << "\n- Trajectory segment type: '" << hardware_interface::internal::demangledTypeName<SegmentImpl>() << "'");
 
 	// Default tolerances
+	// Parent constructor. NodeHandle child(controller_nh_.getNamespace() + "/" + "constraints");
 	ros::NodeHandle tol_nh(controller_nh_, "constraints");
 	default_tolerances_ = getSegmentTolerances<Scalar>(tol_nh, joint_names_);
 

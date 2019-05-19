@@ -83,12 +83,8 @@ int main(int argc, char **argv)
   //     ROS_WARN("failed switching controller");
   ROS_INFO("========== MOVE HOME POSITION =================");
   dualArmRobot.moveHome();
-  sleep(1);
-
   ROS_INFO("========== MOVE GRASP POSITION =================");
   dualArmRobot.moveGraspPosition();
-  sleep(1);
-
   ROS_INFO("========== MOVE CLOSER =================");
 
   // dualArmRobot.graspMove(0.01, false, true, false);
@@ -158,7 +154,6 @@ int main(int argc, char **argv)
   ros::Duration duration(0);
   ros::Time after_place_7;
 
-  
   // Pick box7 on top
   direction.header.frame_id = "world";
   direction.vector.x = 0;

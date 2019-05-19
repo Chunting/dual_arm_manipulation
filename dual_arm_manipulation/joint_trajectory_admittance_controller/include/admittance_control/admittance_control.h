@@ -68,7 +68,7 @@ class AdmittanceControl
     void desiredOffsetCallback(const geometry_msgs::PointStamped::ConstPtr &msg);
 
     // runtime variables
-    double d_;             // distance
+    double desired_distance_;             // distance
     KDL::JntArray q_last_; // last joint state
     std::vector<double> new_start_position_;
     KDL::Vector force_;
@@ -164,7 +164,7 @@ void AdmittanceControl::init(ros::NodeHandle &nh)
 
     nh_ = nh;
     // init variables
-    d_ = 0.0;
+    desired_distance_ = 0.0;
     new_start_position_.clear();
 
     // KDL
@@ -251,16 +251,22 @@ void AdmittanceControl::update_admittance_state(std::vector<double> &position, c
     unsigned int nj = kdl_chain_.getNrOfJoints();
 
     KDL::JntArray q_in(nj);
-
+    ROS_INFO("Input joint positions: " );
     for (int i = 0; i < nj; i++)
     {
         q_in(i, 0) = position[i];
+        ROS_INFO("%f", q_in(i, 0));
     }
+    
 
     // forward kinematics
     KDL::Frame p_eef;
+    Eigen::Affine3d eePose_eig;
     int fk_feedback = fkSolverPos.JntToCart(q_in, p_eef); // segmentNr = -1
-    ROS_INFO_STREAM("kdl p_eef " << p_eef);
+    double yaw = 0;    // Z-axis
+    double pitch = 0;  // Y-axis
+    double roll = 0;   // X-axis
+    ROS_INFO_STREAM("kdl p_eef " <<  p_eef.p << " " << yaw << " " << pitch << " " << roll );
     if (fk_feedback < 0)
     {
         ROS_WARN("Admittance Control: Problem solving forward kinematics. Error: %s",
@@ -272,31 +278,28 @@ void AdmittanceControl::update_admittance_state(std::vector<double> &position, c
     KDL::Vector wrench_eef; // wrench in destination Frame eef
     ros::spinOnce();        // receive wrench msg
     // wrench_eef = p_eef.M.Inverse() * force_; // Rotate to get Force in coordinate system of the eef
-    wrench_eef = force_; // Force in force torque coordinate system
-    // distance is described along X-axis in right ee coordinated system.
-    // If d_ >0, robot looses the object, grip more tightly otherwise.
-    d_ = offset_new_(0) - offset_desired_(0);
+    wrench_eef = force_; // The oritation of robotiq_frame_id frame is consident with left/right_tool0 
 
     // PID
     if (std::abs(wrench_eef.z() - contact_F) > wrench_tolerance_)
     {
-        if (((wrench_eef.z() < contact_F) && (d_ > -max_shift_)) ||
-            ((wrench_eef.z() > contact_F) && (d_ < max_shift_)))
+        if (((wrench_eef.z() < contact_F) && (desired_distance_ > -max_shift_)) ||
+            ((wrench_eef.z() > contact_F) && (desired_distance_ < max_shift_)))
         {
             double pid_vel = pid_controller_.computeCommand(wrench_eef.z() - contact_F, period);
             if (std::abs(pid_vel) < max_vel_)
-                d_ = d_ + pid_vel * period.toSec();
+                desired_distance_ = desired_distance_ + pid_vel * period.toSec();
             else
-                d_ = d_ + (std::abs(pid_vel) / pid_vel) * max_vel_ * period.toSec();
+                desired_distance_ = desired_distance_ + (std::abs(pid_vel) / pid_vel) * max_vel_ * period.toSec();
         }
     }
 
     // distance is transformed to be along z-axis of eef
-    KDL::Vector vec_d; // distance vector
+    KDL::Vector vec_d; // distance vector, in ee frame
     vec_d.x(0);
     vec_d.y(0);
-    vec_d.z(d_);
-    vec_d = p_eef.M * vec_d; // Rotate distance vector
+    vec_d.z(desired_distance_);
+    vec_d = p_eef.M * vec_d; // Rotate distance vector, in base frame
 
     // target frame
     KDL::Frame p_target = p_eef;
@@ -341,6 +344,6 @@ void AdmittanceControl::update_admittance_state(std::vector<double> &position, c
 
 void AdmittanceControl::set_shift(double d)
 {
-    d_ = d;
+    desired_distance_ = d;
     ROS_WARN("Set shift to %f", d);
 }

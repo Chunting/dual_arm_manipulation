@@ -119,6 +119,7 @@ private:
   Stopwatch stopwatch_;
   double start_time_ = 0.0;
   double pre_cmd_time_ =0.0;
+  double pre_state_time_ =0.0;
   ros::Timer timer_;
 
 

@@ -112,6 +112,8 @@ vel_based_admittance_traj_controller:
       left_wrist_1_joint: {p: 20,  i: 0.0, d: 0.1, i_clamp: 1}
       left_wrist_2_joint: {p: 20,  i: 0.0, d: 0.1, i_clamp: 1}
       left_wrist_3_joint: {p: 20,  i: 0.0, d: 0.1, i_clamp: 1}
+   # Transformation from left_robotiq_frame_id to left_tool0
+   left_tip_ft_frame: [0.000, 0.000, 0.016, 0.000, 0.000, 0.000, 1.000]  
 
    # state_publish_rate:  50 # Defaults to 50
    # action_monitor_rate: 20 # Defaults to 20
