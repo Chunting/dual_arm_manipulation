@@ -230,7 +230,7 @@ int main(int argc, char **argv)
   left_rot.GetQuaternion(box7_goal_pose_stamped.pose.orientation.x, box7_goal_pose_stamped.pose.orientation.y,
                          box7_goal_pose_stamped.pose.orientation.z, box7_goal_pose_stamped.pose.orientation.w);
   ROS_INFO("After roll = %f\tpitch = %f\t yaw = %f", roll, pitch, yaw);
-  dualArmRobot.moveObject("box7", box7_goal_pose_stamped, 0.1);
+  // dualArmRobot.moveObject("box7", box7_goal_pose_stamped, 0.1);
   sleep(5);
 
   pitch -= angle;
@@ -240,7 +240,7 @@ int main(int argc, char **argv)
 
   left_rot.GetQuaternion(box7_goal_pose_stamped.pose.orientation.x, box7_goal_pose_stamped.pose.orientation.y,
                          box7_goal_pose_stamped.pose.orientation.z, box7_goal_pose_stamped.pose.orientation.w);
-  dualArmRobot.moveObject("box7", box7_goal_pose_stamped, 0.1);
+  // dualArmRobot.moveObject("box7", box7_goal_pose_stamped, 0.1);
   sleep(1);
 
 

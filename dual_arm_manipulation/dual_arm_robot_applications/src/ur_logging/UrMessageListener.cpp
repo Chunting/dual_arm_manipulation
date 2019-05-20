@@ -45,23 +45,15 @@ UR_Message_Listener::UR_Message_Listener(ros::NodeHandle &nh, std::string ur_nam
 }
 bool UR_Message_Listener::waitForValid(double seconds)
 {
-    ros::Duration(seconds).sleep();
-    start_time_ = last_joint_state_msg_.header.stamp.toSec();
-    if(!last_joint_state_msg_.header.stamp.is_zero()){
-        start_time_ = last_joint_state_msg_.header.stamp.toSec();
+    start_time_ = 0.0;
+    if(!last_cart_pose_cmd_msg_.header.stamp.is_zero()){
+        start_time_ = last_cart_pose_cmd_msg_.header.stamp.toSec();
+        pre_cmd_time_ = start_time_;
+        pre_state_time_ = start_time_;
+        // ROS_INFO("start_time_ = %f", start_time_ );
     } else {
-        ROS_ERROR("There is no joint state message coming...");
         return false;
     }
-    if(!last_wrench_msg_.header.stamp.is_zero()){
-        start_time_ = std::min(last_wrench_msg_.header.stamp.toSec(), start_time_);
-    } else {
-        ROS_ERROR("There is no wrench message coming...");
-        return false;
-    }
-    pre_cmd_time_ = start_time_;
-    pre_state_time_ = start_time_;
-    ROS_ERROR("start_time_ = %f", start_time_ );
     return true;
 }
 void UR_Message_Listener::start(int log_rate)
@@ -357,11 +349,10 @@ void UR_Message_Listener::write_logfile()
                     << delimiter_ << last_offset_pose_state_msg_.orientation.z
                     << delimiter_ << last_offset_pose_state_msg_.orientation.w << "\n";
         pre_state_time_ = last_cart_pose_state_msg_.header.stamp.toSec();
-    }
 
-    if( last_cart_pose_cmd_msg_.header.stamp.toSec() > pre_cmd_time_ 
-        && last_joint_traj_point_cmd_msg_.positions.size()>0){
-        file_robot_cmd_ << last_cart_pose_cmd_msg_.header.stamp.toSec() - start_time_ 
+        if( last_cart_pose_cmd_msg_.header.stamp.toSec() > pre_cmd_time_ 
+            && last_joint_traj_point_cmd_msg_.positions.size()>0){
+            file_robot_cmd_ << last_cart_pose_cmd_msg_.header.stamp.toSec() - start_time_ 
                     << delimiter_ << last_joint_traj_point_cmd_msg_.time_from_start
                     << delimiter_ << last_cart_pose_cmd_msg_.pose.position.x
                     << delimiter_ << last_cart_pose_cmd_msg_.pose.position.y
@@ -388,9 +379,10 @@ void UR_Message_Listener::write_logfile()
                     << delimiter_ << last_joint_traj_point_cmd_msg_.velocities[3]
                     << delimiter_ << last_joint_traj_point_cmd_msg_.velocities[4]
                     << delimiter_ << last_joint_traj_point_cmd_msg_.velocities[5] <<"\n";
-        pre_cmd_time_ = last_cart_pose_cmd_msg_.header.stamp.toSec();
-    } else{
-        file_robot_cmd_ << last_cart_pose_state_msg_.header.stamp.toSec() - start_time_
+            pre_cmd_time_ = last_cart_pose_cmd_msg_.header.stamp.toSec();
+        } else {
+            file_robot_cmd_ << last_cart_pose_state_msg_.header.stamp.toSec() - start_time_
+                    << delimiter_ << 0.0
                     << delimiter_ << last_cart_pose_state_msg_.pose.position.x
                     << delimiter_ << last_cart_pose_state_msg_.pose.position.y
                     << delimiter_ << last_cart_pose_state_msg_.pose.position.z
@@ -417,6 +409,9 @@ void UR_Message_Listener::write_logfile()
                     << delimiter_ << last_joint_state_msg_.velocity[4]
                     << delimiter_ << last_joint_state_msg_.velocity[5] <<"\n"; 
     }
+    }
+
+
 
 
     

@@ -132,13 +132,13 @@ class DualArmRobot
     KDL::Frame getCurrentOffset();
 
     // executes a pick: Moves both arms to the object, grasps it, moves up
-    bool pickBox(std::string object_id, geometry_msgs::Vector3Stamped lift_direction);
+    bool pickBox(std::string object_id, geometry_msgs::Vector3Stamped &lift_direction);
 
     // pace Methods
-    bool placeBox(std::string object_id, geometry_msgs::PoseStamped left_place_pose, geometry_msgs::Vector3 close_direction);
+    bool placeBox(std::string object_id, geometry_msgs::Vector3Stamped &place_direction);
     bool pushPlaceBox(std::string object_id, geometry_msgs::PoseStamped box_pose, geometry_msgs::Vector3 direction);
-    bool moveObject(std::string object_id, geometry_msgs::PoseStamped left_pose, double scale = 0.2);
-    bool planMoveObject(std::string object_id, geometry_msgs::PoseStamped left_pose, double scale = 0.2); // Only plan an visualize without executing. For use in validation.
+    bool moveObject(std::string object_id, const std::vector< geometry_msgs::Pose > &left_waypoints, double scale=0.3);
+    bool planMoveObject(std::string object_id, const std::vector< geometry_msgs::Pose > &left_waypoints, double scale=0.3); // Only plan an visualize without executing. For use in validation.
 
     // enable/disable collision check between robot arms
     void allowedArmCollision(bool enable, std::string left_attachedObject);

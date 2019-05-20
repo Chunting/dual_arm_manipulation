@@ -113,13 +113,13 @@
 	<link name="table">
 		<visual>
 			<geometry>
-				<box size="1.2 0.5 0.90" />
+				<box size="1.2 0.8 0.90" />
 			</geometry>
 			<material name="orange_transparent"/>
 		</visual>
 		<collision>
 			<geometry>
-				<box size="1.2 0.5 0.90" />
+				<box size="1.2 0.8 0.90" />
 			</geometry>
 			<material name="blue_transparent"/>
 		</collision>
