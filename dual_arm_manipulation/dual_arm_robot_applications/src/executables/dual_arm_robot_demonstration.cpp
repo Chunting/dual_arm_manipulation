@@ -23,6 +23,9 @@
 #include "dual_arm_demonstrator_iml/DualArmRobot.h"
 #include "dual_arm_demonstrator_iml/SceneManager.h"
 
+//UrLogger
+#include "ur_logging/UrLogger.h"
+
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "dual_arm_robot_demonstration");
@@ -56,6 +59,12 @@ int main(int argc, char **argv)
     double res_force = sqrt(left_wrench_sub.last_wrench_msg_.wrench.force.x * left_wrench_sub.last_wrench_msg_.wrench.force.x 
                             + left_wrench_sub.last_wrench_msg_.wrench.force.y * left_wrench_sub.last_wrench_msg_.wrench.force.y 
                             + left_wrench_sub.last_wrench_msg_.wrench.force.z * left_wrench_sub.last_wrench_msg_.wrench.force.z);
+                        
+    std::vector<std::string> ur_namespaces;
+    ur_namespaces.push_back("left");
+    ur_namespaces.push_back("right");
+    UR_Logger ur_logger(nh, ur_namespaces);
+    ur_logger.start(100);
 
     while (res_force < 20)
     {
@@ -202,7 +211,7 @@ int main(int argc, char **argv)
         ROS_ERROR("Demonstration aborted to avoid further problems");
         return 0;
     }
-
+    ur_logger.stop();
     dualArmRobot.moveHome();
     after_place_7 = ros::Time::now();
     manipulation_7 = after_place_7 - before_pick_7;

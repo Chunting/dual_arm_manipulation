@@ -10,63 +10,37 @@ UR_Logger::UR_Logger(ros::NodeHandle &nh, std::vector<std::string> &ur_namespace
     logfolder_name_ = generate_logfolder();
     for (int i = 0; i < ur_namespaces.size(); i++)
     {
-        ur_listeners_.push_back(new UR_Message_Listener(nh_, ur_namespaces[i], logfolder_name_));
+        ur_listeners_.push_back(std::make_shared<UR_Message_Listener> (nh_,  ur_namespaces[i], logfolder_name_));
     }
 
     delimiter_ = ',';
-
     ROS_INFO("Initialising UR Logger"); //it needs to be waited until msgs can be received
     sleep(1);
 }
 
 UR_Logger::~UR_Logger()
 {
-    logfile_.close(); // close file when shutdown
-    for (int i = 0; i < ur_listeners_.size(); i++)
-    {
-        delete ur_listeners_[i];
-    }
+    ur_listeners_.clear();
 }
 
 void UR_Logger::start(int log_rate)
 {
-    // for (int i = 0; i < ur_listeners_.size(); i++)
-    // {
-    //     ur_listeners_[i]->start();
-    // }
-    if (logfile_name_ == "" || logfile_name_command_ == "")
-    { //automatically generate a name if no name specified
+    for (int i = 0; i < ur_listeners_.size(); i++)
+    {
+        ur_listeners_[i]->start(log_rate);
+    }
+    if (ft_sensor_logfile_name_ == "" || robot_cart_pose_logfile_name_ == "")
+    {
         generate_logfile_name();
     }
 
-    // write headline
-    logfile_.open(logfile_name_.c_str(), std::ofstream::out | std::ofstream::trunc); //generate new file from beginning
-    if (logfile_.is_open())
-    {
-        for (int i = 0; i < ur_listeners_.size(); i++)
-        {
-            logfile_ << headline(*ur_listeners_[i]);
-            if (i < (ur_listeners_.size() - 1))
-            {
-                logfile_ << delimiter_;
-            }
-        }
-        logfile_ << std::endl;
-        ROS_INFO("Writing log at %iHz to %s. Press Ctrl-C to stop.", log_rate, logfile_name_.c_str());
-    }else{
-        ROS_ERROR("UrLogger failed! log file %s", logfile_name_.c_str());
+    if(!create_ft_sensor_logfile()){
+        return;
+    }
+    if(!create_robot_cart_pose_logfile()){
+        return;
     }
 
-    logfile_command_.open(logfile_name_command_.c_str(), std::ofstream::out | std::ofstream::trunc); //generate new file from beginning
-    if (logfile_command_.is_open())
-    {
-        for (int i = 0; i < ur_listeners_.size(); i++)
-        {
-            logfile_command_ << headline_command(*ur_listeners_[i]);
-        }
-        logfile_command_ << std::endl;
-        ROS_INFO("Writing log at %iHz to %s. Press Ctrl-C to stop.", log_rate, logfile_name_command_.c_str());
-    }
     stopwatch_.restart();
     double log_duration;
     log_duration = 1.0 / log_rate;
@@ -76,14 +50,219 @@ void UR_Logger::stop()
 {
     ROS_INFO("Stopped logging");
     timer_.stop();
-    logfile_.close();
-    logfile_command_.close();
+    ft_sensor_logfile_stream_.close();
+    robot_cart_pose_logfile_stream_.close();
 }
 
 void UR_Logger::generate_logfile_name()
-{ //automatically generate a name
-    logfile_name_ = logfolder_name_ + "ur_log.csv";
-    logfile_name_command_ = logfolder_name_ + "ur_command.csv";
+{ 
+    ft_sensor_logfile_name_ = logfolder_name_ + "ft_sensor_log.csv";
+    robot_cart_pose_logfile_name_ = logfolder_name_ + "robot_cart_pose_log.csv";
+}
+std::string UR_Logger::ft_sensor_headline(UR_Message_Listener &ur_listener)
+{
+    std::stringstream ss;
+    ss << ur_listener.ur_namespace_ + "_Time" 
+       << delimiter_ << ur_listener.ur_namespace_ + "_Fx"
+       << delimiter_ << ur_listener.ur_namespace_ + "_Fy"
+       << delimiter_ << ur_listener.ur_namespace_ + "_Fz"
+       << delimiter_ << ur_listener.ur_namespace_ + "_Tx"
+       << delimiter_ << ur_listener.ur_namespace_ + "_Ty"
+       << delimiter_ << ur_listener.ur_namespace_ + "_Tz"
+       << delimiter_ << ur_listener.ur_namespace_ + "_Fs";
+    return ss.str();
+}
+std::string UR_Logger::ft_sensor_headline()
+{
+    std::stringstream ss;
+    for (int i = 0; i < ur_listeners_.size(); i++)
+    {
+        ss << ft_sensor_headline(*ur_listeners_[i]) << delimiter_;
+    }
+    ss  <<"Relative_Fx" << delimiter_ 
+        <<"Relative_Fy" << delimiter_ 
+        <<"Relative_Fz" << delimiter_ 
+        <<"Relative_Tx" << delimiter_ 
+        <<"Relative_Ty" << delimiter_ 
+        <<"Relative_Tz" << std::endl;
+    return ss.str();
+}
+
+bool UR_Logger::create_ft_sensor_logfile()
+{
+    if(ft_sensor_logfile_name_.empty()){
+        ROS_ERROR("Failed to create robotiq ft sensor logfile!");
+        return false;
+    }
+    ft_sensor_logfile_stream_.open(ft_sensor_logfile_name_.c_str(), std::ofstream::out | std::ofstream::trunc); //generate new file from beginning
+    if (ft_sensor_logfile_stream_.is_open())
+    {
+        ft_sensor_logfile_stream_ << ft_sensor_headline();
+    }else{
+        ROS_ERROR("UrLogger failed! log file %s", ft_sensor_logfile_name_.c_str());
+        return false;
+    }
+    return true;
+
+}
+bool UR_Logger::create_robot_cart_pose_logfile()
+{
+    if(robot_cart_pose_logfile_name_.empty()){
+        ROS_ERROR("Failed to create robot cart pose logfile!");
+        return false;
+    }
+    robot_cart_pose_logfile_stream_.open(robot_cart_pose_logfile_name_.c_str(), std::ofstream::out | std::ofstream::trunc); //generate new file from beginning
+    if (robot_cart_pose_logfile_stream_.is_open())
+    {
+        robot_cart_pose_logfile_stream_ << robot_cart_pose_headline();
+    }else{
+        ROS_ERROR("UrLogger failed! log file %s", ft_sensor_logfile_name_.c_str());
+        return false;
+    }
+    return true;
+
+}
+std::string UR_Logger::robot_cart_pose_headline(UR_Message_Listener &ur_listener)
+{
+    std::stringstream ss;
+    ss << ur_listener.ur_namespace_ + "_state_time"
+        << delimiter_ << ur_listener.ur_namespace_ + "_state_x" 
+        << delimiter_ << ur_listener.ur_namespace_ + "_state_y"
+        << delimiter_ << ur_listener.ur_namespace_ + "_state_z" 
+        << delimiter_ << ur_listener.ur_namespace_ + "_state_qx"
+        << delimiter_ << ur_listener.ur_namespace_ + "_state_qy" 
+        << delimiter_ << ur_listener.ur_namespace_ + "_state_qz"
+        << delimiter_ << ur_listener.ur_namespace_ + "_state_qw"
+        << delimiter_ << ur_listener.ur_namespace_ + "_cmd_time"
+        << delimiter_ << ur_listener.ur_namespace_ + "_time_from_start"
+        << delimiter_ << ur_listener.ur_namespace_ + "_cmd_x" 
+        << delimiter_ << ur_listener.ur_namespace_ + "_cmd_y"
+        << delimiter_ << ur_listener.ur_namespace_ + "_cmd_z" 
+        << delimiter_ << ur_listener.ur_namespace_ + "_cmd_qx"
+        << delimiter_ << ur_listener.ur_namespace_ + "_cmd_qy" 
+        << delimiter_ << ur_listener.ur_namespace_ + "_cmd_qz"
+        << delimiter_ << ur_listener.ur_namespace_ + "_cmd_qw";
+    return ss.str();
+}
+//@TODO by Chunting, Add the absolute error and relative error
+std::string UR_Logger::robot_cart_pose_headline()
+{
+    std::stringstream ss;
+    for (int i = 0; i < ur_listeners_.size(); i++)
+    {
+        ss << robot_cart_pose_headline(*ur_listeners_[i]) << delimiter_;
+    }
+    ss << "offset_x" << delimiter_ 
+       << "offset_y" << delimiter_ 
+       << "offset_z" << delimiter_ 
+       << "offset_qx" << delimiter_ 
+       << "offset_qy" << delimiter_ 
+       << "offset_qz" << delimiter_ 
+       << "offset_qw" << std::endl;
+    return ss.str();
+}
+
+
+// @TODO by Chunting, transform force data into world coordinate system
+std::string UR_Logger::ft_sensor_dataline(UR_Message_Listener &ur_listener)
+{
+    std::ostringstream converter; // stream used to convert numbers to string
+    converter << ur_listener.last_wrench_msg_.header.stamp.toSec()-ur_listener.start_time_        
+              << delimiter_ << ur_listener.last_wrench_msg_.wrench.force.x
+              << delimiter_ << ur_listener.last_wrench_msg_.wrench.force.y
+              << delimiter_ << ur_listener.last_wrench_msg_.wrench.force.z
+              << delimiter_ << ur_listener.last_wrench_msg_.wrench.torque.x
+              << delimiter_ << ur_listener.last_wrench_msg_.wrench.torque.y
+              << delimiter_ << ur_listener.last_wrench_msg_.wrench.torque.z
+              << delimiter_<< sqrt(ur_listener.last_wrench_msg_.wrench.force.x * ur_listener.last_wrench_msg_.wrench.force.x 
+                                    + ur_listener.last_wrench_msg_.wrench.force.y * ur_listener.last_wrench_msg_.wrench.force.y 
+                                    + ur_listener.last_wrench_msg_.wrench.force.z * ur_listener.last_wrench_msg_.wrench.force.z);    
+    return converter.str();
+}
+std::string UR_Logger::ft_sensor_dataline()
+{
+    std::ostringstream converter; // stream used to convert numbers to string
+    for (int i = 0; i < ur_listeners_.size(); i++)
+    {
+       converter << ft_sensor_dataline(*ur_listeners_[i]) << delimiter_;
+    }
+    converter << ur_listeners_[0]->last_wrench_msg_.wrench.force.x - ur_listeners_[1]->last_wrench_msg_.wrench.force.x
+              << delimiter_ << ur_listeners_[0]->last_wrench_msg_.wrench.force.y - ur_listeners_[1]->last_wrench_msg_.wrench.force.y
+              << delimiter_ << ur_listeners_[0]->last_wrench_msg_.wrench.force.z - ur_listeners_[1]->last_wrench_msg_.wrench.force.z
+              << delimiter_ << ur_listeners_[0]->last_wrench_msg_.wrench.torque.x - ur_listeners_[1]->last_wrench_msg_.wrench.torque.x
+              << delimiter_ << ur_listeners_[0]->last_wrench_msg_.wrench.torque.y - ur_listeners_[1]->last_wrench_msg_.wrench.torque.y
+              << delimiter_ << ur_listeners_[0]->last_wrench_msg_.wrench.torque.z - ur_listeners_[1]->last_wrench_msg_.wrench.torque.z
+              << std::endl;
+    
+    return converter.str();
+}
+// @TODO by Chunting, transform force data into world coordinate system
+std::string UR_Logger::robot_cart_pose_dataline(UR_Message_Listener &ur_listener)
+{
+    std::ostringstream converter; // stream used to convert numbers to string
+    converter<< ur_listener.last_cart_pose_state_msg_.header.stamp.toSec() - ur_listener.start_time_
+                    << delimiter_ << ur_listener.last_cart_pose_state_msg_.pose.position.x
+                    << delimiter_ << ur_listener.last_cart_pose_state_msg_.pose.position.y
+                    << delimiter_ << ur_listener.last_cart_pose_state_msg_.pose.position.z
+                    << delimiter_ << ur_listener.last_cart_pose_state_msg_.pose.orientation.x
+                    << delimiter_ << ur_listener.last_cart_pose_state_msg_.pose.orientation.y
+                    << delimiter_ << ur_listener.last_cart_pose_state_msg_.pose.orientation.z
+                    << delimiter_ << ur_listener.last_cart_pose_state_msg_.pose.orientation.w;
+    if( ur_listener.last_cart_pose_cmd_msg_.header.stamp.toSec() > ur_listener.pre_cmd_time_ 
+            && ur_listener.last_joint_traj_point_cmd_msg_.positions.size()>0){
+        converter << ur_listener.last_cart_pose_cmd_msg_.header.stamp.toSec() - ur_listener.start_time_ 
+                    << delimiter_ << ur_listener.last_joint_traj_point_cmd_msg_.time_from_start
+                    << delimiter_ << ur_listener.last_cart_pose_cmd_msg_.pose.position.x
+                    << delimiter_ << ur_listener.last_cart_pose_cmd_msg_.pose.position.y
+                    << delimiter_ << ur_listener.last_cart_pose_cmd_msg_.pose.position.z
+                    << delimiter_ << ur_listener.last_cart_pose_cmd_msg_.pose.orientation.x
+                    << delimiter_ << ur_listener.last_cart_pose_cmd_msg_.pose.orientation.y
+                    << delimiter_ << ur_listener.last_cart_pose_cmd_msg_.pose.orientation.z
+                    << delimiter_ << ur_listener.last_cart_pose_cmd_msg_.pose.orientation.w;
+        ur_listener.pre_cmd_time_ = ur_listener.last_cart_pose_cmd_msg_.header.stamp.toSec();
+    }else{
+        converter << ur_listener.last_cart_pose_state_msg_.header.stamp.toSec() - ur_listener.start_time_
+                  << delimiter_ << 0.0
+                  << delimiter_ << ur_listener.last_cart_pose_state_msg_.pose.position.x
+                  << delimiter_ << ur_listener.last_cart_pose_state_msg_.pose.position.y
+                  << delimiter_ << ur_listener.last_cart_pose_state_msg_.pose.position.z
+                  << delimiter_ << ur_listener.last_cart_pose_state_msg_.pose.orientation.x
+                  << delimiter_ << ur_listener.last_cart_pose_state_msg_.pose.orientation.y
+                  << delimiter_ << ur_listener.last_cart_pose_state_msg_.pose.orientation.z
+                  << delimiter_ << ur_listener.last_cart_pose_state_msg_.pose.orientation.w;
+    }
+        
+
+
+    //for(int i = 0; i < ur_listeners_.size(); i++){
+    if (ur_listeners_[0]->newTrajectory)
+        robot_cart_pose_logfile_stream_ << data_line_command(*ur_listeners_[0]);
+    //}
+    return converter.str();
+}
+std::string UR_Logger::robot_cart_pose_dataline()
+{
+    std::ostringstream converter; // stream used to convert numbers to string
+    for (int i = 0; i < ur_listeners_.size(); i++)
+    {
+       converter << robot_cart_pose_dataline(*ur_listeners_[i]) << delimiter_;
+    }
+    converter << ur_listeners_[0]->last_offset_pose_state_msg_.position.x
+              << delimiter_ << ur_listeners_[0]->last_offset_pose_state_msg_.position.y
+              << delimiter_ << ur_listeners_[0]->last_offset_pose_state_msg_.position.z
+              << delimiter_ << ur_listeners_[0]->last_offset_pose_state_msg_.orientation.x
+              << delimiter_ << ur_listeners_[0]->last_offset_pose_state_msg_.orientation.y
+              << delimiter_ << ur_listeners_[0]->last_offset_pose_state_msg_.orientation.z
+              << delimiter_ << ur_listeners_[0]->last_offset_pose_state_msg_.orientation.w;
+    converter << std::endl;
+    
+    return converter.str();
+}
+void UR_Logger::logCallback(const ros::TimerEvent &)
+{
+
+    ft_sensor_logfile_stream_ << ft_sensor_dataline();
+    robot_cart_pose_logfile_stream_ << robot_cart_pose_dataline();
 }
 std::string UR_Logger::headline(UR_Message_Listener &ur_listener)
 {
@@ -137,7 +316,6 @@ std::string UR_Logger::headline(UR_Message_Listener &ur_listener)
 
     return ss.str();
 }
-
 std::string UR_Logger::data_line(UR_Message_Listener &ur_listener)
 {
 
@@ -334,24 +512,24 @@ std::string UR_Logger::generate_logfolder(){
   return recPath_;
 }
 
-void UR_Logger::logCallback(const ros::TimerEvent &)
-{
-    for (int i = 0; i < ur_listeners_.size(); i++)
-    {
-        ur_listeners_[i]->write_logfile();
-        logfile_ << data_line(*ur_listeners_[i]);
-        if (i < (ur_listeners_.size() - 1))
-        {
-            logfile_ << delimiter_;
-        }
-    }
-    logfile_ << std::endl;
+// void UR_Logger::logCallback(const ros::TimerEvent &)
+// {
+//     for (int i = 0; i < ur_listeners_.size(); i++)
+//     {
+//         ur_listeners_[i]->write_logfile();
+//         ft_sensor_logfile_stream_ << data_line(*ur_listeners_[i]);
+//         if (i < (ur_listeners_.size() - 1))
+//         {
+//             ft_sensor_logfile_stream_ << delimiter_;
+//         }
+//     }
+//     ft_sensor_logfile_stream_ << std::endl;
 
-    //for(int i = 0; i < ur_listeners_.size(); i++){
-    if (ur_listeners_[0]->newTrajectory)
-        logfile_command_ << data_line_command(*ur_listeners_[0]);
-    //}
-}
+//     //for(int i = 0; i < ur_listeners_.size(); i++){
+//     if (ur_listeners_[0]->newTrajectory)
+//         robot_cart_pose_logfile_stream_ << data_line_command(*ur_listeners_[0]);
+//     //}
+// }
 
 
 

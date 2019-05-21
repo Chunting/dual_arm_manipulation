@@ -257,7 +257,10 @@ add_executable(dual_arm_robot_demonstration
               src/dual_arm_toolbox/Transform.cpp 
               src/dual_arm_demonstrator_iml/DualArmRobot.cpp 
               src/dual_arm_demonstrator_iml/SceneManager.cpp
-              src/dual_arm_demonstrator_iml/FTSensorSubscriber.cpp)
+              src/dual_arm_demonstrator_iml/FTSensorSubscriber.cpp
+              src/ur_logging/UrLogger.cpp 
+              src/ur_logging/Stopwatch.cpp 
+              src/ur_logging/UrMessageListener.cpp)
 target_link_libraries(dual_arm_robot_demonstration ${catkin_LIBRARIES})
 
 add_executable(dual_arm_robot_cartesian_velocity 

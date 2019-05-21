@@ -50,7 +50,6 @@ bool UR_Message_Listener::waitForValid(double seconds)
         start_time_ = last_cart_pose_cmd_msg_.header.stamp.toSec();
         pre_cmd_time_ = start_time_;
         pre_state_time_ = start_time_;
-        // ROS_INFO("start_time_ = %f", start_time_ );
     } else {
         return false;
     }
@@ -64,7 +63,6 @@ void UR_Message_Listener::start(int log_rate)
     generate_logfile();
     double log_duration = 1.0 / log_rate;
     timer_ = nh_.createTimer(ros::Duration().fromSec(log_duration), &UR_Message_Listener::logCallback, this);
-    ROS_INFO("Start to subscrib topic %s", sub_cart_pose_cmd_.getTopic().c_str());
 }
 
 void UR_Message_Listener::stop()

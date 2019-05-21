@@ -90,6 +90,14 @@ public:
   void start(int log_rate);
   void stop();
 
+  char delimiter_;
+  std::string folder_name_;
+  Stopwatch stopwatch_;
+  double start_time_ = 0.0;
+  double pre_cmd_time_ =0.0;
+  double pre_state_time_ =0.0;
+  ros::Timer timer_;
+
 private:
   std::string topic_cart_state_;
   std::string topic_cart_pose_state_;
@@ -114,13 +122,7 @@ private:
   // std::ofstream file_joint_state_;
   // std::ofstream file_joint_traj_cmd_;
 
-  char delimiter_;
-  std::string folder_name_;
-  Stopwatch stopwatch_;
-  double start_time_ = 0.0;
-  double pre_cmd_time_ =0.0;
-  double pre_state_time_ =0.0;
-  ros::Timer timer_;
+
 
 
   void cart_state_callback(const cartesian_state_msgs::PoseTwist::ConstPtr &msg);
