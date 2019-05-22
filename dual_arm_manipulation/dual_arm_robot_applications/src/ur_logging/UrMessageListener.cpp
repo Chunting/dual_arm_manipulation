@@ -3,18 +3,18 @@
 UR_Message_Listener::UR_Message_Listener(ros::NodeHandle &nh, std::string ur_namespace, std::string folder_name)
     : nh_(nh), ur_namespace_(ur_namespace), folder_name_(folder_name)
 {
-    stopwatch_.restart();
-    std::string prefix = nh_.getNamespace(); 
+    // stopwatch_.restart();
+    // std::string prefix = nh_.getNamespace(); 
     /// robot states
-    topic_cart_pose_state_ = "tool_pose";
-    topic_cart_vel_state_ = "tool_velocity";
-    topic_external_wrench = "robotiq_ft_wrench";
-    topic_joint_state_ = "ur_driver/joint_states";  // From ur_modern_driver
+    topic_cart_pose_state_ = ur_namespace_ + "/tool_pose";
+    topic_cart_vel_state_ = ur_namespace_ + "/tool_velocity";
+    topic_external_wrench = ur_namespace_ + "/robotiq_ft_wrench";
+    topic_joint_state_ = ur_namespace_ + "/ur_driver/joint_states";  // From ur_modern_driver
     topic_offset_pose_state_ = "/offset_pose_state"; // Not yet recorded
     /// robot command
-    topic_cart_pose_cmd_ = "cart_pose_cmd";
-    topic_joint_traj_cmd_ = "joint_traj_cmd";
-    topic_joint_traj_point_cmd_ = "joint_traj_point_cmd";
+    topic_cart_pose_cmd_ = ur_namespace_ + "/cart_pose_cmd";
+    topic_joint_traj_cmd_ = ur_namespace_ + "/joint_traj_cmd";
+    topic_joint_traj_point_cmd_ = ur_namespace_ + "/joint_traj_point_cmd";
     topic_robot_traj_cmd_ = "/robot_traj_cmd";
     // For ur5_cartesian_velocity_controller
     // topic_cart_state_ = "ur5_cartesian_velocity_controller/ee_state";
@@ -46,8 +46,8 @@ UR_Message_Listener::UR_Message_Listener(ros::NodeHandle &nh, std::string ur_nam
 bool UR_Message_Listener::waitForValid(double seconds)
 {
     start_time_ = 0.0;
-    if(!last_cart_pose_cmd_msg_.header.stamp.is_zero()){
-        start_time_ = last_cart_pose_cmd_msg_.header.stamp.toSec();
+    if(!last_cart_pose_state_msg_.header.stamp.is_zero()){
+        start_time_ = last_cart_pose_state_msg_.header.stamp.toSec();
         pre_cmd_time_ = start_time_;
         pre_state_time_ = start_time_;
     } else {
@@ -58,7 +58,7 @@ bool UR_Message_Listener::waitForValid(double seconds)
 void UR_Message_Listener::start(int log_rate)
 {
     while(!waitForValid()){
-        sleep(1);
+        usleep(100000); // 100 ms
     } 
     generate_logfile();
     double log_duration = 1.0 / log_rate;
@@ -128,6 +128,7 @@ void UR_Message_Listener::cart_vel_cmd_callback(const geometry_msgs::Twist::Cons
 void UR_Message_Listener::cart_pose_cmd_callback(const geometry_msgs::PoseStamped::ConstPtr &msg)
 {
     last_cart_pose_cmd_msg_ = *msg;
+    cmd_count++;
     // ROS_INFO("Subscribe %s, number of publishers %d, timestamp %f", 
     // sub_cart_pose_cmd_.getTopic().c_str(), sub_cart_pose_cmd_.getNumPublishers(), last_cart_pose_cmd_msg_.header.stamp.toSec());
 }
@@ -306,7 +307,8 @@ void UR_Message_Listener::write_logfile()
     //                       << delimiter_ << last_cart_state_msg_.twist.angular.x
     //                       << delimiter_ << last_cart_state_msg_.twist.angular.y
     //                       << delimiter_ << last_cart_state_msg_.twist.angular.z << "\n";
-    if( last_cart_pose_state_msg_.header.stamp.toSec() > pre_state_time_){ 
+    if( last_cart_pose_state_msg_.header.stamp.toSec() > pre_state_time_ &&
+        last_cart_pose_cmd_msg_.header.stamp.toSec() > start_time_){ 
         file_robot_state_ << last_cart_pose_state_msg_.header.stamp.toSec() - start_time_
                     << delimiter_ << last_cart_pose_state_msg_.pose.position.x
                     << delimiter_ << last_cart_pose_state_msg_.pose.position.y
@@ -346,10 +348,8 @@ void UR_Message_Listener::write_logfile()
                     << delimiter_ << last_offset_pose_state_msg_.orientation.y
                     << delimiter_ << last_offset_pose_state_msg_.orientation.z
                     << delimiter_ << last_offset_pose_state_msg_.orientation.w << "\n";
-        pre_state_time_ = last_cart_pose_state_msg_.header.stamp.toSec();
+       
 
-        if( last_cart_pose_cmd_msg_.header.stamp.toSec() > pre_cmd_time_ 
-            && last_joint_traj_point_cmd_msg_.positions.size()>0){
             file_robot_cmd_ << last_cart_pose_cmd_msg_.header.stamp.toSec() - start_time_ 
                     << delimiter_ << last_joint_traj_point_cmd_msg_.time_from_start
                     << delimiter_ << last_cart_pose_cmd_msg_.pose.position.x
@@ -377,36 +377,7 @@ void UR_Message_Listener::write_logfile()
                     << delimiter_ << last_joint_traj_point_cmd_msg_.velocities[3]
                     << delimiter_ << last_joint_traj_point_cmd_msg_.velocities[4]
                     << delimiter_ << last_joint_traj_point_cmd_msg_.velocities[5] <<"\n";
-            pre_cmd_time_ = last_cart_pose_cmd_msg_.header.stamp.toSec();
-        } else {
-            file_robot_cmd_ << last_cart_pose_state_msg_.header.stamp.toSec() - start_time_
-                    << delimiter_ << 0.0
-                    << delimiter_ << last_cart_pose_state_msg_.pose.position.x
-                    << delimiter_ << last_cart_pose_state_msg_.pose.position.y
-                    << delimiter_ << last_cart_pose_state_msg_.pose.position.z
-                    << delimiter_ << last_cart_pose_state_msg_.pose.orientation.x
-                    << delimiter_ << last_cart_pose_state_msg_.pose.orientation.y
-                    << delimiter_ << last_cart_pose_state_msg_.pose.orientation.z
-                    << delimiter_ << last_cart_pose_state_msg_.pose.orientation.w
-                    // << delimiter_ << last_cart_vel_cmd_msg_.linear.x
-                    // << delimiter_ << last_cart_vel_cmd_msg_.linear.y
-                    // << delimiter_ << last_cart_vel_cmd_msg_.linear.z
-                    // << delimiter_ << last_cart_vel_cmd_msg_.angular.x
-                    // << delimiter_ << last_cart_vel_cmd_msg_.angular.y
-                    // << delimiter_ << last_cart_vel_cmd_msg_.angular.z
-                    << delimiter_ << last_joint_state_msg_.position[0]
-                    << delimiter_ << last_joint_state_msg_.position[1]
-                    << delimiter_ << last_joint_state_msg_.position[2]
-                    << delimiter_ << last_joint_state_msg_.position[3]
-                    << delimiter_ << last_joint_state_msg_.position[4]
-                    << delimiter_ << last_joint_state_msg_.position[5]
-                    << delimiter_ << last_joint_state_msg_.velocity[0]
-                    << delimiter_ << last_joint_state_msg_.velocity[1]
-                    << delimiter_ << last_joint_state_msg_.velocity[2]
-                    << delimiter_ << last_joint_state_msg_.velocity[3]
-                    << delimiter_ << last_joint_state_msg_.velocity[4]
-                    << delimiter_ << last_joint_state_msg_.velocity[5] <<"\n"; 
-    }
+        pre_state_time_ = last_cart_pose_state_msg_.header.stamp.toSec();
     }
 
 

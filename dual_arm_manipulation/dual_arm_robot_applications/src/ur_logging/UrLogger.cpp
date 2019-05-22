@@ -25,10 +25,6 @@ UR_Logger::~UR_Logger()
 
 void UR_Logger::start(int log_rate)
 {
-    for (int i = 0; i < ur_listeners_.size(); i++)
-    {
-        ur_listeners_[i]->start(log_rate);
-    }
     if (ft_sensor_logfile_name_ == "" || robot_cart_pose_logfile_name_ == "")
     {
         generate_logfile_name();
@@ -40,6 +36,10 @@ void UR_Logger::start(int log_rate)
     if(!create_robot_cart_pose_logfile()){
         return;
     }
+    for (int i = 0; i < ur_listeners_.size(); i++)
+    {
+        ur_listeners_[i]->start(log_rate);
+    }
 
     stopwatch_.restart();
     double log_duration;
@@ -49,6 +49,11 @@ void UR_Logger::start(int log_rate)
 void UR_Logger::stop()
 {
     ROS_INFO("Stopped logging");
+    for (int i = 0; i < ur_listeners_.size(); i++)
+    {
+        ROS_INFO("Get command %d and write down %d msg for %s", 
+            ur_listeners_[i]->cmd_count, ur_listeners_[i]->msg_count_, ur_listeners_[i]->ur_namespace_.c_str());
+    }
     timer_.stop();
     ft_sensor_logfile_stream_.close();
     robot_cart_pose_logfile_stream_.close();
@@ -200,69 +205,55 @@ std::string UR_Logger::ft_sensor_dataline()
 std::string UR_Logger::robot_cart_pose_dataline(UR_Message_Listener &ur_listener)
 {
     std::ostringstream converter; // stream used to convert numbers to string
-    converter<< ur_listener.last_cart_pose_state_msg_.header.stamp.toSec() - ur_listener.start_time_
-                    << delimiter_ << ur_listener.last_cart_pose_state_msg_.pose.position.x
-                    << delimiter_ << ur_listener.last_cart_pose_state_msg_.pose.position.y
-                    << delimiter_ << ur_listener.last_cart_pose_state_msg_.pose.position.z
-                    << delimiter_ << ur_listener.last_cart_pose_state_msg_.pose.orientation.x
-                    << delimiter_ << ur_listener.last_cart_pose_state_msg_.pose.orientation.y
-                    << delimiter_ << ur_listener.last_cart_pose_state_msg_.pose.orientation.z
-                    << delimiter_ << ur_listener.last_cart_pose_state_msg_.pose.orientation.w;
-    if( ur_listener.last_cart_pose_cmd_msg_.header.stamp.toSec() > ur_listener.pre_cmd_time_ 
-            && ur_listener.last_joint_traj_point_cmd_msg_.positions.size()>0){
-        converter << ur_listener.last_cart_pose_cmd_msg_.header.stamp.toSec() - ur_listener.start_time_ 
-                    << delimiter_ << ur_listener.last_joint_traj_point_cmd_msg_.time_from_start
-                    << delimiter_ << ur_listener.last_cart_pose_cmd_msg_.pose.position.x
-                    << delimiter_ << ur_listener.last_cart_pose_cmd_msg_.pose.position.y
-                    << delimiter_ << ur_listener.last_cart_pose_cmd_msg_.pose.position.z
-                    << delimiter_ << ur_listener.last_cart_pose_cmd_msg_.pose.orientation.x
-                    << delimiter_ << ur_listener.last_cart_pose_cmd_msg_.pose.orientation.y
-                    << delimiter_ << ur_listener.last_cart_pose_cmd_msg_.pose.orientation.z
-                    << delimiter_ << ur_listener.last_cart_pose_cmd_msg_.pose.orientation.w;
-        ur_listener.pre_cmd_time_ = ur_listener.last_cart_pose_cmd_msg_.header.stamp.toSec();
-    }else{
-        converter << ur_listener.last_cart_pose_state_msg_.header.stamp.toSec() - ur_listener.start_time_
-                  << delimiter_ << 0.0
-                  << delimiter_ << ur_listener.last_cart_pose_state_msg_.pose.position.x
-                  << delimiter_ << ur_listener.last_cart_pose_state_msg_.pose.position.y
-                  << delimiter_ << ur_listener.last_cart_pose_state_msg_.pose.position.z
-                  << delimiter_ << ur_listener.last_cart_pose_state_msg_.pose.orientation.x
-                  << delimiter_ << ur_listener.last_cart_pose_state_msg_.pose.orientation.y
-                  << delimiter_ << ur_listener.last_cart_pose_state_msg_.pose.orientation.z
-                  << delimiter_ << ur_listener.last_cart_pose_state_msg_.pose.orientation.w;
-    }
-        
-
-
-    //for(int i = 0; i < ur_listeners_.size(); i++){
-    if (ur_listeners_[0]->newTrajectory)
-        robot_cart_pose_logfile_stream_ << data_line_command(*ur_listeners_[0]);
+    // Only take record new messages
+    //if( ur_listener.last_cart_pose_state_msg_.header.stamp.toSec() > ur_listener.pre_state_time_){
+        converter<< ur_listener.last_cart_pose_state_msg_.header.stamp.toSec() - ur_listener.start_time_
+                        << delimiter_ << ur_listener.last_cart_pose_state_msg_.pose.position.x
+                        << delimiter_ << ur_listener.last_cart_pose_state_msg_.pose.position.y
+                        << delimiter_ << ur_listener.last_cart_pose_state_msg_.pose.position.z
+                        << delimiter_ << ur_listener.last_cart_pose_state_msg_.pose.orientation.x
+                        << delimiter_ << ur_listener.last_cart_pose_state_msg_.pose.orientation.y
+                        << delimiter_ << ur_listener.last_cart_pose_state_msg_.pose.orientation.z
+                        << delimiter_ << ur_listener.last_cart_pose_state_msg_.pose.orientation.w
+                        << delimiter_ << ur_listener.last_cart_pose_cmd_msg_.header.stamp.toSec() - ur_listener.start_time_ 
+                        << delimiter_ << ur_listener.last_joint_traj_point_cmd_msg_.time_from_start
+                        << delimiter_ << ur_listener.last_cart_pose_cmd_msg_.pose.position.x
+                        << delimiter_ << ur_listener.last_cart_pose_cmd_msg_.pose.position.y
+                        << delimiter_ << ur_listener.last_cart_pose_cmd_msg_.pose.position.z
+                        << delimiter_ << ur_listener.last_cart_pose_cmd_msg_.pose.orientation.x
+                        << delimiter_ << ur_listener.last_cart_pose_cmd_msg_.pose.orientation.y
+                        << delimiter_ << ur_listener.last_cart_pose_cmd_msg_.pose.orientation.z
+                        << delimiter_ << ur_listener.last_cart_pose_cmd_msg_.pose.orientation.w;
+        ur_listener.msg_count_++;
     //}
     return converter.str();
 }
 std::string UR_Logger::robot_cart_pose_dataline()
 {
     std::ostringstream converter; // stream used to convert numbers to string
-    for (int i = 0; i < ur_listeners_.size(); i++)
-    {
-       converter << robot_cart_pose_dataline(*ur_listeners_[i]) << delimiter_;
+    if(ur_listeners_[0]->last_cart_pose_state_msg_.header.stamp.toSec() > ur_listeners_[0]->pre_state_time_){
+        for (int i = 0; i < ur_listeners_.size(); i++)
+        {
+            converter << robot_cart_pose_dataline(*ur_listeners_[i]) << delimiter_;
+        }
+        
+        converter << ur_listeners_[0]->last_offset_pose_state_msg_.position.x
+                << delimiter_ << ur_listeners_[0]->last_offset_pose_state_msg_.position.y
+                << delimiter_ << ur_listeners_[0]->last_offset_pose_state_msg_.position.z
+                << delimiter_ << ur_listeners_[0]->last_offset_pose_state_msg_.orientation.x
+                << delimiter_ << ur_listeners_[0]->last_offset_pose_state_msg_.orientation.y
+                << delimiter_ << ur_listeners_[0]->last_offset_pose_state_msg_.orientation.z
+                << delimiter_ << ur_listeners_[0]->last_offset_pose_state_msg_.orientation.w;
+        converter << std::endl;
     }
-    converter << ur_listeners_[0]->last_offset_pose_state_msg_.position.x
-              << delimiter_ << ur_listeners_[0]->last_offset_pose_state_msg_.position.y
-              << delimiter_ << ur_listeners_[0]->last_offset_pose_state_msg_.position.z
-              << delimiter_ << ur_listeners_[0]->last_offset_pose_state_msg_.orientation.x
-              << delimiter_ << ur_listeners_[0]->last_offset_pose_state_msg_.orientation.y
-              << delimiter_ << ur_listeners_[0]->last_offset_pose_state_msg_.orientation.z
-              << delimiter_ << ur_listeners_[0]->last_offset_pose_state_msg_.orientation.w;
-    converter << std::endl;
     
     return converter.str();
 }
 void UR_Logger::logCallback(const ros::TimerEvent &)
 {
-
-    ft_sensor_logfile_stream_ << ft_sensor_dataline();
+    /// Only take 0.0002 s
     robot_cart_pose_logfile_stream_ << robot_cart_pose_dataline();
+    ft_sensor_logfile_stream_ << ft_sensor_dataline();
 }
 std::string UR_Logger::headline(UR_Message_Listener &ur_listener)
 {

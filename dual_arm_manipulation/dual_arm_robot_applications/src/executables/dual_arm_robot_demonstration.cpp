@@ -43,15 +43,24 @@ int main(int argc, char **argv)
     // Scene Setup
     dual_arm_demonstrator_iml::SceneManager sceneManager(nh);
     sceneManager.setupScene();
+    // Setup ft sensor
+    FTSensorSubscriber left_wrench_sub(nh, "left");
+    FTSensorSubscriber right_wrench_sub(nh, "right");
+    // Setup data logger
+    std::vector<std::string> ur_namespaces;
+    ur_namespaces.push_back("left");
+    ur_namespaces.push_back("right");
+    UR_Logger ur_logger(nh, ur_namespaces);
+    ur_logger.start(100);
+
     ros::Time before_pick_7;
     ros::Duration manipulation_7;
     ros::Time after_place_7;
-
     before_pick_7 = ros::Time::now();
-    FTSensorSubscriber left_wrench_sub(nh, "left");
-    FTSensorSubscriber right_wrench_sub(nh, "right");
+
     ROS_INFO("========== MOVE HOME POSITION =================");
     dualArmRobot.moveHome();
+    
     ROS_INFO("========== MOVE GRASP POSITION =================");
     dualArmRobot.moveGraspPosition();
     ROS_INFO("========== MOVE CLOSER =================");
@@ -60,12 +69,6 @@ int main(int argc, char **argv)
                             + left_wrench_sub.last_wrench_msg_.wrench.force.y * left_wrench_sub.last_wrench_msg_.wrench.force.y 
                             + left_wrench_sub.last_wrench_msg_.wrench.force.z * left_wrench_sub.last_wrench_msg_.wrench.force.z);
                         
-    std::vector<std::string> ur_namespaces;
-    ur_namespaces.push_back("left");
-    ur_namespaces.push_back("right");
-    UR_Logger ur_logger(nh, ur_namespaces);
-    ur_logger.start(100);
-
     while (res_force < 20)
     {
         dualArmRobot.graspMove(0.001, false, true, true, 0.1); // true : left arm; false: right arm
@@ -115,15 +118,8 @@ int main(int argc, char **argv)
     double radius = std::abs((left_waypoint_pose.position.y - right_waypoint_pose.position.y)/2);
     double d_angle = 10*3.14159/180; // 3 degree
     double angle = 0;
-    // ROS_INFO("y_center = %f,  left_y = %f,  right_y = %f", y_center, left_waypoint_pose.position.y, right_waypoint_pose.position.y);
-    // ROS_INFO("z_center = %f,  left_z = %f,  right_z = %f", z_center, left_waypoint_pose.position.z, right_waypoint_pose.position.z);
-    // ROS_INFO("x_center = %f,  left_x = %f,  right_x = %f", x_center, left_waypoint_pose.position.x, right_waypoint_pose.position.x);
-    // ROS_INFO("radius = %f", radius);
     left_waypoints_pose_vec.push_back(left_waypoint_pose);
     
-    
-    // box7_goal_pose_stamped.header = dualArmRobot.left_current_pose_.header;
-    // box7_goal_pose_stamped.pose = dualArmRobot.left_current_pose_.pose;
     KDL::Frame left_frame_eef; // endeffector frame
     dual_arm_toolbox::Transform::transformPoseToKDL(left_waypoint_pose, left_frame_eef);
     KDL::Rotation left_rot = left_frame_eef.M;
@@ -132,15 +128,6 @@ int main(int argc, char **argv)
     int num_points = 5;
     double step_size = angle/num_points;
     left_rot.GetEulerZYX(yaw, pitch, roll);
-    // ROS_INFO("1............Print Orientation: roll=%f,  pitch=%f,  yaw=%f\n", roll, pitch, yaw);
-
-    // roll += angle;
-    // left_rot = KDL::Rotation::EulerZYX(yaw, pitch, roll);
-    // left_rot.GetEulerZYX(yaw, pitch, roll);
-    // left_rot.GetQuaternion(box7_goal_pose_stamped.pose.orientation.x,
-    //                        box7_goal_pose_stamped.pose.orientation.y,
-    //                        box7_goal_pose_stamped.pose.orientation.z,
-    //                        box7_goal_pose_stamped.pose.orientation.w);
     
     for(int i=0; i<num_points; ++i){
         angle += d_angle;
@@ -155,19 +142,11 @@ int main(int argc, char **argv)
                            left_waypoint_pose.orientation.z,
                            left_waypoint_pose.orientation.w);
         left_waypoints_pose_vec.push_back(left_waypoint_pose);
-        // ROS_INFO("x=%f, y=%f, z=%f, roll=%f, angle=%f, d_angle=%f", 
-        //     left_waypoint_pose.position.x, left_waypoint_pose.position.y, left_waypoint_pose.position.z,
-        //     roll, angle, d_angle);
 
     }
     dualArmRobot.moveObject("box7", left_waypoints_pose_vec, 0.25);
     left_waypoints_pose_vec.clear();
     left_waypoints_pose_vec.push_back(left_waypoint_pose);
-
-   
-    // ROS_INFO("2.....x=%f, y=%f, z=%f, roll=%f, angle=%f, d_angle=%f", 
-    //         left_waypoint_pose.position.x, left_waypoint_pose.position.y, left_waypoint_pose.position.z,
-    //         roll, angle, d_angle);
 
     for(int i=0; i<num_points; ++i){
         angle -= d_angle;
@@ -182,21 +161,7 @@ int main(int argc, char **argv)
                            left_waypoint_pose.orientation.z,
                            left_waypoint_pose.orientation.w);
         left_waypoints_pose_vec.push_back(left_waypoint_pose);
-        // ROS_INFO("x=%f, y=%f, z=%f, roll=%f, angle=%f, d_angle=%f", 
-        //     left_waypoint_pose.position.x, left_waypoint_pose.position.y, left_waypoint_pose.position.z,
-        //     roll, angle, d_angle);
     }
-    // ROS_INFO("3.....x=%f, y=%f, z=%f, roll=%f, angle=%f, d_angle=%f", 
-    //         left_waypoint_pose.position.x, left_waypoint_pose.position.y, left_waypoint_pose.position.z,
-    //         roll, angle, d_angle);
-
-    // roll -= angle;
-    // left_rot = KDL::Rotation::RPY(roll, pitch, yaw);
-    // left_rot.GetEulerZYX(yaw, pitch, roll);
-    // left_rot.GetQuaternion(box7_goal_pose_stamped.pose.orientation.x,
-    //                        box7_goal_pose_stamped.pose.orientation.y,
-    //                        box7_goal_pose_stamped.pose.orientation.z,
-    //                        box7_goal_pose_stamped.pose.orientation.w);
     dualArmRobot.moveObject("box7", left_waypoints_pose_vec, 0.25);
     left_waypoints_pose_vec.clear();
 
@@ -211,12 +176,13 @@ int main(int argc, char **argv)
         ROS_ERROR("Demonstration aborted to avoid further problems");
         return 0;
     }
+    
     ur_logger.stop();
     dualArmRobot.moveHome();
     after_place_7 = ros::Time::now();
     manipulation_7 = after_place_7 - before_pick_7;
     ROS_INFO(":::::: VALUES EVALUATION ::::::");
-    ROS_INFO("manipulation box 7 took: %li sec", manipulation_7.toSec());
+    ROS_INFO("manipulation box 7 took: %f sec", manipulation_7.toSec());
     ROS_INFO("Finished demonstration");
     ros::shutdown();
     return 0;

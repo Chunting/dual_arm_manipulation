@@ -12,7 +12,7 @@ bool TrajectoryProcessor::fuse(moveit_msgs::RobotTrajectory &arms_trajectory,
     int i1 = arm1_trajectory.joint_trajectory.points.size();
     int i2 = arm2_trajectory.joint_trajectory.points.size();
     int num = std::min(i1,i2);
-    ROS_INFO("Start to fuse trajectory i1=%d, i2=%d, num=%d", i1, i2, num);
+    // ROS_INFO("Start to fuse trajectory i1=%d, i2=%d, num=%d", i1, i2, num);
     if(i1==0 && i2==0){
         ROS_ERROR(" Can not fuse empty trajectory");
         return false;

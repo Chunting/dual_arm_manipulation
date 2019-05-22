@@ -8,7 +8,7 @@ Stopwatch::Stopwatch()
 void Stopwatch::restart()
 {
     start_ = ros::Time::now();
-    ROS_ERROR("start time in stopwatch: %f", start_.toSec());
+    ROS_INFO("start time in stopwatch: %f", start_.toSec());
 }
 
 ros::Duration Stopwatch::elapsed()

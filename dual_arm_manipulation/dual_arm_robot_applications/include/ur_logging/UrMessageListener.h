@@ -80,7 +80,8 @@ public:
 
   bool newTrajectory = false;
   std::string ur_prefix_;
-  int count = 0;
+  int cmd_count = 0;
+  int msg_count_ = 0;
 
   float wrench_filter_factor_;
   float force_dead_zone_thres_;

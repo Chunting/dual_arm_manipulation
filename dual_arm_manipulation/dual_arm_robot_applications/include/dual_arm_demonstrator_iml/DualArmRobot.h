@@ -159,11 +159,9 @@ class DualArmRobot
     bool moveGraspPosition();
     // Planning to a joint-space goal
     std::vector<double> getJointAngles(std::string ur_namespace);
-    void publishPlanCartTrajectory(std::string endEffectorLink,
-                                            const robot_state::JointModelGroup *joint_model_group,
-                                            moveit::planning_interface::MoveGroupInterface::Plan& plan, 
-                                            ros::Time time_send_cmd = ros::Time::now(),
-                                            double frequency=100);                                      
+    void publishPlanCartTrajectory( std::string endEffectorLink,
+                                    const robot_state::JointModelGroup *joint_model_group,
+                                    moveit_msgs::RobotTrajectory &trajectory);                                      
    
 
     Eigen::MatrixXd getJacobian(const robot_state::JointModelGroup *joint_model_group, Eigen::Vector3d &reference_point_position);
