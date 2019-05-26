@@ -72,20 +72,20 @@ vel_based_admittance_traj_controller:
    joint_model_group: right_manipulator
    root_name: right_base
    tip_name: right_tool0
-   contact_force: 22 #[N]
+   contact_force: 25 #[N]
    max_velocity: 0.1
-   max_shift: 0.0015
+   max_shift: 0.0005
    wrench_topic: /right/robotiq_ft_wrench
-   wrench_tolerance: 5 #5
+   wrench_tolerance: 2 #5
    force_dead_zone_thres: 2 
    torque_dead_zone_thres: 0.5
    wrench_filter_factor: 0.1
    admittance_pid:
-      p: 0.0005
-      i: 0.0000
-      d: 0.0000
+      p: 0.0005 #0.005
+      i: 0.005
+      d: 0.0005
       i_clamp_min: -0.0001
-      i_clamp_max: 0.0001
+      i_clamp_max: 0.001
    joints:
      - right_shoulder_pan_joint
      - right_shoulder_lift_joint

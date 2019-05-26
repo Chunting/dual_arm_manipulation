@@ -101,6 +101,7 @@ int main(int argc, char **argv)
         ROS_ERROR("Can't execute demonstration without successful pick. Demonstration aborted.");
         return 0;
     }
+    /*
     ROS_INFO("========== Rotation =================");
     // box7 goal pose
     geometry_msgs::PoseStamped box7_goal_pose_stamped;
@@ -164,7 +165,7 @@ int main(int argc, char **argv)
     }
     dualArmRobot.moveObject("box7", left_waypoints_pose_vec, 0.25);
     left_waypoints_pose_vec.clear();
-
+*/
     ROS_INFO("========== PLACE DOWN =================");
     // Place box7
     direction.vector.x = -direction.vector.x;

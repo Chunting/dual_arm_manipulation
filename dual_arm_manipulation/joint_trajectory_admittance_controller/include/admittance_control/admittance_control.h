@@ -85,7 +85,7 @@ class AdmittanceControl
     planning_scene::PlanningScenePtr planningScenePtr;
     robot_state::RobotStatePtr kinematic_statePtr;
     const robot_state::JointModelGroup *joint_model_groupPtr;
-    moveit::planning_interface::MoveGroupInterface arm_group;
+    // moveit::planning_interface::MoveGroupInterface arm_group;
 
    
 
@@ -97,7 +97,7 @@ class AdmittanceControl
     void desiredOffsetCallback(const geometry_msgs::PointStamped::ConstPtr &msg);
 
     // runtime variables
-    double desired_distance_;             // distance
+    double delta_z_, delta_x_, delta_y_;          
     KDL::JntArray q_last_; // last joint state
     std::vector<double> new_start_position_;
     KDL::Vector force_;
@@ -120,9 +120,13 @@ class AdmittanceControl
     // Control, PID
     double wrench_tolerance_;
     control_toolbox::Pid pid_controller_;
+    control_toolbox::Pid::Gains gains_;
 
     std::string wrench_topic;
     std::string offset_topic;
+    std::string root_name;
+    std::string tip_name;
+    std::string joint_model_group;
 
   public:
     AdmittanceControl();
@@ -193,15 +197,15 @@ void AdmittanceControl::init(ros::NodeHandle &nh)
 
     nh_ = nh;
     // init variables
-    desired_distance_ = 0.0;
+    delta_z_ = 0.0;
+    delta_x_ = 0.0;
+    delta_y_ = 0.0;
     new_start_position_.clear();
 
     // KDL
     KDL::Tree kdl_tree;
     std::string robot_desc_string;
-    std::string root_name;
-    std::string tip_name;
-    std::string joint_model_group;
+   
     std::string name_space = nh.getNamespace(); // /right/vel_based_admittance_traj_controller
     // std::string prefix = getprefix(nh);  // Get prefix from name_space, i.e., left_ or right_
     std::cout << "--------------------> name_space:  " << name_space << std::endl;
@@ -210,13 +214,19 @@ void AdmittanceControl::init(ros::NodeHandle &nh)
     wrench_external_.setZero();
     offset_new_.setZero();
     offset_desired_.setZero();
-    nh.param("joint_model_group", joint_model_group, "right_manipulator");
+    nh.param("joint_model_group", joint_model_group, std::string("right_manipulator"));
     nh.param("root_name", root_name, std::string());
     nh.param("tip_name", tip_name, std::string());
+    nh.param("admittance_pid/p", gains_.p_gain_, 0.01);
+    nh.param("admittance_pid/d", gains_.d_gain_, 0.01);
+    nh.param("admittance_pid/i_clamp_max", gains_.i_max_, 0.0);
+    nh.param("admittance_pid/i_clamp_min", gains_.i_min_, 0.0);
+
     // root_name = prefix + root_name;
     // tip_name = prefix + tip_name;
     std::cout << "root name " << root_name << "\ttip name  " << tip_name << std::endl;
     std::cout << "Namespace: " << name_space << std::endl;
+    std::cout << "p = " << gains_.p_gain_ << "  d =   " << gains_.d_gain_ << std::endl;
 
 
     robotModelLoader = robot_model_loader::RobotModelLoader("robot_description");
@@ -227,7 +237,8 @@ void AdmittanceControl::init(ros::NodeHandle &nh)
     // planning_scene::PlanningScenePtr planningScenePtr = std::make_shared<planning_scene::PlanningScene>(kinematic_modelPtr);
    
     joint_model_groupPtr = kinematic_modelPtr->getJointModelGroup(joint_model_group);
-    arm_group = moveit::planning_interface::MoveGroupInterface(joint_model_group);
+    // arm_group = moveit::planning_interface::MoveGroupInterface(joint_model_group);
+    // arm_group.res
     const std::vector<std::string> &joint_names = joint_model_groupPtr->getJointModelNames();
     std::vector<double> joint_values;
     kinematic_statePtr->copyJointGroupPositions(joint_model_groupPtr, joint_values);
@@ -282,6 +293,7 @@ void AdmittanceControl::init(ros::NodeHandle &nh)
         ROS_ERROR("Admittance Control: could not construct PID controller");
     }
     pid_controller_.reset();
+    pid_controller_.setGains(gains_);
 
     // wrench
 
@@ -314,11 +326,10 @@ void AdmittanceControl::update_admittance_state(std::vector<double> &position, c
 
     // Joint Array in
     unsigned int nj = kdl_chain_.getNrOfJoints();
-    kdl_chain_.getSegment();
-    for (std::size_t i = 0; i < kdl_chain_.getNrOfSegments(); i++)
-	{
-	    ROS_INFO_STREAM("segment(" << i << "): " << kdl_chain_.getSegment(i).getName());
-	}
+    // for (std::size_t i = 0; i < kdl_chain_.getNrOfSegments(); i++)
+	// {
+	//     ROS_INFO_STREAM("segment(" << i << "): " << kdl_chain_.getSegment(i).getName());
+	// }
 
     KDL::JntArray q_in(nj);
     std::vector<double> joint_values;
@@ -338,7 +349,7 @@ void AdmittanceControl::update_admittance_state(std::vector<double> &position, c
     if(found_ik){
         kinematic_statePtr->copyJointGroupPositions(joint_model_groupPtr, joint_values);
         for(std::size_t i=0; i<joint_values.size(); ++i){
-            ROS_INFO("%s : %f", joint_names[i].c_str(), joint_values[i]);
+            ROS_INFO("%f", joint_values[i]);
         }
     }else{
         ROS_WARN("Did not find IK solution");
@@ -351,6 +362,7 @@ void AdmittanceControl::update_admittance_state(std::vector<double> &position, c
     double yaw = 0;    // Z-axis
     double pitch = 0;  // Y-axis
     double roll = 0;   // X-axis
+    
     ROS_INFO_STREAM("kdl p_eef " <<  p_eef.p << " " << yaw << " " << pitch << " " << roll );
     if (fk_feedback < 0)
     {
@@ -366,26 +378,42 @@ void AdmittanceControl::update_admittance_state(std::vector<double> &position, c
     wrench_eef = force_; // The oritation of robotiq_frame_id frame is consident with left/right_tool0 
 
     // PID
+    ROS_INFO("(wrench_eef.z() = %f, contact_F = %f, wrench_tolerance_ = %f", wrench_eef.z(), contact_F, wrench_tolerance_);
     if (std::abs(wrench_eef.z() - contact_F) > wrench_tolerance_)
     {
-        if (((wrench_eef.z() < contact_F) && (desired_distance_ > -max_shift_)) ||
-            ((wrench_eef.z() > contact_F) && (desired_distance_ < max_shift_)))
-        {
+        // if (((wrench_eef.z() < contact_F) && (delta_z_ > -max_shift_)) ||
+        //     ((wrench_eef.z() > contact_F) && (delta_z_ < max_shift_)))
+        // {
             double pid_vel = pid_controller_.computeCommand(wrench_eef.z() - contact_F, period);
             
             if (std::abs(pid_vel) < max_vel_)
-                desired_distance_ = desired_distance_ + pid_vel * period.toSec();
+                delta_z_ = delta_z_ + pid_vel * period.toSec();
             else
-                desired_distance_ = desired_distance_ + (std::abs(pid_vel) / pid_vel) * max_vel_ * period.toSec();
-            ROS_INFO("pid_vel = %f desired_distance_ = %f", pid_vel, desired_distance_);
-        }
+                delta_z_ = delta_z_ + (std::abs(pid_vel) / pid_vel) * max_vel_ * period.toSec();
+            ROS_INFO("pid_vel = %f delta_z_ = %f", pid_vel, delta_z_);
+        //}
+    }
+
+    if (std::abs(wrench_eef.x()) > 10)
+    {
+        // if (((wrench_eef.z() < contact_F) && (delta_z_ > -max_shift_)) ||
+        //     ((wrench_eef.z() > contact_F) && (delta_z_ < max_shift_)))
+        // {
+            double pid_vel = pid_controller_.computeCommand(wrench_eef.x(), period);
+            
+            if (std::abs(pid_vel) < max_vel_)
+                delta_x_ = delta_x_ + pid_vel * period.toSec();
+            else
+                delta_x_ = delta_x_ + (std::abs(pid_vel) / pid_vel) * max_vel_ * period.toSec();
+            ROS_INFO("pid_vel = %f delta_x_ = %f", pid_vel, delta_x_);
+        //}
     }
 
     // distance is transformed to be along z-axis of eef
     KDL::Vector vec_d; // distance vector, in ee frame
-    vec_d.x(0);
+    vec_d.x(delta_x_);
     vec_d.y(0);
-    vec_d.z(desired_distance_);
+    vec_d.z(delta_z_);
     vec_d = p_eef.M * vec_d; // Rotate distance vector, in base frame
 
     // target frame
@@ -431,6 +459,6 @@ void AdmittanceControl::update_admittance_state(std::vector<double> &position, c
 
 void AdmittanceControl::set_shift(double d)
 {
-    desired_distance_ = d;
+    delta_z_ = d;
     ROS_WARN("Set shift to %f", d);
 }
