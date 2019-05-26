@@ -37,6 +37,21 @@
 #include <eigen3/Eigen/Geometry>
 #include <eigen3/Eigen/Dense>
 
+// MoveIt!
+#include <moveit/move_group_interface/move_group_interface.h>
+#include <moveit/planning_scene_interface/planning_scene_interface.h>
+#include <moveit/planning_scene/planning_scene.h>
+#include <moveit_msgs/PlanningScene.h>
+#include <moveit_msgs/AttachedCollisionObject.h>
+#include <moveit_msgs/GetStateValidity.h>
+#include <moveit_msgs/DisplayRobotState.h>
+#include <moveit/collision_detection/collision_matrix.h>
+#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
+#include <moveit_msgs/GetPositionIK.h>
+#include <moveit_msgs/GetPositionFK.h>
+#include <moveit/robot_state/conversions.h>
+#include <moveit/planning_scene_monitor/current_state_monitor.h>
+
 using namespace Eigen;
 
 typedef Matrix<double, 7, 1> Vector7d;
@@ -62,6 +77,20 @@ class AdmittanceControl
     ros::Subscriber sub_wrench_external_;
     // Subscriber for the offset of the attractor
     ros::Subscriber sub_offset_desired_; // Should be a Service
+
+
+
+    robot_model_loader::RobotModelLoader robotModelLoader;
+    robot_model::RobotModelPtr kinematic_modelPtr;
+    planning_scene::PlanningScenePtr planningScenePtr;
+    robot_state::RobotStatePtr kinematic_statePtr;
+    const robot_state::JointModelGroup *joint_model_groupPtr;
+    moveit::planning_interface::MoveGroupInterface arm_group;
+
+   
+
+
+    
 
     void wrenchCallback(const geometry_msgs::WrenchStamped::ConstPtr &msg);
     void offsetCallback(const geometry_msgs::PointStamped::ConstPtr &msg);
@@ -172,6 +201,7 @@ void AdmittanceControl::init(ros::NodeHandle &nh)
     std::string robot_desc_string;
     std::string root_name;
     std::string tip_name;
+    std::string joint_model_group;
     std::string name_space = nh.getNamespace(); // /right/vel_based_admittance_traj_controller
     // std::string prefix = getprefix(nh);  // Get prefix from name_space, i.e., left_ or right_
     std::cout << "--------------------> name_space:  " << name_space << std::endl;
@@ -180,6 +210,46 @@ void AdmittanceControl::init(ros::NodeHandle &nh)
     wrench_external_.setZero();
     offset_new_.setZero();
     offset_desired_.setZero();
+    nh.param("joint_model_group", joint_model_group, "right_manipulator");
+    nh.param("root_name", root_name, std::string());
+    nh.param("tip_name", tip_name, std::string());
+    // root_name = prefix + root_name;
+    // tip_name = prefix + tip_name;
+    std::cout << "root name " << root_name << "\ttip name  " << tip_name << std::endl;
+    std::cout << "Namespace: " << name_space << std::endl;
+
+
+    robotModelLoader = robot_model_loader::RobotModelLoader("robot_description");
+    kinematic_modelPtr = robotModelLoader.getModel();
+    ROS_INFO("MoveIt Model Frame: %s \n", kinematic_modelPtr->getModelFrame().c_str());
+   
+    kinematic_statePtr = std::make_shared<moveit::core::RobotState>(kinematic_modelPtr);
+    // planning_scene::PlanningScenePtr planningScenePtr = std::make_shared<planning_scene::PlanningScene>(kinematic_modelPtr);
+   
+    joint_model_groupPtr = kinematic_modelPtr->getJointModelGroup(joint_model_group);
+    arm_group = moveit::planning_interface::MoveGroupInterface(joint_model_group);
+    const std::vector<std::string> &joint_names = joint_model_groupPtr->getJointModelNames();
+    std::vector<double> joint_values;
+    kinematic_statePtr->copyJointGroupPositions(joint_model_groupPtr, joint_values);
+    for(std::size_t i=0; i<joint_names.size(); ++i){
+        ROS_INFO("%s : %f", joint_names[i].c_str(), joint_values[i]);
+    }
+    kinematic_statePtr->setJointGroupPositions(joint_model_groupPtr, joint_values);
+    const Eigen::Affine3d &end_effector_state = kinematic_statePtr->getGlobalLinkTransform(tip_name);
+    ROS_INFO_STREAM("Translation: " << end_effector_state.translation());
+    ROS_INFO_STREAM("Rotation: " << end_effector_state.rotation());
+    bool found_ik = kinematic_statePtr->setFromIK(joint_model_groupPtr, end_effector_state, 10, 0.1);
+    joint_values.clear();
+    if(found_ik){
+        kinematic_statePtr->copyJointGroupPositions(joint_model_groupPtr, joint_values);
+        for(std::size_t i=0; i<joint_names.size(); ++i){
+            ROS_INFO("%s : %f", joint_names[i].c_str(), joint_values[i]);
+        }
+    }else{
+        ROS_WARN("Did not find IK solution");
+    }
+    
+    
 
     nh.param("/robot_description", robot_desc_string, std::string());
     if (!kdl_parser::treeFromString(robot_desc_string, kdl_tree))
@@ -189,12 +259,7 @@ void AdmittanceControl::init(ros::NodeHandle &nh)
     else
         ROS_INFO("Got kdl tree for joint admittance controller");
 
-    nh.param("root_name", root_name, std::string());
-    nh.param("tip_name", tip_name, std::string());
-    // root_name = prefix + root_name;
-    // tip_name = prefix + tip_name;
-    std::cout << "root name " << root_name << "\ttip name  " << tip_name << std::endl;
-    std::cout << "Namespace: " << name_space << std::endl;
+
 
     if (!kdl_tree.getChain(root_name, tip_name, kdl_chain_))
         ROS_ERROR("Failed to construct kdl chain with root: %s and tip: %s in namespace %s", root_name.c_str(), tip_name.c_str(), name_space.c_str());
@@ -249,15 +314,35 @@ void AdmittanceControl::update_admittance_state(std::vector<double> &position, c
 
     // Joint Array in
     unsigned int nj = kdl_chain_.getNrOfJoints();
+    kdl_chain_.getSegment();
+    for (std::size_t i = 0; i < kdl_chain_.getNrOfSegments(); i++)
+	{
+	    ROS_INFO_STREAM("segment(" << i << "): " << kdl_chain_.getSegment(i).getName());
+	}
 
     KDL::JntArray q_in(nj);
+    std::vector<double> joint_values;
     ROS_INFO("Input joint positions: " );
     for (int i = 0; i < nj; i++)
     {
         q_in(i, 0) = position[i];
-        ROS_INFO("%f", q_in(i, 0));
+        joint_values.push_back(position[i]);
+        ROS_INFO("%f", q_in(i, 0)*180/3.14);
     }
-    
+    kinematic_statePtr->setJointGroupPositions(joint_model_groupPtr, joint_values);
+    const Eigen::Affine3d &end_effector_state = kinematic_statePtr->getGlobalLinkTransform(tip_name);
+    ROS_INFO_STREAM("Translation: " << end_effector_state.translation());
+    ROS_INFO_STREAM("Rotation: " << end_effector_state.rotation());
+    bool found_ik = kinematic_statePtr->setFromIK(joint_model_groupPtr, end_effector_state, 10, 0.1);
+    joint_values.clear();
+    if(found_ik){
+        kinematic_statePtr->copyJointGroupPositions(joint_model_groupPtr, joint_values);
+        for(std::size_t i=0; i<joint_values.size(); ++i){
+            ROS_INFO("%s : %f", joint_names[i].c_str(), joint_values[i]);
+        }
+    }else{
+        ROS_WARN("Did not find IK solution");
+    }
 
     // forward kinematics
     KDL::Frame p_eef;
@@ -287,10 +372,12 @@ void AdmittanceControl::update_admittance_state(std::vector<double> &position, c
             ((wrench_eef.z() > contact_F) && (desired_distance_ < max_shift_)))
         {
             double pid_vel = pid_controller_.computeCommand(wrench_eef.z() - contact_F, period);
+            
             if (std::abs(pid_vel) < max_vel_)
                 desired_distance_ = desired_distance_ + pid_vel * period.toSec();
             else
                 desired_distance_ = desired_distance_ + (std::abs(pid_vel) / pid_vel) * max_vel_ * period.toSec();
+            ROS_INFO("pid_vel = %f desired_distance_ = %f", pid_vel, desired_distance_);
         }
     }
 

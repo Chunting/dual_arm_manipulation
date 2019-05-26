@@ -9,6 +9,7 @@ find_package(catkin
     cmake_modules
     roscpp
     urdf
+    moveit_ros_planning_interface
     control_toolbox
     controller_interface
     hardware_interface

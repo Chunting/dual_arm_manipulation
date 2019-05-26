@@ -479,6 +479,9 @@ bool DualArmRobot::pickBox(std::string object_id, geometry_msgs::Vector3Stamped 
     moveit::planning_interface::MoveGroupInterface::Plan both_arms_plan;
     both_arms_plan.trajectory_ = both_arms_trajectory;
     both_arms_plan.start_state_ = getCurrentRobotStateMsg();
+    // Grasp by switching controller and wait for contact while visualizing plan
+    if (!switch_controller("vel_based_pos_traj_controller", "vel_based_admittance_traj_controller", "right"))
+        ROS_WARN("failed switching controller");
     execute(both_arms_plan);
     return true;
 }
@@ -486,6 +489,8 @@ bool DualArmRobot::placeBox(std::string object_id, geometry_msgs::Vector3Stamped
 {
     pickBox(object_id, place_direction);
     // un-grasp
+    if (!switch_controller("vel_based_admittance_traj_controller", "vel_based_pos_traj_controller", "right"))
+        ROS_WARN("failed switching controller");
     graspMove(-0.02, false, true, true);
     return true;
 }

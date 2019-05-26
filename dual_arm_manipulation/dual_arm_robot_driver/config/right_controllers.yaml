@@ -69,12 +69,13 @@ vel_based_pos_traj_controller:
 # For detailed explanations of parameter see http://wiki.ros.org/
 vel_based_admittance_traj_controller:
    type: velocity_controllers/JointTrajectoryAdmittanceController
+   joint_model_group: right_manipulator
    root_name: right_base
    tip_name: right_tool0
-   contact_force: 20 #[N]
+   contact_force: 22 #[N]
    max_velocity: 0.1
    max_shift: 0.0015
-   wrench_topic: /left/robotiq_ft_wrench
+   wrench_topic: /right/robotiq_ft_wrench
    wrench_tolerance: 5 #5
    force_dead_zone_thres: 2 
    torque_dead_zone_thres: 0.5
