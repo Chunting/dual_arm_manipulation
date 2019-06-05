@@ -394,20 +394,20 @@ void AdmittanceControl::update_admittance_state(std::vector<double> &position, c
         //}
     }
 
-    if (std::abs(wrench_eef.x()) > 10)
-    {
-        // if (((wrench_eef.z() < contact_F) && (delta_z_ > -max_shift_)) ||
-        //     ((wrench_eef.z() > contact_F) && (delta_z_ < max_shift_)))
-        // {
-            double pid_vel = pid_controller_.computeCommand(wrench_eef.x(), period);
+    // if (std::abs(wrench_eef.x()) > 10)
+    // {
+    //     // if (((wrench_eef.z() < contact_F) && (delta_z_ > -max_shift_)) ||
+    //     //     ((wrench_eef.z() > contact_F) && (delta_z_ < max_shift_)))
+    //     // {
+    //         double pid_vel = pid_controller_.computeCommand(wrench_eef.x(), period);
             
-            if (std::abs(pid_vel) < max_vel_)
-                delta_x_ = delta_x_ + pid_vel * period.toSec();
-            else
-                delta_x_ = delta_x_ + (std::abs(pid_vel) / pid_vel) * max_vel_ * period.toSec();
-            ROS_INFO("pid_vel = %f delta_x_ = %f", pid_vel, delta_x_);
-        //}
-    }
+    //         if (std::abs(pid_vel) < max_vel_)
+    //             delta_x_ = delta_x_ + pid_vel * period.toSec();
+    //         else
+    //             delta_x_ = delta_x_ + (std::abs(pid_vel) / pid_vel) * max_vel_ * period.toSec();
+    //         ROS_INFO("pid_vel = %f delta_x_ = %f", pid_vel, delta_x_);
+    //     //}
+    // }
 
     // distance is transformed to be along z-axis of eef
     KDL::Vector vec_d; // distance vector, in ee frame

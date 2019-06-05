@@ -47,11 +47,7 @@ int main(int argc, char **argv)
     FTSensorSubscriber left_wrench_sub(nh, "left");
     FTSensorSubscriber right_wrench_sub(nh, "right");
     // Setup data logger
-    std::vector<std::string> ur_namespaces;
-    ur_namespaces.push_back("left");
-    ur_namespaces.push_back("right");
-    UR_Logger ur_logger(nh, ur_namespaces);
-    ur_logger.start(100);
+ 
 
     ros::Time before_pick_7;
     ros::Duration manipulation_7;
@@ -64,6 +60,11 @@ int main(int argc, char **argv)
     ROS_INFO("========== MOVE GRASP POSITION =================");
     dualArmRobot.moveGraspPosition();
     ROS_INFO("========== MOVE CLOSER =================");
+    std::vector<std::string> ur_namespaces;
+    ur_namespaces.push_back("left");
+    ur_namespaces.push_back("right");
+    UR_Logger ur_logger(nh, ur_namespaces);
+    ur_logger.start(100);
     dualArmRobot.graspMove(0.055, false, true, true);
     double res_force = sqrt(left_wrench_sub.last_wrench_msg_.wrench.force.x * left_wrench_sub.last_wrench_msg_.wrench.force.x 
                             + left_wrench_sub.last_wrench_msg_.wrench.force.y * left_wrench_sub.last_wrench_msg_.wrench.force.y 
@@ -101,7 +102,7 @@ int main(int argc, char **argv)
         ROS_ERROR("Can't execute demonstration without successful pick. Demonstration aborted.");
         return 0;
     }
-    /*
+    
     ROS_INFO("========== Rotation =================");
     // box7 goal pose
     geometry_msgs::PoseStamped box7_goal_pose_stamped;
@@ -165,7 +166,7 @@ int main(int argc, char **argv)
     }
     dualArmRobot.moveObject("box7", left_waypoints_pose_vec, 0.25);
     left_waypoints_pose_vec.clear();
-*/
+
     ROS_INFO("========== PLACE DOWN =================");
     // Place box7
     direction.vector.x = -direction.vector.x;

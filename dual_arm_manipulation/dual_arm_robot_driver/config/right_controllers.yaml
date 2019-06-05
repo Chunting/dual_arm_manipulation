@@ -76,7 +76,7 @@ vel_based_admittance_traj_controller:
    max_velocity: 0.1
    max_shift: 0.0005
    wrench_topic: /right/robotiq_ft_wrench
-   wrench_tolerance: 2 #5
+   wrench_tolerance: 1 #5
    force_dead_zone_thres: 2 
    torque_dead_zone_thres: 0.5
    wrench_filter_factor: 0.1
