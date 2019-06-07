@@ -53,6 +53,7 @@ void UR_Logger::stop()
     {
         ROS_INFO("Get command %d and write down %d msg for %s", 
             ur_listeners_[i]->cmd_count, ur_listeners_[i]->msg_count_, ur_listeners_[i]->ur_namespace_.c_str());
+        ur_listeners_[i]->stop();
     }
     timer_.stop();
     ft_sensor_logfile_stream_.close();

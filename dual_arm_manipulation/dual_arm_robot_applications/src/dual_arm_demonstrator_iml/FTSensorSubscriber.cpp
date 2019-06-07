@@ -9,7 +9,7 @@ FTSensorSubscriber::FTSensorSubscriber(ros::NodeHandle &nh, std::string ur_names
   wrench_external_.setZero();
   ft_arm_ready_ = false;
   wrench_filter_factor_ = 0.1;
-  force_dead_zone_thres_ = 3;
+  force_dead_zone_thres_ = 5;
   torque_dead_zone_thres_ = 0.5;
   sub_wrench_external_ =
       nh_.subscribe(ur_namespace_ + "/robotiq_ft_wrench", 1, &FTSensorSubscriber::wrenchCallback, this);

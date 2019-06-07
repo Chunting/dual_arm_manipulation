@@ -37,6 +37,8 @@ int main(int argc, char **argv)
     ROS_WARN("Robot offline");
 #endif
 
+    ros::Publisher desired_force_pub = nh.advertise<geometry_msgs::WrenchStamped>("/force_desired_", 1);
+
     // Dual Arm Robot Setup
     dual_arm_demonstrator_iml::DualArmRobot dualArmRobot(nh);
 
@@ -54,8 +56,8 @@ int main(int argc, char **argv)
     ros::Time after_place_7;
     before_pick_7 = ros::Time::now();
 
-    ROS_INFO("========== MOVE HOME POSITION =================");
-    dualArmRobot.moveHome();
+    // ROS_INFO("========== MOVE HOME POSITION =================");
+    // dualArmRobot.moveHome();
     
     ROS_INFO("========== MOVE GRASP POSITION =================");
     dualArmRobot.moveGraspPosition();
@@ -79,6 +81,7 @@ int main(int argc, char **argv)
                     + left_wrench_sub.last_wrench_msg_.wrench.force.z * left_wrench_sub.last_wrench_msg_.wrench.force.z);
         ROS_INFO("I heard: Force [%f]  FX[%f] FY[%f] FZ[%f]", res_force, left_wrench_sub.last_wrench_msg_.wrench.force.x, left_wrench_sub.last_wrench_msg_.wrench.force.y, left_wrench_sub.last_wrench_msg_.wrench.force.z);
     }
+    desired_force_pub.publish(left_wrench_sub.last_wrench_msg_);
     ROS_INFO("Desired force: Force [%f]  FX[%f] FY[%f] FZ[%f]", res_force, left_wrench_sub.last_wrench_msg_.wrench.force.x, left_wrench_sub.last_wrench_msg_.wrench.force.y, left_wrench_sub.last_wrench_msg_.wrench.force.z);
     KDL::Frame desired_offset = dualArmRobot.getCurrentOffset(); 
     Vector3d offset_position;
@@ -95,7 +98,7 @@ int main(int argc, char **argv)
     direction.header.frame_id = "world";
     direction.vector.x = 0.1;
     direction.vector.y = 0;
-    direction.vector.z = 0.25;
+    direction.vector.z = 0.2;
     if (!dualArmRobot.pickBox("box7", direction))
     {
         ROS_WARN("Pick failed");
@@ -179,8 +182,10 @@ int main(int argc, char **argv)
         return 0;
     }
     
+    
+    dualArmRobot.moveGraspPosition();
+    sleep(10);
     ur_logger.stop();
-    dualArmRobot.moveHome();
     after_place_7 = ros::Time::now();
     manipulation_7 = after_place_7 - before_pick_7;
     ROS_INFO(":::::: VALUES EVALUATION ::::::");
