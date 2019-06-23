@@ -184,6 +184,15 @@ At time 1547089967.935
             in RPY (degree) [-140.256, -0.684, 178.749]
 
 
+chunting@chunting-Vostro-3670:~/catkin_ws$ rosrun tf tf_echo world left_base
+At time 0.000
+- Translation: [0.000, -0.250, 1.200]
+- Rotation: in Quaternion [0.271, -0.653, 0.271, 0.653]
+            in RPY (radian) [-2.355, -1.570, -3.142]
+            in RPY (degree) [-134.954, -89.954, -180.000]
+
+
+
 
 
 

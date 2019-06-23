@@ -70,14 +70,14 @@ vel_based_pos_traj_controller:
 vel_based_admittance_traj_controller:
    type: velocity_controllers/JointTrajectoryAdmittanceController
    joint_model_group: left_manipulator
-   root_name: left_base
+   root_name: world
    tip_name: left_tool0
    contact_force: 25 #[N]
    max_velocity: 0.1
    max_shift: 0.0015
    wrench_topic: /left/robotiq_ft_wrench
-   wrench_tolerance: 1 #5
-   force_dead_zone_thres: 5 
+   wrench_tolerance: 1 #0.5
+   force_dead_zone_thres: 10 
    torque_dead_zone_thres: 0.5
    wrench_filter_factor: 0.1
    admittance_pid:

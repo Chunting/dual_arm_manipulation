@@ -158,9 +158,9 @@ void AdmittanceControl::wrenchCallback(const geometry_msgs::WrenchStamped::Const
     Vector6d wrench_ft_frame;
     // Reading the FT-sensor in its own frame (robotiq_ft_frame_id)
     wrench_ft_frame << msg->wrench.force.x, msg->wrench.force.y, msg->wrench.force.z, msg->wrench.torque.x, msg->wrench.torque.y, msg->wrench.torque.z;
-    tf::TransformListener listener_arm_;
-    Matrix6d rotation_world_ft_frame;
-    rotation_world_ft_frame.setZero();
+    // tf::TransformListener listener_arm_;
+    // Matrix6d rotation_world_ft_frame;
+    // rotation_world_ft_frame.setZero();
     
     // while (!get_rotation_matrix(rotation_world_ft_frame, listener_arm_, "right_robotiq_fr_frame_id", robotiq_ft_frame_))
     // {
@@ -244,7 +244,6 @@ void AdmittanceControl::init(ros::NodeHandle &nh)
     std::cout << "Namespace: " << ur_namespace_ << std::endl;
     std::cout << "p = " << gains_.p_gain_ << "  d =   " << gains_.d_gain_ << std::endl;
 
-
     robotModelLoader = robot_model_loader::RobotModelLoader("robot_description");
     kinematic_modelPtr = robotModelLoader.getModel();
     ROS_INFO("MoveIt Model Frame: %s \n", kinematic_modelPtr->getModelFrame().c_str());
@@ -312,13 +311,12 @@ void AdmittanceControl::init(ros::NodeHandle &nh)
     pid_controller_.setGains(gains_);
 
     // wrench
-
     nh.param("wrench_tolerance", wrench_tolerance_, double());
     nh.param("wrench_topic", wrench_topic, std::string());
     // nh.param("offset_topic", offset_topic, std::string());
     sub_wrench_external_ = nh_.subscribe(wrench_topic, 1, &AdmittanceControl::wrenchCallback, this);
 
-    sub_offset_new_ = nh_.subscribe("/offset_pose_state", 10, &AdmittanceControl::offsetCallback, this);
+    //sub_offset_new_ = nh_.subscribe("/offset_pose_state", 10, &AdmittanceControl::offsetCallback, this);
     sub_force_desired_ = nh_.subscribe("/force_desired_", 1, &AdmittanceControl::forcedesiredcallback, this);
 }
 
@@ -407,8 +405,8 @@ void AdmittanceControl::update_admittance_state(std::vector<double> &position, c
             else
                 delta_z_ = delta_z_ + (std::abs(pid_vel) / pid_vel) * max_vel_ * period.toSec();
             ROS_INFO("pid_vel = %f delta_z_ = %f", pid_vel, delta_z_);
-        //}
     }
+    //}
 
     // if (std::abs(wrench_eef.x()) > 10)
     // {
@@ -427,7 +425,7 @@ void AdmittanceControl::update_admittance_state(std::vector<double> &position, c
 
     // distance is transformed to be along z-axis of eef
     KDL::Vector vec_d; // distance vector, in ee frame
-    vec_d.x(delta_x_);
+    vec_d.x(0);
     vec_d.y(0);
     vec_d.z(delta_z_);
     vec_d = p_eef.M * vec_d; // Rotate distance vector, in base frame
@@ -435,7 +433,7 @@ void AdmittanceControl::update_admittance_state(std::vector<double> &position, c
     // target frame
     KDL::Frame p_target = p_eef;
     p_target.p = p_eef.p + vec_d; // Add distance Vector to eef Frame
-
+    ROS_INFO_STREAM("p_target.p " <<  p_target.p);
     // target joint state
     KDL::JntArray q_dest(nj);
 
@@ -451,7 +449,7 @@ void AdmittanceControl::update_admittance_state(std::vector<double> &position, c
         ROS_WARN("Admittance Control: Problem solving inverse kinematics. Error: %s", ikSolverPosNR.strError(ik_feedback));
         q_dest = q_init;
     }
-    ROS_INFO_STREAM("Target Frame " << p_target);
+    
 
     // check for jerk motion
     for (unsigned int i = 0; i < nj; i++)

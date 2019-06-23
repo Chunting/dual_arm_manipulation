@@ -261,7 +261,7 @@ bool DualArmRobot::switch_controller(std::string stop_name, std::string start_na
     // stop
     switchController.request.stop_controllers.push_back(stop_name);
     bool success_stop = srv_switch_controller.call(switchController);
-    ROS_INFO("Stopping controller %s %s", stop_name.c_str(), success_stop ? "SUCCEDED" : "FAILED");
+    ROS_INFO("Stopping controller %s/%s %s", ur_namespace.c_str(),stop_name.c_str(), success_stop ? "SUCCEDED" : "FAILED");
     if (!success_stop)
         return false;
 
@@ -271,7 +271,7 @@ bool DualArmRobot::switch_controller(std::string stop_name, std::string start_na
     switchController.request.BEST_EFFORT;
     switchController.request.start_controllers.push_back(start_name);
     bool success_start = srv_switch_controller.call(switchController);
-    ROS_INFO("Starting controller %s %s", start_name.c_str(), success_start ? "SUCCEDED" : "FAILED");
+    ROS_INFO("Starting controller %s/%s %s", ur_namespace.c_str(), start_name.c_str(), success_start ? "SUCCEDED" : "FAILED");
     switchController.request.start_controllers.clear();
 
     // Switch controller in moveit-interface
@@ -495,7 +495,7 @@ bool DualArmRobot::placeBox(std::string object_id, geometry_msgs::Vector3Stamped
         ROS_WARN("failed switching controller");
     // if (!switch_controller("vel_based_admittance_traj_controller", "vel_based_pos_traj_controller", "left"))
     //     ROS_WARN("failed switching controller");
-    // graspMove(-0.02, false, true, true);
+    graspMove(-0.02, false, true, true);
     return true;
 }
 bool DualArmRobot::linearMoveParallel(geometry_msgs::Vector3Stamped direction,
@@ -1259,6 +1259,26 @@ bool DualArmRobot::moveGraspPosition()
             current_dual_arm_robotstate_msg_ = getCurrentRobotStateMsg();
         }
     }
+    left_current_pose_ = left_.getCurrentPose();
+    right_current_pose_ = right_.getCurrentPose();
+    right_current_pose_.pose.orientation.x = 0;
+    right_current_pose_.pose.orientation.y = 0.0;
+    right_current_pose_.pose.orientation.z = 0.7071;
+    right_current_pose_.pose.orientation.w = 0.7071;
+    left_current_pose_.pose.orientation.x = 0;
+    left_current_pose_.pose.orientation.y = 0.0;
+    left_current_pose_.pose.orientation.z = -0.7071;
+    left_current_pose_.pose.orientation.w = 0.7071;
+
+    geometry_msgs::PoseStamped right_current_pose_;
+    arms_.setPoseTarget(right_current_pose_.pose, right_.getEndEffectorLink());
+    arms_.setPoseTarget(left_current_pose_.pose, left_.getEndEffectorLink());
+    moveit::planning_interface::MoveGroupInterface::Plan plan;
+    arms_.plan(plan);
+    arms_.move();
+    // sleep(1);
+
+
     return true;
 }
 void DualArmRobot::publishPlanCartTrajectory(std::string endEffectorLink,

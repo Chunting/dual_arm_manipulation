@@ -74,14 +74,14 @@
         <joint name="left_elbow_joint" value="1.658" />
         <joint name="left_wrist_1_joint" value="-2.618" />
         <joint name="left_wrist_2_joint" value="-1.745" />
-        <joint name="left_wrist_3_joint" value="1.57" />
+        <joint name="left_wrist_3_joint" value="1.7453" />
         
         <joint name="right_shoulder_pan_joint" value="1.309" />
         <joint name="right_shoulder_lift_joint" value="-1.745" />
         <joint name="right_elbow_joint" value="-1.658" />
         <joint name="right_wrist_1_joint" value="-0.524" />
         <joint name="right_wrist_2_joint" value="1.745" />
-        <joint name="right_wrist_3_joint" value="1.57" />
+        <joint name="right_wrist_3_joint" value="1.3962" />
     </group_state>
     <group_state name="grasp_position_1" group="arms">
         <joint name="left_elbow_joint" value="1.798" />

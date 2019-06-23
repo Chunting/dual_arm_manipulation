@@ -156,7 +156,6 @@ static void wait_for_other_connection()
 
 	while(ros::ok())
 	{
-		ROS_INFO("Waiting for sensor connection...");
 		usleep(1000000);//Attend 1 seconde.
 
         ret = sensor_state_machine();
@@ -204,7 +203,7 @@ int main(int argc, char **argv)
     }
     else
     {
-        ROS_INFO("No device filename specified. Will attempt to discover Robotiq force torque sensor.");
+        ROS_INFO("-----------No device filename specified. Will attempt to discover Robotiq force torque sensor.");
     }
 
 	INT_8 bufStream[512];

@@ -39,8 +39,8 @@ UR_Message_Listener::UR_Message_Listener(ros::NodeHandle &nh, std::string ur_nam
     delimiter_ = ',';
     wrench_external_.setZero();
     wrench_filter_factor_ = 0.1;
-    force_dead_zone_thres_ = 5;
-    torque_dead_zone_thres_ = 0.1;
+    force_dead_zone_thres_ = 10;
+    torque_dead_zone_thres_ = 0.5;
     newTrajectory = false;
 }
 bool UR_Message_Listener::waitForValid(double seconds)
@@ -349,36 +349,36 @@ void UR_Message_Listener::write_logfile()
                     << delimiter_ << last_offset_pose_state_msg_.orientation.z
                     << delimiter_ << last_offset_pose_state_msg_.orientation.w << "\n";
        
-            if(last_cart_pose_cmd_msg_.header.stamp.toSec()>pre_cmd_time_){
-                file_robot_cmd_ << last_cart_pose_cmd_msg_.header.stamp.toSec() - start_time_ 
-                    << delimiter_ << last_joint_traj_point_cmd_msg_.time_from_start
-                    << delimiter_ << last_cart_pose_cmd_msg_.pose.position.x
-                    << delimiter_ << last_cart_pose_cmd_msg_.pose.position.y
-                    << delimiter_ << last_cart_pose_cmd_msg_.pose.position.z
-                    << delimiter_ << last_cart_pose_cmd_msg_.pose.orientation.x
-                    << delimiter_ << last_cart_pose_cmd_msg_.pose.orientation.y
-                    << delimiter_ << last_cart_pose_cmd_msg_.pose.orientation.z
-                    << delimiter_ << last_cart_pose_cmd_msg_.pose.orientation.w
-                    // << delimiter_ << last_cart_vel_cmd_msg_.linear.x
-                    // << delimiter_ << last_cart_vel_cmd_msg_.linear.y
-                    // << delimiter_ << last_cart_vel_cmd_msg_.linear.z
-                    // << delimiter_ << last_cart_vel_cmd_msg_.angular.x
-                    // << delimiter_ << last_cart_vel_cmd_msg_.angular.y
-                    // << delimiter_ << last_cart_vel_cmd_msg_.angular.z
-                    << delimiter_ << last_joint_traj_point_cmd_msg_.positions[0]
-                    << delimiter_ << last_joint_traj_point_cmd_msg_.positions[1]
-                    << delimiter_ << last_joint_traj_point_cmd_msg_.positions[2]
-                    << delimiter_ << last_joint_traj_point_cmd_msg_.positions[3]
-                    << delimiter_ << last_joint_traj_point_cmd_msg_.positions[4]
-                    << delimiter_ << last_joint_traj_point_cmd_msg_.positions[5]
-                    << delimiter_ << last_joint_traj_point_cmd_msg_.velocities[0]
-                    << delimiter_ << last_joint_traj_point_cmd_msg_.velocities[1]
-                    << delimiter_ << last_joint_traj_point_cmd_msg_.velocities[2]
-                    << delimiter_ << last_joint_traj_point_cmd_msg_.velocities[3]
-                    << delimiter_ << last_joint_traj_point_cmd_msg_.velocities[4]
-                    << delimiter_ << last_joint_traj_point_cmd_msg_.velocities[5] <<"\n";
-                    pre_cmd_time_ = last_cart_pose_cmd_msg_.header.stamp.toSec();
-            }else{
+            // if(last_cart_pose_cmd_msg_.header.stamp.toSec()>pre_cmd_time_){
+            //     file_robot_cmd_ << last_cart_pose_cmd_msg_.header.stamp.toSec() - start_time_ 
+            //         << delimiter_ << last_joint_traj_point_cmd_msg_.time_from_start
+            //         << delimiter_ << last_cart_pose_cmd_msg_.pose.position.x
+            //         << delimiter_ << last_cart_pose_cmd_msg_.pose.position.y
+            //         << delimiter_ << last_cart_pose_cmd_msg_.pose.position.z
+            //         << delimiter_ << last_cart_pose_cmd_msg_.pose.orientation.x
+            //         << delimiter_ << last_cart_pose_cmd_msg_.pose.orientation.y
+            //         << delimiter_ << last_cart_pose_cmd_msg_.pose.orientation.z
+            //         << delimiter_ << last_cart_pose_cmd_msg_.pose.orientation.w
+            //         // << delimiter_ << last_cart_vel_cmd_msg_.linear.x
+            //         // << delimiter_ << last_cart_vel_cmd_msg_.linear.y
+            //         // << delimiter_ << last_cart_vel_cmd_msg_.linear.z
+            //         // << delimiter_ << last_cart_vel_cmd_msg_.angular.x
+            //         // << delimiter_ << last_cart_vel_cmd_msg_.angular.y
+            //         // << delimiter_ << last_cart_vel_cmd_msg_.angular.z
+            //         << delimiter_ << last_joint_traj_point_cmd_msg_.positions[0]
+            //         << delimiter_ << last_joint_traj_point_cmd_msg_.positions[1]
+            //         << delimiter_ << last_joint_traj_point_cmd_msg_.positions[2]
+            //         << delimiter_ << last_joint_traj_point_cmd_msg_.positions[3]
+            //         << delimiter_ << last_joint_traj_point_cmd_msg_.positions[4]
+            //         << delimiter_ << last_joint_traj_point_cmd_msg_.positions[5]
+            //         << delimiter_ << last_joint_traj_point_cmd_msg_.velocities[0]
+            //         << delimiter_ << last_joint_traj_point_cmd_msg_.velocities[1]
+            //         << delimiter_ << last_joint_traj_point_cmd_msg_.velocities[2]
+            //         << delimiter_ << last_joint_traj_point_cmd_msg_.velocities[3]
+            //         << delimiter_ << last_joint_traj_point_cmd_msg_.velocities[4]
+            //         << delimiter_ << last_joint_traj_point_cmd_msg_.velocities[5] <<"\n";
+            //         pre_cmd_time_ = last_cart_pose_cmd_msg_.header.stamp.toSec();
+            // }else{
                 file_robot_cmd_ << last_cart_pose_state_msg_.header.stamp.toSec() - start_time_ 
                     << delimiter_ << 0
                     << delimiter_ << last_cart_pose_state_msg_.pose.position.x
@@ -400,7 +400,7 @@ void UR_Message_Listener::write_logfile()
                     << delimiter_ << last_joint_state_msg_.velocity[3]
                     << delimiter_ << last_joint_state_msg_.velocity[4]
                     << delimiter_ << last_joint_state_msg_.velocity[5]  << "\n";
-            }
+            // }
         pre_state_time_ = last_cart_pose_state_msg_.header.stamp.toSec();
     }
 

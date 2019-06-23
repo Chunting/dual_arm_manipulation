@@ -49,33 +49,33 @@ int main(int argc, char **argv)
     FTSensorSubscriber left_wrench_sub(nh, "left");
     FTSensorSubscriber right_wrench_sub(nh, "right");
     // Setup data logger
- 
+    std::vector<std::string> ur_namespaces;
+    ur_namespaces.push_back("left");
+    ur_namespaces.push_back("right");
+    UR_Logger ur_logger(nh, ur_namespaces);
+    ur_logger.start(100);
 
     ros::Time before_pick_7;
     ros::Duration manipulation_7;
     ros::Time after_place_7;
     before_pick_7 = ros::Time::now();
 
-    // ROS_INFO("========== MOVE HOME POSITION =================");
-    // dualArmRobot.moveHome();
+    ROS_INFO("========== MOVE HOME POSITION =================");
+    dualArmRobot.moveHome();
     
     ROS_INFO("========== MOVE GRASP POSITION =================");
     dualArmRobot.moveGraspPosition();
     ROS_INFO("========== MOVE CLOSER =================");
-    std::vector<std::string> ur_namespaces;
-    ur_namespaces.push_back("left");
-    ur_namespaces.push_back("right");
-    UR_Logger ur_logger(nh, ur_namespaces);
-    ur_logger.start(100);
-    dualArmRobot.graspMove(0.055, false, true, true);
+
+    dualArmRobot.graspMove(0.052, false, true, true);
     double res_force = sqrt(left_wrench_sub.last_wrench_msg_.wrench.force.x * left_wrench_sub.last_wrench_msg_.wrench.force.x 
                             + left_wrench_sub.last_wrench_msg_.wrench.force.y * left_wrench_sub.last_wrench_msg_.wrench.force.y 
                             + left_wrench_sub.last_wrench_msg_.wrench.force.z * left_wrench_sub.last_wrench_msg_.wrench.force.z);
                         
-    while (res_force < 20)
+    while (res_force < 35)
     {
         dualArmRobot.graspMove(0.001, false, true, true, 0.1); // true : left arm; false: right arm
-        sleep(1);
+
         res_force = sqrt(left_wrench_sub.last_wrench_msg_.wrench.force.x * left_wrench_sub.last_wrench_msg_.wrench.force.x 
                     + left_wrench_sub.last_wrench_msg_.wrench.force.y * left_wrench_sub.last_wrench_msg_.wrench.force.y 
                     + left_wrench_sub.last_wrench_msg_.wrench.force.z * left_wrench_sub.last_wrench_msg_.wrench.force.z);
@@ -183,8 +183,8 @@ int main(int argc, char **argv)
     }
     
     
-    dualArmRobot.moveGraspPosition();
-    sleep(10);
+    dualArmRobot.moveHome();
+    sleep(5);
     ur_logger.stop();
     after_place_7 = ros::Time::now();
     manipulation_7 = after_place_7 - before_pick_7;

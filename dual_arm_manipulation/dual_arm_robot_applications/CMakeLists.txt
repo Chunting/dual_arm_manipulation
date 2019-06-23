@@ -263,6 +263,14 @@ add_executable(dual_arm_robot_demonstration
               src/ur_logging/UrMessageListener.cpp)
 target_link_libraries(dual_arm_robot_demonstration ${catkin_LIBRARIES})
 
+add_executable(dual_arm_robot_moveHome 
+              src/executables/dual_arm_robot_moveHome.cpp 
+              src/dual_arm_toolbox/TrajectoryProcessor.cpp 
+              src/dual_arm_toolbox/Transform.cpp 
+              src/dual_arm_demonstrator_iml/DualArmRobot.cpp 
+              src/dual_arm_demonstrator_iml/SceneManager.cpp)
+target_link_libraries(dual_arm_robot_moveHome  ${catkin_LIBRARIES})
+
 add_executable(dual_arm_robot_cartesian_velocity 
               src/executables/dual_arm_robot_cartesian_velocity.cpp 
               src/dual_arm_toolbox/TrajectoryProcessor.cpp 

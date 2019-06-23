@@ -146,6 +146,8 @@ INT_8 rq_sensor_com(const std::string& ftdi_id)
     device_found = rq_com_identify_device(ftdi_id.c_str());
     if (device_found == 0)
     {
+		
+		printf("Failed to find sensor %s\n", ftdi_id.c_str());
         return -1;
     }
     return 0;
@@ -1194,7 +1196,7 @@ static UINT_8 rq_com_identify_device(INT_8 const * const d_name)
 				return 1;
 			}
 		}
-		printf("----port_com = %s\n", port_com);
+		printf("Failed to connect port_com = %s\n", port_com);
 		//The device is identified, close the connection
 		close(fd_connexion);
 	}
